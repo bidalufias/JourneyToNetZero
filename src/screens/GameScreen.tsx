@@ -22,67 +22,58 @@ function Quadrant({
   const c = ROLE_CLASS[player.role];
   const primaries = getPrimaryActionOptions(player.activePanelRole, round);
   const supports = getSupportOptions(player.activePanelRole);
-  const isFlipped = corner.startsWith("bottom");
-
-  const content = (
-    <>
-      <div className={`q-header q-header--${c}`}>
-        <div className={`q-avatar q-avatar--${c}`}>{ROLE_EMOJI[player.role]}</div>
-        <span className="q-role">{ROLE_LABEL[player.role]}</span>
-        <div className="q-resources">
-          <span className="q-res">⚔️ {player.resources.primary}</span>
-          <span className="q-res">🛡️ {player.resources.secondary}</span>
-        </div>
-      </div>
-
-      <div className="q-actions">
-        {primaries.map((a) => {
-          const ok = player.resources.primary >= (a.costs.primary ?? 0) && player.resources.secondary >= (a.costs.secondary ?? 0);
-          const sel = player.selectedPrimaryActionId === a.id;
-          const dis = player.lockedIn || (!ok && !sel);
-          return (
-            <button key={a.id}
-              className={`q-card ${sel ? "q-card--selected" : ""} ${dis && !sel ? "q-card--disabled" : ""}`}
-              onClick={() => !dis && onPrimary(a.id)} disabled={dis && !sel}>
-              <span className="q-card__title">{a.title}</span>
-              <span className="q-card__cost">⚔️{a.costs.primary ?? 0} 🛡️{a.costs.secondary ?? 0}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="q-support">
-        {supports.map((a) => {
-          const ok = player.resources.primary >= (a.costs.primary ?? 0) && player.resources.secondary >= (a.costs.secondary ?? 0);
-          const sel = player.selectedSupportActionId === a.id;
-          const dis = player.lockedIn || (!ok && !sel);
-          return (
-            <button key={a.id}
-              className={`q-support-btn ${sel ? "q-support-btn--selected" : ""} ${dis && !sel ? "q-support-btn--disabled" : ""}`}
-              onClick={() => !dis && onSupport(sel ? undefined : a.id)} disabled={dis && !sel}>
-              {a.title}
-            </button>
-          );
-        })}
-      </div>
-
-      <button className={`q-lockin ${player.lockedIn ? "q-lockin--locked" : ""} ${!player.selectedPrimaryActionId ? "q-lockin--disabled" : ""}`}
-        onClick={onToggle} disabled={!player.selectedPrimaryActionId}>
-        {player.lockedIn ? "🔒 Locked" : "Lock In"}
-      </button>
-      <div className="q-status">
-        {!player.selectedPrimaryActionId ? "Select an action" : player.lockedIn ? "Ready!" : "Selected ✓"}
-      </div>
-    </>
-  );
 
   return (
     <div className={`quadrant quadrant--${corner}`}>
-      {isFlipped ? (
-        <div className="q-flip">{content}</div>
-      ) : (
-        content
-      )}
+      <div className="q-flip">
+        <div className={`q-header q-header--${c}`}>
+          <div className={`q-avatar q-avatar--${c}`}>{ROLE_EMOJI[player.role]}</div>
+          <span className="q-role">{ROLE_LABEL[player.role]}</span>
+          <div className="q-resources">
+            <span className="q-res">⚔️ {player.resources.primary}</span>
+            <span className="q-res">🛡️ {player.resources.secondary}</span>
+          </div>
+        </div>
+
+        <div className="q-actions">
+          {primaries.map((a) => {
+            const ok = player.resources.primary >= (a.costs.primary ?? 0) && player.resources.secondary >= (a.costs.secondary ?? 0);
+            const sel = player.selectedPrimaryActionId === a.id;
+            const dis = player.lockedIn || (!ok && !sel);
+            return (
+              <button key={a.id}
+                className={`q-card ${sel ? "q-card--selected" : ""} ${dis && !sel ? "q-card--disabled" : ""}`}
+                onClick={() => !dis && onPrimary(a.id)} disabled={dis && !sel}>
+                <span className="q-card__title">{a.title}</span>
+                <span className="q-card__cost">⚔️{a.costs.primary ?? 0} 🛡️{a.costs.secondary ?? 0}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="q-support">
+          {supports.map((a) => {
+            const ok = player.resources.primary >= (a.costs.primary ?? 0) && player.resources.secondary >= (a.costs.secondary ?? 0);
+            const sel = player.selectedSupportActionId === a.id;
+            const dis = player.lockedIn || (!ok && !sel);
+            return (
+              <button key={a.id}
+                className={`q-support-btn ${sel ? "q-support-btn--selected" : ""} ${dis && !sel ? "q-support-btn--disabled" : ""}`}
+                onClick={() => !dis && onSupport(sel ? undefined : a.id)} disabled={dis && !sel}>
+                {a.title}
+              </button>
+            );
+          })}
+        </div>
+
+        <button className={`q-lockin ${player.lockedIn ? "q-lockin--locked" : ""} ${!player.selectedPrimaryActionId ? "q-lockin--disabled" : ""}`}
+          onClick={onToggle} disabled={!player.selectedPrimaryActionId}>
+          {player.lockedIn ? "🔒 Locked" : "Lock In"}
+        </button>
+        <div className="q-status">
+          {!player.selectedPrimaryActionId ? "Select an action" : player.lockedIn ? "Ready!" : "Selected ✓"}
+        </div>
+      </div>
     </div>
   );
 }
