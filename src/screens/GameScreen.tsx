@@ -5,287 +5,198 @@ import { allPlayersLocked, getPrimaryActionOptions, getSupportOptions } from "..
 import type { RoleKey, PlayerState } from "../types/gameTypes";
 import { motion, AnimatePresence } from "framer-motion";
 
-const ROLE_COLORS = { government: "gov", business: "biz", community: "com", youth: "youth" } as const;
-const ROLE_EMOJIS: Record<RoleKey, string> = { government: "🏛️", business: "💼", community: "🏘️", youth: "🔥" };
-const ROLE_LABELS: Record<RoleKey, string> = { government: "Government", business: "Business", community: "Community", youth: "Youth" };
+const ROLE_CLASS: Record<RoleKey, string> = { government: "gov", business: "biz", community: "com", youth: "youth" };
+const ROLE_EMOJI: Record<RoleKey, string> = { government: "🏛️", business: "💼", community: "🏘️", youth: "🔥" };
+const ROLE_LABEL: Record<RoleKey, string> = { government: "Government", business: "Business", community: "Community", youth: "Youth Activist" };
 
-function QuadrantPanel({
-  player,
-  colour,
-  onPrimarySelect,
-  onSupportSelect,
-  onToggleLock,
-  round,
+function Quadrant({
+  player, corner,
+  onPrimary, onSupport, onToggle, round,
 }: {
-  player: PlayerState;
-  colour: string;
-  onPrimarySelect: (actionId: string) => void;
-  onSupportSelect: (actionId?: string) => void;
-  onToggleLock: () => void;
+  player: PlayerState; corner: string;
+  onPrimary: (id: string) => void;
+  onSupport: (id?: string) => void;
+  onToggle: () => void;
   round: number;
 }) {
-  const c = ROLE_COLORS[player.role];
-  const primaryOptions = getPrimaryActionOptions(player.activePanelRole, round);
-  const supportOptions = getSupportOptions(player.activePanelRole);
+  const c = ROLE_CLASS[player.role];
+  const primaries = getPrimaryActionOptions(player.activePanelRole, round);
+  const supports = getSupportOptions(player.activePanelRole);
 
   return (
-    <div className={`quadrant quadrant--${colour}`}>
-      {/* Header */}
-      <div className={`quadrant__header quadrant__header--${c}`}>
-        <div className={`quadrant__avatar quadrant__avatar--${c}`}>
-          {ROLE_EMOJIS[player.role]}
-        </div>
-        <span className="quadrant__role-name">{ROLE_LABELS[player.role]}</span>
-        <div className="quadrant__resources">
-          <span className="resource-badge">⚔️ {player.resources.primary}</span>
-          <span className="resource-badge">🛡️ {player.resources.secondary}</span>
+    <div className={`quadrant quadrant--${corner}`}>
+      <div className={`q-header q-header--${c}`}>
+        <div className={`q-avatar q-avatar--${c}`}>{ROLE_EMOJI[player.role]}</div>
+        <span className="q-role">{ROLE_LABEL[player.role]}</span>
+        <div className="q-resources">
+          <span className="q-res">⚔️ {player.resources.primary}</span>
+          <span className="q-res">🛡️ {player.resources.secondary}</span>
         </div>
       </div>
 
-      {/* Action Cards */}
-      <div className="quadrant__actions">
-        {primaryOptions.map((action) => {
-          const canAfford = player.resources.primary >= (action.costs.primary ?? 0) && player.resources.secondary >= (action.costs.secondary ?? 0);
-          const selected = player.selectedPrimaryActionId === action.id;
-          const disabled = player.lockedIn || !canAfford;
+      <div className="q-actions">
+        {primaries.map((a) => {
+          const ok = player.resources.primary >= (a.costs.primary ?? 0) && player.resources.secondary >= (a.costs.secondary ?? 0);
+          const sel = player.selectedPrimaryActionId === a.id;
+          const dis = player.lockedIn || (!ok && !sel);
           return (
-            <button
-              key={action.id}
-              className={`quadrant-card quadrant-card--${c} ${selected ? "quadrant-card--selected" : ""} ${disabled && !selected ? "quadrant-card--disabled" : ""}`}
-              onClick={() => !disabled && onPrimarySelect(action.id)}
-              disabled={disabled && !selected}
-            >
-              <span className="quadrant-card__title">{action.title}</span>
-              <span className="quadrant-card__cost">
-                Cost: ⚔️{action.costs.primary ?? 0} 🛡️{action.costs.secondary ?? 0}
-              </span>
+            <button key={a.id}
+              className={`q-card ${sel ? "q-card--selected" : ""} ${dis && !sel ? "q-card--disabled" : ""}`}
+              onClick={() => !dis && onPrimary(a.id)} disabled={dis && !sel}>
+              <span className="q-card__title">{a.title}</span>
+              <span className="q-card__cost">⚔️{a.costs.primary ?? 0} 🛡️{a.costs.secondary ?? 0}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Support Strip */}
-      <div className="quadrant__support">
-        {supportOptions.map((action) => {
-          const canAfford = player.resources.primary >= (action.costs.primary ?? 0) && player.resources.secondary >= (action.costs.secondary ?? 0);
-          const selected = player.selectedSupportActionId === action.id;
-          const disabled = player.lockedIn || !canAfford;
+      <div className="q-support">
+        {supports.map((a) => {
+          const ok = player.resources.primary >= (a.costs.primary ?? 0) && player.resources.secondary >= (a.costs.secondary ?? 0);
+          const sel = player.selectedSupportActionId === a.id;
+          const dis = player.lockedIn || (!ok && !sel);
           return (
-            <button
-              key={action.id}
-              className={`support-btn ${selected ? "support-btn--selected" : ""} ${disabled && !selected ? "support-btn--disabled" : ""}`}
-              onClick={() => !disabled && onSupportSelect(selected ? undefined : action.id)}
-              disabled={disabled && !selected}
-            >
-              {action.title}
+            <button key={a.id}
+              className={`q-support-btn ${sel ? "q-support-btn--selected" : ""} ${dis && !sel ? "q-support-btn--disabled" : ""}`}
+              onClick={() => !dis && onSupport(sel ? undefined : a.id)} disabled={dis && !sel}>
+              {a.title}
             </button>
           );
         })}
       </div>
 
-      {/* Lock In */}
-      <button
-        className={`quadrant__lockin quadrant__lockin--${c} ${player.lockedIn ? "quadrant__lockin--locked" : ""} ${!player.selectedPrimaryActionId ? "quadrant__lockin--disabled" : ""}`}
-        onClick={onToggleLock}
-        disabled={!player.selectedPrimaryActionId}
-      >
+      <button className={`q-lockin ${player.lockedIn ? "q-lockin--locked" : ""} ${!player.selectedPrimaryActionId ? "q-lockin--disabled" : ""}`}
+        onClick={onToggle} disabled={!player.selectedPrimaryActionId}>
         {player.lockedIn ? "🔒 Locked" : "Lock In"}
       </button>
-      <div className="quadrant__status">
-        {!player.selectedPrimaryActionId ? "Select an action" : player.lockedIn ? "Ready!" : "Action selected"}
+      <div className="q-status">
+        {!player.selectedPrimaryActionId ? "Select an action" : player.lockedIn ? "Ready!" : "Selected ✓"}
       </div>
     </div>
   );
 }
 
-function IndicatorDial({ label, value, icon }: { label: string; value: number; icon: string }) {
-  const pct = Math.min(100, Math.max(0, (value / 10) * 100));
-  const color = value >= 7 ? "#2e7d32" : value >= 4 ? "#8B7355" : "#c62828";
+function Dial({ icon, label, value }: { icon: string; label: string; value: number }) {
+  const pct = Math.min(100, Math.max(0, value * 10));
+  const cls = value >= 7 ? "good" : value >= 4 ? "mid" : "bad";
+  const color = value >= 7 ? "#66bb6a" : value >= 4 ? "#ffa726" : "#ef5350";
   return (
-    <div className="indicator-dial">
-      <span className="indicator-dial__value" style={{ color }}>{icon}</span>
-      <span className="indicator-dial__value" style={{ color }}>{value}</span>
-      <div className="indicator-dial__bar">
-        <div className="indicator-dial__fill" style={{ width: `${pct}%`, backgroundColor: color }} />
-      </div>
-      <span className="indicator-dial__label">{label}</span>
+    <div className="ind">
+      <span className="ind__icon">{icon}</span>
+      <span className={`ind__val ind__val--${cls}`}>{value}</span>
+      <div className="ind__bar"><div className="ind__fill" style={{ width: `${pct}%`, backgroundColor: color }} /></div>
+      <span className="ind__label">{label}</span>
     </div>
   );
 }
 
 export function TabletopGameScreen() {
   const store = useGameStore();
-  const { game, showResolution } = store;
-  const [showRes, setShowRes] = useState(showResolution);
+  const { game } = store;
+  const [showRes, setShowRes] = useState(false);
 
-  const event = events.find((e) => e.id === game.currentEventId);
-  const wildcard = wildcards.find((w) => w.id === game.currentWildcardId);
-  const everyoneLocked = allPlayersLocked(game);
-  const latestLog = game.logs[game.logs.length - 1];
-
-  const players = game.players;
-  const gov = players.find((p) => p.seat === 0)!;
-  const biz = players.find((p) => p.seat === 1)!;
-  const com = players.find((p) => p.seat === 2)!;
-  const youth = players.find((p) => p.seat === 3)!;
-
-  const indicators = game.city.indicators;
-
-  const handleResolve = () => {
-    store.resolveRoundNow();
-    setShowRes(true);
-  };
-
-  const handleCloseResolution = () => {
-    store.closeResolution();
-    setShowRes(false);
-  };
+  const evt = events.find((e) => e.id === game.currentEventId);
+  const wc = wildcards.find((w) => w.id === game.currentWildcardId);
+  const allLocked = allPlayersLocked(game);
+  const log = game.logs[game.logs.length - 1];
+  const ind = game.city.indicators;
+  const [gov, biz, com, youth] = game.players;
 
   return (
     <div className="tabletop-game">
       <div className="tabletop-grid">
-        {/* Top-Left: Government */}
-        <QuadrantPanel
-          player={gov}
-          colour="top-left"
-          onPrimarySelect={(id) => store.selectPrimaryAction(0, id)}
-          onSupportSelect={(id) => store.selectSupportAction(0, id)}
-          onToggleLock={() => store.toggleLock(0)}
-          round={game.round}
-        />
+        <Quadrant player={gov} corner="top-left"
+          onPrimary={(id) => store.selectPrimaryAction(0, id)}
+          onSupport={(id) => store.selectSupportAction(0, id)}
+          onToggle={() => store.toggleLock(0)} round={game.round} />
 
-        {/* Top-Right: Business */}
-        <QuadrantPanel
-          player={biz}
-          colour="top-right"
-          onPrimarySelect={(id) => store.selectPrimaryAction(1, id)}
-          onSupportSelect={(id) => store.selectSupportAction(1, id)}
-          onToggleLock={() => store.toggleLock(1)}
-          round={game.round}
-        />
+        <Quadrant player={biz} corner="top-right"
+          onPrimary={(id) => store.selectPrimaryAction(1, id)}
+          onSupport={(id) => store.selectSupportAction(1, id)}
+          onToggle={() => store.toggleLock(1)} round={game.round} />
 
-        {/* Bottom-Left: Community (rotated 180° via CSS) */}
-        <QuadrantPanel
-          player={com}
-          colour="bottom-left"
-          onPrimarySelect={(id) => store.selectPrimaryAction(2, id)}
-          onSupportSelect={(id) => store.selectSupportAction(2, id)}
-          onToggleLock={() => store.toggleLock(2)}
-          round={game.round}
-        />
+        <Quadrant player={com} corner="bottom-left"
+          onPrimary={(id) => store.selectPrimaryAction(2, id)}
+          onSupport={(id) => store.selectSupportAction(2, id)}
+          onToggle={() => store.toggleLock(2)} round={game.round} />
 
-        {/* Bottom-Right: Youth (rotated 180° via CSS) */}
-        <QuadrantPanel
-          player={youth}
-          colour="bottom-right"
-          onPrimarySelect={(id) => store.selectPrimaryAction(3, id)}
-          onSupportSelect={(id) => store.selectSupportAction(3, id)}
-          onToggleLock={() => store.toggleLock(3)}
-          round={game.round}
-        />
+        <Quadrant player={youth} corner="bottom-right"
+          onPrimary={(id) => store.selectPrimaryAction(3, id)}
+          onSupport={(id) => store.selectSupportAction(3, id)}
+          onToggle={() => store.toggleLock(3)} round={game.round} />
       </div>
 
-      {/* Centre Overlay */}
-      <div className="centre-overlay">
-        <div className="centre-header">
-          <div className="centre-header__round">Round {game.round} of 8</div>
-          <div className="centre-header__event">{event?.title ?? "Decision Round"}</div>
-          {event && <div className="centre-header__desc">{event.description}</div>}
+      {/* Centre */}
+      <div className="centre">
+        <div className="centre__round">Round {game.round} of 8</div>
+        {evt && <div className="centre__event">{evt.title}</div>}
+        {evt && <div className="centre__desc">{evt.description}</div>}
+
+        <div className="indicators">
+          <Dial icon="💰" label="Economy" value={ind.economy} />
+          <Dial icon="🏭" label="Emissions" value={ind.emissions} />
+          <Dial icon="🤝" label="Trust" value={ind.trust} />
+          <Dial icon="⚖️" label="Equity" value={ind.equity} />
+          <Dial icon="🛡️" label="Resilience" value={ind.resilience} />
+          <Dial icon="⚡" label="Energy" value={ind.energySecurity} />
         </div>
 
-        <div className="indicator-ring">
-          <IndicatorDial label="Economy" value={indicators.economy} icon="💰" />
-          <IndicatorDial label="Emissions" value={indicators.emissions} icon="🏭" />
-          <IndicatorDial label="Trust" value={indicators.trust} icon="🤝" />
-          <IndicatorDial label="Equity" value={indicators.equity} icon="⚖️" />
-          <IndicatorDial label="Resilience" value={indicators.resilience} icon="🛡️" />
-          <IndicatorDial label="Energy" value={indicators.energySecurity} icon="⚡" />
-        </div>
-
-        {wildcard && (
-          <div className="wildcard-banner">
-            <div className="wildcard-banner__title">🎯 {wildcard.title}</div>
-            <div className="wildcard-banner__desc">{wildcard.description}</div>
+        {wc && (
+          <div className="wc-banner">
+            <div className="wc-banner__title">🎯 {wc.title}</div>
+            <div className="wc-banner__desc">{wc.description}</div>
           </div>
         )}
 
-        <button
-          className={`resolve-btn ${!everyoneLocked ? "resolve-btn--disabled" : ""}`}
-          onClick={handleResolve}
-          disabled={!everyoneLocked}
-        >
-          {everyoneLocked ? "▶ Resolve Round" : `⏳ ${game.players.filter(p => p.lockedIn).length}/4 Locked`}
+        <button className={`resolve-btn ${!allLocked ? "resolve-btn--disabled" : ""}`}
+          onClick={() => { store.resolveRoundNow(); setShowRes(true); }}
+          disabled={!allLocked}>
+          {allLocked ? "▶ Resolve Round" : `⏳ ${game.players.filter(p => p.lockedIn).length}/4 Locked`}
         </button>
       </div>
 
-      {/* Resolution Overlay */}
+      {/* Resolution */}
       <AnimatePresence>
-        {showRes && latestLog && (
-          <motion.div
-            className="resolution-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <motion.div
-              className="resolution-panel"
-              initial={{ scale: 0.8, y: 30 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.8, y: 30 }}
-              transition={{ type: "spring", damping: 20 }}
-            >
-              <div className="resolution-panel__title">
-                Round {latestLog.round} Results
-              </div>
-
-              <div className="resolution-deltas">
+        {showRes && log && (
+          <motion.div className="res-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div className="res-panel" initial={{ scale: 0.8, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.8, y: 30 }} transition={{ type: "spring", damping: 20 }}>
+              <div className="res-panel__title">Round {log.round} Results</div>
+              <div className="res-deltas">
                 {([
-                  ["💰 Economy", latestLog.indicatorChanges.economy],
-                  ["🏭 Emissions", latestLog.indicatorChanges.emissions],
-                  ["🤝 Trust", latestLog.indicatorChanges.trust],
-                  ["⚖️ Equity", latestLog.indicatorChanges.equity],
-                  ["🛡️ Resilience", latestLog.indicatorChanges.resilience],
-                  ["⚡ Energy", latestLog.indicatorChanges.energySecurity],
-                  ["😤 Friction", latestLog.frictionChange],
-                ] as const).map(([label, delta]) => (
-                  <span
-                    key={label}
-                    className={`delta-chip ${!delta ? "delta-chip--zero" : (delta ?? 0) > 0 ? "delta-chip--up" : "delta-chip--down"}`}
-                  >
+                  ["💰 Economy", log.indicatorChanges.economy],
+                  ["🏭 Emissions", log.indicatorChanges.emissions],
+                  ["🤝 Trust", log.indicatorChanges.trust],
+                  ["⚖️ Equity", log.indicatorChanges.equity],
+                  ["🛡️ Resilience", log.indicatorChanges.resilience],
+                  ["⚡ Energy", log.indicatorChanges.energySecurity],
+                  ["😤 Friction", log.frictionChange],
+                ] as [string, number | undefined][]).map(([label, delta]) => (
+                  <span key={label}
+                    className={`d-chip ${!(delta ?? 0) ? "d-chip--zero" : (delta ?? 0) > 0 ? "d-chip--up" : "d-chip--down"}`}>
                     {label} {(delta ?? 0) > 0 ? `+${delta}` : (delta ?? 0) < 0 ? `${delta}` : "0"}
                   </span>
                 ))}
               </div>
-
-              <ul className="resolution-actions">
-                {Object.entries(latestLog.actionsByRole).map(([role, actions]) => (
-                  <li key={role}>
-                    <strong>{ROLE_LABELS[role as RoleKey]}:</strong>{" "}
+              <ul className="res-actions">
+                {Object.entries(log.actionsByRole).map(([role, actions]) => (
+                  <li key={role}><strong>{ROLE_LABEL[role as RoleKey]}:</strong>{" "}
                     {actionById.get(actions.primary ?? "")?.title ?? "Pass"} /{" "}
                     {actionById.get(actions.support ?? "")?.title ?? "No support"}
                   </li>
                 ))}
               </ul>
-
-              {latestLog.triggeredSynergies.length > 0 && (
-                <div style={{ textAlign: "center", marginBottom: 8 }}>
+              {log.triggeredSynergies.length > 0 && (
+                <div style={{ textAlign: "center", marginBottom: 8, color: "#fff" }}>
                   <strong>✨ Synergies:</strong>{" "}
-                  {latestLog.triggeredSynergies.map((s) => (
-                    <span key={s} className="delta-chip delta-chip--up" style={{ margin: 2 }}>{s}</span>
-                  ))}
+                  {log.triggeredSynergies.map((s) => <span key={s} className="d-chip d-chip--up" style={{ margin: 2 }}>{s}</span>)}
                 </div>
               )}
-
-              {latestLog.headlines.length > 0 && (
-                <ul className="resolution-actions" style={{ fontStyle: "italic" }}>
-                  {latestLog.headlines.map((h, i) => <li key={i}>📰 {h}</li>)}
+              {log.headlines.length > 0 && (
+                <ul className="res-actions" style={{ fontStyle: "italic" }}>
+                  {log.headlines.map((h, i) => <li key={i}>📰 {h}</li>)}
                 </ul>
               )}
-
-              <button className="resolution-continue" onClick={handleCloseResolution}>
-                Continue
-              </button>
+              <button className="res-continue" onClick={() => { store.closeResolution(); setShowRes(false); }}>Continue</button>
             </motion.div>
           </motion.div>
         )}

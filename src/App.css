@@ -1,667 +1,525 @@
 /* ============================================
-   TABLETOP BOARD GAME LAYOUT
-   100vh x 100vw, no scroll, 4 quadrants
+   JOURNEY TO NET ZERO — TABLETOP BOARD GAME
+   100vh × 100vw, no scroll, 4 corner quadrants
+   Design: watercolour backdrop, high contrast,
+   touch-first, proportionate spacing
    ============================================ */
 
-*, *::before, *::after { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body, #root {
-  margin: 0;
-  padding: 0;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  touch-action: manipulation; /* prevent double-tap zoom */
+  font-family: 'SF Pro Display', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
+  background: #1a1a2e;
 }
 
-/* ---------- WATERCOLOUR CITY BACKDROP ---------- */
+/* ===================================================
+   TABLETOP GAME BOARD
+   =================================================== */
 .tabletop-game {
   position: relative;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  /* Watercolour city backdrop - zoomed out, subtle */
   background:
-    /* soft vignette overlay */
-    radial-gradient(ellipse at center, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0.15) 100%),
-    /* watercolour wash layers */
-    radial-gradient(ellipse at 20% 80%, rgba(139,115,85,0.15) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(85,107,47,0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 50%, rgba(210,180,140,0.1) 0%, transparent 60%),
-    /* city backdrop image */
-    url('/city-backdrop.png') center / cover no-repeat,
-    /* base wash */
-    linear-gradient(160deg, #f5efe6 0%, #e8dcc8 30%, #d4c4a8 60%, #c9b896 100%);
-  background-blend-mode: normal, overlay, overlay, soft-light, normal, normal;
+    /* dark overlay for contrast */
+    linear-gradient(135deg, rgba(26,26,46,0.55) 0%, rgba(22,33,62,0.45) 100%),
+    /* backdrop image */
+    url('/city-backdrop.png') center / cover no-repeat;
 }
 
-.tabletop-game::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(245, 239, 230, 0.45);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ---------- 4-QUADRANT GRID ---------- */
+/* ===================================================
+   4-CORNER QUADRANT GRID
+   Each quadrant is anchored to a corner with padding
+   toward the centre for the shared info area
+   =================================================== */
 .tabletop-grid {
   position: relative;
   z-index: 1;
+  width: 100%;
+  height: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  width: 100%;
-  height: 100%;
-  gap: 2px;
 }
 
-/* ---------- QUADRANT (PLAYER PANEL) ---------- */
+/* ---------- QUADRANT BASE ---------- */
 .quadrant {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 6px;
-  border-radius: 8px;
+  padding: 12px;
   overflow: hidden;
 }
 
+/* Top-Left: Government — reads top-to-bottom */
 .quadrant--top-left {
-  grid-column: 1;
-  grid-row: 1;
-  background: rgba(46, 99, 153, 0.08);
-  border-bottom: 2px solid rgba(46, 99, 153, 0.25);
-  border-right: 2px solid rgba(46, 99, 153, 0.15);
+  grid-column: 1; grid-row: 1;
+  padding-right: 80px;
+  padding-bottom: 70px;
 }
 
+/* Top-Right: Business — reads top-to-bottom */
 .quadrant--top-right {
-  grid-column: 2;
-  grid-row: 1;
-  background: rgba(56, 142, 60, 0.08);
-  border-bottom: 2px solid rgba(56, 142, 60, 0.25);
-  border-left: 2px solid rgba(56, 142, 60, 0.15);
+  grid-column: 2; grid-row: 1;
+  padding-left: 80px;
+  padding-bottom: 70px;
 }
 
+/* Bottom-Left: Community — ROTATED 180° for opposite player */
 .quadrant--bottom-left {
-  grid-column: 1;
-  grid-row: 2;
-  background: rgba(230, 160, 0, 0.08);
-  border-top: 2px solid rgba(230, 160, 0, 0.25);
-  border-right: 2px solid rgba(230, 160, 0, 0.15);
+  grid-column: 1; grid-row: 2;
+  padding-right: 80px;
+  padding-top: 70px;
   transform: rotate(180deg);
 }
 
+/* Bottom-Right: Youth — ROTATED 180° for opposite player */
 .quadrant--bottom-right {
-  grid-column: 2;
-  grid-row: 2;
-  background: rgba(198, 40, 40, 0.08);
-  border-top: 2px solid rgba(198, 40, 40, 0.25);
-  border-left: 2px solid rgba(198, 40, 40, 0.15);
+  grid-column: 2; grid-row: 2;
+  padding-left: 80px;
+  padding-top: 70px;
   transform: rotate(180deg);
 }
 
 /* ---------- QUADRANT HEADER ---------- */
-.quadrant__header {
+.q-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  margin-bottom: 4px;
-  min-height: 32px;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  backdrop-filter: blur(8px);
 }
+.q-header--gov  { background: rgba(41, 98, 163, 0.35); border: 1px solid rgba(41, 98, 163, 0.4); }
+.q-header--biz { background: rgba(46, 125, 50, 0.35); border: 1px solid rgba(46, 125, 50, 0.4); }
+.q-header--com { background: rgba(200, 145, 0, 0.35); border: 1px solid rgba(200, 145, 0, 0.4); }
+.q-header--youth { background: rgba(183, 28, 28, 0.35); border: 1px solid rgba(183, 28, 28, 0.4); }
 
-.quadrant__header--gov { background: rgba(46, 99, 153, 0.2); }
-.quadrant__header--biz { background: rgba(56, 142, 60, 0.2); }
-.quadrant__header--com { background: rgba(230, 160, 0, 0.2); }
-.quadrant__header--youth { background: rgba(198, 40, 40, 0.2); }
-
-.quadrant__avatar {
-  width: 28px;
-  height: 28px;
+.q-avatar {
+  width: 32px; height: 32px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
 }
+.q-avatar--gov  { background: rgba(41, 98, 163, 0.5); }
+.q-avatar--biz { background: rgba(46, 125, 50, 0.5); }
+.q-avatar--com { background: rgba(200, 145, 0, 0.5); }
+.q-avatar--youth { background: rgba(183, 28, 28, 0.5); }
 
-.quadrant__avatar--gov { background: rgba(46, 99, 153, 0.3); }
-.quadrant__avatar--biz { background: rgba(56, 142, 60, 0.3); }
-.quadrant__avatar--com { background: rgba(230, 160, 0, 0.3); }
-.quadrant__avatar--youth { background: rgba(198, 40, 40, 0.3); }
-
-.quadrant__role-name {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.q-role {
+  font-size: 12px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: #fff;
   flex: 1;
 }
 
-.quadrant__resources {
-  display: flex;
-  gap: 6px;
-  font-size: 10px;
-  font-weight: 600;
+.q-resources {
+  display: flex; gap: 6px;
 }
-
-.resource-badge {
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(0,0,0,0.08);
-  white-space: nowrap;
-}
-
-/* ---------- ACTION CARDS IN QUADRANT ---------- */
-.quadrant__actions {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  flex: 1;
-  overflow: hidden;
-}
-
-.quadrant-card {
-  padding: 4px 8px;
+.q-res {
+  padding: 3px 8px;
   border-radius: 6px;
-  border: 1.5px solid rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.55);
+  font-size: 11px; font-weight: 700;
+  color: #fff;
+  background: rgba(0,0,0,0.3);
   backdrop-filter: blur(4px);
+}
+
+/* ---------- ACTION CARDS ---------- */
+.q-actions {
+  display: flex; flex-direction: column; gap: 4px;
+  flex: 1;
+}
+
+.q-card {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(6px);
   cursor: pointer;
-  transition: all 0.15s ease;
-  min-height: 36px;
+  transition: all 0.12s ease;
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+.q-card:active { transform: scale(0.96); }
+
+.q-card--selected {
+  border-color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.22);
+  box-shadow: 0 0 12px rgba(255,255,255,0.15);
 }
 
-.quadrant-card:active {
-  transform: scale(0.97);
+.q-card--disabled {
+  opacity: 0.3; cursor: not-allowed;
 }
 
-.quadrant-card--selected {
-  border-color: currentColor;
-  border-width: 2px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.12);
-}
-
-.quadrant-card--gov.quadrant-card--selected { border-color: rgba(46, 99, 153, 0.6); background: rgba(46, 99, 153, 0.12); }
-.quadrant-card--biz.quadrant-card--selected { border-color: rgba(56, 142, 60, 0.6); background: rgba(56, 142, 60, 0.12); }
-.quadrant-card--com.quadrant-card--selected { border-color: rgba(230, 160, 0, 0.6); background: rgba(230, 160, 0, 0.12); }
-.quadrant-card--youth.quadrant-card--selected { border-color: rgba(198, 40, 40, 0.6); background: rgba(198, 40, 40, 0.12); }
-
-.quadrant-card--disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.quadrant-card__title {
-  font-size: 10px;
-  font-weight: 700;
+.q-card__title {
+  font-size: 11px; font-weight: 700; color: #fff;
   line-height: 1.2;
 }
 
-.quadrant-card__cost {
-  font-size: 8px;
-  color: rgba(0,0,0,0.5);
+.q-card__cost {
+  font-size: 9px; font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  white-space: nowrap;
 }
 
 /* ---------- SUPPORT STRIP ---------- */
-.quadrant__support {
-  display: flex;
-  gap: 3px;
-  padding: 3px 0;
+.q-support {
+  display: flex; gap: 3px; padding: 4px 0;
   flex-wrap: wrap;
 }
 
-.support-btn {
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 8px;
-  font-weight: 600;
-  border: 1px solid rgba(0,0,0,0.1);
-  background: rgba(255,255,255,0.4);
+.q-support-btn {
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 9px; font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
   cursor: pointer;
-  min-height: 24px;
-  display: flex;
-  align-items: center;
   transition: all 0.1s;
 }
-
-.support-btn:active { transform: scale(0.95); }
-
-.support-btn--selected {
-  background: rgba(0,0,0,0.1);
-  border-color: rgba(0,0,0,0.3);
+.q-support-btn:active { transform: scale(0.93); }
+.q-support-btn--selected {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.4);
+  color: #fff;
 }
+.q-support-btn--disabled { opacity: 0.25; cursor: not-allowed; }
 
-.support-btn--disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-/* ---------- LOCK-IN BUTTON ---------- */
-.quadrant__lockin {
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: none;
+/* ---------- LOCK-IN ---------- */
+.q-lockin {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
   cursor: pointer;
-  transition: all 0.15s;
-  min-height: 32px;
+  transition: all 0.12s;
+  margin-top: 4px;
+}
+.q-lockin:active { transform: scale(0.94); }
+.q-lockin--locked {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.5);
+}
+.q-lockin--disabled { opacity: 0.25; cursor: not-allowed; }
+
+.q-status {
+  font-size: 8px; text-align: center;
+  color: rgba(255,255,255,0.4);
   margin-top: 2px;
 }
 
-.quadrant__lockin:active { transform: scale(0.95); }
-
-.quadrant__lockin--gov { background: rgba(46, 99, 153, 0.25); color: #2e6399; }
-.quadrant__lockin--gov:hover { background: rgba(46, 99, 153, 0.35); }
-.quadrant__lockin--biz { background: rgba(56, 142, 60, 0.25); color: #388e3c; }
-.quadrant__lockin--biz:hover { background: rgba(56, 142, 60, 0.35); }
-.quadrant__lockin--com { background: rgba(230, 160, 0, 0.25); color: #b8860b; }
-.quadrant__lockin--com:hover { background: rgba(230, 160, 0, 0.35); }
-.quadrant__lockin--youth { background: rgba(198, 40, 40, 0.25); color: #c62828; }
-.quadrant__lockin--youth:hover { background: rgba(198, 40, 40, 0.35); }
-
-.quadrant__lockin--locked {
-  background: rgba(0,0,0,0.15) !important;
-  color: #333 !important;
-}
-
-.quadrant__lockin--disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.quadrant__status {
-  font-size: 8px;
-  text-align: center;
-  color: rgba(0,0,0,0.4);
-  margin-top: 2px;
-}
-
-/* ---------- CENTRE OVERLAY ---------- */
-.centre-overlay {
+/* ===================================================
+   CENTRE OVERLAY — shared game info
+   =================================================== */
+.centre {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   z-index: 10;
-  width: 42%;
-  height: 42%;
+  width: 44%;
+  min-width: 200px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
+  gap: 6px;
   pointer-events: none;
 }
 
-.centre-overlay--interactive {
-  pointer-events: auto;
-}
-
-.centre-header {
+.centre__round {
+  font-size: 10px; text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.6);
+  font-weight: 700;
   text-align: center;
 }
 
-.centre-header__round {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: rgba(0,0,0,0.5);
-  font-weight: 600;
+.centre__event {
+  font-size: 14px; font-weight: 800;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 
-.centre-header__event {
-  font-size: 13px;
-  font-weight: 700;
-  margin-top: 2px;
-}
-
-.centre-header__desc {
+.centre__desc {
   font-size: 9px;
-  color: rgba(0,0,0,0.5);
-  max-width: 280px;
+  color: rgba(255,255,255,0.55);
+  max-width: 300px;
   text-align: center;
   line-height: 1.3;
 }
 
-/* ---------- INDICATOR RING (CENTRE) ---------- */
-.indicator-ring {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  justify-content: center;
-  max-width: 260px;
+/* ---------- INDICATORS ---------- */
+.indicators {
+  display: flex; flex-wrap: wrap;
+  gap: 6px; justify-content: center;
+  max-width: 320px;
 }
 
-.indicator-dial {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 40px;
-  gap: 1px;
+.ind {
+  display: flex; flex-direction: column;
+  align-items: center; width: 44px; gap: 2px;
 }
 
-.indicator-dial__value {
-  font-size: 14px;
-  font-weight: 800;
-  line-height: 1;
+.ind__icon { font-size: 16px; }
+.ind__val {
+  font-size: 16px; font-weight: 900; line-height: 1;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
+.ind__val--good { color: #66bb6a; }
+.ind__val--mid  { color: #ffa726; }
+.ind__val--bad  { color: #ef5350; }
 
-.indicator-dial__label {
-  font-size: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  color: rgba(0,0,0,0.5);
-  text-align: center;
-}
-
-.indicator-dial__bar {
-  width: 30px;
-  height: 4px;
+.ind__bar {
+  width: 36px; height: 4px;
   border-radius: 2px;
-  background: rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.15);
   overflow: hidden;
 }
-
-.indicator-dial__fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 0.5s ease, background-color 0.5s ease;
+.ind__fill {
+  height: 100%; border-radius: 2px;
+  transition: width 0.5s ease;
 }
 
-/* ---------- RESOLVE BUTTON (CENTRE) ---------- */
+.ind__label {
+  font-size: 6px; text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: rgba(255,255,255,0.4);
+  text-align: center;
+}
+
+/* ---------- RESOLVE BUTTON ---------- */
 .resolve-btn {
-  padding: 6px 16px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: 2px solid rgba(0,0,0,0.15);
-  background: rgba(255,255,255,0.7);
+  padding: 8px 20px;
+  border-radius: 10px;
+  font-size: 12px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  border: 2px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.15);
+  color: #fff;
   backdrop-filter: blur(8px);
   cursor: pointer;
-  transition: all 0.2s;
   pointer-events: auto;
+  transition: all 0.15s;
 }
+.resolve-btn:active { transform: scale(0.94); }
+.resolve-btn--disabled { opacity: 0.25; cursor: not-allowed; }
 
-.resolve-btn:active { transform: scale(0.95); }
-
-.resolve-btn--disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* ---------- WILDCARD BANNER (CENTRE) ---------- */
-.wildcard-banner {
-  padding: 4px 12px;
-  border-radius: 6px;
-  background: rgba(139, 69, 19, 0.2);
-  border: 1px solid rgba(139, 69, 19, 0.3);
-  text-align: center;
-  max-width: 260px;
-}
-
-.wildcard-banner__title {
-  font-size: 10px;
-  font-weight: 700;
-  color: #8B4513;
-}
-
-.wildcard-banner__desc {
-  font-size: 8px;
-  color: rgba(139, 69, 19, 0.7);
-  margin-top: 1px;
-}
-
-/* ---------- RESOLUTION OVERLAY ---------- */
-.resolution-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 50;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.resolution-panel {
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  padding: 16px;
-  max-width: 400px;
-  width: 80%;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.resolution-panel__title {
-  font-size: 14px;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 8px;
-}
-
-.resolution-deltas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-  margin-bottom: 8px;
-}
-
-.delta-chip {
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.delta-chip--up { background: rgba(56, 142, 60, 0.15); color: #2e7d32; }
-.delta-chip--down { background: rgba(198, 40, 40, 0.15); color: #c62828; }
-.delta-chip--zero { background: rgba(0,0,0,0.05); color: #666; }
-
-.resolution-actions {
-  font-size: 10px;
-  margin-bottom: 8px;
-}
-
-.resolution-actions li {
-  margin-bottom: 2px;
-}
-
-.resolution-continue {
-  display: block;
-  margin: 0 auto;
-  padding: 8px 20px;
+/* ---------- WILDCARD ---------- */
+.wc-banner {
+  padding: 5px 14px;
   border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  border: none;
-  background: rgba(0,0,0,0.1);
-  cursor: pointer;
+  background: rgba(139, 69, 19, 0.35);
+  border: 1px solid rgba(200, 140, 60, 0.4);
+  text-align: center;
+  max-width: 280px;
+}
+.wc-banner__title { font-size: 10px; font-weight: 800; color: #ffcc80; }
+.wc-banner__desc { font-size: 8px; color: rgba(255,204,128,0.7); margin-top: 1px; }
+
+/* ===================================================
+   RESOLUTION OVERLAY
+   =================================================== */
+.res-overlay {
+  position: absolute; inset: 0; z-index: 50;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
 }
 
-.resolution-continue:active { transform: scale(0.95); }
+.res-panel {
+  background: rgba(30,30,50,0.92);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 20px;
+  max-width: 420px; width: 85%;
+  max-height: 75vh; overflow-y: auto;
+}
 
-/* ---------- ENDING SCREEN ---------- */
-.ending-screen {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.res-panel__title {
+  font-size: 16px; font-weight: 800; color: #fff;
+  text-align: center; margin-bottom: 10px;
+}
+
+.res-deltas {
+  display: flex; flex-wrap: wrap;
+  gap: 6px; justify-content: center; margin-bottom: 10px;
+}
+
+.d-chip {
+  padding: 3px 8px; border-radius: 6px;
+  font-size: 10px; font-weight: 700;
+}
+.d-chip--up   { background: rgba(76,175,80,0.2); color: #81c784; }
+.d-chip--down { background: rgba(244,67,54,0.2); color: #e57373; }
+.d-chip--zero { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
+
+.res-actions { font-size: 10px; color: rgba(255,255,255,0.7); margin-bottom: 10px; list-style: none; }
+.res-actions li { margin-bottom: 3px; }
+.res-actions strong { color: #fff; }
+
+.res-continue {
+  display: block; margin: 0 auto;
+  padding: 8px 24px; border-radius: 10px;
+  font-size: 12px; font-weight: 800;
+  border: 2px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.12);
+  color: #fff; cursor: pointer;
+}
+.res-continue:active { transform: scale(0.94); }
+
+/* ===================================================
+   ENDING SCREEN
+   =================================================== */
+.ending {
+  width: 100vw; height: 100vh;
+  display: flex; align-items: center; justify-content: center;
   background:
-    radial-gradient(ellipse at center, rgba(255,255,255,0.4) 0%, rgba(0,0,0,0.2) 100%),
+    linear-gradient(135deg, rgba(26,26,46,0.7), rgba(22,33,62,0.6)),
     url('/city-backdrop.png') center / cover no-repeat;
-  background-blend-mode: normal;
 }
 
 .ending-card {
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(12px);
+  background: rgba(30,30,50,0.9);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 20px;
-  padding: 24px 32px;
+  padding: 28px 36px;
   text-align: center;
-  max-width: 500px;
+  max-width: 520px;
 }
 
 .ending-card__title {
-  font-size: 20px;
-  font-weight: 800;
-  margin-bottom: 8px;
+  font-size: 24px; font-weight: 900; color: #fff;
+  margin-bottom: 10px;
 }
 
 .ending-card__body {
-  font-size: 13px;
-  line-height: 1.5;
-  color: #444;
-  margin-bottom: 16px;
+  font-size: 14px; line-height: 1.6;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 18px;
 }
 
 .ending-card__stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 16px;
+  display: flex; flex-wrap: wrap;
+  gap: 8px; justify-content: center;
+  margin-bottom: 18px;
 }
 
-/* ---------- PRE-GAME SCREENS (keep existing styles) ---------- */
+/* ===================================================
+   PRE-GAME SCREENS
+   =================================================== */
 .screen {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px;
   background:
-    radial-gradient(ellipse at 30% 70%, rgba(139,115,85,0.1) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 30%, rgba(85,107,47,0.08) 0%, transparent 50%),
-    linear-gradient(160deg, #f5efe6 0%, #e8dcc8 30%, #d4c4a8 60%, #c9b896 100%);
+    linear-gradient(135deg, rgba(26,26,46,0.85), rgba(22,33,62,0.75)),
+    url('/city-backdrop.png') center / cover no-repeat;
 }
 
 .screen h1 {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
+  font-size: 40px; font-weight: 900;
+  color: #fff; letter-spacing: -1px;
 }
 
 .screen h2 {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 26px; font-weight: 800;
+  color: #fff;
 }
 
 .eyebrow {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: rgba(0,0,0,0.4);
-  font-weight: 600;
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.45);
+  font-weight: 700;
 }
 
 .muted {
-  color: rgba(0,0,0,0.45);
-  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
 }
 
 .wc-button {
-  padding: 10px 24px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  border: 1.5px solid rgba(0,0,0,0.1);
-  background: rgba(255,255,255,0.6);
-  backdrop-filter: blur(6px);
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-size: 16px; font-weight: 800;
+  border: 2px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  backdrop-filter: blur(8px);
   cursor: pointer;
   transition: all 0.15s;
 }
-
-.wc-button:active { transform: scale(0.95); }
+.wc-button:active { transform: scale(0.94); }
 .wc-button:disabled { opacity: 0.3; cursor: not-allowed; }
 
 .wc-card {
-  background: rgba(255,255,255,0.5);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 12px;
-  padding: 12px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 14px;
 }
 
-/* City select grid */
+/* City Select */
 .city-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
-  max-width: 800px;
+  display: flex; flex-wrap: wrap;
+  gap: 16px; justify-content: center;
+  max-width: 900px;
 }
 
 .city-card {
-  padding: 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.5);
-  backdrop-filter: blur(6px);
-  border: 1.5px solid rgba(0,0,0,0.06);
-  width: 220px;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  width: 240px;
   cursor: pointer;
   transition: all 0.15s;
 }
+.city-card:active { transform: scale(0.96); }
+.city-card h3 { font-size: 16px; font-weight: 800; color: #fff; margin: 0 0 6px; }
+.city-card p { font-size: 12px; color: rgba(255,255,255,0.55); margin: 0 0 8px; }
 
-.city-card:active { transform: scale(0.97); }
+.city-ind { display: flex; align-items: center; gap: 4px; font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 3px; }
+.city-ind__bar { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); }
+.city-ind__fill { height: 100%; border-radius: 2px; background: #8B7355; }
 
-.city-card h3 { font-size: 14px; font-weight: 700; margin: 0 0 4px; }
-.city-card p { font-size: 11px; color: rgba(0,0,0,0.5); margin: 0 0 6px; }
-
-.city-indicator {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  margin-bottom: 2px;
-}
-
-.city-indicator__bar {
-  flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(0,0,0,0.08);
-}
-
-.city-indicator__fill {
-  height: 100%;
-  border-radius: 2px;
-  background: #8B7355;
-}
-
-/* Role intro */
+/* Role Intro */
 .roles-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
-  max-width: 700px;
+  display: flex; flex-wrap: wrap;
+  gap: 16px; justify-content: center;
+  max-width: 800px;
 }
 
 .role-card {
-  padding: 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.5);
-  backdrop-filter: blur(6px);
-  width: 160px;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
+  width: 180px;
 }
-
-.role-card h3 { font-size: 13px; font-weight: 700; margin: 0 0 4px; }
-.role-card p { font-size: 10px; margin: 2px 0; color: rgba(0,0,0,0.5); }
+.role-card h3 { font-size: 15px; font-weight: 800; color: #fff; margin: 4px 0 6px; }
+.role-card p { font-size: 11px; margin: 3px 0; color: rgba(255,255,255,0.55); line-height: 1.4; }
+.role-card strong { color: rgba(255,255,255,0.8); }
