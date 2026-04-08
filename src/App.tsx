@@ -1,121 +1,55 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { AnimatePresence, motion } from "framer-motion";
+import { AttractScreen } from "./screens/AttractScreen";
+import { CitySelectScreen } from "./screens/CitySelectScreen";
+import { EndingScreen } from "./screens/EndingScreen";
+import { GameScreen } from "./screens/GameScreen";
+import { HowToPlayScreen } from "./screens/HowToPlayScreen";
+import { RoleIntroScreen } from "./screens/RoleIntroScreen";
+import { useGameStore } from "./store/useGameStore";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const screen = useGameStore((state) => state.screen);
+  const game = useGameStore((state) => state.game);
+  const showResolution = useGameStore((state) => state.showResolution);
+
+  const selectPrimaryAction = useGameStore((state) => state.selectPrimaryAction);
+  const selectSupportAction = useGameStore((state) => state.selectSupportAction);
+  const toggleLock = useGameStore((state) => state.toggleLock);
+  const resolveRoundNow = useGameStore((state) => state.resolveRoundNow);
+  const closeResolution = useGameStore((state) => state.closeResolution);
+  const resetGame = useGameStore((state) => state.resetGame);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+    <main className="app-shell">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={screen}
+          className="screen-frame"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -16 }}
+          transition={{ duration: 0.32, ease: "easeOut" }}
         >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+          {screen === "attract" && <AttractScreen />}
+          {screen === "roleIntro" && <RoleIntroScreen />}
+          {screen === "citySelect" && <CitySelectScreen />}
+          {screen === "howToPlay" && <HowToPlayScreen />}
+          {screen === "game" && (
+            <GameScreen
+              game={game}
+              showResolution={showResolution}
+              onPrimarySelect={selectPrimaryAction}
+              onSupportSelect={selectSupportAction}
+              onToggleLock={toggleLock}
+              onResolveRound={resolveRoundNow}
+              onCloseResolution={closeResolution}
+            />
+          )}
+          {screen === "ending" && <EndingScreen game={game} onPlayAgain={resetGame} />}
+        </motion.div>
+      </AnimatePresence>
+    </main>
+  );
 }
 
-export default App
+export default App;
