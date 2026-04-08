@@ -22,9 +22,10 @@ function Quadrant({
   const c = ROLE_CLASS[player.role];
   const primaries = getPrimaryActionOptions(player.activePanelRole, round);
   const supports = getSupportOptions(player.activePanelRole);
+  const isFlipped = corner.startsWith("bottom");
 
-  return (
-    <div className={`quadrant quadrant--${corner}`}>
+  const content = (
+    <>
       <div className={`q-header q-header--${c}`}>
         <div className={`q-avatar q-avatar--${c}`}>{ROLE_EMOJI[player.role]}</div>
         <span className="q-role">{ROLE_LABEL[player.role]}</span>
@@ -72,6 +73,16 @@ function Quadrant({
       <div className="q-status">
         {!player.selectedPrimaryActionId ? "Select an action" : player.lockedIn ? "Ready!" : "Selected ✓"}
       </div>
+    </>
+  );
+
+  return (
+    <div className={`quadrant quadrant--${corner}`}>
+      {isFlipped ? (
+        <div className="q-flip">{content}</div>
+      ) : (
+        content
+      )}
     </div>
   );
 }
