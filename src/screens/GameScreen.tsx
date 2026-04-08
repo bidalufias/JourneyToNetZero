@@ -1,286 +1,295 @@
+import { useState } from "react";
+import { useGameStore } from "../store/useGameStore";
 import { actionById, events, wildcards } from "../data";
-import { IndicatorBar } from "../components/IndicatorBar";
-import { RolePanel } from "../components/RolePanel";
-import { WildcardBanner } from "../components/WildcardBanner";
 import { allPlayersLocked, getPrimaryActionOptions, getSupportOptions } from "../store/selectors";
-import type { ActionCard, GameState, RoleKey } from "../types/gameTypes";
+import type { RoleKey, PlayerState } from "../types/gameTypes";
+import { motion, AnimatePresence } from "framer-motion";
 
-type GameScreenProps = {
-  game: GameState;
-  showResolution: boolean;
-  onPrimarySelect: (seat: 0 | 1 | 2 | 3, actionId: string) => void;
-  onSupportSelect: (seat: 0 | 1 | 2 | 3, actionId?: string) => void;
-  onToggleLock: (seat: 0 | 1 | 2 | 3) => void;
-  onResolveRound: () => void;
-  onCloseResolution: () => void;
-};
+const ROLE_COLORS = { government: "gov", business: "biz", community: "com", youth: "youth" } as const;
+const ROLE_EMOJIS: Record<RoleKey, string> = { government: "🏛️", business: "💼", community: "🏘️", youth: "🔥" };
+const ROLE_LABELS: Record<RoleKey, string> = { government: "Government", business: "Business", community: "Community", youth: "Youth" };
 
-const roleLabels: Record<RoleKey, string> = {
-  government: "Government",
-  business: "Business",
-  community: "Community",
-  youth: "Youth Activist",
-};
-
-const formatDelta = (value?: number): string => {
-  if (!value) return "0";
-  return value > 0 ? `+${value}` : `${value}`;
-};
-
-export function GameScreen({
-  game,
-  showResolution,
+function QuadrantPanel({
+  player,
+  colour,
   onPrimarySelect,
   onSupportSelect,
   onToggleLock,
-  onResolveRound,
-  onCloseResolution,
-}: GameScreenProps) {
-  const event = events.find((item) => item.id === game.currentEventId);
-  const wildcard = wildcards.find((item) => item.id === game.currentWildcardId);
-  const latestLog = game.logs[game.logs.length - 1];
+  round,
+}: {
+  player: PlayerState;
+  colour: string;
+  onPrimarySelect: (actionId: string) => void;
+  onSupportSelect: (actionId?: string) => void;
+  onToggleLock: () => void;
+  round: number;
+}) {
+  const c = ROLE_COLORS[player.role];
+  const primaryOptions = getPrimaryActionOptions(player.activePanelRole, round);
+  const supportOptions = getSupportOptions(player.activePanelRole);
+
+  return (
+    <div className={`quadrant quadrant--${colour}`}>
+      {/* Header */}
+      <div className={`quadrant__header quadrant__header--${c}`}>
+        <div className={`quadrant__avatar quadrant__avatar--${c}`}>
+          {ROLE_EMOJIS[player.role]}
+        </div>
+        <span className="quadrant__role-name">{ROLE_LABELS[player.role]}</span>
+        <div className="quadrant__resources">
+          <span className="resource-badge">⚔️ {player.resources.primary}</span>
+          <span className="resource-badge">🛡️ {player.resources.secondary}</span>
+        </div>
+      </div>
+
+      {/* Action Cards */}
+      <div className="quadrant__actions">
+        {primaryOptions.map((action) => {
+          const canAfford = player.resources.primary >= (action.costs.primary ?? 0) && player.resources.secondary >= (action.costs.secondary ?? 0);
+          const selected = player.selectedPrimaryActionId === action.id;
+          const disabled = player.lockedIn || !canAfford;
+          return (
+            <button
+              key={action.id}
+              className={`quadrant-card quadrant-card--${c} ${selected ? "quadrant-card--selected" : ""} ${disabled && !selected ? "quadrant-card--disabled" : ""}`}
+              onClick={() => !disabled && onPrimarySelect(action.id)}
+              disabled={disabled && !selected}
+            >
+              <span className="quadrant-card__title">{action.title}</span>
+              <span className="quadrant-card__cost">
+                Cost: ⚔️{action.costs.primary ?? 0} 🛡️{action.costs.secondary ?? 0}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Support Strip */}
+      <div className="quadrant__support">
+        {supportOptions.map((action) => {
+          const canAfford = player.resources.primary >= (action.costs.primary ?? 0) && player.resources.secondary >= (action.costs.secondary ?? 0);
+          const selected = player.selectedSupportActionId === action.id;
+          const disabled = player.lockedIn || !canAfford;
+          return (
+            <button
+              key={action.id}
+              className={`support-btn ${selected ? "support-btn--selected" : ""} ${disabled && !selected ? "support-btn--disabled" : ""}`}
+              onClick={() => !disabled && onSupportSelect(selected ? undefined : action.id)}
+              disabled={disabled && !selected}
+            >
+              {action.title}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Lock In */}
+      <button
+        className={`quadrant__lockin quadrant__lockin--${c} ${player.lockedIn ? "quadrant__lockin--locked" : ""} ${!player.selectedPrimaryActionId ? "quadrant__lockin--disabled" : ""}`}
+        onClick={onToggleLock}
+        disabled={!player.selectedPrimaryActionId}
+      >
+        {player.lockedIn ? "🔒 Locked" : "Lock In"}
+      </button>
+      <div className="quadrant__status">
+        {!player.selectedPrimaryActionId ? "Select an action" : player.lockedIn ? "Ready!" : "Action selected"}
+      </div>
+    </div>
+  );
+}
+
+function IndicatorDial({ label, value, icon }: { label: string; value: number; icon: string }) {
+  const pct = Math.min(100, Math.max(0, (value / 10) * 100));
+  const color = value >= 7 ? "#2e7d32" : value >= 4 ? "#8B7355" : "#c62828";
+  return (
+    <div className="indicator-dial">
+      <span className="indicator-dial__value" style={{ color }}>{icon}</span>
+      <span className="indicator-dial__value" style={{ color }}>{value}</span>
+      <div className="indicator-dial__bar">
+        <div className="indicator-dial__fill" style={{ width: `${pct}%`, backgroundColor: color }} />
+      </div>
+      <span className="indicator-dial__label">{label}</span>
+    </div>
+  );
+}
+
+export function TabletopGameScreen() {
+  const store = useGameStore();
+  const { game, showResolution } = store;
+  const [showRes, setShowRes] = useState(showResolution);
+
+  const event = events.find((e) => e.id === game.currentEventId);
+  const wildcard = wildcards.find((w) => w.id === game.currentWildcardId);
   const everyoneLocked = allPlayersLocked(game);
-  const playerBySeat = new Map(game.players.map((player) => [player.seat, player]));
-  const orientationBySeat: Record<0 | 1 | 2 | 3, "top" | "right" | "bottom" | "left"> = {
-    0: "top",
-    1: "right",
-    2: "bottom",
-    3: "left",
+  const latestLog = game.logs[game.logs.length - 1];
+
+  const players = game.players;
+  const gov = players.find((p) => p.seat === 0)!;
+  const biz = players.find((p) => p.seat === 1)!;
+  const com = players.find((p) => p.seat === 2)!;
+  const youth = players.find((p) => p.seat === 3)!;
+
+  const indicators = game.city.indicators;
+
+  const handleResolve = () => {
+    store.resolveRoundNow();
+    setShowRes(true);
   };
 
-  const canAfford = (rolePlayer: NonNullable<(typeof game.players)[number]>, action: ActionCard): boolean =>
-    rolePlayer.resources.primary >= (action.costs.primary ?? 0) &&
-    rolePlayer.resources.secondary >= (action.costs.secondary ?? 0);
-
-  const isPrimaryDisabled = (
-    rolePlayer: NonNullable<(typeof game.players)[number]>,
-    action: ActionCard,
-  ): boolean => {
-    if (!canAfford(rolePlayer, action)) {
-      return true;
-    }
-    if (game.currentWildcardId === "WC_03" && rolePlayer.role === "government") {
-      return (action.costs.primary ?? 0) > 1;
-    }
-    if (game.currentWildcardId === "WC_04" && rolePlayer.role === "business") {
-      return !action.tags.includes("investment") && !action.tags.includes("clean-investment");
-    }
-    return false;
+  const handleCloseResolution = () => {
+    store.closeResolution();
+    setShowRes(false);
   };
 
   return (
-    <section className="screen game-screen">
-      <header className="game-screen__header wc-card">
-        <div>
-          <p className="eyebrow">Round {game.round} of 8</p>
-          <h2>{event?.title ?? "Decision Round"}</h2>
-          <p className="muted">{event?.description}</p>
-        </div>
-        <button type="button" className="wc-button" disabled={!everyoneLocked} onClick={onResolveRound}>
-          Resolve Round
-        </button>
-      </header>
+    <div className="tabletop-game">
+      <div className="tabletop-grid">
+        {/* Top-Left: Government */}
+        <QuadrantPanel
+          player={gov}
+          colour="top-left"
+          onPrimarySelect={(id) => store.selectPrimaryAction(0, id)}
+          onSupportSelect={(id) => store.selectSupportAction(0, id)}
+          onToggleLock={() => store.toggleLock(0)}
+          round={game.round}
+        />
 
-      <div className="game-table">
-        {(() => {
-          const top = playerBySeat.get(0);
-          if (!top) return null;
-          const swapped = top.role !== top.activePanelRole;
-          return (
-            <RolePanel
-              key={top.role}
-              orientation={orientationBySeat[top.seat]}
-              player={top}
-              ownerRoleLabel={roleLabels[top.role]}
-              displayRoleLabel={
-                swapped ? `${roleLabels[top.activePanelRole]} panel` : roleLabels[top.activePanelRole]
-              }
-              primaryOptions={getPrimaryActionOptions(top.activePanelRole, game.round)}
-              supportOptions={getSupportOptions(top.activePanelRole)}
-              isPrimaryDisabled={(action) => isPrimaryDisabled(top, action)}
-              isSupportDisabled={(action) => !canAfford(top, action)}
-              onPrimarySelect={(actionId) => onPrimarySelect(top.seat, actionId)}
-              onSupportSelect={(actionId) => onSupportSelect(top.seat, actionId)}
-              onToggleLock={() => onToggleLock(top.seat)}
-            />
-          );
-        })()}
+        {/* Top-Right: Business */}
+        <QuadrantPanel
+          player={biz}
+          colour="top-right"
+          onPrimarySelect={(id) => store.selectPrimaryAction(1, id)}
+          onSupportSelect={(id) => store.selectSupportAction(1, id)}
+          onToggleLock={() => store.toggleLock(1)}
+          round={game.round}
+        />
 
-        <div className="game-table__middle">
-          {(() => {
-            const left = playerBySeat.get(3);
-            if (!left) return null;
-            const swapped = left.role !== left.activePanelRole;
-            return (
-              <RolePanel
-                key={left.role}
-                orientation={orientationBySeat[left.seat]}
-                player={left}
-                ownerRoleLabel={roleLabels[left.role]}
-                displayRoleLabel={
-                  swapped
-                    ? `${roleLabels[left.activePanelRole]} panel`
-                    : roleLabels[left.activePanelRole]
-                }
-                primaryOptions={getPrimaryActionOptions(left.activePanelRole, game.round)}
-                supportOptions={getSupportOptions(left.activePanelRole)}
-                isPrimaryDisabled={(action) => isPrimaryDisabled(left, action)}
-                isSupportDisabled={(action) => !canAfford(left, action)}
-                onPrimarySelect={(actionId) => onPrimarySelect(left.seat, actionId)}
-                onSupportSelect={(actionId) => onSupportSelect(left.seat, actionId)}
-                onToggleLock={() => onToggleLock(left.seat)}
-              />
-            );
-          })()}
+        {/* Bottom-Left: Community (rotated 180° via CSS) */}
+        <QuadrantPanel
+          player={com}
+          colour="bottom-left"
+          onPrimarySelect={(id) => store.selectPrimaryAction(2, id)}
+          onSupportSelect={(id) => store.selectSupportAction(2, id)}
+          onToggleLock={() => store.toggleLock(2)}
+          round={game.round}
+        />
 
-          <section className="game-table__center">
-            <section className="indicator-grid wc-card">
-              <IndicatorBar label="Economy" value={game.city.indicators.economy} />
-              <IndicatorBar label="Emissions" value={game.city.indicators.emissions} />
-              <IndicatorBar label="Trust" value={game.city.indicators.trust} />
-              <IndicatorBar label="Equity" value={game.city.indicators.equity} />
-              <IndicatorBar label="Resilience" value={game.city.indicators.resilience} />
-              <IndicatorBar label="Energy Security" value={game.city.indicators.energySecurity} />
-            </section>
-
-            <section className="city-board wc-card">
-              <div className="city-board__header">
-                <h3>City Status</h3>
-                <p className="muted">Friction {game.city.friction} / 5</p>
-              </div>
-              <div className="city-board__map">
-                <span className="city-node city-node--a" />
-                <span className="city-node city-node--b" />
-                <span className="city-node city-node--c" />
-              </div>
-              <div className="city-board__brief">
-                <p>
-                  Round event: <strong>{event?.title ?? "None"}</strong>
-                </p>
-                <p>{event?.description}</p>
-              </div>
-            </section>
-
-            {wildcard ? <WildcardBanner title={wildcard.title} description={wildcard.description} /> : null}
-          </section>
-
-          {(() => {
-            const right = playerBySeat.get(1);
-            if (!right) return null;
-            const swapped = right.role !== right.activePanelRole;
-            return (
-              <RolePanel
-                key={right.role}
-                orientation={orientationBySeat[right.seat]}
-                player={right}
-                ownerRoleLabel={roleLabels[right.role]}
-                displayRoleLabel={
-                  swapped
-                    ? `${roleLabels[right.activePanelRole]} panel`
-                    : roleLabels[right.activePanelRole]
-                }
-                primaryOptions={getPrimaryActionOptions(right.activePanelRole, game.round)}
-                supportOptions={getSupportOptions(right.activePanelRole)}
-                isPrimaryDisabled={(action) => isPrimaryDisabled(right, action)}
-                isSupportDisabled={(action) => !canAfford(right, action)}
-                onPrimarySelect={(actionId) => onPrimarySelect(right.seat, actionId)}
-                onSupportSelect={(actionId) => onSupportSelect(right.seat, actionId)}
-                onToggleLock={() => onToggleLock(right.seat)}
-              />
-            );
-          })()}
-        </div>
-
-        {(() => {
-          const bottom = playerBySeat.get(2);
-          if (!bottom) return null;
-          const swapped = bottom.role !== bottom.activePanelRole;
-          return (
-            <RolePanel
-              key={bottom.role}
-              orientation={orientationBySeat[bottom.seat]}
-              player={bottom}
-              ownerRoleLabel={roleLabels[bottom.role]}
-              displayRoleLabel={
-                swapped
-                  ? `${roleLabels[bottom.activePanelRole]} panel`
-                  : roleLabels[bottom.activePanelRole]
-              }
-              primaryOptions={getPrimaryActionOptions(bottom.activePanelRole, game.round)}
-              supportOptions={getSupportOptions(bottom.activePanelRole)}
-              isPrimaryDisabled={(action) => isPrimaryDisabled(bottom, action)}
-              isSupportDisabled={(action) => !canAfford(bottom, action)}
-              onPrimarySelect={(actionId) => onPrimarySelect(bottom.seat, actionId)}
-              onSupportSelect={(actionId) => onSupportSelect(bottom.seat, actionId)}
-              onToggleLock={() => onToggleLock(bottom.seat)}
-            />
-          );
-        })()}
+        {/* Bottom-Right: Youth (rotated 180° via CSS) */}
+        <QuadrantPanel
+          player={youth}
+          colour="bottom-right"
+          onPrimarySelect={(id) => store.selectPrimaryAction(3, id)}
+          onSupportSelect={(id) => store.selectSupportAction(3, id)}
+          onToggleLock={() => store.toggleLock(3)}
+          round={game.round}
+        />
       </div>
 
-      {showResolution && latestLog && (
-        <aside className="resolution-overlay">
-          <div className="wc-card resolution-overlay__panel">
-            <p className="eyebrow">Round {latestLog.round} Resolution</p>
-            <h3>City Update</h3>
-            <div className="resolution-overlay__changes">
-              {(
-                [
-                  ["Economy", latestLog.indicatorChanges.economy],
-                  ["Emissions", latestLog.indicatorChanges.emissions],
-                  ["Trust", latestLog.indicatorChanges.trust],
-                  ["Equity", latestLog.indicatorChanges.equity],
-                  ["Resilience", latestLog.indicatorChanges.resilience],
-                  ["Energy Security", latestLog.indicatorChanges.energySecurity],
-                  ["Friction", latestLog.frictionChange],
-                ] as const
-              ).map(([label, delta]) => (
-                <article
-                  key={label}
-                  className={`delta ${!delta ? "" : delta > 0 ? "delta--up" : "delta--down"}`}
-                >
-                  <strong>{label}</strong>
-                  <span>{formatDelta(delta)}</span>
-                </article>
-              ))}
-            </div>
+      {/* Centre Overlay */}
+      <div className="centre-overlay">
+        <div className="centre-header">
+          <div className="centre-header__round">Round {game.round} of 8</div>
+          <div className="centre-header__event">{event?.title ?? "Decision Round"}</div>
+          {event && <div className="centre-header__desc">{event.description}</div>}
+        </div>
 
-            <h4>Selected Actions</h4>
-            <ul className="resolution-overlay__headlines">
-              {Object.entries(latestLog.actionsByRole).map(([role, actions]) => (
-                <li key={role}>
-                  <strong>{roleLabels[role as RoleKey]}:</strong>{" "}
-                  {actionById.get(actions.primary ?? "")?.title ?? "No primary"} /{" "}
-                  {actionById.get(actions.support ?? "")?.title ?? "No support"}
-                </li>
-              ))}
-            </ul>
+        <div className="indicator-ring">
+          <IndicatorDial label="Economy" value={indicators.economy} icon="💰" />
+          <IndicatorDial label="Emissions" value={indicators.emissions} icon="🏭" />
+          <IndicatorDial label="Trust" value={indicators.trust} icon="🤝" />
+          <IndicatorDial label="Equity" value={indicators.equity} icon="⚖️" />
+          <IndicatorDial label="Resilience" value={indicators.resilience} icon="🛡️" />
+          <IndicatorDial label="Energy" value={indicators.energySecurity} icon="⚡" />
+        </div>
 
-            {latestLog.triggeredSynergies.length > 0 ? (
-              <div className="resolution-overlay__synergies">
-                {latestLog.triggeredSynergies.map((synergy) => (
-                  <span key={synergy}>{synergy}</span>
+        {wildcard && (
+          <div className="wildcard-banner">
+            <div className="wildcard-banner__title">🎯 {wildcard.title}</div>
+            <div className="wildcard-banner__desc">{wildcard.description}</div>
+          </div>
+        )}
+
+        <button
+          className={`resolve-btn ${!everyoneLocked ? "resolve-btn--disabled" : ""}`}
+          onClick={handleResolve}
+          disabled={!everyoneLocked}
+        >
+          {everyoneLocked ? "▶ Resolve Round" : `⏳ ${game.players.filter(p => p.lockedIn).length}/4 Locked`}
+        </button>
+      </div>
+
+      {/* Resolution Overlay */}
+      <AnimatePresence>
+        {showRes && latestLog && (
+          <motion.div
+            className="resolution-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.div
+              className="resolution-panel"
+              initial={{ scale: 0.8, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 30 }}
+              transition={{ type: "spring", damping: 20 }}
+            >
+              <div className="resolution-panel__title">
+                Round {latestLog.round} Results
+              </div>
+
+              <div className="resolution-deltas">
+                {([
+                  ["💰 Economy", latestLog.indicatorChanges.economy],
+                  ["🏭 Emissions", latestLog.indicatorChanges.emissions],
+                  ["🤝 Trust", latestLog.indicatorChanges.trust],
+                  ["⚖️ Equity", latestLog.indicatorChanges.equity],
+                  ["🛡️ Resilience", latestLog.indicatorChanges.resilience],
+                  ["⚡ Energy", latestLog.indicatorChanges.energySecurity],
+                  ["😤 Friction", latestLog.frictionChange],
+                ] as const).map(([label, delta]) => (
+                  <span
+                    key={label}
+                    className={`delta-chip ${!delta ? "delta-chip--zero" : (delta ?? 0) > 0 ? "delta-chip--up" : "delta-chip--down"}`}
+                  >
+                    {label} {(delta ?? 0) > 0 ? `+${delta}` : (delta ?? 0) < 0 ? `${delta}` : "0"}
+                  </span>
                 ))}
               </div>
-            ) : null}
 
-            {latestLog.headlines.length > 0 && (
-              <>
-                <h4>Headlines</h4>
-                <ul className="resolution-overlay__headlines">
-                  {latestLog.headlines.map((headline) => (
-                    <li key={headline}>{headline}</li>
+              <ul className="resolution-actions">
+                {Object.entries(latestLog.actionsByRole).map(([role, actions]) => (
+                  <li key={role}>
+                    <strong>{ROLE_LABELS[role as RoleKey]}:</strong>{" "}
+                    {actionById.get(actions.primary ?? "")?.title ?? "Pass"} /{" "}
+                    {actionById.get(actions.support ?? "")?.title ?? "No support"}
+                  </li>
+                ))}
+              </ul>
+
+              {latestLog.triggeredSynergies.length > 0 && (
+                <div style={{ textAlign: "center", marginBottom: 8 }}>
+                  <strong>✨ Synergies:</strong>{" "}
+                  {latestLog.triggeredSynergies.map((s) => (
+                    <span key={s} className="delta-chip delta-chip--up" style={{ margin: 2 }}>{s}</span>
                   ))}
-                </ul>
-              </>
-            )}
+                </div>
+              )}
 
-            <button type="button" className="wc-button" onClick={onCloseResolution}>
-              Continue
-            </button>
-          </div>
-        </aside>
-      )}
-    </section>
+              {latestLog.headlines.length > 0 && (
+                <ul className="resolution-actions" style={{ fontStyle: "italic" }}>
+                  {latestLog.headlines.map((h, i) => <li key={i}>📰 {h}</li>)}
+                </ul>
+              )}
+
+              <button className="resolution-continue" onClick={handleCloseResolution}>
+                Continue
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
