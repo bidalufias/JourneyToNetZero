@@ -39,6 +39,7 @@ export function HowToPlayScreen() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.08, duration: 0.24 }}
           >
+            <div className="step-number">{idx + 1}</div>
             <h3>{step.title}</h3>
             <p>{step.text}</p>
           </motion.article>

@@ -384,7 +384,7 @@ html, body, #root {
 .ending-card__stats { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px; }
 
 /* ===================================================
-   PRE-GAME SCREENS
+   PRE-GAME SCREENS — Base
    =================================================== */
 .screen {
   min-height: 100vh;
@@ -395,11 +395,44 @@ html, body, #root {
     linear-gradient(135deg, rgba(15,25,35,0.88), rgba(10,18,30,0.78)),
     url('/city-backdrop.png') center / cover no-repeat;
   background-color: #0f1923;
+  gap: 28px;
 }
-.screen h1 { font-size: 48px; font-weight: 900; color: #fff; letter-spacing: -1px; }
-.screen h2 { font-size: 30px; font-weight: 800; color: #fff; }
+.screen header { text-align: center; max-width: 600px; }
+.screen h1 { font-size: 48px; font-weight: 900; color: #fff; letter-spacing: -1px; margin: 8px 0; }
+.screen h2 { font-size: 30px; font-weight: 800; color: #fff; margin: 8px 0; }
 .eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: 2.5px; color: rgba(255,255,255,0.4); font-weight: 700; }
-.muted { color: rgba(255,255,255,0.45); font-size: 15px; }
+.lead { font-size: 18px; color: rgba(255,255,255,0.55); font-weight: 500; margin: 4px 0; }
+.muted { color: rgba(255,255,255,0.45); font-size: 14px; line-height: 1.4; }
+
+/* ===================================================
+   ATTRACT SCREEN
+   =================================================== */
+.attract-screen {
+  position: relative;
+  overflow: hidden;
+}
+.attract-screen__wash {
+  position: absolute; inset: -40px;
+  background: radial-gradient(ellipse at 40% 40%, rgba(41,98,163,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 60%, rgba(183,28,28,0.1) 0%, transparent 50%);
+  z-index: 0;
+}
+.attract-screen__content {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 16px;
+}
+.attract-screen .eyebrow { margin-bottom: 4px; }
+.attract-screen h1 {
+  font-size: 56px; letter-spacing: -2px;
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===================================================
+   BUTTONS
+   =================================================== */
 .wc-button {
   padding: 16px 36px; border-radius: 14px;
   font-size: 18px; font-weight: 800;
@@ -410,6 +443,15 @@ html, body, #root {
 }
 .wc-button:active { transform: scale(0.94); }
 .wc-button:disabled { opacity: 0.3; cursor: not-allowed; }
+.wc-button--lg {
+  padding: 20px 48px; font-size: 22px;
+  border-color: rgba(255,255,255,0.3);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+/* ===================================================
+   CARDS (base)
+   =================================================== */
 .wc-card {
   background: rgba(255,255,255,0.06);
   backdrop-filter: blur(10px);
@@ -417,29 +459,123 @@ html, body, #root {
   border-radius: 16px; padding: 16px;
 }
 
-.city-grid { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; max-width: 1000px; }
-.city-card {
-  padding: 18px; border-radius: 16px;
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(10px);
-  border: 1.5px solid rgba(255,255,255,0.08);
-  width: 260px; cursor: pointer; transition: all 0.15s;
+/* ===================================================
+   ROLE INTRO SCREEN
+   =================================================== */
+.role-intro-screen { cursor: pointer; }
+.role-intro-screen header p:last-child {
+  font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 8px;
 }
-.city-card:active { transform: scale(0.96); }
-.city-card h3 { font-size: 17px; font-weight: 800; color: #fff; margin: 0 0 6px; }
-.city-card p  { font-size: 13px; color: rgba(255,255,255,0.45); margin: 0 0 10px; }
-.city-ind { display: flex; align-items: center; gap: 5px; font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 3px; }
-.city-ind__bar  { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.08); }
-.city-ind__fill { height: 100%; border-radius: 3px; background: #8B7355; }
-
-.roles-grid { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; max-width: 900px; }
-.role-card {
-  padding: 18px; border-radius: 16px;
+.role-intro-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  max-width: 720px;
+  width: 100%;
+}
+.role-intro-card {
+  padding: 20px;
+  border-radius: 16px;
   background: rgba(255,255,255,0.06);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.08);
-  width: 200px;
+  transition: all 0.2s;
 }
-.role-card h3 { font-size: 16px; font-weight: 800; color: #fff; margin: 4px 0 8px; }
-.role-card p  { font-size: 12px; margin: 4px 0; color: rgba(255,255,255,0.5); line-height: 1.4; }
-.role-card strong { color: rgba(255,255,255,0.75); }
+.role-intro-card:nth-child(1) { border-color: rgba(41,98,163,0.3); }
+.role-intro-card:nth-child(2) { border-color: rgba(46,125,50,0.3); }
+.role-intro-card:nth-child(3) { border-color: rgba(200,145,0,0.3); }
+.role-intro-card:nth-child(4) { border-color: rgba(183,28,28,0.3); }
+.role-intro-card h3 {
+  font-size: 18px; font-weight: 800; color: #fff; margin: 0 0 8px;
+}
+.role-intro-card p {
+  font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.5; margin: 4px 0;
+}
+.role-intro-card .muted {
+  font-size: 11px; color: rgba(255,255,255,0.35);
+}
+
+/* ===================================================
+   CITY SELECT SCREEN
+   =================================================== */
+.city-select-screen header { margin-bottom: 8px; }
+.city-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  max-width: 1100px; width: 100%;
+}
+.city-card {
+  padding: 20px; border-radius: 16px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  display: flex; flex-direction: column;
+  transition: all 0.15s;
+}
+.city-card:hover { border-color: rgba(255,255,255,0.2); }
+.city-card:active { transform: scale(0.97); }
+.city-card h3 { font-size: 18px; font-weight: 800; color: #fff; margin: 0 0 6px; }
+.city-card p  { font-size: 13px; color: rgba(255,255,255,0.5); margin: 0 0 12px; line-height: 1.4; }
+.city-card__bars { margin-bottom: 12px; }
+.city-card .wc-button {
+  width: 100%; padding: 10px 0; font-size: 14px; text-align: center;
+}
+.city-card--random {
+  border-style: dashed;
+  border-color: rgba(255,255,255,0.15);
+}
+
+/* Indicator bars (city select component) */
+.indicator { margin-bottom: 6px; }
+.indicator__head {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 3px;
+}
+.indicator__head strong { color: rgba(255,255,255,0.75); font-weight: 700; }
+.indicator__track {
+  width: 100%; height: 6px; border-radius: 3px;
+  background: rgba(255,255,255,0.08); overflow: hidden;
+}
+.indicator__fill {
+  height: 100%; border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.indicator__fill--crisis      { background: #ef5350; }
+.indicator__fill--fragile     { background: #ffa726; }
+.indicator__fill--stable      { background: #8B7355; }
+.indicator__fill--strong      { background: #66bb6a; }
+.indicator__fill--exceptional { background: #42a5f5; }
+
+/* ===================================================
+   HOW TO PLAY SCREEN
+   =================================================== */
+.how-to-play-screen { gap: 24px; }
+.how-to-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 900px; width: 100%;
+}
+.how-to-card {
+  padding: 20px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+}
+.how-to-card h3 {
+  font-size: 16px; font-weight: 800; color: #fff; margin: 0 0 6px;
+}
+.how-to-card p {
+  font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.5; margin: 0;
+}
+.how-to-card .step-number {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.6);
+  font-size: 14px; font-weight: 800;
+  margin-bottom: 8px;
+}
