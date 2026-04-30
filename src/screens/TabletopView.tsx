@@ -83,7 +83,7 @@ function PlayerCorner({ seat, phase }: { seat: number; phase: Phase }) {
   const player = game.players[seat];
 
   return (
-    <>
+    <div className="corner__inner">
       <CornerHeader player={player} role={role} />
       {phase === "objectives" && <ObjectiveSelection seat={seat} />}
       {phase === "city" && (
@@ -97,7 +97,7 @@ function PlayerCorner({ seat, phase }: { seat: number; phase: Phase }) {
         <GameplayActions seat={seat as 0 | 1 | 2 | 3} role={role} />
       )}
       {phase === "ending" && <CornerVerdict role={role} />}
-    </>
+    </div>
   );
 }
 

@@ -101,10 +101,22 @@ html, body, #root {
   font-size: 11px;
   line-height: 1.4;
 }
-.corner--tl { grid-area: p3; }
-.corner--tr { grid-area: p4; }
+.corner--tl { grid-area: p3; transform: rotate(180deg); }
+.corner--tr { grid-area: p4; transform: rotate(180deg); }
 .corner--bl { grid-area: p1; }
 .corner--br { grid-area: p2; }
+
+/* Counter-rotate inner content so it stays readable */
+.corner--tl > .corner__inner,
+.corner--tr > .corner__inner { transform: rotate(180deg); }
+
+/* Player corner inner (rotated for top corners) */
+.corner__inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
 
 /* Corner header */
 .corner__head {
