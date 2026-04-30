@@ -453,6 +453,44 @@ function CenterGame() {
         </div>
       </div>
 
+      {game.logs.length > 0 && (
+        <div className="history">
+          <div className="history__label">📜 Round History</div>
+          <div className="history__scroll">
+            {[...game.logs].reverse().map((log) => {
+              const evtTitle = events.find(e => e.id === log.eventId)?.title;
+              return (
+                <div key={log.round} className="history__entry">
+                  <div className="history__head">
+                    <span className="history__round">R{log.round}</span>
+                    <span className="history__deltas">
+                      {([
+                        ["💰", log.indicatorChanges.economy],
+                        ["🏭", log.indicatorChanges.emissions],
+                        ["🤝", log.indicatorChanges.trust],
+                        ["⚖️", log.indicatorChanges.equity],
+                        ["🛡️", log.indicatorChanges.resilience],
+                        ["⚡", log.indicatorChanges.energySecurity],
+                      ] as [string, number | undefined][]).map(([icon, d]) => (
+                        <span key={icon} className={`history__delta ${(d ?? 0) > 0 ? "history__delta--up" : (d ?? 0) < 0 ? "history__delta--down" : ""}`}>
+                          {icon}{(d ?? 0) > 0 ? `+${d}` : (d ?? 0) < 0 ? `${d}` : ""}
+                        </span>
+                      ))}
+                    </span>
+                  </div>
+                  <div className="history__actions">
+                    {Object.entries(log.actionsByRole).map(([role, actions]) => (
+                      <span key={role}>{ROLE_EMOJI[role as RoleKey]}{actionById.get(actions.primary ?? "")?.title ?? "Pass"}</span>
+                    ))}
+                  </div>
+                  {evtTitle && <div className="history__event">📰 {evtTitle}</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {evt && (
         <div className="event">
           <div className="event__title">{evt.title}</div>
