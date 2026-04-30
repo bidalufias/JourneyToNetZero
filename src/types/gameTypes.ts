@@ -110,6 +110,46 @@ export type RoundLog = {
   headlines: string[];
 };
 
+/* ── Objective system ── */
+
+export type ObjectiveCondition =
+  | { type: "indicatorMin"; key: IndicatorKey; min: number }
+  | { type: "indicatorNeverBelow"; key: IndicatorKey; min: number }
+  | { type: "frictionMax"; max: number }
+  | { type: "synergyCount"; min: number }
+  | { type: "resourceMin"; key: RoleKey; resourceType: "primary" | "secondary"; min: number }
+  | { type: "tagChosenMax"; tag: string; max: number }
+  | { type: "supportActionCount"; min: number }
+  | { type: "combined"; conditions: ObjectiveCondition[]; mode: "all" | "any" };
+
+export type ObjectiveCard = {
+  id: string;
+  role: RoleKey;
+  tier: "primary" | "secondary";
+  title: string;
+  tagline: string;
+  description: string;
+  conditions: ObjectiveCondition;
+  tensionNote: string;
+};
+
+export type ObjectiveVerdict =
+  | "Hero"
+  | "Pyrrhic Victory"
+  | "The Pivot"
+  | "Team Player"
+  | "Selfish"
+  | "Lost";
+
+export type ObjectiveStats = {
+  synergiesTriggeredByRole: Record<RoleKey, number>;
+  supportActionsUsedByRole: Record<RoleKey, number>;
+  tagsChosenByRole: Record<RoleKey, string[]>;
+  indicatorsNeverBelow: Record<IndicatorKey, { below: number; violated: boolean }>;
+  frictionNeverAbove: { max: number; violated: boolean };
+  resourcesNeverBelow: Record<string, { min: number; violated: boolean }>;
+};
+
 export type GameState = {
   cityArchetypeId: string;
   round: number;
@@ -123,4 +163,10 @@ export type GameState = {
   timers: {
     phaseEndsAt?: number;
   };
+  /* objective selection */
+  objectiveSelectingSeat: number;
+  selectedObjectives: Record<RoleKey, { primary?: string; secondary?: string }>;
+  collectiveWin?: boolean;
+  verdicts: Partial<Record<RoleKey, ObjectiveVerdict>>;
+  stats: ObjectiveStats;
 };

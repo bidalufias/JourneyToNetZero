@@ -8,21 +8,41 @@ import {
   wildcards,
 } from "../data";
 import { resolveRound } from "./resolutionEngine";
-import type { ActionCard, GameState, PlayerState, RoleKey } from "../types/gameTypes";
+import type { ActionCard, GameState, ObjectiveStats, PlayerState, RoleKey } from "../types/gameTypes";
 
 export type UIScreen =
   | "attract"
   | "roleIntro"
+  | "objectiveSelect"
   | "citySelect"
   | "howToPlay"
   | "game"
   | "ending";
+
+const createInitialStats = (): ObjectiveStats => ({
+  synergiesTriggeredByRole: { government: 0, business: 0, community: 0, youth: 0 },
+  supportActionsUsedByRole: { government: 0, business: 0, community: 0, youth: 0 },
+  tagsChosenByRole: { government: [], business: [], community: [], youth: [] },
+  indicatorsNeverBelow: {
+    economy: { below: 0, violated: false },
+    emissions: { below: 0, violated: false },
+    trust: { below: 0, violated: false },
+    equity: { below: 0, violated: false },
+    resilience: { below: 0, violated: false },
+    energySecurity: { below: 0, violated: false },
+  },
+  frictionNeverAbove: { max: 5, violated: false },
+  resourcesNeverBelow: {},
+});
 
 type StoreState = {
   screen: UIScreen;
   game: GameState;
   showResolution: boolean;
   goToRoleIntro: () => void;
+  goToObjectiveSelect: () => void;
+  selectObjective: (seat: number, tier: "primary" | "secondary", objectiveId: string) => void;
+  confirmObjectives: (seat: number) => void;
   goToCitySelect: () => void;
   setupCity: (cityArchetypeId: string) => void;
   startGame: () => void;
@@ -92,6 +112,15 @@ const initialGameState = (): GameState => {
     currentWildcardId: undefined,
     logs: [],
     timers: {},
+    objectiveSelectingSeat: 0,
+    selectedObjectives: {
+      government: {},
+      business: {},
+      community: {},
+      youth: {},
+    },
+    verdicts: {},
+    stats: createInitialStats(),
   };
 };
 
@@ -114,6 +143,39 @@ export const useGameStore = create<StoreState>((set, get) => ({
   showResolution: false,
 
   goToRoleIntro: () => set({ screen: "roleIntro" }),
+
+  goToObjectiveSelect: () => {
+    const game = structuredClone(get().game);
+    game.objectiveSelectingSeat = 0;
+    game.selectedObjectives = { government: {}, business: {}, community: {}, youth: {} };
+    game.stats = createInitialStats();
+    set({ screen: "objectiveSelect", game });
+  },
+
+  selectObjective: (seat, tier, objectiveId) => {
+    const game = structuredClone(get().game);
+    const role = roleOrder[seat];
+    if (!role) return;
+    game.selectedObjectives[role][tier] = objectiveId;
+    set({ game });
+  },
+
+  confirmObjectives: (seat) => {
+    const game = structuredClone(get().game);
+    const role = roleOrder[seat];
+    if (!role) return;
+    const obj = game.selectedObjectives[role];
+    if (!obj.primary) return; // must have at least primary
+    if (seat < 3) {
+      game.objectiveSelectingSeat = seat + 1;
+    } else {
+      // all done — move to city select
+      set({ screen: "citySelect", game });
+      return;
+    }
+    set({ game });
+  },
+
   goToCitySelect: () => set({ screen: "citySelect" }),
 
   setupCity: (cityArchetypeId) => {
@@ -125,6 +187,7 @@ export const useGameStore = create<StoreState>((set, get) => ({
     set({
       screen: "howToPlay",
       game: {
+        ...get().game,
         cityArchetypeId: city.id,
         round: 1,
         phase: "brief",
@@ -138,6 +201,7 @@ export const useGameStore = create<StoreState>((set, get) => ({
         currentWildcardId: wildcardId,
         logs: [],
         timers: {},
+        stats: createInitialStats(),
       },
       showResolution: false,
     });

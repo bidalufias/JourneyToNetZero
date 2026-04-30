@@ -1,6 +1,8 @@
 import { useGameStore } from "./store/useGameStore";
-import { cityArchetypes, endings } from "./data";
+import { cityArchetypes } from "./data";
 import { TabletopGameScreen } from "./screens/GameScreen";
+import { ObjectiveSelectScreen } from "./screens/ObjectiveSelectScreen";
+import { EndingScreen } from "./screens/EndingScreen";
 import "./App.css";
 
 function AttractScreen() {
@@ -23,7 +25,7 @@ const ROLES = [
 ];
 
 function RoleIntroScreen() {
-  const goToCitySelect = useGameStore((s) => s.goToCitySelect);
+  const goToObjectiveSelect = useGameStore((s) => s.goToObjectiveSelect);
   return (
     <div className="screen">
       <p className="eyebrow">ROLES</p>
@@ -39,7 +41,7 @@ function RoleIntroScreen() {
           </div>
         ))}
       </div>
-      <button className="wc-button" style={{ marginTop: 16 }} onClick={goToCitySelect}>Continue</button>
+      <button className="wc-button" style={{ marginTop: 16 }} onClick={goToObjectiveSelect}>Choose Objectives</button>
     </div>
   );
 }
@@ -77,28 +79,9 @@ function HowToPlayScreen() {
         <p>📊 <strong>6 Indicators:</strong> Economy, Emissions, Trust, Equity, Resilience, Energy</p>
         <p>✨ <strong>Synergies:</strong> Coordinate roles for bonus effects</p>
         <p>🎯 <strong>Wildcards:</strong> Unexpected events each round</p>
+        <p>🏆 <strong>Objectives:</strong> Each player has a public + secret goal for individual scoring</p>
       </div>
       <button className="wc-button" style={{ marginTop: 20 }} onClick={startGame}>Continue to Round 1</button>
-    </div>
-  );
-}
-
-function EndingScreen() {
-  const game = useGameStore((s) => s.game);
-  const resetGame = useGameStore((s) => s.resetGame);
-  const ending = endings.find((e: any) => e.id === (game as any).endingId);
-  return (
-    <div className="ending-screen">
-      <div className="ending-card">
-        <h1 className="ending-card__title">{ending?.title ?? "Game Over"}</h1>
-        <p className="ending-card__body">{ending?.narrative ?? ending?.title ?? "The campaign has ended."}</p>
-        <div className="ending-card__stats">
-          {Object.entries(game.city.indicators).map(([k, v]) => (
-            <span key={k} className="delta-chip delta-chip--zero">{k}: {v as number}</span>
-          ))}
-        </div>
-        <button className="wc-button" style={{ marginTop: 16 }} onClick={resetGame}>Play Again</button>
-      </div>
     </div>
   );
 }
@@ -108,6 +91,7 @@ export default function App() {
   switch (screen) {
     case "attract": return <AttractScreen />;
     case "roleIntro": return <RoleIntroScreen />;
+    case "objectiveSelect": return <ObjectiveSelectScreen />;
     case "citySelect": return <CitySelectScreen />;
     case "howToPlay": return <HowToPlayScreen />;
     case "game": return <TabletopGameScreen />;

@@ -1,4 +1,5 @@
 import { actionById, endings, events, synergies, wildcards } from "../data";
+import { evaluateObjectives } from "./objectiveEvaluator";
 import type {
   ActionCard,
   DelayedEffect,
@@ -789,6 +790,45 @@ export const resolveRound = (state: GameState): GameState => {
   });
   next.city.friction = clamp(next.city.friction, 0, 5);
 
+  // 8b) Track objective stats (after clamping)
+  (Object.keys(next.city.indicators) as IndicatorKey[]).forEach((indicator) => {
+    const val = next.city.indicators[indicator];
+    const tracker = next.stats.indicatorsNeverBelow[indicator];
+    if (tracker && val < tracker.below) {
+      tracker.violated = true;
+    }
+  });
+  if (next.city.friction > next.stats.frictionNeverAbove.max) {
+    next.stats.frictionNeverAbove.violated = true;
+  }
+  next.players.forEach((player) => {
+    const rKey = `${player.role}_primary`;
+    const tracker = next.stats.resourcesNeverBelow[rKey];
+    if (tracker && player.resources.primary < tracker.min) {
+      tracker.violated = true;
+    }
+  });
+  // track tags chosen this round
+  roleOrder.forEach((role) => {
+    const action = ctx.selectedPrimary[role];
+    if (action) {
+      next.stats.tagsChosenByRole[role].push(...action.tags);
+    }
+    const support = ctx.selectedSupport[role];
+    if (support) {
+      next.stats.supportActionsUsedByRole[role] += 1;
+    }
+  });
+  next.stats.synergiesTriggeredByRole = Object.fromEntries(
+    roleOrder.map((r) => [r, (next.stats.synergiesTriggeredByRole[r] ?? 0)])
+  ) as Record<RoleKey, number>;
+  ctx.triggeredSynergies.forEach(() => {
+    // attribute to all roles since synergies are cooperative
+    roleOrder.forEach((r) => {
+      next.stats.synergiesTriggeredByRole[r] += 1;
+    });
+  });
+
   // 9) Resource refresh
   refreshResources(next, ctx);
 
@@ -809,6 +849,10 @@ export const resolveRound = (state: GameState): GameState => {
     next.endingId = evaluateEnding(next);
     next.currentEventId = undefined;
     next.currentWildcardId = undefined;
+    // evaluate objectives
+    const result = evaluateObjectives(next);
+    next.collectiveWin = result.collectiveWin;
+    next.verdicts = result.verdicts;
     return next;
   }
 
