@@ -146,58 +146,111 @@ function ObjectiveSelection({ seat }: { seat: number }) {
   const primaries = primaryObjectivesFor(role);
   const secondaries = secondaryObjectivesFor(role);
   const selectedPrimary = primaries.find((o) => o.id === obj.primary);
+  const selectedSecondary = secondaries.find((o) => o.id === obj.secondary);
+  // selectedSecondary available for future confirm summary display
+  void selectedSecondary;
+
+  /* Build a short impact summary from conditions */
+  const impactSummary = (conditions: any): string[] => {
+    if (!conditions) return [];
+    if (conditions.type === "combined") {
+      return (conditions.conditions as any[]).flatMap(impactSummary);
+    }
+    if (conditions.type === "indicatorMin") {
+      return [`${IND_ICONS[conditions.key] ?? ""} ${IND_LABELS[conditions.key] ?? conditions.key} ≥ ${conditions.min}`];
+    }
+    if (conditions.type === "indicatorNeverBelow") {
+      return [`${IND_ICONS[conditions.key] ?? ""} ${IND_LABELS[conditions.key] ?? conditions.key} never < ${conditions.min}`];
+    }
+    if (conditions.type === "frictionMax") {
+      return [`😤 Friction ≤ ${conditions.max}`];
+    }
+    if (conditions.type === "synergyCount") {
+      return [`✨ Synergies ≥ ${conditions.min}`];
+    }
+    if (conditions.type === "resourceMin") {
+      return [`⚔️ Resources ≥ ${conditions.min}`];
+    }
+    if (conditions.type === "supportActionCount") {
+      return [`🤝 Support actions ≥ ${conditions.min}`];
+    }
+    return [];
+  };
 
   return (
-    <div className="corner__actions">
-      <div className="obj-section">
-        <div className="obj-section__label">Public</div>
-        {primaries.map((o) => (
-          <div key={o.id} className="obj-choice">
-            <button
-              className={`card-btn card-btn--obj ${obj.primary === o.id ? "card-btn--selected" : ""}`}
-              onClick={() => store.selectObjective(seat, "primary", o.id)}
-            >
-              {o.title}
-            </button>
-            <div className="obj-choice__tagline">{o.tagline}</div>
+    <div className="corner__actions obj-select">
+      {/* ── Impact info panel (shown when a primary is selected) ── */}
+      {selectedPrimary && (
+        <div className="obj-impact">
+          <div className="obj-impact__label">Final Results</div>
+          <div className="obj-impact__tags">
+            {impactSummary(selectedPrimary.conditions).map((t, i) => (
+              <span key={i} className="obj-impact__tag">{t}</span>
+            ))}
           </div>
-        ))}
-        {selectedPrimary && (
-          <div className="obj-desc">
-            <div className="obj-desc__text">{selectedPrimary.description}</div>
-            {selectedPrimary.tensionNote && (
-              <div className="obj-desc__tension">⚡ {selectedPrimary.tensionNote}</div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {obj.primary && (
-        <div className="obj-section">
-          <div className="obj-section__label">🔒 Secret</div>
-          {secondaries.map((o) => (
-            <div key={o.id} className="obj-choice">
-              <button
-                className={`card-btn card-btn--obj ${obj.secondary === o.id ? "card-btn--selected" : ""}`}
-                onClick={() => store.selectObjective(seat, "secondary", o.id)}
-              >
-                {o.title}
-              </button>
-              <div className="obj-choice__tagline">{o.tagline}</div>
-            </div>
-          ))}
-          <button
-            className={`card-btn card-btn--obj ${!obj.secondary ? "card-btn--selected" : ""}`}
-            onClick={() => store.selectObjective(seat, "secondary", "")}
-          >
-            Skip
-          </button>
+          {selectedPrimary.tensionNote && (
+            <div className="obj-impact__tension">⚡ {selectedPrimary.tensionNote}</div>
+          )}
         </div>
       )}
 
+      {/* ── Public objectives — 2×2 card grid ── */}
+      <div className="obj-grid">
+        <div className="obj-section__label">Public Objective</div>
+        <div className="obj-grid__cards">
+          {primaries.map((o) => (
+            <button
+              key={o.id}
+              className={`obj-card ${obj.primary === o.id ? "obj-card--selected" : ""}`}
+              onClick={() => store.selectObjective(seat, "primary", o.id)}
+            >
+              <div className="obj-card__title">{o.title}</div>
+              <div className="obj-card__tagline">{o.tagline}</div>
+              <div className="obj-card__impact">
+                {impactSummary(o.conditions).map((t, i) => (
+                  <span key={i} className="obj-card__impact-tag">{t}</span>
+                ))}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Secondary objectives — 2×2 grid (3 cards + skip), shown after primary ── */}
       {obj.primary && (
-        <button className="corner__lockin" onClick={() => store.confirmObjectives(seat)}>
-          Confirm
+        <div className="obj-grid" style={{ marginTop: 4 }}>
+          <div className="obj-section__label">🔒 Secret Objective</div>
+          <div className="obj-grid__cards">
+            {secondaries.map((o) => (
+              <button
+                key={o.id}
+                className={`obj-card ${obj.secondary === o.id ? "obj-card--selected" : ""}`}
+                onClick={() => store.selectObjective(seat, "secondary", o.id)}
+              >
+                <div className="obj-card__title">🔒 {o.title}</div>
+                <div className="obj-card__tagline">{o.tagline}</div>
+                <div className="obj-card__impact">
+                  {impactSummary(o.conditions).map((t, i) => (
+                    <span key={i} className="obj-card__impact-tag">{t}</span>
+                  ))}
+                </div>
+              </button>
+            ))}
+            <button
+              className={`obj-card obj-card--skip ${obj.secondary === "" ? "obj-card--selected" : ""}`}
+              onClick={() => store.selectObjective(seat, "secondary", "")}
+            >
+              <div className="obj-card__title">No Secret</div>
+              <div className="obj-card__tagline">Play with only your public goal</div>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Confirm — show once both selections are made ── */}
+      {obj.primary && (obj.secondary !== undefined) && (
+        <button className="corner__lockin" onClick={() => store.confirmObjectives(seat)} style={{ marginTop: 6 }}>
+          ✓ Confirm
         </button>
       )}
     </div>
