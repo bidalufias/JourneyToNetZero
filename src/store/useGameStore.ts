@@ -10,14 +10,7 @@ import {
 import { resolveRound } from "./resolutionEngine";
 import type { ActionCard, GameState, ObjectiveStats, PlayerState, RoleKey } from "../types/gameTypes";
 
-export type UIScreen =
-  | "attract"
-  | "roleIntro"
-  | "objectiveSelect"
-  | "citySelect"
-  | "howToPlay"
-  | "game"
-  | "ending";
+export type UIScreen = "attract" | "tabletop";
 
 const createInitialStats = (): ObjectiveStats => ({
   synergiesTriggeredByRole: { government: 0, business: 0, community: 0, youth: 0 },
@@ -39,11 +32,9 @@ type StoreState = {
   screen: UIScreen;
   game: GameState;
   showResolution: boolean;
-  goToRoleIntro: () => void;
-  goToObjectiveSelect: () => void;
+  goToTabletop: () => void;
   selectObjective: (seat: number, tier: "primary" | "secondary", objectiveId: string) => void;
   confirmObjectives: (seat: number) => void;
-  goToCitySelect: () => void;
   setupCity: (cityArchetypeId: string) => void;
   startGame: () => void;
   selectPrimaryAction: (seat: 0 | 1 | 2 | 3, actionId: string) => void;
@@ -142,14 +133,12 @@ export const useGameStore = create<StoreState>((set, get) => ({
   game: initialGameState(),
   showResolution: false,
 
-  goToRoleIntro: () => set({ screen: "roleIntro" }),
-
-  goToObjectiveSelect: () => {
-    const game = structuredClone(get().game);
+  goToTabletop: () => {
+    const game = initialGameState();
     game.objectiveSelectingSeat = 0;
     game.selectedObjectives = { government: {}, business: {}, community: {}, youth: {} };
     game.stats = createInitialStats();
-    set({ screen: "objectiveSelect", game });
+    set({ screen: "tabletop", game, showResolution: false });
   },
 
   selectObjective: (seat, tier, objectiveId) => {
@@ -165,18 +154,12 @@ export const useGameStore = create<StoreState>((set, get) => ({
     const role = roleOrder[seat];
     if (!role) return;
     const obj = game.selectedObjectives[role];
-    if (!obj.primary) return; // must have at least primary
+    if (!obj.primary) return;
     if (seat < 3) {
       game.objectiveSelectingSeat = seat + 1;
-    } else {
-      // all done — move to city select
-      set({ screen: "citySelect", game });
-      return;
     }
     set({ game });
   },
-
-  goToCitySelect: () => set({ screen: "citySelect" }),
 
   setupCity: (cityArchetypeId) => {
     const city = cityArchetypes.find((item) => item.id === cityArchetypeId) ?? cityArchetypes[0];
@@ -185,12 +168,11 @@ export const useGameStore = create<StoreState>((set, get) => ({
     applyRoleSwap(players, wildcardId);
 
     set({
-      screen: "howToPlay",
       game: {
         ...get().game,
         cityArchetypeId: city.id,
         round: 1,
-        phase: "brief",
+        phase: "decision",
         players,
         city: {
           indicators: structuredClone(city.indicators),
@@ -211,7 +193,7 @@ export const useGameStore = create<StoreState>((set, get) => ({
     const state = get();
     const game = structuredClone(state.game);
     game.phase = "decision";
-    set({ screen: "game", game });
+    set({ game });
   },
 
   selectPrimaryAction: (seat, actionId) => {
@@ -287,14 +269,14 @@ export const useGameStore = create<StoreState>((set, get) => ({
     set({
       game: resolved,
       showResolution: true,
-      screen: resolved.phase === "ending" ? "ending" : "game",
+      screen: "tabletop",
     });
   },
 
   closeResolution: () => {
     const state = get();
     if (state.game.phase === "ending") {
-      set({ showResolution: false, screen: "ending" });
+      set({ showResolution: false });
       return;
     }
     const game = structuredClone(state.game);
