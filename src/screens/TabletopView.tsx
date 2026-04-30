@@ -409,19 +409,25 @@ function CenterGame() {
       <div className="center__round">{game.round} / 8</div>
 
       <div className="indicators">
-        {(["economy", "emissions", "trust", "equity", "resilience", "energySecurity"] as const).map((key) => (
-          <div key={key} className="ind">
-            <span className="ind__icon">{IND_ICONS[key]}</span>
-            <span className="ind__val">{ind[key]}</span>
-            <div className="ind__bar">
-              <div className="ind__fill" style={{ width: `${Math.min(100, ind[key] * 10)}%` }} />
+        {(["economy", "emissions", "trust", "equity", "resilience", "energySecurity"] as const).map((key) => {
+          const val = ind[key];
+          const inverted = key === "emissions";
+          const danger = inverted ? val >= 7 : val <= 3;
+          const warning = !danger && (inverted ? val >= 5 : val <= 5);
+          return (
+            <div key={key} className={`ind ${danger ? "ind--danger" : warning ? "ind--warning" : ""}`}>
+              <span className="ind__icon">{IND_ICONS[key]}</span>
+              <span className="ind__val">{val}</span>
+              <div className="ind__bar">
+                <div className="ind__fill" style={{ width: `${Math.min(100, val * 10)}%` }} />
+              </div>
+              <span className="ind__label">{IND_LABELS[key]}</span>
             </div>
-            <span className="ind__label">{IND_LABELS[key]}</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <div className="friction">
+      <div className={`friction ${game.city.friction >= 4 ? "friction--danger" : ""}`}>
         <span style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: 0.5 }}>Friction</span>
         <div className="friction__dots">
           {Array.from({ length: 5 }, (_, i) => (

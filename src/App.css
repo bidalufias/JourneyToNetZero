@@ -501,7 +501,30 @@ html, body, #root {
 .ind__fill {
   height: 100%;
   background: #000;
-  transition: width 0.4s ease;
+  transition: width 0.4s ease, background 0.3s;
+}
+
+/* Indicator warning state (value approaching danger zone) */
+.ind--warning .ind__fill {
+  background: #b8860b;
+}
+.ind--warning .ind__val {
+  color: #b8860b;
+}
+
+/* Indicator danger state (critical — value in red zone) */
+.ind--danger .ind__fill {
+  background: #cc0000;
+  animation: dangerPulse 1.2s ease-in-out infinite;
+}
+.ind--danger .ind__val {
+  color: #cc0000;
+  animation: dangerPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes dangerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 /* Friction */
