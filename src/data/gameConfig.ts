@@ -9,14 +9,14 @@ export const indicatorScaleBands = [
 ] as const;
 
 export const indicatorDescriptions: Record<IndicatorKey, string> = {
-  economy: "jobs, investment, productivity, business activity",
+  economy: "jobs, investment, productivity, SMEs, and export activity",
   emissions:
     "higher value means better emissions performance, meaning lower net emissions and cleaner systems",
-  trust: "confidence in leadership, fairness, and legitimacy",
-  equity: "whether benefits and burdens are shared fairly",
-  resilience: "ability to withstand and recover from shocks",
+  trust: "rakyat confidence in leadership, fairness, and legitimacy",
+  equity: "whether benefits and burdens are shared fairly across income groups and districts",
+  resilience: "ability to withstand and recover from heat, banjir, and supply shocks",
   energySecurity:
-    "affordability, reliability, and diversification of energy supply",
+    "affordability, reliability, and diversification of Malaysia's energy supply",
 };
 
 export const startingResources: Record<RoleKey, { primary: number; secondary: number }> = {

@@ -4,7 +4,7 @@ import { useGameStore } from "../store/useGameStore";
 
 const indicatorLabels = {
   economy: "Economy",
-  emissions: "Emissions",
+  emissions: "Clean Air",
   trust: "Trust",
   equity: "Equity",
   resilience: "Resilience",
@@ -17,9 +17,9 @@ export function CitySelectScreen() {
   return (
     <section className="screen city-select-screen">
       <header>
-        <p className="eyebrow">City Archetype</p>
+        <p className="eyebrow">Malaysia Scenario</p>
         <h2>Choose your city</h2>
-        <p>Pick a starting condition. You can also let fate decide.</p>
+        <p>Pick a Malaysian starting condition. You can also let fate decide.</p>
       </header>
 
       <div className="city-grid">
@@ -40,7 +40,7 @@ export function CitySelectScreen() {
 
         <article className="wc-card city-card city-card--random" key="random-city">
           <h3>Wildcard Start</h3>
-          <p>Randomly assign one of the city archetypes.</p>
+          <p>Randomly assign one of the Malaysian city archetypes.</p>
           <button
             className="wc-button"
             type="button"

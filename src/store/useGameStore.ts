@@ -5,10 +5,17 @@ import {
   endings,
   events,
   startingResources,
-  wildcards,
 } from "../data";
+import { objectiveById } from "../data/objectives";
 import { resolveRound } from "./resolutionEngine";
-import type { ActionCard, GameState, ObjectiveStats, PlayerState, RoleKey } from "../types/gameTypes";
+import type {
+  ActionCard,
+  GameState,
+  ObjectiveCondition,
+  ObjectiveStats,
+  PlayerState,
+  RoleKey,
+} from "../types/gameTypes";
 
 export type UIScreen = "attract" | "tabletop";
 
@@ -47,12 +54,13 @@ type StoreState = {
 
 const roleOrder: RoleKey[] = ["government", "business", "community", "youth"];
 
+const wildcardOrder = ["WC_01", "WC_04", "WC_07", "WC_08", "WC_03", "WC_10", "WC_09"];
+
 const wildcardForRound = (round: number): string | undefined => {
   if (round < 2) {
     return undefined;
   }
-  const index = (round - 2) % wildcards.length;
-  return wildcards[index]?.id;
+  return wildcardOrder[(round - 2) % wildcardOrder.length];
 };
 
 const buildPlayers = (): PlayerState[] =>
@@ -134,6 +142,66 @@ const canAfford = (player: PlayerState, action?: ActionCard): boolean => {
   );
 };
 
+const registerObjectiveCondition = (
+  stats: ObjectiveStats,
+  condition: ObjectiveCondition,
+): void => {
+  if (condition.type === "combined") {
+    condition.conditions.forEach((item) => registerObjectiveCondition(stats, item));
+    return;
+  }
+  if (condition.type === "indicatorNeverBelow") {
+    const tracker = stats.indicatorsNeverBelow[condition.key];
+    tracker.below = Math.max(tracker.below, condition.min);
+    return;
+  }
+  if (condition.type === "frictionMax") {
+    stats.frictionNeverAbove.max = Math.min(stats.frictionNeverAbove.max, condition.max);
+    return;
+  }
+  if (condition.type === "resourceMin") {
+    const key = `${condition.key}_${condition.resourceType}`;
+    const existing = stats.resourcesNeverBelow[key];
+    stats.resourcesNeverBelow[key] = {
+      min: Math.max(existing?.min ?? 0, condition.min),
+      violated: existing?.violated ?? false,
+    };
+    return;
+  }
+};
+
+const registerObjectiveTrackers = (game: GameState): void => {
+  roleOrder.forEach((role) => {
+    const selected = game.selectedObjectives[role];
+    [selected.primary, selected.secondary].forEach((id) => {
+      if (!id) return;
+      const card = objectiveById(id);
+      if (card) registerObjectiveCondition(game.stats, card.conditions);
+    });
+  });
+};
+
+const updateTrackerViolations = (game: GameState): void => {
+  (Object.keys(game.city.indicators) as Array<keyof typeof game.city.indicators>).forEach((key) => {
+    const tracker = game.stats.indicatorsNeverBelow[key];
+    if (tracker && game.city.indicators[key] < tracker.below) {
+      tracker.violated = true;
+    }
+  });
+  if (game.city.friction > game.stats.frictionNeverAbove.max) {
+    game.stats.frictionNeverAbove.violated = true;
+  }
+  game.players.forEach((player) => {
+    (["primary", "secondary"] as const).forEach((resourceType) => {
+      const key = `${player.role}_${resourceType}`;
+      const tracker = game.stats.resourcesNeverBelow[key];
+      if (tracker && player.resources[resourceType] < tracker.min) {
+        tracker.violated = true;
+      }
+    });
+  });
+};
+
 export const useGameStore = create<StoreState>((set, get) => ({
   screen: "attract",
   game: initialGameState(),
@@ -163,6 +231,8 @@ export const useGameStore = create<StoreState>((set, get) => ({
     const obj = game.selectedObjectives[role];
     if (!obj.primary) return;
     game.objectivesLocked[role] = true;
+    registerObjectiveTrackers(game);
+    updateTrackerViolations(game);
     set({ game });
   },
 
@@ -192,6 +262,10 @@ export const useGameStore = create<StoreState>((set, get) => ({
       },
       showResolution: false,
     });
+    const nextGame = structuredClone(get().game);
+    registerObjectiveTrackers(nextGame);
+    updateTrackerViolations(nextGame);
+    set({ game: nextGame });
   },
 
   startGame: () => {

@@ -108,6 +108,13 @@ export type RoundLog = {
   frictionChange: number;
   triggeredSynergies: string[];
   headlines: string[];
+  narrative?: {
+    headline: string;
+    summary: string;
+    consequences: string[];
+    roleReflections: Partial<Record<RoleKey, string>>;
+    memory?: string;
+  };
 };
 
 /* ── Objective system ── */
@@ -120,6 +127,7 @@ export type ObjectiveCondition =
   | { type: "resourceMin"; key: RoleKey; resourceType: "primary" | "secondary"; min: number }
   | { type: "tagChosenMax"; tag: string; max: number }
   | { type: "supportActionCount"; min: number }
+  | { type: "supportActionMax"; max: number }
   | { type: "combined"; conditions: ObjectiveCondition[]; mode: "all" | "any" };
 
 export type ObjectiveCard = {

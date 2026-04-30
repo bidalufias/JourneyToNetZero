@@ -1,5 +1,6 @@
 import { actionById, endings, events, synergies, wildcards } from "../data";
 import { evaluateObjectives } from "./objectiveEvaluator";
+import { buildRoundNarrative } from "./narrativeEngine";
 import type {
   ActionCard,
   DelayedEffect,
@@ -713,6 +714,7 @@ const buildRoundLog = (state: GameState, ctx: ResolutionContext): RoundLog => ({
   frictionChange: ctx.frictionChange,
   triggeredSynergies: ctx.triggeredSynergies,
   headlines: ctx.headlines,
+  narrative: buildRoundNarrative(state, ctx),
 });
 
 export const resolveRound = (state: GameState): GameState => {
@@ -802,11 +804,13 @@ export const resolveRound = (state: GameState): GameState => {
     next.stats.frictionNeverAbove.violated = true;
   }
   next.players.forEach((player) => {
-    const rKey = `${player.role}_primary`;
-    const tracker = next.stats.resourcesNeverBelow[rKey];
-    if (tracker && player.resources.primary < tracker.min) {
-      tracker.violated = true;
-    }
+    (["primary", "secondary"] as const).forEach((resourceType) => {
+      const rKey = `${player.role}_${resourceType}`;
+      const tracker = next.stats.resourcesNeverBelow[rKey];
+      if (tracker && player.resources[resourceType] < tracker.min) {
+        tracker.violated = true;
+      }
+    });
   });
   // track tags chosen this round
   roleOrder.forEach((role) => {

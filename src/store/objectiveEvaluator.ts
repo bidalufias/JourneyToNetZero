@@ -25,11 +25,11 @@ export const evaluateCondition = (
 
     case "indicatorNeverBelow": {
       const tracker = state.stats.indicatorsNeverBelow[condition.key];
-      return !tracker.violated;
+      return !tracker.violated && state.city.indicators[condition.key] >= condition.min;
     }
 
     case "frictionMax": {
-      return !state.stats.frictionNeverAbove.violated;
+      return !state.stats.frictionNeverAbove.violated && state.city.friction <= condition.max;
     }
 
     case "synergyCount": {
@@ -50,11 +50,15 @@ export const evaluateCondition = (
     case "tagChosenMax": {
       const tags = state.stats.tagsChosenByRole[role] ?? [];
       const count = tags.filter((t) => t === condition.tag).length;
-      return count >= 3;
+      return count >= condition.max;
     }
 
     case "supportActionCount": {
       return state.stats.supportActionsUsedByRole[role] >= condition.min;
+    }
+
+    case "supportActionMax": {
+      return state.stats.supportActionsUsedByRole[role] <= condition.max;
     }
 
     case "combined": {

@@ -57,7 +57,7 @@ export const youthObjectives: ObjectiveCard[] = [
     title: "Confrontational Stance",
     tagline: "Force the issue through pressure",
     description: "Choose actions tagged 'confrontational' at least 3 times.",
-    conditions: { type: "tagChosenMax", tag: "confrontational", max: 99 },
+    conditions: { type: "tagChosenMax", tag: "confrontation", max: 3 },
     tensionNote: "High risk — friction spikes will hurt everyone including yourself.",
   },
   {

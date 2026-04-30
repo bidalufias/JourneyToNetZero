@@ -11,6 +11,7 @@ export { wildcards } from "./wildcards";
 export { synergies } from "./synergies";
 export { supportActions } from "./supportActions";
 export { endings } from "./endings";
+export { eventBriefings } from "./narrative";
 export { startingResources, indicatorScaleBands, frictionBands } from "./gameConfig";
 
 export const primaryActions: ActionCard[] = [

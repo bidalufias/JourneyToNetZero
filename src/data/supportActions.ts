@@ -4,8 +4,8 @@ export const supportActions: ActionCard[] = [
   {
     id: "SUP_GOV_01",
     role: "government",
-    title: "Fast Consultation",
-    description: "Next Trust penalty reduced by 1.",
+    title: "Fast Town Hall",
+    description: "A quick sesi libat urus reduces the next Trust penalty by 1.",
     actionType: "support",
     costs: { secondary: 1 },
     tags: ["consultation"],
@@ -15,7 +15,7 @@ export const supportActions: ActionCard[] = [
   {
     id: "SUP_GOV_02",
     role: "government",
-    title: "Emergency Relief",
+    title: "Bantuan Relief",
     description: "Cancel 1 Equity loss this round.",
     actionType: "support",
     costs: { primary: 1 },
@@ -26,7 +26,7 @@ export const supportActions: ActionCard[] = [
   {
     id: "SUP_GOV_03",
     role: "government",
-    title: "Streamline Permits",
+    title: "Streamline Local Permits",
     description: "If Business invested, Economy +1.",
     actionType: "support",
     costs: { secondary: 1 },
@@ -43,7 +43,7 @@ export const supportActions: ActionCard[] = [
   {
     id: "SUP_BUS_01",
     role: "business",
-    title: "Sponsor Training",
+    title: "Sponsor TVET Training",
     description: "If Community or Government equity action chosen, Equity +1.",
     actionType: "support",
     costs: { primary: 1 },
@@ -71,7 +71,7 @@ export const supportActions: ActionCard[] = [
   {
     id: "SUP_BUS_03",
     role: "business",
-    title: "Pilot Technology",
+    title: "Pilot Local Clean Tech",
     description: "If clean-tech present, Emissions +1.",
     actionType: "support",
     costs: { primary: 1 },
@@ -84,7 +84,7 @@ export const supportActions: ActionCard[] = [
   {
     id: "SUP_COM_01",
     role: "community",
-    title: "Local Outreach",
+    title: "RT and JMB Outreach",
     description: "Next Trust gain +1.",
     actionType: "support",
     costs: { primary: 1 },
@@ -95,7 +95,7 @@ export const supportActions: ActionCard[] = [
   {
     id: "SUP_COM_02",
     role: "community",
-    title: "Volunteer Push",
+    title: "Gotong-Royong Push",
     description: "If shock round, Resilience +1.",
     actionType: "support",
     costs: { secondary: 1 },
@@ -119,7 +119,7 @@ export const supportActions: ActionCard[] = [
   {
     id: "SUP_YOU_01",
     role: "youth",
-    title: "Social Media Push",
+    title: "TikTok and WhatsApp Push",
     description: "Next public-facing action gains +1 Trust.",
     actionType: "support",
     costs: { primary: 1 },

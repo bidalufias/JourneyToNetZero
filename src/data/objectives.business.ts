@@ -60,7 +60,7 @@ export const businessObjectives: ObjectiveCard[] = [
     title: "Efficiency King",
     tagline: "Do more with less",
     description: "Use no more than 2 support actions the entire game.",
-    conditions: { type: "supportActionCount", min: 0 },
+    conditions: { type: "supportActionMax", max: 2 },
     tensionNote: "Self-imposed restraint — may miss critical combo opportunities.",
   },
   {
@@ -71,7 +71,7 @@ export const businessObjectives: ObjectiveCard[] = [
     tagline: "Stack clean-investment tags",
     description: "Choose actions tagged 'clean-investment' at least 4 times.",
     conditions: { type: "combined", mode: "all", conditions: [
-      { type: "tagChosenMax", tag: "clean-investment", max: 99 },
+      { type: "tagChosenMax", tag: "clean-investment", max: 4 },
     ] },
     tensionNote: "Forces green picks even when red picks are strategically better this round.",
   },

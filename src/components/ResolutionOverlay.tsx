@@ -10,7 +10,7 @@ type ResolutionOverlayProps = {
 
 const indicatorLabels: Record<IndicatorKey, string> = {
   economy: "Economy",
-  emissions: "Emissions",
+  emissions: "Clean Air",
   trust: "Trust",
   equity: "Equity",
   resilience: "Resilience",

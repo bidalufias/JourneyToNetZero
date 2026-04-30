@@ -15,11 +15,24 @@ export function TimerRing({
   label = "Timer",
   onComplete,
 }: TimerRingProps) {
-  const [secondsLeft, setSecondsLeft] = useState(durationSeconds);
+  return (
+    <TimerRingInner
+      key={`${resetKey}-${durationSeconds}`}
+      durationSeconds={durationSeconds}
+      isActive={isActive}
+      label={label}
+      onComplete={onComplete}
+    />
+  );
+}
 
-  useEffect(() => {
-    setSecondsLeft(durationSeconds);
-  }, [durationSeconds, resetKey]);
+function TimerRingInner({
+  durationSeconds,
+  isActive,
+  label,
+  onComplete,
+}: Omit<TimerRingProps, "resetKey">) {
+  const [secondsLeft, setSecondsLeft] = useState(durationSeconds);
 
   useEffect(() => {
     if (!isActive) return;

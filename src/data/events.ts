@@ -4,9 +4,9 @@ export const events: EventCard[] = [
   {
     id: "EVT_01",
     round: 1,
-    title: "Cost of Power",
+    title: "TNB Bill Shock",
     description:
-      "Global energy prices are rising, and households are worried about bills while businesses warn about competitiveness.",
+      "Electricity costs dominate kopitiam talk and WhatsApp groups. Households worry about bills while factories warn that higher tariffs could hurt Malaysia's export edge.",
     tags: ["affordability", "energy"],
     baseEffects: [
       {
@@ -20,9 +20,9 @@ export const events: EventCard[] = [
   {
     id: "EVT_02",
     round: 2,
-    title: "Investor at the Gate",
+    title: "Green Investor at the Gate",
     description:
-      "A major investor is exploring a green manufacturing facility in the city, but they want policy certainty and local readiness.",
+      "A regional clean manufacturing investor is studying Malaysia for a new facility, but they want policy certainty, skilled workers, and credible local suppliers.",
     tags: ["opportunity", "investment"],
     baseEffects: [
       {
@@ -36,9 +36,9 @@ export const events: EventCard[] = [
   {
     id: "EVT_03",
     round: 3,
-    title: "Who Pays?",
+    title: "Siapa Bayar?",
     description:
-      "Citizens are beginning to ask who bears the cost of the transition. Support is softening in lower-income areas.",
+      "Residents in flats, kampungs, and terrace neighborhoods are asking who pays for the transition. Support softens where people fear another cost passed down to them.",
     tags: ["social-tension", "equity"],
     baseEffects: [
       {
@@ -54,7 +54,7 @@ export const events: EventCard[] = [
     round: 4,
     title: "Heatwave Week",
     description:
-      "A severe heatwave pushes up cooling demand, strains the grid, and affects public health.",
+      "A brutal heatwave pushes up air-conditioning demand, strains the grid, and sends clinics a wave of heat-stress cases.",
     tags: ["shock", "heatwave"],
     baseEffects: [
       {
@@ -74,9 +74,9 @@ export const events: EventCard[] = [
   {
     id: "EVT_05",
     round: 5,
-    title: "Election Season",
+    title: "Pilihan Raya Season",
     description:
-      "Climate ambition becomes politically charged. Every move is watched and interpreted through a political lens.",
+      "Climate ambition becomes campaign material. Every tariff, permit, subsidy, and protest is clipped, shared, and interpreted through a political lens.",
     tags: ["politics", "narrative"],
     baseEffects: [
       {
@@ -91,9 +91,9 @@ export const events: EventCard[] = [
   {
     id: "EVT_06",
     round: 6,
-    title: "Flooding the Low District",
+    title: "Banjir in the Low District",
     description:
-      "A heavy rainfall event overwhelms drainage in vulnerable neighborhoods and disrupts roads, commerce, and public confidence.",
+      "Intense monsoon rain overwhelms drains in low-lying neighborhoods, disrupting roads, hawker income, school runs, and public confidence.",
     tags: ["shock", "flood"],
     baseEffects: [
       {
@@ -113,9 +113,9 @@ export const events: EventCard[] = [
   {
     id: "EVT_07",
     round: 7,
-    title: "New Market Demand",
+    title: "ASEAN Buyers Go Low-Carbon",
     description:
-      "Regional buyers are beginning to favor low-carbon products and climate-ready suppliers.",
+      "Regional buyers are beginning to favor low-carbon products and climate-ready suppliers. Malaysian firms sense opportunity, but only if the city can prove the transition is real.",
     tags: ["future-economy", "market"],
     baseEffects: [
       {
@@ -137,9 +137,9 @@ export const events: EventCard[] = [
   {
     id: "EVT_08",
     round: 8,
-    title: "City at the Crossroads",
+    title: "Malaysia at the Crossroads",
     description:
-      "The city faces one final test. Investors, citizens, and future generations all expect proof that the transition is real, fair, and durable.",
+      "The city faces one final test. Investors, rakyat, and future generations all expect proof that the transition is real, fair, and durable.",
     tags: ["endgame"],
     baseEffects: [
       {

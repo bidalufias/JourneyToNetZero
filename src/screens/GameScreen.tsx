@@ -176,7 +176,7 @@ export function TabletopGameScreen() {
         {evt && <div className="centre__desc">{evt.description}</div>}
         <div className="indicators">
           <Dial icon="💰" label="Economy" value={ind.economy} />
-          <Dial icon="🏭" label="Emissions" value={ind.emissions} />
+          <Dial icon="🏭" label="Clean Air" value={ind.emissions} />
           <Dial icon="🤝" label="Trust" value={ind.trust} />
           <Dial icon="⚖️" label="Equity" value={ind.equity} />
           <Dial icon="🛡️" label="Resilience" value={ind.resilience} />
@@ -202,7 +202,7 @@ export function TabletopGameScreen() {
               <div className="res-deltas">
                 {([
                   ["💰 Economy", log.indicatorChanges.economy],
-                  ["🏭 Emissions", log.indicatorChanges.emissions],
+                  ["🏭 Clean Air", log.indicatorChanges.emissions],
                   ["🤝 Trust", log.indicatorChanges.trust],
                   ["⚖️ Equity", log.indicatorChanges.equity],
                   ["🛡️ Resilience", log.indicatorChanges.resilience],

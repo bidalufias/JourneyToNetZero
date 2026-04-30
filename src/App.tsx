@@ -15,7 +15,7 @@ function HowToPlayModal({ onClose }: { onClose: () => void }) {
           <div className="modal__heading">🏙️ The Setup</div>
           <p>
             You and 3 friends sit around a table, each representing a <strong>stakeholder</strong> in
-            the same city: <strong>Government</strong>, <strong>Business</strong>, <strong>Community</strong>,
+            the same Malaysian city: <strong>Government</strong>, <strong>Business</strong>, <strong>Community</strong>,
             and <strong>Youth</strong>. Your city must reach <strong>Net Zero</strong> emissions in 8 rounds
             — or at least survive the attempt.
           </p>
@@ -33,7 +33,7 @@ function HowToPlayModal({ onClose }: { onClose: () => void }) {
         <div className="modal__section">
           <div className="modal__heading">⚡ Each Round</div>
           <ol className="modal__list">
-            <li><strong>Event:</strong> A crisis or opportunity hits the city (floods, investors, protests…).</li>
+            <li><strong>Event:</strong> A crisis or opportunity hits the city (banjir, investors, heatwaves, protests).</li>
             <li><strong>Wildcard:</strong> A twist — maybe a role swap, a double-cost round, or a surprise alliance.</li>
             <li><strong>Pick actions:</strong> Each player chooses one <strong>primary action</strong> (costs ⚔️ and/or 🛡️) and one optional <strong>support</strong> action.</li>
             <li><strong>Lock in:</strong> Once everyone locks, the round resolves together.</li>
@@ -45,14 +45,14 @@ function HowToPlayModal({ onClose }: { onClose: () => void }) {
           <div className="modal__heading">📊 The 6 City Indicators</div>
           <div className="modal__indicators">
             <span>💰 <strong>Economy</strong> — the city's wealth</span>
-            <span>🏭 <strong>Emissions</strong> — pollution level</span>
+            <span>🏭 <strong>Clean Air</strong> — emissions performance</span>
             <span>🤝 <strong>Trust</strong> — public confidence</span>
             <span>⚖️ <strong>Equity</strong> — fairness across groups</span>
             <span>🛡️ <strong>Resilience</strong> — ability to absorb shocks</span>
             <span>⚡ <strong>Energy Security</strong> — reliable clean power</span>
           </div>
           <p>
-            Push emissions down while keeping everything else stable. If any indicator
+            Improve emissions performance while keeping everything else stable. If any indicator
             hits <strong>0</strong>, the city collapses. If friction maxes out, alliances break.
           </p>
         </div>
@@ -87,9 +87,9 @@ function AttractScreen() {
 
   return (
     <div className="attract">
-      <p className="attract__tag">Tabletop Climate Simulation</p>
+      <p className="attract__tag">Malaysia Tabletop Climate Simulation</p>
       <h1 className="attract__title">Journey to Net Zero</h1>
-      <p className="attract__sub">4 players · 8 rounds · 1 city</p>
+      <p className="attract__sub">4 players · 8 rounds · 1 Malaysian city</p>
       <div className="attract__buttons">
         <button className="btn" onClick={goToTabletop}>Start Game</button>
         <button className="btn btn--outline" onClick={() => setShowHelp(true)}>How to Play</button>

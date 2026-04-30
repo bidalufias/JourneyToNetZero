@@ -4,9 +4,9 @@ export const governmentActions: ActionCard[] = [
   {
     id: "GOV_01",
     role: "government",
-    title: "Transit Expansion",
+    title: "MRT and Bus Corridor Expansion",
     description:
-      "Cost Budget 2, Political Capital 1. Immediate Resilience +1, Emissions +1. Trade-off Economy -1 this round.",
+      "Cost Budget 2, Political Capital 1. Expand MRT feeders, bus lanes, and first-last-mile links. Immediate Resilience +1, Emissions +1. Trade-off Economy -1 this round.",
     actionType: "primary",
     costs: { primary: 2, secondary: 1 },
     tags: ["transit", "infrastructure"],
@@ -20,9 +20,9 @@ export const governmentActions: ActionCard[] = [
   {
     id: "GOV_02",
     role: "government",
-    title: "Carbon Pricing",
+    title: "Carbon Pricing Pilot",
     description:
-      "Cost Budget 0, Political Capital 2. Immediate Emissions +2. Trade-off Trust -1, Economy -1 unless Just Transition Package active.",
+      "Cost Budget 0, Political Capital 2. Pilot carbon pricing for major emitters. Immediate Emissions +2. Trade-off Trust -1, Economy -1 unless Just Transition Package active.",
     actionType: "primary",
     costs: { primary: 0, secondary: 2 },
     tags: ["pricing", "decarbonisation"],
@@ -42,7 +42,7 @@ export const governmentActions: ActionCard[] = [
     role: "government",
     title: "Just Transition Fund",
     description:
-      "Cost Budget 2, Political Capital 1. Immediate Equity +2, Trust +1.",
+      "Cost Budget 2, Political Capital 1. Support workers, B40 households, and small contractors through the transition. Immediate Equity +2, Trust +1.",
     actionType: "primary",
     costs: { primary: 2, secondary: 1 },
     tags: ["government-support", "equity"],
@@ -56,9 +56,9 @@ export const governmentActions: ActionCard[] = [
   {
     id: "GOV_04",
     role: "government",
-    title: "Grid Modernisation",
+    title: "Tenaga Grid Modernisation",
     description:
-      "Cost Budget 2, Political Capital 1. Immediate Energy Security +1. Delayed after 2 rounds Emissions +1, Resilience +1. Trade-off Economy -1 this round.",
+      "Cost Budget 2, Political Capital 1. Upgrade substations, storage, and clean power integration. Immediate Energy Security +1. Delayed after 2 rounds Emissions +1, Resilience +1. Trade-off Economy -1 this round.",
     actionType: "primary",
     costs: { primary: 2, secondary: 1 },
     tags: ["grid", "infrastructure", "clean-tech"],
@@ -79,9 +79,9 @@ export const governmentActions: ActionCard[] = [
   {
     id: "GOV_05",
     role: "government",
-    title: "Green Industrial Zone",
+    title: "Green Industrial Park",
     description:
-      "Cost Budget 2, Political Capital 1. Delayed after 2 rounds Economy +2, Emissions +1. Trade-off Trust -1 unless Business or Community support is present.",
+      "Cost Budget 2, Political Capital 1. Build a low-carbon industrial park for Malaysian suppliers. Delayed after 2 rounds Economy +2, Emissions +1. Trade-off Trust -1 unless Business or Community support is present.",
     actionType: "primary",
     costs: { primary: 2, secondary: 1 },
     tags: ["industrial-policy", "growth"],
@@ -109,9 +109,9 @@ export const governmentActions: ActionCard[] = [
   {
     id: "GOV_06",
     role: "government",
-    title: "Building Efficiency Standards",
+    title: "Shoplot and Tower Efficiency Standards",
     description:
-      "Cost Budget 0, Political Capital 2. Immediate Emissions +1, Energy Security +1. Trade-off Business Confidence -1 unless Business chose transparency, innovation, or partnership action.",
+      "Cost Budget 0, Political Capital 2. Set efficiency standards for malls, offices, factories, and shoplots. Immediate Emissions +1, Energy Security +1. Trade-off Business Confidence -1 unless Business chose transparency, innovation, or partnership action.",
     actionType: "primary",
     costs: { primary: 0, secondary: 2 },
     tags: ["efficiency", "regulation"],
@@ -132,9 +132,9 @@ export const governmentActions: ActionCard[] = [
   {
     id: "GOV_07",
     role: "government",
-    title: "Nature-Based Flood Buffer",
+    title: "Mangrove and River Flood Buffer",
     description:
-      "Cost Budget 2, Political Capital 1. Immediate Resilience +1. Delayed on next flood or heat shock, cancel 1 penalty.",
+      "Cost Budget 2, Political Capital 1. Restore mangroves, river reserves, and sponge-city drainage. Immediate Resilience +1. Delayed on next flood or heat shock, cancel 1 penalty.",
     actionType: "primary",
     costs: { primary: 2, secondary: 1 },
     tags: ["adaptation", "nature"],
@@ -154,9 +154,9 @@ export const governmentActions: ActionCard[] = [
   {
     id: "GOV_08",
     role: "government",
-    title: "Public Retrofit Grants",
+    title: "PPR and School Retrofit Grants",
     description:
-      "Cost Budget 2, Political Capital 0. Immediate Equity +1, Energy Security +1, Emissions +1.",
+      "Cost Budget 2, Political Capital 0. Retrofit PPR blocks, schools, and community facilities. Immediate Equity +1, Energy Security +1, Emissions +1.",
     actionType: "primary",
     costs: { primary: 2, secondary: 0 },
     tags: ["equity", "efficiency", "buildings"],
@@ -170,9 +170,9 @@ export const governmentActions: ActionCard[] = [
   {
     id: "GOV_09",
     role: "government",
-    title: "Clean Procurement Rules",
+    title: "Green Government Procurement",
     description:
-      "Cost Budget 1, Political Capital 1. Immediate Emissions +1, Economy +1 if Business chose investment-related action. Trade-off next Budget gain skipped once.",
+      "Cost Budget 1, Political Capital 1. Use public purchasing to pull Malaysian suppliers toward cleaner materials and services. Immediate Emissions +1, Economy +1 if Business chose investment-related action. Trade-off next Budget gain skipped once.",
     actionType: "primary",
     costs: { primary: 1, secondary: 1 },
     tags: ["procurement", "clean-tech"],
@@ -189,9 +189,9 @@ export const governmentActions: ActionCard[] = [
   {
     id: "GOV_10",
     role: "government",
-    title: "Public Narrative Campaign",
+    title: "Rakyat Transition Campaign",
     description:
-      "Cost Budget 1, Political Capital 1. Immediate Trust +1, Friction -1.",
+      "Cost Budget 1, Political Capital 1. Explain the transition in plain language through local leaders, media, and town halls. Immediate Trust +1, Friction -1.",
     actionType: "primary",
     costs: { primary: 1, secondary: 1 },
     tags: ["communication", "public-awareness", "public-narrative"],

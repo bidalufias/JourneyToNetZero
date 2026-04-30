@@ -4,9 +4,9 @@ export const communityActions: ActionCard[] = [
   {
     id: "COM_01",
     role: "community",
-    title: "Community Solar Co-op",
+    title: "Flat-Block Solar Co-op",
     description:
-      "Cost Cohesion 1, Capacity 1. Immediate Equity +1, Energy Security +1. Delayed after 1 round Trust +1.",
+      "Cost Cohesion 1, Capacity 1. Help flats and neighborhood associations own shared solar. Immediate Equity +1, Energy Security +1. Delayed after 1 round Trust +1.",
     actionType: "primary",
     costs: { primary: 1, secondary: 1 },
     tags: ["equity", "energy", "community", "community-equity"],
@@ -27,9 +27,9 @@ export const communityActions: ActionCard[] = [
   {
     id: "COM_02",
     role: "community",
-    title: "Home Efficiency Drive",
+    title: "Kampung and Flat Efficiency Drive",
     description:
-      "Cost Cohesion 1, Capacity 1. Immediate Energy Security +1, Equity +1. Gains reduced by 1 if no Government or Business support exists.",
+      "Cost Cohesion 1, Capacity 1. Upgrade fans, roofs, lighting, and appliances in kampungs and flats. Immediate Energy Security +1, Equity +1. Gains reduced by 1 if no Government or Business support exists.",
     actionType: "primary",
     costs: { primary: 1, secondary: 1 },
     tags: ["efficiency", "household"],
@@ -48,9 +48,9 @@ export const communityActions: ActionCard[] = [
   {
     id: "COM_03",
     role: "community",
-    title: "Cooling Shelter Network",
+    title: "Dewan Cooling Shelter Network",
     description:
-      "Cost Cohesion 1, Capacity 1. Immediate Resilience +1, Trust +1 during heatwave rounds.",
+      "Cost Cohesion 1, Capacity 1. Turn dewan, libraries, and clinics into heatwave cooling points. Immediate Resilience +1, Trust +1 during heatwave rounds.",
     actionType: "primary",
     costs: { primary: 1, secondary: 1 },
     tags: ["adaptation", "local-resilience"],
@@ -64,9 +64,9 @@ export const communityActions: ActionCard[] = [
   {
     id: "COM_04",
     role: "community",
-    title: "Transit Adoption Campaign",
+    title: "MRT and Bas Adoption Campaign",
     description:
-      "Cost Cohesion 1, Capacity 0. Immediate Trust +1 if Government or Business chose transit or fleet action.",
+      "Cost Cohesion 1, Capacity 0. Organize residents around feeder buses, MRT links, and safer walking routes. Immediate Trust +1 if Government or Business chose transit or fleet action.",
     actionType: "primary",
     costs: { primary: 1, secondary: 0 },
     tags: ["adoption", "transit"],
@@ -83,9 +83,9 @@ export const communityActions: ActionCard[] = [
   {
     id: "COM_05",
     role: "community",
-    title: "Neighborhood Retrofit Hub",
+    title: "Kejiranan Retrofit Hub",
     description:
-      "Cost Cohesion 1, Capacity 2. Immediate Equity +1. Delayed after 2 rounds Resilience +1, Energy Security +1.",
+      "Cost Cohesion 1, Capacity 2. Coordinate local contractors, residents, and building managers. Immediate Equity +1. Delayed after 2 rounds Resilience +1, Energy Security +1.",
     actionType: "primary",
     costs: { primary: 1, secondary: 2 },
     tags: ["retrofit", "local-resilience"],
@@ -106,9 +106,9 @@ export const communityActions: ActionCard[] = [
   {
     id: "COM_06",
     role: "community",
-    title: "Citizen Assembly",
+    title: "Majlis Rakyat Assembly",
     description:
-      "Cost Cohesion 2, Capacity 0. Immediate Trust +1, Friction -1. Delayed after 1 round next Trust penalty reduced by 1.",
+      "Cost Cohesion 2, Capacity 0. Bring residents, traders, youth, and officials into a public deliberation. Immediate Trust +1, Friction -1. Delayed after 1 round next Trust penalty reduced by 1.",
     actionType: "primary",
     costs: { primary: 2, secondary: 0 },
     tags: ["assembly", "public-awareness"],
@@ -130,9 +130,9 @@ export const communityActions: ActionCard[] = [
   {
     id: "COM_07",
     role: "community",
-    title: "Waste and Food Initiative",
+    title: "Pasar Waste and Food Initiative",
     description:
-      "Cost Cohesion 1, Capacity 1. Immediate Emissions +1, Trust +1.",
+      "Cost Cohesion 1, Capacity 1. Cut food waste from pasar, hawker centres, and events. Immediate Emissions +1, Trust +1.",
     actionType: "primary",
     costs: { primary: 1, secondary: 1 },
     tags: ["circular", "community"],
@@ -145,9 +145,9 @@ export const communityActions: ActionCard[] = [
   {
     id: "COM_08",
     role: "community",
-    title: "Volunteer Resilience Teams",
+    title: "Banjir Volunteer Resilience Teams",
     description:
-      "Cost Cohesion 1, Capacity 1. Immediate Resilience +1. Delayed on next shock, cancel 1 Trust loss.",
+      "Cost Cohesion 1, Capacity 1. Train local flood and heat response volunteers. Immediate Resilience +1. Delayed on next shock, cancel 1 Trust loss.",
     actionType: "primary",
     costs: { primary: 1, secondary: 1 },
     tags: ["local-resilience", "adaptation"],
@@ -167,9 +167,9 @@ export const communityActions: ActionCard[] = [
   {
     id: "COM_09",
     role: "community",
-    title: "Support Compact Growth",
+    title: "Support Transit-Oriented Growth",
     description:
-      "Cost Cohesion 1, Capacity 1. Immediate Resilience +1. Delayed after 2 rounds Emissions +1. Trade-off Trust -1 unless Public Narrative, Assembly, or Youth coalition support is present.",
+      "Cost Cohesion 1, Capacity 1. Back denser development near transit instead of more car-dependent sprawl. Immediate Resilience +1. Delayed after 2 rounds Emissions +1. Trade-off Trust -1 unless Public Narrative, Assembly, or Youth coalition support is present.",
     actionType: "primary",
     costs: { primary: 1, secondary: 1 },
     tags: ["urban-form", "transit"],
@@ -196,7 +196,7 @@ export const communityActions: ActionCard[] = [
     role: "community",
     title: "Resist Disruptive Development",
     description:
-      "Cost Cohesion 1, Capacity 0. Immediate Equity +1, Trust +1 if a major industrial or infrastructure action was selected this round. Trade-off Economy -1 if opposing a Government or Business growth action without mediation support.",
+      "Cost Cohesion 1, Capacity 0. Defend residents from relocation, noise, and rushed approvals. Immediate Equity +1, Trust +1 if a major industrial or infrastructure action was selected this round. Trade-off Economy -1 if opposing a Government or Business growth action without mediation support.",
     actionType: "primary",
     costs: { primary: 1, secondary: 0 },
     tags: ["protection", "local-legitimacy"],

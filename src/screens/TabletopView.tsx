@@ -1,16 +1,15 @@
-import { useState, useEffect } from "react";
-import { useGameStore } from "../store/useGameStore";
-import { actionById, cityArchetypes, events, wildcards } from "../data";
+import { getEndingById, useGameStore } from "../store/useGameStore";
+import { actionById, cityArchetypes, eventBriefings, events, wildcards } from "../data";
 import { primaryObjectivesFor, secondaryObjectivesFor } from "../data/objectives";
 import { allPlayersLocked, getPrimaryActionOptions, getSupportOptions } from "../store/selectors";
-import type { ActionCard, RoleKey } from "../types/gameTypes";
+import type { ActionCard, ObjectiveCondition, PlayerState, RoleKey } from "../types/gameTypes";
 
 /* ── Constants ── */
 const ROLE_ORDER: RoleKey[] = ["government", "business", "community", "youth"];
 const ROLE_EMOJI: Record<RoleKey, string> = { government: "🏛️", business: "💼", community: "🏘️", youth: "🔥" };
 const ROLE_LABEL: Record<RoleKey, string> = { government: "Government", business: "Business", community: "Community", youth: "Youth" };
 const IND_ICONS: Record<string, string> = { economy: "💰", emissions: "🏭", trust: "🤝", equity: "⚖️", resilience: "🛡️", energySecurity: "⚡" };
-const IND_LABELS: Record<string, string> = { economy: "Economy", emissions: "Emissions", trust: "Trust", equity: "Equity", resilience: "Resilience", energySecurity: "Energy" };
+const IND_LABELS: Record<string, string> = { economy: "Economy", emissions: "Clean Air", trust: "Trust", equity: "Equity", resilience: "Resilience", energySecurity: "Energy" };
 
 type Phase = "objectives" | "city" | "playing" | "ending";
 
@@ -21,27 +20,15 @@ type Phase = "objectives" | "city" | "playing" | "ending";
 export function TabletopView() {
   const store = useGameStore();
   const { game, showResolution } = store;
-  const [phase, setPhase] = useState<Phase>("objectives");
 
   const allObjLocked = ROLE_ORDER.every((r) => game.objectivesLocked[r]);
-
-  useEffect(() => {
-    if (phase === "objectives" && allObjLocked) {
-      setPhase("city");
-    }
-  }, [allObjLocked, phase]);
-
-  useEffect(() => {
-    if (phase === "playing" && game.phase === "ending" && !showResolution) {
-      setPhase("ending");
-    }
-  }, [game.phase, showResolution, phase]);
-
-  useEffect(() => {
-    if (phase === "city" && game.phase === "decision") {
-      setPhase("playing");
-    }
-  }, [game.phase, phase]);
+  const phase: Phase = !allObjLocked
+    ? "objectives"
+    : game.phase === "ending" && !showResolution
+      ? "ending"
+      : game.phase === "decision" || game.phase === "brief" || showResolution
+        ? "playing"
+        : "city";
 
   const cornerSeats = [
     { seat: 2, cls: "corner--tl" },
@@ -104,7 +91,15 @@ function PlayerCorner({ seat, phase }: { seat: number; phase: Phase }) {
 }
 
 /* ── Shared Header ── */
-function CornerHeader({ player, role, swappedRole }: { player: any; role: RoleKey; swappedRole?: RoleKey }) {
+function CornerHeader({
+  player,
+  role,
+  swappedRole,
+}: {
+  player?: PlayerState;
+  role: RoleKey;
+  swappedRole?: RoleKey;
+}) {
   const isSwapped = !!swappedRole;
   return (
     <div className={`corner__head ${isSwapped ? "corner__head--swapped" : ""}`}>
@@ -151,10 +146,10 @@ function ObjectiveSelection({ seat }: { seat: number }) {
   void selectedSecondary;
 
   /* Build a short impact summary from conditions */
-  const impactSummary = (conditions: any): string[] => {
+  const impactSummary = (conditions: ObjectiveCondition): string[] => {
     if (!conditions) return [];
     if (conditions.type === "combined") {
-      return (conditions.conditions as any[]).flatMap(impactSummary);
+      return conditions.conditions.flatMap(impactSummary);
     }
     if (conditions.type === "indicatorMin") {
       return [`${IND_ICONS[conditions.key] ?? ""} ${IND_LABELS[conditions.key] ?? conditions.key} ≥ ${conditions.min}`];
@@ -173,6 +168,9 @@ function ObjectiveSelection({ seat }: { seat: number }) {
     }
     if (conditions.type === "supportActionCount") {
       return [`🤝 Support actions ≥ ${conditions.min}`];
+    }
+    if (conditions.type === "supportActionMax") {
+      return [`🤝 Support actions ≤ ${conditions.max}`];
     }
     return [];
   };
@@ -433,7 +431,7 @@ function CenterCitySelect() {
   const store = useGameStore();
   return (
     <>
-      <div className="center__phase">City Archetype</div>
+      <div className="center__phase">Malaysia Scenario</div>
       <div className="center__round">Choose Your City</div>
       <div className="city-grid">
         {cityArchetypes.map((city) => (
@@ -453,6 +451,7 @@ function CenterGame() {
   const { game } = store;
   const ind = game.city.indicators;
   const evt = events.find((e) => e.id === game.currentEventId);
+  const briefing = evt ? eventBriefings[evt.id] : undefined;
   const wc = wildcards.find((w) => w.id === game.currentWildcardId);
   const allLocked = allPlayersLocked(game);
 
@@ -464,9 +463,8 @@ function CenterGame() {
       <div className="indicators">
         {(["economy", "emissions", "trust", "equity", "resilience", "energySecurity"] as const).map((key) => {
           const val = ind[key];
-          const inverted = key === "emissions";
-          const danger = inverted ? val >= 7 : val <= 3;
-          const warning = !danger && (inverted ? val >= 5 : val <= 5);
+          const danger = val <= 3;
+          const warning = !danger && val <= 5;
           return (
             <div key={key} className={`ind ${danger ? "ind--danger" : warning ? "ind--warning" : ""}`}>
               <span className="ind__icon">{IND_ICONS[key]}</span>
@@ -536,6 +534,9 @@ function CenterGame() {
                       <span key={role}>{ROLE_EMOJI[role as RoleKey]}{actionById.get(actions.primary ?? "")?.title ?? "Pass"}</span>
                     ))}
                   </div>
+                  {log.narrative?.headline && (
+                    <div className="history__event">📰 {log.narrative.headline}</div>
+                  )}
                   {evtTitle && <div className="history__event">📰 {evtTitle}</div>}
                 </div>
               );
@@ -548,6 +549,13 @@ function CenterGame() {
         <div className="event">
           <div className="event__title">{evt.title}</div>
           {evt.description && <div className="event__desc">{evt.description}</div>}
+          {briefing && (
+            <div className="event__desc">
+              <strong>Scene:</strong> {briefing.scene}
+              <br />
+              <strong>Table question:</strong> {briefing.tableQuestion}
+            </div>
+          )}
         </div>
       )}
 
@@ -576,13 +584,28 @@ function CenterEnding() {
   const store = useGameStore();
   const { game } = store;
   const ind = game.city.indicators;
+  const ending = getEndingById(game.endingId);
+  const turningPoints = [...game.logs]
+    .sort((a, b) => {
+      const score = (log: typeof a) =>
+        Object.values(log.indicatorChanges).reduce((sum, delta) => sum + Math.abs(delta ?? 0), 0) +
+        Math.abs(log.frictionChange) * 2 +
+        log.triggeredSynergies.length * 2;
+      return score(b) - score(a);
+    })
+    .slice(0, 3);
 
   return (
     <>
       <div className="center__phase">Game Over</div>
       <div className="ending-title">
-        {game.phase === "ending" ? "Journey Complete" : "Game Over"}
+        {ending?.title ?? (game.phase === "ending" ? "Journey Complete" : "Game Over")}
       </div>
+      {ending?.narrative && (
+        <div className="event__desc">
+          {ending.narrative}
+        </div>
+      )}
 
       <div className="indicators">
         {(["economy", "emissions", "trust", "equity", "resilience", "energySecurity"] as const).map((key) => (
@@ -596,6 +619,25 @@ function CenterEnding() {
           </div>
         ))}
       </div>
+
+      {turningPoints.length > 0 && (
+        <div className="history">
+          <div className="history__label">Turning Points</div>
+          <div className="history__scroll">
+            {turningPoints.map((log) => (
+              <div key={log.round} className="history__entry">
+                <div className="history__head">
+                  <span className="history__round">R{log.round}</span>
+                  <span>{log.narrative?.headline ?? log.headlines[0] ?? "Major city shift"}</span>
+                </div>
+                {log.narrative?.memory && (
+                  <div className="history__event">{log.narrative.memory}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <button className="btn" onClick={() => store.resetGame()}>
         Play Again
@@ -617,10 +659,20 @@ function ResolutionOverlay() {
       <div className="overlay__panel">
         <div className="overlay__title">Round {log.round} Results</div>
 
+        {log.narrative && (
+          <ul className="overlay__headlines">
+            <li><strong>{log.narrative.headline}</strong></li>
+            <li>{log.narrative.summary}</li>
+            {log.narrative.consequences.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        )}
+
         <div className="overlay__deltas">
           {([
             ["💰 Economy", log.indicatorChanges.economy],
-            ["🏭 Emissions", log.indicatorChanges.emissions],
+            ["🏭 Clean Air", log.indicatorChanges.emissions],
             ["🤝 Trust", log.indicatorChanges.trust],
             ["⚖️ Equity", log.indicatorChanges.equity],
             ["🛡️ Resilience", log.indicatorChanges.resilience],
@@ -659,6 +711,17 @@ function ResolutionOverlay() {
           <ul className="overlay__headlines">
             {log.headlines.map((h, i) => (
               <li key={i}>📰 {h}</li>
+            ))}
+          </ul>
+        )}
+
+        {log.narrative && (
+          <ul className="overlay__actions">
+            {ROLE_ORDER.map((role) => (
+              <li key={role}>
+                <strong>{ROLE_LABEL[role]}:</strong>{" "}
+                {log.narrative?.roleReflections[role]}
+              </li>
             ))}
           </ul>
         )}

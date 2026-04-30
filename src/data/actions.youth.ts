@@ -4,9 +4,9 @@ export const youthActions: ActionCard[] = [
   {
     id: "YOU_01",
     role: "youth",
-    title: "Climate March",
+    title: "Dataran Climate March",
     description:
-      "Cost Momentum 1, Pressure 1. Immediate Government Political Capital -1 internal, Emissions +1 if Government responds with ambitious action. Trade-off Business Confidence -1.",
+      "Cost Momentum 1, Pressure 1. Rally students and young workers in a public climate march. Immediate Government Political Capital -1 internal, Emissions +1 if Government responds with ambitious action. Trade-off Business Confidence -1.",
     actionType: "primary",
     costs: { primary: 1, secondary: 1 },
     tags: ["pressure", "public-facing"],
@@ -23,9 +23,9 @@ export const youthActions: ActionCard[] = [
   {
     id: "YOU_02",
     role: "youth",
-    title: "Public Education Campaign",
+    title: "Bahasa Rakyat Education Campaign",
     description:
-      "Cost Momentum 1, Pressure 0. Immediate Trust +1, Friction -1.",
+      "Cost Momentum 1, Pressure 0. Translate climate trade-offs into simple, multilingual public messages. Immediate Trust +1, Friction -1.",
     actionType: "primary",
     costs: { primary: 1, secondary: 0 },
     tags: ["public-awareness", "public-facing"],
@@ -39,9 +39,9 @@ export const youthActions: ActionCard[] = [
   {
     id: "YOU_03",
     role: "youth",
-    title: "Policy Scorecard",
+    title: "Manifesto Scorecard",
     description:
-      "Cost Momentum 1, Pressure 1. Immediate Trust +1 if Government or Business chose a credible action, otherwise Public Pressure +1 internal bonus. Trade-off Business Confidence -1 if Business chose delay or pass-through.",
+      "Cost Momentum 1, Pressure 1. Publish a public scorecard comparing promises to action. Immediate Trust +1 if Government or Business chose a credible action, otherwise Public Pressure +1 internal bonus. Trade-off Business Confidence -1 if Business chose delay or pass-through.",
     actionType: "primary",
     costs: { primary: 1, secondary: 1 },
     tags: ["scorecard", "accountability"],
@@ -73,7 +73,7 @@ export const youthActions: ActionCard[] = [
     role: "youth",
     title: "Expose Greenwashing",
     description:
-      "Cost Momentum 1, Pressure 1. Immediate Trust +1 if Business chose a weak or delay action. Trade-off Business Confidence -1 regardless.",
+      "Cost Momentum 1, Pressure 1. Call out vague ESG claims and delay tactics. Immediate Trust +1 if Business chose a weak or delay action. Trade-off Business Confidence -1 regardless.",
     actionType: "primary",
     costs: { primary: 1, secondary: 1 },
     tags: ["accountability", "confrontation"],
@@ -89,9 +89,9 @@ export const youthActions: ActionCard[] = [
   {
     id: "YOU_05",
     role: "youth",
-    title: "Green Jobs Narrative",
+    title: "Green Jobs for Anak Muda",
     description:
-      "Cost Momentum 1, Pressure 0. Immediate Trust +1, Economy +1 if Business or Government chose growth-oriented clean action.",
+      "Cost Momentum 1, Pressure 0. Make the transition feel like a jobs pathway for young Malaysians. Immediate Trust +1, Economy +1 if Business or Government chose growth-oriented clean action.",
     actionType: "primary",
     costs: { primary: 1, secondary: 0 },
     tags: ["jobs", "narrative", "public-facing"],
@@ -109,9 +109,9 @@ export const youthActions: ActionCard[] = [
   {
     id: "YOU_06",
     role: "youth",
-    title: "Coalition with Communities",
+    title: "Coalition with Residents",
     description:
-      "Cost Momentum 1, Pressure 1. Immediate Equity +1, Trust +1 if Community chose a local action.",
+      "Cost Momentum 1, Pressure 1. Link student organizers with residents, hawkers, and local groups. Immediate Equity +1, Trust +1 if Community chose a local action.",
     actionType: "primary",
     costs: { primary: 1, secondary: 1 },
     tags: ["coalition", "equity"],
@@ -129,9 +129,9 @@ export const youthActions: ActionCard[] = [
   {
     id: "YOU_07",
     role: "youth",
-    title: "Push Stronger City Targets",
+    title: "Push Stronger Malaysia Targets",
     description:
-      "Cost Momentum 1, Pressure 2. Immediate Emissions +1 if Government or Business chose climate action. Trade-off Friction +1 if no climate-aligned Government or Business action selected.",
+      "Cost Momentum 1, Pressure 2. Demand targets that match Malaysia's climate ambition. Immediate Emissions +1 if Government or Business chose climate action. Trade-off Friction +1 if no climate-aligned Government or Business action selected.",
     actionType: "primary",
     costs: { primary: 1, secondary: 2 },
     tags: ["ambition", "pressure"],
@@ -156,7 +156,7 @@ export const youthActions: ActionCard[] = [
     role: "youth",
     title: "Join City Taskforce",
     description:
-      "Cost Momentum 1, Pressure 0. Immediate next synergy this round or next round gains +1 Trust.",
+      "Cost Momentum 1, Pressure 0. Take a seat at the municipal taskforce without giving up public pressure. Immediate next synergy this round or next round gains +1 Trust.",
     actionType: "primary",
     costs: { primary: 1, secondary: 0 },
     tags: ["coordination", "coalition"],
@@ -166,9 +166,9 @@ export const youthActions: ActionCard[] = [
   {
     id: "YOU_09",
     role: "youth",
-    title: "Youth Innovation Challenge",
+    title: "Campus Innovation Challenge",
     description:
-      "Cost Momentum 1, Pressure 0. Immediate Trust +1. Delayed after 2 rounds Economy +1.",
+      "Cost Momentum 1, Pressure 0. Mobilize campuses, startups, and makers around local climate solutions. Immediate Trust +1. Delayed after 2 rounds Economy +1.",
     actionType: "primary",
     costs: { primary: 1, secondary: 0 },
     tags: ["innovation", "future"],
@@ -188,7 +188,7 @@ export const youthActions: ActionCard[] = [
     role: "youth",
     title: "Direct Action Escalation",
     description:
-      "Cost Momentum 1, Pressure 2. Immediate if Government ignored climate and equity this round, Trust +1 among supportive publics and Public Pressure +1 internal bonus. Trade-off Business Confidence -2, Friction +1.",
+      "Cost Momentum 1, Pressure 2. Occupy attention when leaders ignore climate and equity. Immediate if Government ignored climate and equity this round, Trust +1 among supportive publics and Public Pressure +1 internal bonus. Trade-off Business Confidence -2, Friction +1.",
     actionType: "primary",
     costs: { primary: 1, secondary: 2 },
     tags: ["confrontation", "pressure", "public-facing"],

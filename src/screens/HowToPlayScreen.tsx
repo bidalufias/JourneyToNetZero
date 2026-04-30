@@ -12,11 +12,11 @@ const steps = [
   },
   {
     title: "Balance 6 indicators",
-    text: "Economy, emissions, trust, equity, resilience, and energy security.",
+    text: "Economy, clean air, trust, equity, resilience, and energy security.",
   },
   {
     title: "Survive 8 rounds",
-    text: "Handle shocks and end with a resilient, fair, low-emissions city.",
+    text: "Handle shocks and end with a resilient, fair, low-carbon city.",
   },
 ] as const;
 

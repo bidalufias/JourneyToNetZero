@@ -11,8 +11,8 @@ export type CityArchetype = {
 export const cityArchetypes: CityArchetype[] = [
   {
     id: "industrial-port-city",
-    title: "Industrial Port City",
-    description: "Strong economy, high emissions, flood risk.",
+    title: "Klang Port Industrial City",
+    description: "Export strength, high industrial emissions, monsoon flood exposure.",
     indicators: {
       economy: 7,
       emissions: 3,
@@ -25,8 +25,8 @@ export const cityArchetypes: CityArchetype[] = [
   },
   {
     id: "growing-inland-city",
-    title: "Growing Inland City",
-    description: "Fast growth, weak transit, rising inequality.",
+    title: "Johor Growth Corridor",
+    description: "Fast development, car dependence, pressure on housing and utilities.",
     indicators: {
       economy: 5,
       emissions: 4,
@@ -39,8 +39,8 @@ export const cityArchetypes: CityArchetype[] = [
   },
   {
     id: "coastal-tourism-city",
-    title: "Coastal Tourism City",
-    description: "Climate exposed, service economy, strong public visibility.",
+    title: "Penang Coastal Tourism City",
+    description: "Tourism visibility, heritage districts, climate-exposed coastlines.",
     indicators: {
       economy: 5,
       emissions: 5,
@@ -53,8 +53,8 @@ export const cityArchetypes: CityArchetype[] = [
   },
   {
     id: "legacy-manufacturing-city",
-    title: "Legacy Manufacturing City",
-    description: "Jobs dependent on legacy industry, big transition tension.",
+    title: "Northern Manufacturing Belt",
+    description: "Factory jobs, supplier networks, and tough transition politics.",
     indicators: {
       economy: 6,
       emissions: 3,
