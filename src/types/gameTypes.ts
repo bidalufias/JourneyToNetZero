@@ -43,6 +43,7 @@ export type DelayedEffect = {
 export type ActionCard = {
   id: string;
   role: RoleKey;
+  eventId?: string;
   title: string;
   description: string;
   actionType: "primary" | "support";
@@ -164,6 +165,7 @@ export type GameState = {
   phase: PhaseKey;
   players: PlayerState[];
   city: CityState;
+  eventDeckIds: string[];
   currentEventId?: string;
   currentWildcardId?: string;
   logs: RoundLog[];

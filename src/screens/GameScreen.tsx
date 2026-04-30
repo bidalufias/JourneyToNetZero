@@ -66,16 +66,17 @@ function PlayCard({
 
 /* ── Quadrant ── */
 function Quadrant({
-  player, corner, onPrimary, onSupport, onToggle, round,
+  player, corner, onPrimary, onSupport, onToggle, round, eventId,
 }: {
   player: PlayerState; corner: string;
   onPrimary: (id: string) => void;
   onSupport: (id?: string) => void;
   onToggle: () => void;
   round: number;
+  eventId?: string;
 }) {
   const c = ROLE_CLASS[player.role];
-  const primaries = getPrimaryActionOptions(player.activePanelRole, round);
+  const primaries = getPrimaryActionOptions(player.activePanelRole, round, eventId);
   const supports = getSupportOptions(player.activePanelRole);
 
   return (
@@ -155,23 +156,23 @@ export function TabletopGameScreen() {
         <Quadrant player={gov} corner="top-left"
           onPrimary={(id) => store.selectPrimaryAction(0, id)}
           onSupport={(id) => store.selectSupportAction(0, id)}
-          onToggle={() => store.toggleLock(0)} round={game.round} />
+          onToggle={() => store.toggleLock(0)} round={game.round} eventId={game.currentEventId} />
         <Quadrant player={biz} corner="top-right"
           onPrimary={(id) => store.selectPrimaryAction(1, id)}
           onSupport={(id) => store.selectSupportAction(1, id)}
-          onToggle={() => store.toggleLock(1)} round={game.round} />
+          onToggle={() => store.toggleLock(1)} round={game.round} eventId={game.currentEventId} />
         <Quadrant player={com} corner="bottom-left"
           onPrimary={(id) => store.selectPrimaryAction(2, id)}
           onSupport={(id) => store.selectSupportAction(2, id)}
-          onToggle={() => store.toggleLock(2)} round={game.round} />
+          onToggle={() => store.toggleLock(2)} round={game.round} eventId={game.currentEventId} />
         <Quadrant player={youth} corner="bottom-right"
           onPrimary={(id) => store.selectPrimaryAction(3, id)}
           onSupport={(id) => store.selectSupportAction(3, id)}
-          onToggle={() => store.toggleLock(3)} round={game.round} />
+          onToggle={() => store.toggleLock(3)} round={game.round} eventId={game.currentEventId} />
       </div>
 
       <div className="centre">
-        <div className="centre__round">Round {game.round} of 8</div>
+        <div className="centre__round">Round {game.round} of {game.eventDeckIds.length}</div>
         {evt && <div className="centre__event">{evt.title}</div>}
         {evt && <div className="centre__desc">{evt.description}</div>}
         <div className="indicators">

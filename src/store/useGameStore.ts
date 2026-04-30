@@ -4,6 +4,7 @@ import {
   cityArchetypes,
   endings,
   events,
+  GAME_ROUNDS,
   startingResources,
 } from "../data";
 import { objectiveById } from "../data/objectives";
@@ -56,6 +57,18 @@ const roleOrder: RoleKey[] = ["government", "business", "community", "youth"];
 
 const wildcardOrder = ["WC_01", "WC_04", "WC_07", "WC_08", "WC_03", "WC_10", "WC_09"];
 
+const buildEventDeck = (): string[] => {
+  const openerId = "EVT_01";
+  const finaleId = "EVT_12";
+  const middleSlots = Math.max(0, GAME_ROUNDS - 2);
+  const middleEvents = events
+    .filter((event) => event.id !== openerId && event.id !== finaleId)
+    .map((event) => event.id);
+
+  const shuffled = [...middleEvents].sort(() => Math.random() - 0.5);
+  return [openerId, ...shuffled.slice(0, middleSlots), finaleId].slice(0, GAME_ROUNDS);
+};
+
 const wildcardForRound = (round: number): string | undefined => {
   if (round < 2) {
     return undefined;
@@ -95,6 +108,7 @@ const applyRoleSwap = (players: PlayerState[], wildcardId?: string): void => {
 const initialGameState = (): GameState => {
   const city = cityArchetypes[0];
   const players = buildPlayers();
+  const eventDeckIds = buildEventDeck();
   applyRoleSwap(players, undefined);
 
   return {
@@ -107,7 +121,8 @@ const initialGameState = (): GameState => {
       friction: city.startingFriction,
       delayedEffectsQueue: [],
     },
-    currentEventId: events[0]?.id,
+    eventDeckIds,
+    currentEventId: eventDeckIds[0],
     currentWildcardId: undefined,
     logs: [],
     timers: {},
@@ -239,6 +254,7 @@ export const useGameStore = create<StoreState>((set, get) => ({
   setupCity: (cityArchetypeId) => {
     const city = cityArchetypes.find((item) => item.id === cityArchetypeId) ?? cityArchetypes[0];
     const players = buildPlayers();
+    const eventDeckIds = buildEventDeck();
     const wildcardId = wildcardForRound(1);
     applyRoleSwap(players, wildcardId);
 
@@ -254,7 +270,8 @@ export const useGameStore = create<StoreState>((set, get) => ({
           friction: city.startingFriction,
           delayedEffectsQueue: [],
         },
-        currentEventId: events[0]?.id,
+        eventDeckIds,
+        currentEventId: eventDeckIds[0],
         currentWildcardId: wildcardId,
         logs: [],
         timers: {},
@@ -340,7 +357,7 @@ export const useGameStore = create<StoreState>((set, get) => ({
 
     const resolved = resolveRound(state.game);
     if (resolved.phase !== "ending") {
-      resolved.currentEventId = events[resolved.round - 1]?.id;
+      resolved.currentEventId = resolved.eventDeckIds[resolved.round - 1];
       resolved.currentWildcardId = wildcardForRound(resolved.round);
       applyRoleSwap(resolved.players, resolved.currentWildcardId);
     }

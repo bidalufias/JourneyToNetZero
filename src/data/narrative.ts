@@ -18,41 +18,50 @@ export const eventBriefings: Record<EventCard["id"], EventBriefing> = {
   },
   EVT_02: {
     scene:
-      "A clean manufacturing investor is watching the city closely. The opportunity is real, but so is the risk of building a future economy that leaves local workers behind.",
+      "CBAM turns distant climate policy into a local export problem. Suddenly carbon data matters as much as price, delivery, and quality.",
     stakes: [
-      "Government and Business alignment can unlock investment.",
-      "Community and Youth can make the opportunity feel legitimate, not imposed.",
+      "Clean Air performance now affects market access.",
+      "SME suppliers may be left behind if compliance becomes a private scramble.",
     ],
-    tableQuestion: "Can Malaysia's green economy be built with local confidence?",
+    tableQuestion: "Can Malaysia defend its export future without abandoning smaller suppliers?",
   },
   EVT_03: {
     scene:
-      "The fairness debate leaves policy papers and enters pasar aisles, surau conversations, resident groups, and family chats.",
+      "El Nino makes climate risk bodily. Heat, water anxiety, and power demand all arrive at once, and the most exposed people cannot simply stay indoors.",
     stakes: [
-      "Equity protects the coalition from turning against the transition.",
-      "Fast climate gains may backfire if people feel they are paying for someone else's future.",
+      "Resilience decides whether heat becomes disruption or tragedy.",
+      "Energy Security weakens when cooling demand spikes.",
     ],
-    tableQuestion: "What does a fair transition look like when money is tight?",
+    tableQuestion: "Who gets protected first when heat and drought squeeze the city?",
   },
   EVT_04: {
     scene:
-      "Heat sits over the city. Clinics, schools, factories, and families all feel how climate risk becomes daily life.",
+      "The haze rolls in as a regional crisis and a local health emergency. Diplomacy, supplier accountability, and neighborhood care all compete for attention.",
     stakes: [
-      "Resilience decides whether this is a bad week or a breaking point.",
-      "Energy Security matters when cooling demand spikes.",
+      "Trust falls quickly if the city looks passive.",
+      "Health protection and ASEAN diplomacy pull on different political muscles.",
     ],
-    tableQuestion: "Who protects the people most exposed to heat?",
+    tableQuestion: "How do you act when the smoke crosses borders but the breathing happens here?",
   },
   EVT_05: {
     scene:
-      "Every move is now political theatre. A serious policy can become a campaign attack before the evening news cycle ends.",
+      "Oil prices jump and old habits return: subsidy demands, fuel queues, logistics complaints, and anger at the cost of moving around.",
     stakes: [
-      "Trust penalties hit harder when voters are watching.",
-      "Narrative and consultation can keep ambition from becoming backlash.",
+      "Short-term relief can slow the shift away from fossil fuels.",
+      "Transit, efficiency, and fairness can turn pain into momentum.",
     ],
-    tableQuestion: "Can leaders act boldly without losing the mandate?",
+    tableQuestion: "Do you cushion the shock, accelerate the transition, or try to do both?",
   },
   EVT_06: {
+    scene:
+      "Water stress exposes the hidden infrastructure of daily life. The same rationing notice means different things to a hospital, a factory, a hawker, and a high-rise flat.",
+    stakes: [
+      "Resilience protects production and health.",
+      "Equity collapses if rationing looks politically or commercially biased.",
+    ],
+    tableQuestion: "Who gets water, who cuts use, and who proves the rules are fair?",
+  },
+  EVT_07: {
     scene:
       "The low district floods again. Photos spread before the rain stops, and people ask why the same neighborhoods keep paying first.",
     stakes: [
@@ -61,16 +70,43 @@ export const eventBriefings: Record<EventCard["id"], EventBriefing> = {
     ],
     tableQuestion: "Will the city treat banjir as an emergency or a warning?",
   },
-  EVT_07: {
-    scene:
-      "Buyers across ASEAN are changing their expectations. Cleaner suppliers get calls; laggards get polite silence.",
-    stakes: [
-      "Clean Air and Economy can reinforce each other now.",
-      "Business confidence matters, but public legitimacy still decides whether growth lasts.",
-    ],
-    tableQuestion: "Can the city prove its transition is more than branding?",
-  },
   EVT_08: {
+    scene:
+      "Data centre investors arrive with glossy renderings and enormous power needs. The city wants growth, but the grid and water system are not imaginary.",
+    stakes: [
+      "Economy can rise quickly if the city sets credible conditions.",
+      "Energy Security and water resilience can suffer if approvals chase headlines.",
+    ],
+    tableQuestion: "What kind of digital economy can the city actually sustain?",
+  },
+  EVT_09: {
+    scene:
+      "A clean manufacturing investor is watching the city closely. The opportunity is real, but so is the risk of building a future economy that leaves local workers behind.",
+    stakes: [
+      "Government and Business alignment can unlock investment.",
+      "Community and Youth can make the opportunity feel legitimate, not imposed.",
+    ],
+    tableQuestion: "Can Malaysia's green economy be built with local confidence?",
+  },
+  EVT_10: {
+    scene:
+      "The fairness debate leaves policy papers and enters pasar aisles, surau conversations, resident groups, and family chats.",
+    stakes: [
+      "Equity protects the coalition from turning against the transition.",
+      "Fast climate gains may backfire if people feel they are paying for someone else's future.",
+    ],
+    tableQuestion: "What does a fair transition look like when money is tight?",
+  },
+  EVT_11: {
+    scene:
+      "Every move is now political theatre. A serious policy can become a campaign attack before the evening news cycle ends.",
+    stakes: [
+      "Trust penalties hit harder when voters are watching.",
+      "Narrative and consultation can keep ambition from becoming backlash.",
+    ],
+    tableQuestion: "Can leaders act boldly without losing the mandate?",
+  },
+  EVT_12: {
     scene:
       "The final week arrives. Investors want proof, residents want fairness, and young people want a future they can believe in.",
     stakes: [
@@ -80,4 +116,3 @@ export const eventBriefings: Record<EventCard["id"], EventBriefing> = {
     tableQuestion: "What kind of Malaysian city did you actually build?",
   },
 };
-

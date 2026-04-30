@@ -1,5 +1,7 @@
 import type { IndicatorKey, RoleKey } from "../types/gameTypes";
 
+export const GAME_ROUNDS = 8;
+
 export const indicatorScaleBands = [
   { min: 0, max: 2, label: "crisis" },
   { min: 3, max: 4, label: "fragile" },

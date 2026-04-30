@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { GAME_ROUNDS } from "../data";
 import { useGameStore } from "../store/useGameStore";
 
 const steps = [
@@ -15,7 +16,7 @@ const steps = [
     text: "Economy, clean air, trust, equity, resilience, and energy security.",
   },
   {
-    title: "Survive 8 rounds",
+    title: `Survive ${GAME_ROUNDS} rounds`,
     text: "Handle shocks and end with a resilient, fair, low-carbon city.",
   },
 ] as const;

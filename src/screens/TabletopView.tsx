@@ -279,14 +279,25 @@ function GameplayActions({ seat, role }: { seat: 0 | 1 | 2 | 3; role: RoleKey })
   const obj = game.selectedObjectives[role];
   const pObj = obj?.primary ? primaryObjectivesFor(role).find((o) => o.id === obj.primary) : null;
 
-  const primaries = getPrimaryActionOptions(player.activePanelRole, game.round);
+  const primaries = getPrimaryActionOptions(
+    player.activePanelRole,
+    game.round,
+    game.currentEventId,
+  );
   const supports = getSupportOptions(player.activePanelRole);
+  const scenarioPrimaries = primaries.filter((action) =>
+    action.tags.includes("scenario-response"),
+  );
+  const strategicPrimaries = primaries.filter((action) =>
+    !action.tags.includes("scenario-response"),
+  );
 
   return (
     <>
       {pObj && <div className="corner__obj">🎯 {pObj.title}</div>}
       <div className="corner__actions">
-        {primaries.map((a) => {
+        <div className="obj-section__label">Scenario Response + Strategy</div>
+        {[...scenarioPrimaries, ...strategicPrimaries].map((a) => {
           const ok =
             player.resources.primary >= (a.costs.primary ?? 0) &&
             player.resources.secondary >= (a.costs.secondary ?? 0);
@@ -295,15 +306,20 @@ function GameplayActions({ seat, role }: { seat: 0 | 1 | 2 | 3; role: RoleKey })
           return (
             <button
               key={a.id}
-              className={`card-btn ${sel ? "card-btn--selected" : ""}`}
+              className={`card-btn ${a.tags.includes("scenario-response") ? "card-btn--scenario" : ""} ${sel ? "card-btn--selected" : ""}`}
               disabled={dis && !sel}
               onClick={() => store.selectPrimaryAction(seat, a.id)}
             >
+              {a.tags.includes("scenario-response") && (
+                <div className="card-btn__badge">Scenario Response</div>
+              )}
               <div className="card-btn__title">{a.title}</div>
+              <div className="card-btn__desc">{a.description}</div>
               <div className="card-btn__cost">
                 ⚔️{a.costs.primary ?? 0} 🛡️{a.costs.secondary ?? 0}
               </div>
-              <EffectLine effects={a.immediateEffects} />
+              <EffectLine label="Now" effects={a.immediateEffects} />
+              <EffectLine label="Trade" effects={a.tradeoffEffects} />
             </button>
           );
         })}
@@ -345,12 +361,20 @@ function GameplayActions({ seat, role }: { seat: 0 | 1 | 2 | 3; role: RoleKey })
   );
 }
 
-function EffectLine({ effects }: { effects: ActionCard["immediateEffects"] }) {
+function EffectLine({
+  effects,
+  label,
+}: {
+  effects: ActionCard["immediateEffects"];
+  label?: string;
+}) {
   if (!effects || effects.length === 0) return null;
+  const visibleEffects = effects.filter((e) => e.target !== "meta");
+  if (visibleEffects.length === 0) return null;
   return (
     <div className="card-btn__effects">
-      {effects
-        .filter((e) => e.target !== "meta")
+      {label && <span className="card-btn__effects-label">{label}: </span>}
+      {visibleEffects
         .map((e, i) => (
           <span key={i}>
             {IND_ICONS[e.target] || "●"}
@@ -458,7 +482,7 @@ function CenterGame() {
   return (
     <>
       <div className="center__phase">Round</div>
-      <div className="center__round">{game.round} / 8</div>
+      <div className="center__round">{game.round} / {game.eventDeckIds.length}</div>
 
       <div className="indicators">
         {(["economy", "emissions", "trust", "equity", "resilience", "energySecurity"] as const).map((key) => {
@@ -554,6 +578,8 @@ function CenterGame() {
               <strong>Scene:</strong> {briefing.scene}
               <br />
               <strong>Table question:</strong> {briefing.tableQuestion}
+              <br />
+              <strong>Stakes:</strong> {briefing.stakes.join(" ")}
             </div>
           )}
         </div>

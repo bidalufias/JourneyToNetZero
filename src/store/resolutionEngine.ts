@@ -65,6 +65,12 @@ const isInvestmentTagged = (action?: ActionCard): boolean =>
     action?.tags.includes("investment") || action?.tags.includes("clean-investment"),
   );
 
+const eventForStateRound = (state: GameState) =>
+  events.find((item) => item.id === state.currentEventId) ??
+  events.find((item) => item.id === state.eventDeckIds[state.round - 1]) ??
+  events[state.round - 1] ??
+  events[0];
+
 const tagsMatchRequirement = (allTags: Set<string>, requirement: string): boolean => {
   if (!requirement.includes(" or ")) {
     return allTags.has(requirement);
@@ -201,6 +207,20 @@ const conditionPasses = (
   }
 
   const c = effect.condition;
+  const indicatorAtMost = c.match(
+    /^if (economy|emissions|trust|equity|resilience|energySecurity) <= (\d+)$/,
+  );
+  if (indicatorAtMost) {
+    const [, key, threshold] = indicatorAtMost;
+    return state.city.indicators[key as IndicatorKey] <= Number(threshold);
+  }
+  const indicatorAtLeast = c.match(
+    /^if (economy|emissions|trust|equity|resilience|energySecurity) >= (\d+)$/,
+  );
+  if (indicatorAtLeast) {
+    const [, key, threshold] = indicatorAtLeast;
+    return state.city.indicators[key as IndicatorKey] >= Number(threshold);
+  }
   if (c === "if energySecurity <= 4") return state.city.indicators.energySecurity <= 4;
   if (c === "if government and business align") return ctx.governmentBusinessAligned;
   if (c === "if equity <= 4") return state.city.indicators.equity <= 4;
@@ -244,7 +264,7 @@ const conditionPasses = (
     return !ctx.selectedSupport.community && !ctx.selectedSupport.government;
   }
   if (c === "during heatwave rounds") {
-    return events[state.round - 1]?.id === "EVT_04";
+    return eventForStateRound(state).tags.includes("heatwave");
   }
   if (c === "if government or business chose transit or fleet action") {
     const gov = ctx.selectedPrimary.government;
@@ -540,7 +560,7 @@ const applyFrictionRules = (state: GameState, ctx: ResolutionContext): void => {
 };
 
 const applyDueDelayedEffects = (state: GameState, ctx: ResolutionContext): void => {
-  const event = events[state.round - 1];
+  const event = eventForStateRound(state);
   const remaining: DelayedEffect[] = [];
 
   state.city.delayedEffectsQueue.forEach((queued) => {
@@ -720,7 +740,7 @@ const buildRoundLog = (state: GameState, ctx: ResolutionContext): RoundLog => ({
 export const resolveRound = (state: GameState): GameState => {
   const next = structuredClone(state) as GameState;
   const ctx = initContext(next);
-  const event = events.find((item) => item.id === next.currentEventId) ?? events[next.round - 1];
+  const event = eventForStateRound(next);
   const wildcard = wildcards.find((item) => item.id === next.currentWildcardId);
 
   ctx.eventIsShock = event.tags.includes("shock");
@@ -848,7 +868,7 @@ export const resolveRound = (state: GameState): GameState => {
     player.lockedIn = false;
   });
 
-  if (next.round >= 8) {
+  if (next.round >= next.eventDeckIds.length) {
     next.phase = "ending";
     next.endingId = evaluateEnding(next);
     next.currentEventId = undefined;
@@ -862,6 +882,6 @@ export const resolveRound = (state: GameState): GameState => {
 
   next.round += 1;
   next.phase = "brief";
-  next.currentEventId = events[next.round - 1]?.id;
+  next.currentEventId = next.eventDeckIds[next.round - 1];
   return next;
 };

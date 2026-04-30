@@ -2,6 +2,7 @@ import { businessActions } from "./actions.business";
 import { communityActions } from "./actions.community";
 import { governmentActions } from "./actions.government";
 import { youthActions } from "./actions.youth";
+import { scenarioResponseActions } from "./scenarioResponses";
 import { supportActions } from "./supportActions";
 import type { ActionCard, RoleKey } from "../types/gameTypes";
 
@@ -10,15 +11,17 @@ export { events } from "./events";
 export { wildcards } from "./wildcards";
 export { synergies } from "./synergies";
 export { supportActions } from "./supportActions";
+export { scenarioActionsByEventRole, scenarioResponseActions } from "./scenarioResponses";
 export { endings } from "./endings";
 export { eventBriefings } from "./narrative";
-export { startingResources, indicatorScaleBands, frictionBands } from "./gameConfig";
+export { GAME_ROUNDS, startingResources, indicatorScaleBands, frictionBands } from "./gameConfig";
 
 export const primaryActions: ActionCard[] = [
   ...governmentActions,
   ...businessActions,
   ...communityActions,
   ...youthActions,
+  ...scenarioResponseActions,
 ];
 
 export const actionsByRole: Record<RoleKey, ActionCard[]> = {

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { GAME_ROUNDS } from "./data";
 import { useGameStore } from "./store/useGameStore";
 import { TabletopView } from "./screens/TabletopView";
 import "./App.css";
@@ -16,7 +17,7 @@ function HowToPlayModal({ onClose }: { onClose: () => void }) {
           <p>
             You and 3 friends sit around a table, each representing a <strong>stakeholder</strong> in
             the same Malaysian city: <strong>Government</strong>, <strong>Business</strong>, <strong>Community</strong>,
-            and <strong>Youth</strong>. Your city must reach <strong>Net Zero</strong> emissions in 8 rounds
+            and <strong>Youth</strong>. Your city must reach <strong>Net Zero</strong> emissions in {GAME_ROUNDS} rounds
             — or at least survive the attempt.
           </p>
         </div>
@@ -33,9 +34,9 @@ function HowToPlayModal({ onClose }: { onClose: () => void }) {
         <div className="modal__section">
           <div className="modal__heading">⚡ Each Round</div>
           <ol className="modal__list">
-            <li><strong>Event:</strong> A crisis or opportunity hits the city (banjir, investors, heatwaves, protests).</li>
+            <li><strong>Event:</strong> Each game draws 8 rounds from a larger scenario pool: CBAM, haze, El Nino, oil shocks, water stress, banjir, investors, elections, and more.</li>
             <li><strong>Wildcard:</strong> A twist — maybe a role swap, a double-cost round, or a surprise alliance.</li>
-            <li><strong>Pick actions:</strong> Each player chooses one <strong>primary action</strong> (costs ⚔️ and/or 🛡️) and one optional <strong>support</strong> action.</li>
+            <li><strong>Pick actions:</strong> Each player chooses one <strong>primary action</strong>, including a tailored scenario response, and one optional <strong>support</strong> action.</li>
             <li><strong>Lock in:</strong> Once everyone locks, the round resolves together.</li>
             <li><strong>Resolve:</strong> All effects apply at once — synergies trigger, indicators shift, friction rises or falls.</li>
           </ol>
@@ -89,7 +90,7 @@ function AttractScreen() {
     <div className="attract">
       <p className="attract__tag">Malaysia Tabletop Climate Simulation</p>
       <h1 className="attract__title">Journey to Net Zero</h1>
-      <p className="attract__sub">4 players · 8 rounds · 1 Malaysian city</p>
+      <p className="attract__sub">4 players · {GAME_ROUNDS} rounds · 1 Malaysian city</p>
       <div className="attract__buttons">
         <button className="btn" onClick={goToTabletop}>Start Game</button>
         <button className="btn btn--outline" onClick={() => setShowHelp(true)}>How to Play</button>

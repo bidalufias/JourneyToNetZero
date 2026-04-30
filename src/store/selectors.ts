@@ -1,4 +1,4 @@
-import { actionsByRole, events, supportActionsByRole } from "../data";
+import { actionsByRole, events, scenarioActionsByEventRole, supportActionsByRole } from "../data";
 import type { ActionCard, GameState, RoleKey } from "../types/gameTypes";
 
 export const roleOrder: RoleKey[] = ["government", "business", "community", "youth"];
@@ -9,11 +9,23 @@ export const getEventForRound = (round: number) =>
 export const getPrimaryActionOptions = (
   role: RoleKey,
   round: number,
-  count = 3,
+  eventId?: string,
+  count = 4,
 ): ActionCard[] => {
-  const list = actionsByRole[role];
-  const start = ((round - 1) * count) % list.length;
-  return Array.from({ length: count }, (_, offset) => list[(start + offset) % list.length]);
+  const scenarioActions = eventId ? scenarioActionsByEventRole[eventId]?.[role] ?? [] : [];
+  const list = actionsByRole[role].filter((action) => !action.tags.includes("scenario-response"));
+  const fillCount = Math.max(0, count - scenarioActions.length);
+  const start = ((round - 1) * fillCount) % list.length;
+  const rotatingActions = Array.from(
+    { length: fillCount },
+    (_, offset) => list[(start + offset) % list.length],
+  );
+
+  const uniqueActions = new Map<string, ActionCard>();
+  [...scenarioActions, ...rotatingActions].forEach((action) => {
+    uniqueActions.set(action.id, action);
+  });
+  return [...uniqueActions.values()];
 };
 
 export const getSupportOptions = (role: RoleKey): ActionCard[] =>
