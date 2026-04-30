@@ -430,6 +430,23 @@ function CenterGame() {
         </div>
       </div>
 
+      <div className="obj-peek">
+        <div className="obj-peek__label">Public Objectives</div>
+        <div className="obj-peek__grid">
+          {ROLE_ORDER.map((r) => {
+            const pObj = game.selectedObjectives[r]?.primary
+              ? primaryObjectivesFor(r).find((o) => o.id === game.selectedObjectives[r].primary)
+              : null;
+            return (
+              <div key={r} className="obj-peek__item">
+                <span className="obj-peek__emoji">{ROLE_EMOJI[r]}</span>
+                <span className="obj-peek__title">{pObj?.title ?? "—"}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {evt && (
         <div className="event">
           <div className="event__title">{evt.title}</div>
