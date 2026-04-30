@@ -166,6 +166,7 @@ export type GameState = {
   /* objective selection */
   objectiveSelectingSeat: number;
   selectedObjectives: Record<RoleKey, { primary?: string; secondary?: string }>;
+  objectivesLocked: Record<RoleKey, boolean>;
   collectiveWin?: boolean;
   verdicts: Partial<Record<RoleKey, ObjectiveVerdict>>;
   stats: ObjectiveStats;

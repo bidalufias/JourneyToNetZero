@@ -37,6 +37,13 @@ export function TabletopView() {
     }
   }, [game.phase, showResolution, phase]);
 
+  // City selected → move to gameplay
+  useEffect(() => {
+    if (phase === "city" && game.phase === "decision") {
+      setPhase("playing");
+    }
+  }, [game.phase, phase]);
+
   /* Corner layout:
      seat 2 (community) = top-left
      seat 3 (youth)    = top-right
@@ -117,9 +124,9 @@ function ObjectiveSelection({ seat }: { seat: number }) {
   const role = ROLE_ORDER[seat];
   const isActive = game.objectiveSelectingSeat === seat;
   const obj = game.selectedObjectives[role];
-  const confirmed = !!obj?.primary;
+  const locked = game.objectivesLocked[role];
 
-  if (!isActive && !confirmed) {
+  if (!isActive && !locked) {
     return (
       <div className="corner__waiting">
         Waiting ({game.objectiveSelectingSeat + 1}/4)
@@ -127,7 +134,7 @@ function ObjectiveSelection({ seat }: { seat: number }) {
     );
   }
 
-  if (confirmed) {
+  if (locked) {
     const pObj = primaryObjectivesFor(role).find((o) => o.id === obj.primary);
     return (
       <div className="corner__obj">
@@ -139,33 +146,46 @@ function ObjectiveSelection({ seat }: { seat: number }) {
 
   const primaries = primaryObjectivesFor(role);
   const secondaries = secondaryObjectivesFor(role);
+  const selectedPrimary = primaries.find((o) => o.id === obj.primary);
 
   return (
     <div className="corner__actions">
       <div className="obj-section">
         <div className="obj-section__label">Public</div>
         {primaries.map((o) => (
-          <button
-            key={o.id}
-            className={`card-btn card-btn--obj ${obj.primary === o.id ? "card-btn--selected" : ""}`}
-            onClick={() => store.selectObjective(seat, "primary", o.id)}
-          >
-            {o.title}
-          </button>
+          <div key={o.id} className="obj-choice">
+            <button
+              className={`card-btn card-btn--obj ${obj.primary === o.id ? "card-btn--selected" : ""}`}
+              onClick={() => store.selectObjective(seat, "primary", o.id)}
+            >
+              {o.title}
+            </button>
+            <div className="obj-choice__tagline">{o.tagline}</div>
+          </div>
         ))}
+        {selectedPrimary && (
+          <div className="obj-desc">
+            <div className="obj-desc__text">{selectedPrimary.description}</div>
+            {selectedPrimary.tensionNote && (
+              <div className="obj-desc__tension">⚡ {selectedPrimary.tensionNote}</div>
+            )}
+          </div>
+        )}
       </div>
 
       {obj.primary && (
         <div className="obj-section">
           <div className="obj-section__label">🔒 Secret</div>
           {secondaries.map((o) => (
-            <button
-              key={o.id}
-              className={`card-btn card-btn--obj ${obj.secondary === o.id ? "card-btn--selected" : ""}`}
-              onClick={() => store.selectObjective(seat, "secondary", o.id)}
-            >
-              {o.title}
-            </button>
+            <div key={o.id} className="obj-choice">
+              <button
+                className={`card-btn card-btn--obj ${obj.secondary === o.id ? "card-btn--selected" : ""}`}
+                onClick={() => store.selectObjective(seat, "secondary", o.id)}
+              >
+                {o.title}
+              </button>
+              <div className="obj-choice__tagline">{o.tagline}</div>
+            </div>
           ))}
           <button
             className={`card-btn card-btn--obj ${!obj.secondary ? "card-btn--selected" : ""}`}

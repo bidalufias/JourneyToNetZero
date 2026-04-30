@@ -110,6 +110,12 @@ const initialGameState = (): GameState => {
       community: {},
       youth: {},
     },
+    objectivesLocked: {
+      government: false,
+      business: false,
+      community: false,
+      youth: false,
+    },
     verdicts: {},
     stats: createInitialStats(),
   };
@@ -137,6 +143,7 @@ export const useGameStore = create<StoreState>((set, get) => ({
     const game = initialGameState();
     game.objectiveSelectingSeat = 0;
     game.selectedObjectives = { government: {}, business: {}, community: {}, youth: {} };
+    game.objectivesLocked = { government: false, business: false, community: false, youth: false };
     game.stats = createInitialStats();
     set({ screen: "tabletop", game, showResolution: false });
   },
@@ -155,6 +162,7 @@ export const useGameStore = create<StoreState>((set, get) => ({
     if (!role) return;
     const obj = game.selectedObjectives[role];
     if (!obj.primary) return;
+    game.objectivesLocked[role] = true;
     if (seat < 3) {
       game.objectiveSelectingSeat = seat + 1;
     }
