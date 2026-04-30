@@ -213,6 +213,17 @@ html, body, #root {
   overflow: hidden;
 }
 
+/* Swapped corner state — dashed border + subtle tint */
+.corner__inner--swapped {
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.03) 3px,
+    rgba(0,0,0,0.03) 6px
+  );
+}
+
 /* Corner header */
 .corner__head {
   display: flex;
@@ -222,6 +233,11 @@ html, body, #root {
   border-bottom: 1px solid #000;
   margin-bottom: 4px;
   flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.corner__head--swapped {
+  border-bottom-style: dashed;
+  border-bottom-color: #999;
 }
 .corner__emoji { font-size: 16px; }
 .corner__role {
@@ -245,6 +261,20 @@ html, body, #root {
   padding: 1px 5px;
   border: 1px solid #000;
   border-radius: 3px;
+}
+
+/* Swap badge — shows "→ Role" when playing a different panel */
+.corner__swap-badge {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 5px;
+  border: 1px dashed #999;
+  background: #f5f5f5;
+  color: #555;
+  border-radius: 3px;
+  white-space: nowrap;
 }
 
 /* Objective badge */

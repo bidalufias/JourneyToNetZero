@@ -81,10 +81,11 @@ function PlayerCorner({ seat, phase }: { seat: number; phase: Phase }) {
   const role = ROLE_ORDER[seat];
   const game = useGameStore((s) => s.game);
   const player = game.players[seat];
+  const swappedRole = player?.activePanelRole;
 
   return (
-    <div className="corner__inner">
-      <CornerHeader player={player} role={role} />
+    <div className={`corner__inner ${swappedRole && swappedRole !== role ? "corner__inner--swapped" : ""}`}>
+      <CornerHeader player={player} role={role} swappedRole={swappedRole} />
       {phase === "objectives" && <ObjectiveSelection seat={seat} />}
       {phase === "city" && (
         <CornerWaiting
@@ -102,11 +103,17 @@ function PlayerCorner({ seat, phase }: { seat: number; phase: Phase }) {
 }
 
 /* ── Shared Header ── */
-function CornerHeader({ player, role }: { player: any; role: RoleKey }) {
+function CornerHeader({ player, role, swappedRole }: { player: any; role: RoleKey; swappedRole?: RoleKey }) {
+  const isSwapped = swappedRole && swappedRole !== role;
   return (
-    <div className="corner__head">
+    <div className={`corner__head ${isSwapped ? "corner__head--swapped" : ""}`}>
       <span className="corner__emoji">{ROLE_EMOJI[role]}</span>
       <span className="corner__role">{ROLE_LABEL[role]}</span>
+      {isSwapped && (
+        <span className="corner__swap-badge">
+          → {ROLE_EMOJI[swappedRole!]} {ROLE_LABEL[swappedRole!]}
+        </span>
+      )}
       {player && (
         <div className="corner__resources">
           <span className="corner__res">⚔️{player.resources.primary}</span>
