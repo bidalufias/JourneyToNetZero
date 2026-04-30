@@ -83,8 +83,9 @@ function PlayerCorner({ seat, phase }: { seat: number; phase: Phase }) {
   const player = game.players[seat];
   const swappedRole = player?.activePanelRole;
 
+  console.log(`[DEBUG] seat=${seat} role=${role} swappedRole=${swappedRole} player=${JSON.stringify(player?.activePanelRole)} swapped=${swappedRole && swappedRole !== role}`);
   return (
-    <div className={`corner__inner ${swappedRole && swappedRole !== role ? "corner__inner--swapped" : ""}`}>
+    <div className={`corner__inner ${swappedRole && swappedRole !== role ? "corner__inner--swapped" : ""}`} data-swap={swappedRole && swappedRole !== role ? `${role}->${swappedRole}` : ""}>
       <CornerHeader player={player} role={role} swappedRole={swappedRole} />
       {phase === "objectives" && <ObjectiveSelection seat={seat} />}
       {phase === "city" && (
