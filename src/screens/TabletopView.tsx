@@ -23,13 +23,14 @@ export function TabletopView() {
   const { game, showResolution } = store;
   const [phase, setPhase] = useState<Phase>("objectives");
 
-  const allObjSelected = ROLE_ORDER.every((r) => game.selectedObjectives[r]?.primary);
+  // All 4 players have confirmed objectives → advance to city selection
+  const allObjLocked = ROLE_ORDER.every((r) => game.objectivesLocked[r]);
 
   useEffect(() => {
-    if (phase === "objectives" && allObjSelected) {
+    if (phase === "objectives" && allObjLocked) {
       setPhase("city");
     }
-  }, [allObjSelected, phase]);
+  }, [allObjLocked, phase]);
 
   useEffect(() => {
     if (phase === "playing" && game.phase === "ending" && !showResolution) {
@@ -79,19 +80,23 @@ export function TabletopView() {
    ════════════════════════════════════════════ */
 function PlayerCorner({ seat, phase }: { seat: number; phase: Phase }) {
   const role = ROLE_ORDER[seat];
-  const game = useGameStore((s) => s.game);
-  const player = game.players[seat];
-  const swappedRole = player?.activePanelRole;
+  const player = useGameStore((s) => s.game.players[seat]);
+  // Read activePanelRole directly from fresh store selector
+  const activePanelRole = useGameStore((s) => s.game.players[seat]?.activePanelRole);
+  const isSwapped = !!activePanelRole && activePanelRole !== role;
+  const swappedRole = isSwapped ? activePanelRole : undefined;
 
-  console.log(`[DEBUG] seat=${seat} role=${role} swappedRole=${swappedRole} player=${JSON.stringify(player?.activePanelRole)} swapped=${swappedRole && swappedRole !== role}`);
   return (
-    <div className={`corner__inner ${swappedRole && swappedRole !== role ? "corner__inner--swapped" : ""}`} data-swap={swappedRole && swappedRole !== role ? `${role}->${swappedRole}` : ""}>
+    <div
+      className={`corner__inner ${isSwapped ? "corner__inner--swapped" : ""}`}
+      data-swap={isSwapped ? `${role}->${activePanelRole}` : ""}
+    >
       <CornerHeader player={player} role={role} swappedRole={swappedRole} />
       {phase === "objectives" && <ObjectiveSelection seat={seat} />}
       {phase === "city" && (
         <CornerWaiting
-          done={!!game.selectedObjectives[role]?.primary}
-          secondary={!!game.selectedObjectives[role]?.secondary}
+          done={!!useGameStore((s) => s.game.objectivesLocked[role])}
+          secondary={!!useGameStore((s) => s.game.selectedObjectives[role]?.secondary)}
           label="Selecting city…"
         />
       )}
@@ -105,7 +110,7 @@ function PlayerCorner({ seat, phase }: { seat: number; phase: Phase }) {
 
 /* ── Shared Header ── */
 function CornerHeader({ player, role, swappedRole }: { player: any; role: RoleKey; swappedRole?: RoleKey }) {
-  const isSwapped = swappedRole && swappedRole !== role;
+  const isSwapped = !!swappedRole;
   return (
     <div className={`corner__head ${isSwapped ? "corner__head--swapped" : ""}`}>
       <span className="corner__emoji">{ROLE_EMOJI[role]}</span>
@@ -125,23 +130,15 @@ function CornerHeader({ player, role, swappedRole }: { player: any; role: RoleKe
   );
 }
 
-/* ── Objective Selection ── */
+/* ── Objective Selection (SIMULTANEOUS — all 4 players pick at once) ── */
 function ObjectiveSelection({ seat }: { seat: number }) {
   const store = useGameStore();
   const game = store.game;
   const role = ROLE_ORDER[seat];
-  const isActive = game.objectiveSelectingSeat === seat;
   const obj = game.selectedObjectives[role];
   const locked = game.objectivesLocked[role];
 
-  if (!isActive && !locked) {
-    return (
-      <div className="corner__waiting">
-        Waiting ({game.objectiveSelectingSeat + 1}/4)
-      </div>
-    );
-  }
-
+  // Once locked, show compact confirmation
   if (locked) {
     const pObj = primaryObjectivesFor(role).find((o) => o.id === obj.primary);
     return (
@@ -152,6 +149,7 @@ function ObjectiveSelection({ seat }: { seat: number }) {
     );
   }
 
+  // All players see their objectives simultaneously — no waiting state
   const primaries = primaryObjectivesFor(role);
   const secondaries = secondaryObjectivesFor(role);
   const selectedPrimary = primaries.find((o) => o.id === obj.primary);
@@ -351,26 +349,26 @@ function CenterBoard({ phase }: { phase: Phase }) {
   return <CenterGame />;
 }
 
-/* ── Objective Progress ── */
+/* ── Objective Progress (simultaneous) ── */
 function CenterObjectives() {
   const game = useGameStore((s) => s.game);
-  const current = game.objectiveSelectingSeat;
+  const lockedCount = ROLE_ORDER.filter((r) => game.objectivesLocked[r]).length;
 
   return (
     <>
       <div className="center__phase">Setup</div>
       <div className="center__round">Select Objectives</div>
       <div style={{ fontSize: 12, color: "#666" }}>
-        {ROLE_LABEL[ROLE_ORDER[current]]} is choosing
+        {lockedCount}/4 confirmed
       </div>
       <div className="obj-progress">
-        {ROLE_ORDER.map((_, i) => (
+        {ROLE_ORDER.map((r, i) => (
           <div
             key={i}
             className={`obj-progress__dot ${
-              game.selectedObjectives[ROLE_ORDER[i]]?.primary
+              game.objectivesLocked[r]
                 ? "obj-progress__dot--done"
-                : i === current
+                : game.selectedObjectives[r]?.primary
                   ? "obj-progress__dot--active"
                   : ""
             }`}
@@ -378,7 +376,7 @@ function CenterObjectives() {
         ))}
       </div>
       <div style={{ fontSize: 9, color: "#999", textAlign: "center", maxWidth: 280, lineHeight: 1.5 }}>
-        Each player picks a <strong>public</strong> objective and an optional <strong>🔒 secret</strong>. Objectives determine individual scores at the end.
+        All players pick simultaneously — choose a <strong>public</strong> objective and an optional <strong>🔒 secret</strong>.
       </div>
     </>
   );

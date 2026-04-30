@@ -103,7 +103,7 @@ const initialGameState = (): GameState => {
     currentWildcardId: undefined,
     logs: [],
     timers: {},
-    objectiveSelectingSeat: 0,
+    objectiveSelectingSeat: -1,
     selectedObjectives: {
       government: {},
       business: {},
@@ -141,7 +141,7 @@ export const useGameStore = create<StoreState>((set, get) => ({
 
   goToTabletop: () => {
     const game = initialGameState();
-    game.objectiveSelectingSeat = 0;
+    game.objectiveSelectingSeat = -1;
     game.selectedObjectives = { government: {}, business: {}, community: {}, youth: {} };
     game.objectivesLocked = { government: false, business: false, community: false, youth: false };
     game.stats = createInitialStats();
@@ -163,9 +163,6 @@ export const useGameStore = create<StoreState>((set, get) => ({
     const obj = game.selectedObjectives[role];
     if (!obj.primary) return;
     game.objectivesLocked[role] = true;
-    if (seat < 3) {
-      game.objectiveSelectingSeat = seat + 1;
-    }
     set({ game });
   },
 
