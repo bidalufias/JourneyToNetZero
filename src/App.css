@@ -101,8 +101,8 @@ html, body, #root {
   font-size: 11px;
   line-height: 1.4;
 }
-.corner--tl { grid-area: p3; }
-.corner--tr { grid-area: p4; }
+.corner--tl { grid-area: p3; transform: rotate(180deg); }
+.corner--tr { grid-area: p4; transform: rotate(180deg); }
 .corner--bl { grid-area: p1; }
 .corner--br { grid-area: p2; }
 
