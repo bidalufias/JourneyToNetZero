@@ -48,7 +48,7 @@ tables through all eight rounds; `npx tsx scripts/balance.ts` reproduces this:
 | Table | Economy | Emissions | Living | Result |
 |---|---|---|---|---|
 | Everyone self-interested | 47 | 142 | 53 | **0/3** — rich in nothing, burning |
-| Everyone collective | 38 | 15 | 52 | **1/3** — *Clean, But Poorer* |
+| Everyone collective | 38 | 15 | 52 | **1/3** — *The Cliff Edge* |
 | Everyone barters | 93 | 0 | 91 | **3/3** — the only route to all three |
 | Business defects | 64 | 77 | 35 | 1/3 |
 | Coast, then act from round 5 | 92 | 34 | 85 | 2/3 — too late on emissions |

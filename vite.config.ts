@@ -9,7 +9,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           supabase: ['@supabase/supabase-js'],
-          motion: ['motion'],
         },
       },
     },

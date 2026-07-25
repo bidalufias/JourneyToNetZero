@@ -1,0 +1,97 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Deep petrol green — the colour of a Malaysian forest at dusk, and dark
+     enough to read from across a room when projected. */
+  --color-ink-900: #060f0d;
+  --color-ink-800: #0a1917;
+  --color-ink-700: #102523;
+  --color-ink-600: #17332f;
+  --color-ink-500: #21453f;
+
+  --color-mist-100: #f2f7f5;
+  --color-mist-200: #d8e6e1;
+  --color-mist-300: #a8c2bb;
+  --color-mist-400: #6f8b84;
+
+  /* Indicator hues, kept distinct in both light and dark and distinguishable
+     without relying on red/green alone. */
+  --color-economy: #f0b429;
+  --color-emissions: #e2725b;
+  --color-living: #4fb286;
+
+  --color-gov: #e0b341;
+  --color-biz: #3f9ecb;
+  --color-com: #5fbf8f;
+  --color-act: #d4705f;
+
+  --font-display: 'Inter Tight', system-ui, -apple-system, sans-serif;
+  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    background: var(--color-ink-900);
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    color: var(--color-mist-100);
+    background: var(--color-ink-900);
+    overscroll-behavior-y: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Respect the notch on phones without adding a library. */
+  #root {
+    min-height: 100dvh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  input {
+    font: inherit;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility card {
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--color-ink-700) 92%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-mist-400) 22%, transparent);
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* A slow drift behind the title screens — one element, no library, no jank. */
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+  to {
+    transform: translate3d(0, -2%, 0) scale(1.12);
+  }
+}
+
+@utility bg-drift {
+  animation: drift 24s ease-in-out infinite alternate;
+}
