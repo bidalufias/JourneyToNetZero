@@ -1,8 +1,10 @@
 # Journey to Net Zero — Game Design Document
 
-**Version:** 0.1 (for review — not yet implemented)
-**Format:** 4 players, one facilitator screen, ~30 minutes, in person
+**Version:** 0.2 (for review — not yet implemented)
+**Format:** 4 players, one shared big screen, ~30 minutes, in person
 **Setting:** Malaysia, 2026 → 2050
+**Content basis:** every scenario is anchored to a verified fact in
+[`RESEARCH.md`](./RESEARCH.md)
 
 ---
 
@@ -100,16 +102,25 @@ They create the bartering pressure that pure cooperation lacks.
 
 Eight rounds. Each round is roughly **3 minutes**, compressing three years.
 
-| Round | Year | Situation |
-|---|---|---|
-| 1 | 2026 | **Subsidy rationalisation & the carbon tax** — targeted RON95 subsidy and a new carbon tax on heavy industry. Fiscal room vs. cost of living. |
-| 2 | 2028 | **The data-centre boom** — massive investment lands in Johor, straining grid and water. Growth vs. emissions and local supply. |
-| 3 | 2031 | **Export shock** — EU carbon border tariffs and deforestation rules bite palm oil, steel and aluminium. Decarbonise or lose the market. |
-| 4 | 2034 | **Haze emergency** — transboundary smoke and peat fires. Schools close, health costs spike, tempers fray with neighbours. |
-| 5 | 2037 | **Election year** — green costs become the campaign issue. Populist backlash threatens to unwind the transition. |
-| 6 | 2040 | **The oil and gas cliff** — petroleum revenue that funded the state is now a stranded liability. Who pays for the gap? |
-| 7 | 2044 | **The great floods** — a climate disaster forces a choice between adaptation spending and mitigation momentum. |
-| 8 | 2048 | **The last mile** — the cheap cuts are gone. Hard-to-abate industry, carbon capture, and the final push to zero. |
+Eight rounds. Each is roughly **3 minutes**. Round 1 opens on the situation
+Malaysia is *actually in* as of July 2026 — not a hypothetical.
+
+| Round | Year | Situation | Real anchor |
+|---|---|---|---|
+| 1 | 2026 | **The tax that keeps slipping** — the carbon tax on iron, steel and energy was shelved in April over the Middle East conflict and the Hormuz oil spike. The Climate Change Bill is on the table. Legislate now, or protect industry through the shock? | Carbon tax deferred Apr 2026; Climate Change Bill tabled 2026 |
+| 2 | 2027 | **Election year** — GE16 must be called by early 2028 and Sarawak polls by April. BUDI95 holds RON95 at RM1.99 while the quota has already been cut to 200 litres. Excluding the T20 would save RM1.5bn a month — and cost votes. | GE16 due by Feb 2028; BUDI95 quota cut Apr 2026 |
+| 3 | 2029 | **The data-centre reckoning** — Johor's pipeline is heading for 7,000 MW and could take 40% of the state's power by 2035, drawing 200× the water of ordinary industry. The grid can't deliver fast enough. Take the investment or set the limit? | 51 projects, USD44.3bn approved; grid delivery bottleneck |
+| 4 | 2031 | **Peak or bust** — Malaysia promised the world its emissions would peak by 2030. 7 GW of coal is scheduled to retire by 2033. Hold the line, or keep the plants running for reliability and price? | NDC 3.0 peaking window 2029–2034; ~7 GW coal retiring |
+| 5 | 2034 | **Smoke and the trade wall** — a severe haze season closes schools while EU deforestation rules lock out untraceable palm oil. Health, smallholders and exports pull three ways. | SIIA red haze outlook 2026; EUDR enforcement Dec 2026 |
+| 6 | 2038 | **The petroleum cliff** — the dividend that padded every budget has been shrinking for a decade. Diversification worked on paper; now the gap is real. Who absorbs it? | PETRONAS dividend RM20bn 2026, −38%, lowest since 2017 |
+| 7 | 2043 | **The water rises** — the modelled worst case arrives: a one-in-20-year flood on the back of a heatwave. Adaptation spending competes directly with mitigation momentum. | World Bank: >20% GDP hit in the modelled worst case |
+| 8 | 2048 | **The last mile** — the cheap cuts are gone. Nuclear, carbon capture, hard-to-abate industry and land sinks. Everything left is expensive, slow or contested. | Nuclear in 13MP; unabated coal out by 2044; RE 70% by 2050 |
+
+**A correction worth carrying into the design:** petroleum is a smaller share
+of federal revenue than most people assume — 17.5% in 2025, down from 41.3% in
+2009, with PETRONAS dividends specifically only 5–6% of 2026 revenue. Round 6
+plays the *pressure* honestly rather than as a collapse. Getting this right
+matters more than making the round dramatic.
 
 ### Phase timing within a round
 
@@ -121,8 +132,11 @@ Eight rounds. Each round is roughly **3 minutes**, compressing three years.
   3:00  RESOLUTION     Meters animate. Synergies and clashes fire.     30s
 ```
 
-Timers are visible but the facilitator can pause and extend — real discussion
-should never be cut off mid-sentence.
+**No facilitator required.** The four players run the session themselves. The
+phase clock advances automatically, and any player can tap to extend the
+discussion phase — real conversation should never be cut off mid-sentence. The
+player who created the room can pause. That is the entire set of controls, and
+nobody has to sit out to operate them.
 
 ---
 
@@ -205,6 +219,13 @@ another's selection until all four are locked.
 Dark, high-contrast, legible from across a room. Live meters, the round timer,
 who has locked in, currency flows drawn as they happen, and the reveal moment.
 It is the shared source of truth and the thing people point at while arguing.
+Read-only — it carries no controls, so it can run on any screen with nobody
+attending it.
+
+**Retention**
+
+Finished games are kept for **7 days** so a group can revisit the debrief,
+then deleted automatically.
 
 **Performance targets**
 
@@ -216,30 +237,38 @@ It is the shared source of truth and the thing people point at while arguing.
 
 ## 9. Content integrity
 
-Every situation is anchored to a real Malaysian policy context — NETR, the
-12th Malaysia Plan net-zero-by-2050 commitment, the NDC carbon intensity
-target, subsidy rationalisation, the carbon tax on heavy industry, Johor's
-data-centre build-out, EU border measures, transboundary haze, petroleum's
-share of federal revenue, and the 2021 flood precedent.
+Every situation is anchored to a verified fact recorded in
+[`RESEARCH.md`](./RESEARCH.md), with a source link for each. That research pass
+is **done** — it corrected several assumptions in v0.1 of this document:
 
-**Before content is finalised I will do a verification pass** on every figure,
-date and policy name used in the game text, and cite sources in
-`src/data/sources.md`. Numbers in this document are directional and are not
-yet verified. Nothing ships with an invented statistic.
+- It is the **13th** Malaysia Plan (2026–2030), not the 12th
+- The NDC is now an **absolute** emissions target (NDC 3.0, Oct 2025), not the
+  old carbon-intensity-per-GDP target
+- The carbon tax **has already been deferred**, in April 2026 — a live policy
+  delay, better than any invented one
+- **Nuclear is back** on the table via 13MP, which changes the endgame
+- Petroleum is a **much smaller** share of federal revenue than commonly
+  assumed, so the "oil cliff" round had to be rewritten honestly
+- The 2026 haze risk is rated **red** — round 5 is a live forecast, not history
+
+Each round's card will carry a small "the real story" footnote linking the
+scenario to what actually happened, which is where most of the educational
+value lands during the debrief.
 
 ---
 
-## 10. Open for your call
+## 10. Settled
 
-These are not blockers — I have a default for each — but say the word if you
-disagree:
+- **No facilitator.** Four players run it themselves; the dashboard is
+  read-only and unattended.
+- **4 players required.** No 3-player mode with an automated role — the
+  tension needs all four.
+- **7-day retention** on finished games.
+
+## 11. Still open
 
 1. **Language** — English only, or English with a Bahasa Malaysia toggle?
    Default: English first, structured so BM can be added without rework.
-2. **Facilitator** — is there a 5th person running the session who needs
-   pause/skip/override controls on the dashboard? Default: yes, minimal
-   controls, hidden behind a tap.
-3. **Fewer than 4 players** — should 3 players be allowed with one role
-   automated? Default: no, 4 is required; the tension needs all four.
-4. **Persistence** — keep finished games for later debrief and comparison
-   across sessions? Default: yes, 30-day retention.
+2. **Round 5 scope** — haze and the EU trade wall are currently one round.
+   They could be split into two, dropping the 2038 petroleum round. Default:
+   keep them combined; the collision is the point.
