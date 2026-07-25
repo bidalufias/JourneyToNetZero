@@ -35,15 +35,33 @@ times on the dashboard and on every phone.
 | **Emissions** | 100 | must fall | National GHG output, indexed to 2026 = 100. Net zero = 0 |
 | **Living Standards** | 50 | must rise | Cost of living, jobs, health, energy access, public trust |
 
-**2050 thresholds** (tuned in playtesting):
+**2050 thresholds:**
 
-- Economy ≥ 65 — the economy grew
-- Emissions ≤ 20 — near net zero (residual offset by sinks)
-- Living Standards ≥ 65 — citizens are better off
+- Economy ≥ 60 — the economy grew
+- Emissions ≤ 30 — a ~70% cut in gross emissions, small enough for land sinks
+  and removals to close the gap. That is what net zero means in practice.
+- Living Standards ≥ 60 — citizens are better off
 
-Hitting all three is possible but hard, and requires deals across all four
-roles. Most tables will hit two. The debrief is about which one they sacrificed
-and when.
+**These are calibrated, not guessed.** `scripts/balance.ts` runs archetypal
+tables through all eight rounds; `npx tsx scripts/balance.ts` reproduces this:
+
+| Table | Economy | Emissions | Living | Result |
+|---|---|---|---|---|
+| Everyone self-interested | 47 | 142 | 53 | **0/3** — rich in nothing, burning |
+| Everyone collective | 38 | 15 | 52 | **1/3** — *Clean, But Poorer* |
+| Everyone barters | 93 | 0 | 91 | **3/3** — the only route to all three |
+| Business defects | 64 | 77 | 35 | 1/3 |
+| Coast, then act from round 5 | 92 | 34 | 85 | 2/3 — too late on emissions |
+| Act early, then coast | 61 | 39 | 69 | 2/3 — momentum lost |
+
+Realistic mixed tables average 0.33 (cautious), 0.67 (cooperative) and 1.83
+(deal-making) out of three. **Trading is what separates them** — a table that
+only sacrifices lands the clean-but-poorer ending, and a table that only
+defends its corner takes nothing at all. That result is the entire argument of
+the game, and it falls out of the numbers rather than being asserted.
+
+Emissions added early are weighted to be harder to remove later, so coasting
+through the opening rounds and bartering hard from round five cannot win.
 
 ---
 
