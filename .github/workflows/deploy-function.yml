@@ -30,27 +30,55 @@ jobs:
       PROJECT_REF: dsibzzchpokqwscjrbif
 
     steps:
+      # Without the token there is nothing to deploy to. Say so once and stop,
+      # rather than failing every push to main with a red X that means nothing
+      # more than "you have not set this up yet".
+      - name: Check for a deploy token
+        id: gate
+        env:
+          TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Automatic deploys are not set up"
+              echo
+              echo "Add a \`SUPABASE_ACCESS_TOKEN\` repository secret from"
+              echo "<https://supabase.com/dashboard/account/tokens> and this"
+              echo "workflow will deploy the function on every push to main."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::SUPABASE_ACCESS_TOKEN is not set — skipping deploy."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.gate.outputs.ready == 'true'
 
       - uses: actions/setup-node@v4
+        if: steps.gate.outputs.ready == 'true'
         with:
           node-version: '22'
           cache: npm
 
       - run: npm ci
+        if: steps.gate.outputs.ready == 'true'
 
       # The engine is the thing that must not drift. If parity with the
       # reference implementation breaks, nothing reaches production.
       - name: Verify engine parity
+        if: steps.gate.outputs.ready == 'true'
         run: npm test
 
       - name: Rebuild the bundle
+        if: steps.gate.outputs.ready == 'true'
         run: npm run build:function
 
       # The bundle is committed so the function can also be deployed straight
       # from the Supabase dashboard with no local tooling. If it has drifted,
       # somebody would be pasting yesterday's game into production.
       - name: Check the committed bundle is current
+        if: steps.gate.outputs.ready == 'true'
         run: |
           if ! git diff --quiet -- supabase/functions/room/; then
             echo "::error::the committed function bundle is stale."
@@ -60,10 +88,12 @@ jobs:
           fi
 
       - uses: supabase/setup-cli@v1
+        if: steps.gate.outputs.ready == 'true'
         with:
           version: latest
 
       - name: Deploy
+        if: steps.gate.outputs.ready == 'true'
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: supabase functions deploy room --project-ref "$PROJECT_REF"

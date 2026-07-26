@@ -10,6 +10,10 @@ name: Smoke-test the room function
 
 on:
   workflow_dispatch:
+  # Editing the check should run the check.
+  push:
+    branches: [main]
+    paths: ['.github/workflows/smoke-function.yml']
   workflow_run:
     workflows: ['Deploy the room edge function']
     types: [completed]
