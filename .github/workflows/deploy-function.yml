@@ -1,0 +1,69 @@
+name: Deploy the room edge function
+
+# The function is a generated bundle of src/engine and src/game, so a manual
+# deploy goes stale the moment anyone touches the reducer. This keeps the
+# deployed game and the tested game the same thing.
+#
+# Needs one repository secret — SUPABASE_ACCESS_TOKEN, from
+# https://supabase.com/dashboard/account/tokens
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/engine/**'
+      - 'src/game/**'
+      - 'content/**'
+      - 'supabase/**'
+      - 'tools/build-function.mjs'
+      - '.github/workflows/deploy-function.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-room-function
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_REF: dsibzzchpokqwscjrbif
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # The engine is the thing that must not drift. If parity with the
+      # reference implementation breaks, nothing reaches production.
+      - name: Verify engine parity
+        run: npm test
+
+      - name: Rebuild the bundle
+        run: npm run build:function
+
+      # The bundle is committed so the function can also be deployed straight
+      # from the Supabase dashboard with no local tooling. If it has drifted,
+      # somebody would be pasting yesterday's game into production.
+      - name: Check the committed bundle is current
+        run: |
+          if ! git diff --quiet -- supabase/functions/room/index.ts; then
+            echo "::error::supabase/functions/room/index.ts is stale."
+            echo "Run 'npm run build:function' and commit the result."
+            git diff --stat -- supabase/functions/room/index.ts
+            exit 1
+          fi
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase functions deploy room --project-ref "$PROJECT_REF"

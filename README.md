@@ -88,20 +88,57 @@ enabled and **no policies at all**, because room state holds every option's
 effects, every sealed private goal and every insider tip. Only the edge
 function's service role touches them.
 
-Deploy the function:
+### Deploying the edge function
+
+`supabase/functions/room/index.ts` is **generated** — it is `_src/room.ts`
+bundled together with `src/engine` and `src/game`, because Deno cannot resolve
+those modules' extensionless imports and a hand-copied reducer would let the
+deployed game drift from the tested one. It is committed so it can be deployed
+without any local tooling. Pick whichever route suits:
+
+**GitHub Actions (recommended).** `.github/workflows/deploy-function.yml`
+deploys on every push to `main` that touches the engine, the room, the content
+pack or the function. It runs the parity tests first, and fails if the committed
+bundle is stale. Add one repository secret:
+
+```
+SUPABASE_ACCESS_TOKEN   # supabase.com/dashboard/account/tokens
+```
+
+**The Supabase dashboard.** Edge Functions → *Deploy a new function* → *Via
+Editor*, name it `room`, and paste the contents of
+`supabase/functions/room/index.ts` (copy it straight from GitHub — no checkout
+needed). Leave JWT verification on.
+
+**The CLI.**
 
 ```bash
 npm run build:function
 supabase functions deploy room --project-ref dsibzzchpokqwscjrbif
 ```
 
+**The Management API.**
+
+```bash
+curl -X POST "https://api.supabase.com/v1/projects/dsibzzchpokqwscjrbif/functions/deploy?slug=room" \
+  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  -F "metadata={\"entrypoint_path\":\"index.ts\",\"name\":\"room\"};type=application/json" \
+  -F "file=@supabase/functions/room/index.ts;type=application/typescript"
+```
+
+Whichever you use, rebuild first if you changed the engine, the room or the
+content pack — the bundle is the deployable unit, not the source.
+
 Then point the front end at it:
 
 ```bash
 # .env.local, or Netlify environment variables
 VITE_SUPABASE_URL=https://dsibzzchpokqwscjrbif.supabase.co
-VITE_SUPABASE_ANON_KEY=<publishable key>
+VITE_SUPABASE_ANON_KEY=<legacy anon key>
 ```
+
+Use the **legacy anon key**, which is a JWT. The newer `sb_publishable_*` keys
+are not JWTs and the function verifies one, so they are rejected.
 
 With those unset the app falls back to the local one-browser transport, which is
 what makes `npm run dev` useful and lets a facilitator rehearse on a laptop.

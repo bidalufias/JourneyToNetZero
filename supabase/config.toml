@@ -1,0 +1,8 @@
+project_id = "journey-to-net-zero"
+
+[functions.room]
+# The client sends the anon key as a bearer token, which is a signed JWT, so
+# verification stays on. Note this pins the front end to the legacy anon key:
+# the newer sb_publishable_* keys are not JWTs and would be rejected here.
+verify_jwt = true
+entrypoint = "./functions/room/index.ts"
