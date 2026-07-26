@@ -10,3 +10,14 @@ build
 *.tsbuildinfo
 .vite
 .cache
+
+# Playwright/browser scratch
+shots/
+
+# Python
+__pycache__/
+*.pyc
+
+# Generated bundle for the edge function
+supabase/functions/room/bundle.ts
+supabase/functions/room/content.gen.ts

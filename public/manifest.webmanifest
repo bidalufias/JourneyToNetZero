@@ -1,0 +1,19 @@
+{
+  "name": "Journey to Net Zero",
+  "short_name": "Net Zero",
+  "description": "Six crises. Thirty minutes. Four of you, and none of you can do it alone.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F3F2F2",
+  "theme_color": "#0E0D0D",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+======================================================================================================================
+BALANCE REPORT v1.0 (as designed)
+======================================================================================================================
+
+--- policy archetypes ---
+ALL SELFISH                        n=2000   WIN   0.0%   miss: carbon 100.0% growth 99.3% happy 100.0%   E  278.7  G 4.31  H 4.92  green 26.5%
+ALL COOPERATOR                     n=2000   WIN  83.9%   miss: carbon  0.0% growth 16.1% happy  0.0%   E  149.6  G 5.17  H 8.82  green 59.3%
+ALL BALANCED                       n=2000   WIN  97.1%   miss: carbon  0.0% growth  2.9% happy  0.0%   E  162.9  G 5.33  H 8.56  green 56.7%
+ALL POPULIST                       n=2000   WIN   8.9%   miss: carbon 70.4% growth 66.6% happy  0.3%   E  206.8  G 4.90  H 8.00  green 46.3%
+ALL IDEOLOGUE                      n=2000   WIN   0.1%   miss: carbon  0.0% growth 99.9% happy  2.8%   E  138.6  G 4.31  H 7.93  green 60.1%
+ALL RANDOM                         n=2000   WIN   0.7%   miss: carbon 35.3% growth 98.7% happy 63.5%   E  194.3  G 4.18  H 6.80  green 46.9%
+3 COOP + 1 SELFISH(biz)            n=2000   WIN  23.8%   miss: carbon  8.5% growth 50.6% happy 52.0%   E  190.3  G 5.01  H 6.99  green 48.4%
+3 COOP + 1 SELFISH(gov)            n=2000   WIN  14.2%   miss: carbon 16.6% growth 85.4% happy  8.6%   E  192.5  G 4.85  H 7.56  green 47.8%
+REALISTIC (bal/self/pop/ideo)      n=2000   WIN   1.3%   miss: carbon 57.2% growth 96.5% happy 21.3%   E  203.1  G 4.46  H 7.14  green 46.1%
+
+MIXED TABLE (random policies)      n=6000   WIN  22.0%   miss: carbon 24.0% growth 73.8% happy 23.0%   E  184.5  G 4.74  H 7.60  green 50.1%
+
+--- private goal achievement (mixed tables) ---
+  government   G-a  41.5%   G-b  47.4%   G-c  28.7%
+  business     B-a  39.4%   B-b  40.9%   B-c  33.8%
+  community    C-a  38.0%   C-b  35.8%   C-c  47.0%
+  activist     A-a  40.9%   A-b  44.0%   A-c  22.1%
+
+--- option usage (dead / dominant options in mixed tables) ---
+  dead options (<5% share within its role): 3
+     R4C-B3  4.8%
+     R1B-G2  4.9%
+     R5B-C2  5.0%
+  dominant options (>85% share): 5
+     R5B-C3  89.2%
+     R5A-C3  88.2%
+     R6B-C3  86.9%
+     R5C-C3  85.7%
+     R1C-C3  85.2%
+
+--- scenario variant fairness (win rate when that variant appears) ---
+   R1A  24.3%  R1B  27.2%  R1C  14.6%
+   R2A  18.2%  R2B  19.7%  R2C  28.2%
+   R3A  19.8%  R3B  19.5%  R3C  26.8%
+   R4A  23.5%  R4B  25.4%  R4C  17.3%
+   R5A  17.8%  R5B  27.1%  R5C  21.3%
+   R6A  22.5%  R6B  21.0%  R6C  22.6%
+
+--- resources --- ended with 0 fiscal: 12.1%   0 capital: 20.5%
+    green share reached 100%: 0.0%
+    growth hit the 9% ceiling: 0.0%
