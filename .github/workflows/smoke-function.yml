@@ -93,3 +93,48 @@ jobs:
           echo "Forged token rejected"
 
       - run: echo "Room function is healthy."
+
+  # The function working is only half of it. The browser bundle has to actually
+  # point at it, and VITE_* values are baked in at build time — so a correct
+  # Netlify environment that has not been rebuilt since is indistinguishable
+  # from a missing one until you look at the shipped JavaScript.
+  live-site:
+    runs-on: ubuntu-latest
+    env:
+      SITE: https://journeytonetzero.netlify.app
+    steps:
+      - name: Is the deployed bundle wired to the function?
+        run: |
+          set -uo pipefail
+          wired=no
+          for attempt in $(seq 1 8); do
+            html=$(curl -fsS --max-time 20 "$SITE/" || true)
+            js=$(printf '%s' "$html" | grep -o '/assets/index-[A-Za-z0-9_-]*\.js' | head -1)
+            if [ -n "$js" ]; then
+              bundle=$(curl -fsS --max-time 30 "$SITE$js" || true)
+              if printf '%s' "$bundle" | grep -q 'dsibzzchpokqwscjrbif\.supabase\.co'; then
+                wired=yes
+                echo "Bundle $js points at the room function."
+                break
+              fi
+              echo "attempt $attempt: $js does not carry the Supabase URL yet"
+            else
+              echo "attempt $attempt: no bundle found on the page"
+            fi
+            sleep 30
+          done
+
+          if [ "$wired" = yes ]; then
+            echo "### Live site is wired to Supabase" >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "### Live site is still on the local transport"
+              echo
+              echo "The deployed bundle does not contain the Supabase URL, so"
+              echo "VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are either unset"
+              echo "on Netlify, or set but not yet rebuilt. They are baked in at"
+              echo "build time, so setting them is not enough on its own —"
+              echo "trigger a deploy."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::Live site is not wired to Supabase yet."
+          fi
