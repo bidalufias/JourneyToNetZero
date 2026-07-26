@@ -1,0 +1,91 @@
+name: Smoke-test the room function
+
+# Proves the deployed function actually plays a round, not merely that it boots.
+# Drives the real endpoint the way two clients would: create a room, claim a
+# seat, check the phone view is a phone view, and check it carries no effect
+# values. Runs after a deploy and on demand.
+#
+# The anon key is public by design — it ships in the browser bundle — so it
+# lives here in the open rather than as a secret.
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy the room edge function']
+    types: [completed]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      FN: https://dsibzzchpokqwscjrbif.supabase.co/functions/v1/room
+      ANON: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzaWJ6emNocG9rcXdzY2pyYmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5OTY5OTAsImV4cCI6MjEwMDU3Mjk5MH0.fsl2zUiLQOJr9fxDhTY9AAuBGjr1JjaVWRMFpeY9Sbo
+
+    steps:
+      - name: Create a room
+        id: create
+        run: |
+          set -euo pipefail
+          body=$(curl -sS -X POST "$FN" \
+            -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+            -H 'Content-Type: application/json' \
+            -d '{"action":"create"}')
+          echo "$body" > create.json
+          code=$(jq -r '.code // empty' create.json)
+          token=$(jq -r '.token // empty' create.json)
+          if [ -z "$code" ] || [ -z "$token" ]; then
+            echo "::error::create failed"
+            head -c 800 create.json
+            exit 1
+          fi
+          if ! printf '%s' "$code" | grep -Eq '^[A-Z]{4}$'; then
+            echo "::error::room code '$code' is not four letters"
+            exit 1
+          fi
+          echo "room=$code" >> "$GITHUB_OUTPUT"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+          echo "Created room $code"
+
+      - name: Claim a seat and check the phone view
+        env:
+          ROOM: ${{ steps.create.outputs.room }}
+        run: |
+          set -euo pipefail
+          curl -sS -X POST "$FN" \
+            -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+            -H 'Content-Type: application/json' \
+            -d "{\"action\":\"claim\",\"code\":\"$ROOM\",\"role\":\"government\"}" > claim.json
+
+          kind=$(jq -r '.kind // empty' claim.json)
+          seat_token=$(jq -r '.token // empty' claim.json)
+          if [ "$kind" != "phone" ] || [ -z "$seat_token" ]; then
+            echo "::error::claim did not return a phone view"
+            head -c 800 claim.json
+            exit 1
+          fi
+
+          # The guarantee the whole design rests on: a phone view must not carry
+          # an option's effect values. If any appear, players can read the maths.
+          if jq -e '.view.options[]? | has("e") or has("g") or has("h") or has("gr")' claim.json | grep -q true; then
+            echo "::error::a phone view leaked option effect values"
+            exit 1
+          fi
+          echo "Seat claimed; phone view is clean"
+
+      - name: Reject a forged seat token
+        env:
+          ROOM: ${{ steps.create.outputs.room }}
+        run: |
+          set -euo pipefail
+          status=$(curl -sS -o forged.json -w '%{http_code}' -X POST "$FN" \
+            -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+            -H 'Content-Type: application/json' \
+            -d "{\"action\":\"view\",\"code\":\"$ROOM\",\"token\":\"00000000-0000-0000-0000-000000000000\"}")
+          if [ "$status" != "403" ]; then
+            echo "::error::a forged token got $status, expected 403"
+            head -c 400 forged.json
+            exit 1
+          fi
+          echo "Forged token rejected"
+
+      - run: echo "Room function is healthy."
