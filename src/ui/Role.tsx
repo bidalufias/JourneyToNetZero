@@ -46,23 +46,25 @@ export function RoleBadge({
  * uncut from 320px up, where a fixed size would clip "Government".
  */
 export function RoleTile({ role }: { role: RoleId }) {
-  const { color, light, icon: Icon } = roleTheme(role)
+  const { color, icon: Icon } = roleTheme(role)
   return (
     <div className="flex flex-col items-center gap-1.5 rounded-[var(--radius-small)] border border-line bg-surface px-1 py-3 shadow-[var(--shadow-card)]">
+      {/* Solid disc, white glyph. The name is navy rather than the role
+          colour: "Business" green on white is 3.1:1, which fails AA at this
+          size, and the disc already carries the colour. */}
       <span
-        className="grid place-items-center rounded-full"
+        className="grid place-items-center rounded-full text-white"
         style={{
           width: 'clamp(34px, 11vw, 46px)',
           height: 'clamp(34px, 11vw, 46px)',
-          background: light,
-          color,
+          background: color,
         }}
       >
         <Icon size={22} strokeWidth={1.9} aria-hidden="true" />
       </span>
       <span
-        className="w-full text-center leading-tight font-[650]"
-        style={{ color, fontSize: 'clamp(9px, 2.95vw, 12px)' }}
+        className="w-full text-center leading-tight font-[650] text-navy"
+        style={{ fontSize: 'clamp(9px, 2.95vw, 12px)' }}
       >
         {ROLES[role].name}
       </span>
@@ -102,13 +104,13 @@ export function RoleCard({
     <>
       <div className="flex items-center gap-3">
         <span
-          className="grid size-11 shrink-0 place-items-center rounded-[12px]"
-          style={{ background: light, color }}
+          className="grid size-11 shrink-0 place-items-center rounded-full text-white"
+          style={{ background: color }}
         >
           <Icon size={22} strokeWidth={2} aria-hidden="true" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[17px] font-[650]" style={{ color }}>
+          <span className="block truncate text-[17px] font-[650] text-navy">
             {meta.name}
           </span>
           <span className="block truncate text-[12px] font-medium text-muted">
