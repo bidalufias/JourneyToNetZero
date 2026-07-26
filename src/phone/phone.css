@@ -1,0 +1,400 @@
+/*
+ * The phone — a control surface, not the game.
+ *
+ * Every second spent on the phone is a second not spent negotiating, so the
+ * app is built to be got out of: 48px targets, flush-left labels, two taps
+ * maximum for any Table action, and never a raw number anywhere.
+ *
+ * Each role keeps the same type ramp and the same 8px rhythm and differs by
+ * accent ink, one signature texture, and information density — so a glance at
+ * a neighbour's phone reads the role in under a second.
+ */
+
+.phone {
+  min-height: 100dvh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+  overscroll-behavior: none;
+}
+
+.phone[data-skin='role'] { background: var(--skin-tint); }
+.phone[data-skin='deep'] { background: var(--skin-base); color: #fff; }
+.phone[data-skin='dark'] { background: var(--jtnz-broadcast); color: #fff; }
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+
+.phead {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--skin-base);
+  color: #fff;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-bottom: var(--rule) solid var(--skin-deep);
+}
+
+.phead__org {
+  font: 800 11px/1.2 var(--font-heading);
+  letter-spacing: 0.14em;
+  color: var(--skin-mark);
+  flex: 1;
+  min-width: 0;
+}
+
+.phead__title { font: 800 17px/1.15 var(--font-heading); letter-spacing: -0.01em; }
+
+.phead__clock {
+  font: 800 30px/1 var(--font-heading);
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+}
+
+.phead__clock--urgent { color: var(--jtnz-com-warm); animation: jtnz-pulse 1s steps(2, end) infinite; }
+
+/* A progress rule rather than a ring: it reads at a glance and costs nothing. */
+.phead__bar { height: 4px; background: var(--skin-deep); }
+.phead__bar-fill { height: 100%; background: var(--color-accent); transition: width 250ms linear; }
+
+.pbody { flex: 1; padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+
+.plabel {
+  font: 800 11px/1 var(--font-heading);
+  letter-spacing: 0.14em;
+  color: var(--color-neutral-700);
+}
+
+.phone[data-skin='deep'] .plabel,
+.phone[data-skin='dark'] .plabel { color: var(--skin-mark); }
+
+.pheading { font: 800 27px/1.08 var(--font-heading); letter-spacing: -0.02em; }
+.pbig { font: 800 38px/1.02 var(--font-heading); letter-spacing: -0.03em; }
+.ptext { font: 400 15px/1.5 var(--font-body); }
+.pmono { font: 400 12px/1.5 var(--font-mono); letter-spacing: 0.02em; }
+
+/* ── Buttons ────────────────────────────────────────────────────────── */
+
+.btn {
+  min-height: 48px;
+  padding: var(--space-3) var(--space-4);
+  border: var(--rule) solid currentColor;
+  background: transparent;
+  color: inherit;
+  font: 800 14px/1 var(--font-heading);
+  letter-spacing: 0.1em;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  transition: background var(--jtnz-press-ms) var(--jtnz-ease);
+}
+
+.btn:active { background: color-mix(in srgb, currentColor 14%, transparent); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn--primary {
+  background: var(--skin-base);
+  color: #fff;
+  border-color: var(--skin-base);
+  text-align: center;
+}
+
+.btn--accent { background: var(--color-accent); color: #fff; border-color: var(--color-accent); text-align: center; }
+.btn--ghost { background: #fff; }
+
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+
+/* ── Option card — the most important component in the game ─────────── */
+
+/* Fixed anatomy so the eye lands in the same four places every round:
+   cost chip top-right, title, one line, hint rule. */
+/* A button's children are inline by default, which would let the hint's rule
+   draw straight through the description. Stack them explicitly. */
+.ocard {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-height: 132px;
+  background: #fff;
+  border: var(--rule) solid var(--color-text);
+  padding: var(--space-4);
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--jtnz-press-ms) var(--jtnz-ease);
+}
+
+.ocard:active { background: var(--jtnz-gov-tint); }
+
+.ocard--selected { background: var(--skin-base); color: #fff; border-color: var(--skin-base); }
+
+.ocard__top { display: flex; align-items: flex-start; gap: var(--space-3); }
+
+.ocard__title { font: 800 19px/1.12 var(--font-heading); letter-spacing: -0.015em; flex: 1; }
+
+.ocard__cost {
+  flex: 0 0 auto;
+  font: 800 12px/1 var(--font-mono);
+  letter-spacing: 0.06em;
+  border: var(--rule) solid var(--color-accent);
+  color: var(--color-accent);
+  padding: 5px 7px;
+}
+
+.ocard--selected .ocard__cost { border-color: var(--skin-mark); color: var(--skin-mark); }
+
+.ocard__desc { display: block; margin-top: var(--space-2); font: 400 14px/1.4 var(--font-body); }
+
+/* The hint reads as a verdict, not a stat line. 8-second read target. */
+.ocard__hint {
+  display: block;
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: var(--rule) solid color-mix(in srgb, currentColor 22%, transparent);
+  font: 700 12px/1.35 var(--font-mono);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.ocard__check { position: absolute; right: var(--space-4); bottom: var(--space-4); font-size: 18px; }
+
+/* Three disabled states, three different edges — "I can't", "she stopped me"
+   and "I did this to myself" are three different feelings. */
+.ocard--afford {
+  background: var(--color-neutral-200);
+  border-color: var(--color-neutral-400);
+  color: var(--color-neutral-700);
+  cursor: not-allowed;
+}
+
+.ocard--veto {
+  cursor: not-allowed;
+  border-color: var(--jtnz-com-base);
+  color: var(--color-neutral-700);
+  background: repeating-linear-gradient(
+    45deg,
+    var(--jtnz-com-tint) 0 8px,
+    color-mix(in srgb, var(--jtnz-com-base) 16%, var(--jtnz-com-tint)) 8px 16px
+  );
+}
+
+.ocard--veto .ocard__title { text-decoration: line-through; }
+
+.ocard--gate {
+  cursor: not-allowed;
+  border: var(--rule) dashed var(--color-text);
+  background: transparent;
+  color: var(--color-neutral-700);
+}
+
+.ocard__flag {
+  align-self: flex-start;
+  margin-top: auto;
+  font: 800 11px/1 var(--font-heading);
+  letter-spacing: 0.12em;
+  padding: 5px 7px;
+}
+
+.ocard--afford .ocard__flag { background: var(--color-accent); color: #fff; }
+.ocard--veto .ocard__flag { background: var(--jtnz-com-base); color: #fff; }
+.ocard--gate .ocard__flag { background: var(--color-text); color: #fff; }
+
+.ocard__note { display: block; margin-top: var(--space-2); font: 700 11px/1.4 var(--font-mono); }
+
+/* ── Sheets ─────────────────────────────────────────────────────────── */
+
+/* Rise 240ms from the bottom edge, take the full width, and never cover the
+   timer. Close is 44×44 and always top-right. */
+.sheet-scrim { position: fixed; inset: 0; background: rgba(32, 30, 29, 0.55); z-index: 40; }
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 41;
+  background: var(--color-bg);
+  border-top: var(--rule) solid var(--color-text);
+  max-height: 78dvh;
+  overflow-y: auto;
+  animation: jtnz-sheet-up var(--jtnz-sheet-ms) var(--jtnz-ease) both;
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--rule) solid var(--color-text);
+  position: sticky;
+  top: 0;
+  background: var(--color-bg);
+}
+
+.sheet__title { font: 800 14px/1 var(--font-heading); letter-spacing: 0.12em; }
+
+.sheet__close {
+  width: 44px;
+  height: 44px;
+  border: var(--rule) solid var(--color-text);
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.sheet__body { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+
+/* ── Insider tip — the only dark screen on any phone ────────────────── */
+
+.tip {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--jtnz-broadcast);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6) var(--space-4) var(--space-4);
+  box-shadow: var(--shadow-lg);
+  animation: jtnz-sheet-up var(--jtnz-sheet-ms) var(--jtnz-ease) both;
+}
+
+.tip__label { font: 800 11px/1 var(--font-heading); letter-spacing: 0.16em; color: var(--jtnz-com-warm); }
+.tip__eyes { font: 400 11px/1 var(--font-mono); color: var(--jtnz-glare); margin-top: var(--space-1); }
+
+.tip__chip {
+  display: inline-block;
+  margin-top: var(--space-4);
+  font: 800 11px/1 var(--font-mono);
+  letter-spacing: 0.12em;
+  padding: 6px 8px;
+}
+
+.tip__chip--confirmed { background: var(--jtnz-com-warm); color: var(--jtnz-broadcast); }
+.tip__chip--unverified { background: transparent; border: var(--rule) solid var(--color-accent); color: var(--color-accent); }
+
+.tip__source { margin-top: var(--space-3); font: 400 12px/1.4 var(--font-mono); color: var(--jtnz-glare); }
+.tip__body { margin-top: var(--space-3); font: 600 20px/1.35 var(--font-body); flex: 1; }
+.tip__foot { display: flex; flex-direction: column; gap: var(--space-2); }
+.tip__reminder { font: 400 12px/1.4 var(--font-mono); color: var(--jtnz-glare); text-align: center; }
+
+/* ── Locked, waiting ────────────────────────────────────────────────── */
+
+.lookup {
+  min-height: 100dvh;
+  background: var(--skin-deep);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.lookup__label { font: 800 12px/1 var(--font-heading); letter-spacing: 0.16em; color: var(--skin-lift); }
+
+.lookup__big {
+  font: 800 68px/0.94 var(--font-heading);
+  letter-spacing: -0.04em;
+  margin: var(--space-4) 0;
+}
+
+.lookup__rule { width: 96px; height: 6px; background: var(--skin-lift); }
+.lookup__note { margin-top: var(--space-6); font: 400 17px/1.45 var(--font-body); opacity: 0.9; }
+
+/* ── Round result — the group chat ──────────────────────────────────── */
+
+.chat { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.bubble {
+  background: #fff;
+  border-left: 6px solid var(--skin-base);
+  padding: var(--space-3) var(--space-4);
+  animation: jtnz-rise 240ms var(--jtnz-ease) both;
+}
+
+.bubble--them { background: var(--skin-base); color: #fff; border-left-color: var(--skin-mark); }
+.bubble__label { font: 800 11px/1 var(--font-heading); letter-spacing: 0.12em; color: var(--color-neutral-700); }
+.bubble--them .bubble__label { color: var(--skin-mark); }
+.bubble__lead { margin-top: var(--space-2); font: 800 18px/1.25 var(--font-heading); letter-spacing: -0.01em; }
+.bubble__text { margin-top: var(--space-2); font: 400 15px/1.45 var(--font-body); }
+
+/* ── Seats / lobby ──────────────────────────────────────────────────── */
+
+.pseat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--skin-base);
+  color: #fff;
+}
+
+.pseat--empty { background: transparent; border: var(--rule) dashed var(--color-neutral-400); color: var(--color-neutral-700); }
+.pseat--you { outline: 3px solid var(--color-accent); outline-offset: -3px; }
+.pseat__role { font: 800 15px/1.15 var(--font-heading); }
+.pseat__name { font: 400 13px/1.2 var(--font-body); opacity: 0.85; }
+.pseat__tag { margin-left: auto; font: 800 11px/1 var(--font-heading); letter-spacing: 0.12em; }
+
+/* ── Goal cards ─────────────────────────────────────────────────────── */
+
+.goal {
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  border: var(--rule) solid var(--color-text);
+  padding: var(--space-4);
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.goal--picked { background: var(--skin-base); color: #fff; border-color: var(--skin-base); }
+.goal__title { display: block; font: 800 19px/1.15 var(--font-heading); }
+.goal__desc { display: block; margin-top: var(--space-2); font: 400 14px/1.4 var(--font-body); }
+
+/* ── Input ──────────────────────────────────────────────────────────── */
+
+.field {
+  width: 100%;
+  min-height: 52px;
+  padding: var(--space-3) var(--space-4);
+  border: var(--rule) solid var(--color-text);
+  background: #fff;
+  font: 800 20px/1 var(--font-heading);
+  letter-spacing: 0.08em;
+  color: var(--color-text);
+}
+
+.field::placeholder { color: var(--color-neutral-400); letter-spacing: 0.04em; }
+.field--code { text-transform: uppercase; letter-spacing: 0.3em; text-align: center; font-size: 34px; }
+
+/* ── Connection banner ──────────────────────────────────────────────── */
+
+.reconnect {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  background: var(--color-accent);
+  color: #fff;
+  padding: var(--space-3) var(--space-4);
+  font: 800 12px/1.3 var(--font-heading);
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+
+/* The one place the app is allowed to be rude. */
+.nudge {
+  background: var(--color-accent-100);
+  border: var(--rule) solid var(--color-accent);
+  color: var(--color-accent-700);
+  padding: var(--space-3) var(--space-4);
+}
+
+.nudge__lead { font: 800 20px/1.15 var(--font-heading); }
+.nudge__sub { margin-top: var(--space-2); font: 700 12px/1.3 var(--font-mono); }

@@ -1,0 +1,3 @@
+# Netlify: the client routes /dashboard and /play itself, so every path
+# resolves to the single build.
+/*  /index.html  200

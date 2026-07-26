@@ -163,7 +163,8 @@ export interface DashboardView {
   /** Announced, but never who received it. */
   tipDealtThisRound: boolean
   publishedTip: { from: Role; text: string; source: string; verdict: 'true' | 'false' | null } | null
-  spotlight: { by: Role; target: Role; remaining: number } | null
+  /** Target is null until the choices resolve — the engine derives it. */
+  spotlight: { by: Role; target: Role | null; remaining: number } | null
   veto: { target: Role; removed: string[]; remaining: number } | null
   lastRound: RoundLog | null
   history: RoundLog[]

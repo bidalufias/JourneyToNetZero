@@ -1,0 +1,482 @@
+/* Dashboard screens: attract, The Table, the Reckoning, coalition, summary, endgame. */
+
+/* ── D-01 Attract ───────────────────────────────────────────────────── */
+
+.attract {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--space-8);
+  align-items: center;
+  padding: var(--space-8) var(--space-6);
+}
+
+.attract__cue {
+  font: 800 clamp(14px, 1.6cqw, 30px) / 1 var(--font-heading);
+  letter-spacing: 0.18em;
+  color: var(--color-accent);
+  margin-bottom: var(--space-4);
+}
+
+/* The only element on the dashboard ever set this large — legible across any
+   training room, and read aloud without ambiguity. */
+.attract__code {
+  font: 800 clamp(96px, 15.5cqw, 300px) / 0.82 var(--font-heading);
+  letter-spacing: -0.04em;
+}
+
+.attract__tagline {
+  margin-top: var(--space-4);
+  font: 400 clamp(18px, 2cqw, 38px) / 1.3 var(--font-body);
+  color: var(--jtnz-glare);
+}
+
+.attract__seats-label {
+  font: 800 clamp(12px, 1.2cqw, 22px) / 1 var(--font-heading);
+  letter-spacing: 0.18em;
+  color: var(--jtnz-glare);
+  margin-bottom: var(--space-3);
+}
+
+.seat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--skin-base);
+  padding: var(--space-4);
+  margin-bottom: var(--space-2);
+  animation: jtnz-rise 320ms var(--jtnz-ease) both;
+}
+
+.seat--empty {
+  background: transparent;
+  border: 2px dashed var(--jtnz-broadcast-line);
+  color: var(--jtnz-glare);
+}
+
+.seat__role { font: 800 clamp(16px, 1.75cqw, 34px) / 1.1 var(--font-heading); letter-spacing: 0.04em; }
+.seat__name { font: 600 clamp(12px, 1.3cqw, 24px) / 1.2 var(--font-body); opacity: 0.85; }
+
+.briefing-strip {
+  display: flex;
+  align-items: stretch;
+  background: var(--jtnz-broadcast-raise);
+  border-top: 2px solid var(--jtnz-broadcast-line);
+}
+
+.briefing-strip__label {
+  background: var(--color-accent);
+  font: 800 clamp(11px, 1.1cqw, 20px) / 1 var(--font-heading);
+  letter-spacing: 0.14em;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+}
+
+.briefing-strip__text {
+  padding: var(--space-3) var(--space-6);
+  font: 600 clamp(13px, 1.45cqw, 27px) / 1.3 var(--font-body);
+  display: flex;
+  align-items: center;
+}
+
+/* ── D-04 The Table ─────────────────────────────────────────────────── */
+
+.table {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+  border-top: 2px solid var(--jtnz-broadcast-line);
+}
+
+.table__record { padding: var(--space-4) var(--space-6); overflow: hidden; }
+.table__side {
+  padding: var(--space-4) var(--space-6);
+  border-left: 2px solid var(--jtnz-broadcast-line);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.table__heading {
+  font: 800 clamp(12px, 1.2cqw, 22px) / 1 var(--font-heading);
+  letter-spacing: 0.18em;
+  color: var(--jtnz-glare);
+  margin-bottom: var(--space-3);
+}
+
+.table__empty {
+  font: 400 clamp(13px, 1.35cqw, 25px) / 1.4 var(--font-body);
+  color: var(--jtnz-broadcast-line);
+}
+
+.table__promises, .table__offers { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); }
+
+.pledge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--jtnz-broadcast-raise);
+  border-left: 6px solid var(--skin-base);
+  padding: var(--space-3) var(--space-4);
+  animation: jtnz-rise 260ms var(--jtnz-ease) both;
+}
+
+.pledge__glyph { color: var(--skin-lift); flex: 0 0 auto; }
+.pledge__text { font: 600 clamp(14px, 1.5cqw, 28px) / 1.25 var(--font-body); flex: 1; }
+
+.pledge__kind {
+  font: 800 clamp(10px, 1cqw, 18px) / 1 var(--font-heading);
+  letter-spacing: 0.14em;
+  flex: 0 0 auto;
+}
+
+.pledge__kind--promise { color: var(--jtnz-glare); }
+.pledge__kind--demand { color: var(--jtnz-com-warm); }
+
+/* An offer is a literal bar crossing between two glyphs, so the room watches
+   a resource change hands. */
+.inflight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--jtnz-broadcast-raise);
+  padding: var(--space-3) var(--space-4);
+}
+
+.inflight__end { color: var(--skin-base); }
+.inflight__wire { position: relative; flex: 1; height: 6px; background: var(--jtnz-broadcast-line); overflow: hidden; }
+
+.inflight__pulse {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 60%;
+  background: var(--jtnz-com-warm);
+  animation: jtnz-ticker 1.6s linear infinite;
+}
+
+.inflight__label {
+  font: 800 clamp(13px, 1.4cqw, 26px) / 1 var(--font-heading);
+  color: var(--jtnz-com-warm);
+  letter-spacing: 0.06em;
+}
+
+.spotlight-panel, .veto-panel, .tip-panel { padding: var(--space-4); }
+
+.spotlight-panel { background: var(--jtnz-act-base); }
+.spotlight-panel__title { font: 800 clamp(16px, 1.8cqw, 34px) / 1 var(--font-heading); letter-spacing: 0.06em; }
+.spotlight-panel__body { margin-top: var(--space-2); font: 600 clamp(14px, 1.5cqw, 27px) / 1.3 var(--font-body); }
+.spotlight-panel__rule {
+  margin-top: var(--space-2);
+  font: 400 clamp(11px, 1.15cqw, 21px) / 1.4 var(--font-mono);
+  color: var(--jtnz-act-lift);
+}
+.spotlight-panel__pips { display: flex; gap: 6px; margin-top: var(--space-3); }
+.pip { width: 16px; height: 16px; border: 2px solid #fff; }
+.pip--on { background: var(--color-accent); border-color: var(--color-accent); }
+
+.veto-panel { border: 2px solid var(--jtnz-com-base); }
+.veto-panel__title {
+  font: 800 clamp(12px, 1.2cqw, 22px) / 1 var(--font-heading);
+  letter-spacing: 0.14em;
+  color: var(--jtnz-com-lift);
+}
+.veto-panel__body { margin-top: var(--space-2); font: 600 clamp(13px, 1.4cqw, 26px) / 1.3 var(--font-body); }
+.veto-panel__count {
+  margin-top: var(--space-2);
+  font: 800 clamp(10px, 1.05cqw, 19px) / 1 var(--font-heading);
+  letter-spacing: 0.14em;
+  color: var(--jtnz-glare);
+}
+
+.tip-panel { border: 2px solid var(--jtnz-broadcast-line); background: var(--jtnz-broadcast-raise); }
+.tip-panel__title { font: 800 clamp(11px, 1.15cqw, 21px) / 1 var(--font-heading); letter-spacing: 0.14em; color: var(--jtnz-com-warm); }
+.tip-panel__from { margin-top: var(--space-1); font: 400 clamp(10px, 1.05cqw, 19px) / 1.2 var(--font-mono); color: var(--jtnz-glare); }
+.tip-panel__body { margin-top: var(--space-2); font: 600 clamp(13px, 1.35cqw, 25px) / 1.35 var(--font-body); }
+.tip-panel__verdict { margin-top: var(--space-2); font: 800 clamp(12px, 1.25cqw, 23px) / 1 var(--font-heading); letter-spacing: 0.12em; }
+.tip-panel__verdict--true { color: var(--jtnz-good); }
+.tip-panel__verdict--false { color: var(--color-accent); }
+
+/* Deliberately vague: that *someone* knows is what makes people suspicious. */
+.table__tipline {
+  margin-top: auto;
+  font: 400 clamp(11px, 1.15cqw, 21px) / 1.4 var(--font-mono);
+  color: var(--jtnz-broadcast-line);
+}
+
+/* ── D-05 The Reckoning ─────────────────────────────────────────────── */
+
+.reckoning {
+  position: absolute;
+  inset: 0;
+  background: var(--jtnz-broadcast);
+  display: flex;
+  flex-direction: column;
+  z-index: 15;
+}
+
+.reckoning__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 8px solid var(--color-accent);
+}
+
+.reckoning__emissions { margin-left: auto; display: flex; align-items: baseline; gap: var(--space-3); }
+.reckoning__emissions-label {
+  font: 800 clamp(11px, 1.15cqw, 21px) / 1 var(--font-heading);
+  letter-spacing: 0.16em;
+  color: var(--jtnz-glare);
+}
+.reckoning__emissions-value {
+  font: 800 clamp(30px, 3.4cqw, 64px) / 1 var(--font-heading);
+  font-variant-numeric: tabular-nums;
+}
+.reckoning__arrow[data-dir='down'] { color: var(--jtnz-good); }
+.reckoning__arrow[data-dir='up'] { color: var(--color-accent); }
+
+.reckoning__cards {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  perspective: 1400px;
+}
+
+.rcard {
+  background: var(--skin-base);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  transform-origin: left center;
+  opacity: 0;
+}
+
+/* 400ms rotateY from 88°. One card at a time — the gap is the design. */
+.rcard--in {
+  opacity: 1;
+  animation: jtnz-flip var(--jtnz-flip-ms) var(--jtnz-ease) both;
+}
+
+.rcard__role {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: 800 clamp(11px, 1.1cqw, 20px) / 1 var(--font-heading);
+  letter-spacing: 0.16em;
+  color: var(--skin-lift);
+  margin-bottom: var(--space-3);
+}
+
+.rcard__title {
+  font: 800 clamp(20px, 2.3cqw, 44px) / 1.05 var(--font-heading);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-3);
+}
+
+.rcard__desc { font: 400 clamp(13px, 1.4cqw, 26px) / 1.35 var(--font-body); opacity: 0.9; }
+
+.rcard__foot { margin-top: auto; }
+
+.rcard__promise {
+  font: 800 clamp(11px, 1.1cqw, 20px) / 1.2 var(--font-heading);
+  letter-spacing: 0.12em;
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid currentColor;
+  margin-bottom: var(--space-2);
+}
+
+.rcard__promise--kept { color: var(--jtnz-com-warm); }
+.rcard__promise--broken { color: var(--color-accent); }
+.rcard__promise--none { color: color-mix(in srgb, #fff 45%, transparent); }
+
+.rcard__headline { font: 400 clamp(12px, 1.25cqw, 23px) / 1.35 var(--font-body); opacity: 0.85; }
+
+.reckoning__meters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-6);
+  border-top: 2px solid var(--jtnz-broadcast-line);
+}
+
+.travel__label {
+  font: 800 clamp(11px, 1.1cqw, 20px) / 1 var(--font-heading);
+  letter-spacing: 0.16em;
+  color: var(--jtnz-glare);
+}
+
+.travel__track { height: clamp(10px, 1.2cqw, 22px); background: var(--jtnz-meter-track); margin-top: var(--space-2); }
+
+/* Meters travel on their own 900ms curves in the gaps between flips. */
+.travel__fill { display: block; height: 100%; transition: width var(--jtnz-meter-ms) var(--jtnz-ease); }
+
+/* Fires after the fourth card, never interrupting the sequence. 240px type,
+   full accent bleed, no consoling subtitle. Holds 2.5 seconds and cuts. */
+.promise-sting {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: var(--color-accent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.promise-sting__text {
+  font: 800 clamp(64px, 12.5cqw, 240px) / 0.9 var(--font-heading);
+  letter-spacing: -0.04em;
+  text-align: center;
+}
+
+.promise-sting__who {
+  font: 800 clamp(16px, 2cqw, 40px) / 1 var(--font-heading);
+  letter-spacing: 0.2em;
+}
+
+/* ── D-06 Coalition Bonus ───────────────────────────────────────────── */
+
+.coalition {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  background: var(--jtnz-act-base);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+  background-size: 18px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(24px, 5cqw, 96px);
+  animation: jtnz-rise 320ms var(--jtnz-ease) both;
+}
+
+.coalition__label {
+  font: 800 clamp(14px, 1.5cqw, 28px) / 1 var(--font-heading);
+  letter-spacing: 0.2em;
+  color: var(--jtnz-com-warm);
+  margin-bottom: var(--space-4);
+}
+
+.coalition__title {
+  font: 800 clamp(44px, 7cqw, 132px) / 0.92 var(--font-heading);
+  letter-spacing: -0.035em;
+  margin-bottom: var(--space-8);
+}
+
+.coalition__row { display: flex; align-items: center; gap: var(--space-8); flex-wrap: wrap; }
+.coalition__glyphs { display: flex; gap: var(--space-2); }
+
+.coalition__glyph {
+  width: clamp(38px, 4cqw, 72px);
+  height: clamp(38px, 4cqw, 72px);
+  background: #fff;
+  color: var(--jtnz-act-base);
+  display: grid;
+  place-items: center;
+}
+
+/* The fourth glyph stays visibly hollow — the room should feel the better
+   number they didn't get. */
+.coalition__glyph--hollow {
+  background: transparent;
+  border: 2px solid color-mix(in srgb, #fff 45%, transparent);
+  color: color-mix(in srgb, #fff 45%, transparent);
+}
+
+.coalition__effect { font: 800 clamp(18px, 2.1cqw, 40px) / 1.2 var(--font-heading); }
+.coalition__note { margin-top: var(--space-2); font: 400 clamp(13px, 1.4cqw, 26px) / 1.35 var(--font-body); color: var(--jtnz-act-lift); }
+
+/* ── D-07 Round summary ─────────────────────────────────────────────── */
+
+.summary {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  border-top: 2px solid var(--jtnz-broadcast-line);
+}
+
+.summary__story { padding: var(--space-4) var(--space-6); }
+.summary__standing { padding: var(--space-4) var(--space-6); border-left: 2px solid var(--jtnz-broadcast-line); }
+
+.summary__list { list-style: none; display: flex; flex-direction: column; gap: var(--space-3); }
+.summary__item { display: flex; gap: var(--space-4); }
+
+.summary__round {
+  font: 800 clamp(11px, 1.15cqw, 21px) / 1.4 var(--font-mono);
+  color: var(--jtnz-glare);
+  flex: 0 0 auto;
+}
+
+.summary__sentence { font: 400 clamp(13px, 1.4cqw, 26px) / 1.35 var(--font-body); }
+
+.standing {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: var(--space-4);
+  align-items: baseline;
+  padding: var(--space-3) 0;
+  border-bottom: 2px solid var(--jtnz-broadcast-line);
+}
+
+.standing__label { font: 800 clamp(11px, 1.15cqw, 21px) / 1 var(--font-heading); letter-spacing: 0.14em; }
+.standing__value { font: 800 clamp(24px, 2.7cqw, 52px) / 1 var(--font-heading); font-variant-numeric: tabular-nums; }
+.standing__gap { font: 400 clamp(11px, 1.1cqw, 20px) / 1 var(--font-mono); color: var(--color-accent); }
+.standing__gap--met { color: var(--jtnz-good); }
+
+.summary__verdict {
+  margin-top: var(--space-4);
+  font: 800 clamp(13px, 1.4cqw, 26px) / 1.35 var(--font-heading);
+  color: var(--jtnz-com-warm);
+}
+
+/* ── D-08/09 Endgame ────────────────────────────────────────────────── */
+
+.results { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1.2fr; gap: var(--space-6); padding: var(--space-6); }
+.results__targets { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.result-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-4);
+  background: var(--jtnz-broadcast-raise);
+  border-left: 6px solid var(--color-accent);
+}
+
+.result-row--met { border-left-color: var(--jtnz-good); }
+.result-row__label { font: 800 clamp(12px, 1.25cqw, 23px) / 1.1 var(--font-heading); letter-spacing: 0.14em; }
+.result-row__value { font: 800 clamp(30px, 3.4cqw, 64px) / 1 var(--font-heading); font-variant-numeric: tabular-nums; }
+.result-row__unit { font: 400 clamp(11px, 1.15cqw, 21px) / 1 var(--font-mono); color: var(--jtnz-glare); }
+.result-row__verdict { font: 800 clamp(13px, 1.4cqw, 26px) / 1 var(--font-heading); letter-spacing: 0.1em; }
+.result-row--met .result-row__verdict { color: var(--jtnz-good); }
+
+.ending { background: var(--color-bg); color: var(--color-text); padding: var(--space-6); display: flex; flex-direction: column; }
+.ending--hollow { background: var(--jtnz-broadcast-raise); color: #fff; }
+
+.ending__kicker { font: 800 clamp(12px, 1.25cqw, 23px) / 1 var(--font-heading); letter-spacing: 0.18em; color: var(--color-accent); }
+
+.ending__title {
+  font: 800 clamp(44px, 6.4cqw, 120px) / 0.9 var(--font-heading);
+  letter-spacing: -0.04em;
+  margin: var(--space-3) 0;
+  border-bottom: 8px solid var(--color-accent);
+  padding-bottom: var(--space-4);
+}
+
+.ending__blurb { font: 400 clamp(15px, 1.7cqw, 32px) / 1.35 var(--font-body); margin-bottom: var(--space-6); max-width: 40ch; }
+
+.ending__players { margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); }
+.ending__player { background: var(--skin-base); color: #fff; padding: var(--space-3); }
+.ending__player-role { display: flex; align-items: center; gap: 6px; font: 800 clamp(10px, 1.05cqw, 19px) / 1 var(--font-heading); letter-spacing: 0.12em; }
+.ending__player-name { margin-top: var(--space-1); font: 600 clamp(12px, 1.3cqw, 24px) / 1.2 var(--font-body); }
+.ending__player-goal { margin-top: var(--space-1); font: 400 clamp(10px, 1.05cqw, 19px) / 1.3 var(--font-mono); opacity: 0.85; }
+.ending__player-title { margin-top: var(--space-2); font: 800 clamp(11px, 1.15cqw, 21px) / 1 var(--font-heading); letter-spacing: 0.1em; color: var(--skin-mark); }

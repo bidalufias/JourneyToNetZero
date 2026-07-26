@@ -330,8 +330,11 @@ export function playRound(state: GameState, input: RoundInput, content: Content)
     reveals.push({
       role: r,
       optionId: o.id,
+      arch: o.arch,
       title: o.title,
+      desc: o.desc,
       headline: o.headline,
+      aligned: !DIRTY.has(o.arch) && o.arch !== 'DEMAND_RELIEF',
       multiplier: m,
       emissions: e * m,
       partnerUnfunded,

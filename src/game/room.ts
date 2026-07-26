@@ -89,8 +89,24 @@ function currentScenario(room: Room, content: Content): Scenario | null {
   return id ? (content.scenarios[id] ?? null) : null
 }
 
+/** The round now being played — used for choices, tips and new pledges. */
 function roundNumber(room: Room): number {
   return Math.min(room.game.round + 1, 6)
+}
+
+/**
+ * The round the surfaces are currently *showing*.
+ *
+ * The engine advances `game.round` the instant a round resolves, so from the
+ * Reckoning onward `roundNumber` already names the next one. Everything the
+ * room is still narrating — the promise board, the kept/broken badges, the
+ * published tip — belongs to the round just played, so the views use this.
+ */
+function displayRound(room: Room): number {
+  if ((room.phase === 'reckoning' || room.phase === 'summary') && room.lastRound) {
+    return room.lastRound.round
+  }
+  return roundNumber(room)
 }
 
 function setPhase(room: Room, phase: Phase, now: number): void {
@@ -629,7 +645,7 @@ export function dashboardView(room: Room, content: Content): DashboardView {
   const lockOrder = ROLES.map((r) => room.players[r].lockedAt).filter((t): t is number => t !== null)
   const lastLock = lockOrder.length === 3 ? ROLES.find((r) => room.players[r].choiceId === null) : null
 
-  const tip = room.tips.find((t) => t.round === roundNumber(room))
+  const tip = room.tips.find((t) => t.round === displayRound(room))
   const published =
     tip?.published && tip
       ? {
@@ -656,7 +672,7 @@ export function dashboardView(room: Room, content: Content): DashboardView {
     code: room.code,
     phase: room.phase,
     phaseEndsAt: room.phaseEndsAt,
-    round: roundNumber(room),
+    round: displayRound(room),
     scenario: scenario
       ? { id: scenario.id, title: scenario.title, type: scenario.type, situation: scenario.situation }
       : null,
@@ -668,14 +684,16 @@ export function dashboardView(room: Room, content: Content): DashboardView {
       locked: room.players[role].choiceId !== null,
       lastToLock: lastLock === role,
     })),
-    promises: room.promises.filter((p) => p.round === roundNumber(room)),
-    offersInFlight: room.offers.filter((o) => o.round === roundNumber(room) && o.status === 'pending'),
+    promises: room.promises.filter((p) => p.round === displayRound(room)),
+    offersInFlight: room.offers.filter((o) => o.round === displayRound(room) && o.status === 'pending'),
     tipDealtThisRound: Boolean(tip),
     publishedTip: published,
     spotlight: room.spotlightCalled
       ? {
           by: 'activist' as Role,
-          target: (room.lastRound?.spotlightTarget ?? 'business') as Role,
+          // Whoever takes the dirtiest option this round wears it. Nobody
+          // knows who that is until the choices lock, so do not pretend to.
+          target: room.lastRound?.spotlightTarget ?? null,
           remaining: room.game.spotlights,
         }
       : null,
@@ -762,7 +780,7 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
     name: player.name,
     phase: room.phase,
     phaseEndsAt: room.phaseEndsAt,
-    round: roundNumber(room),
+    round: displayRound(room),
     scenario: scenario
       ? { id: scenario.id, title: scenario.title, situation: scenario.situation, type: scenario.type }
       : null,
@@ -777,10 +795,10 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
     goalId: player.goalId,
     goalChoices,
     // Only ever your own tip, and only while it is yours to act on.
-    tip: room.tips.find((t) => t.to === role && t.round === roundNumber(room)) ?? null,
-    promises: room.promises.filter((p) => p.round === roundNumber(room)),
+    tip: room.tips.find((t) => t.to === role && t.round === displayRound(room)) ?? null,
+    promises: room.promises.filter((p) => p.round === displayRound(room)),
     incomingOffers: room.offers.filter((o) => o.to === role && o.status === 'pending'),
-    sentOffers: room.offers.filter((o) => o.from === role && o.round === roundNumber(room)),
+    sentOffers: room.offers.filter((o) => o.from === role && o.round === displayRound(room)),
     seats: ROLES.map((r) => ({
       role: r,
       name: room.players[r].name || null,
@@ -803,7 +821,10 @@ function roundResultCopy(room: Room, role: Role): PhoneView['roundResult'] {
   const mine = log.reveals.find((r) => r.role === role)
   if (!mine) return null
 
-  const didWhat = `You chose ${asPledgeObject(mine.title)}.`
+  // Quoted rather than folded into the sentence: option titles are imperative
+  // ("Demand a Fresh Election"), so "you chose demand a fresh election" reads
+  // as a typo. The quotation is always grammatical whatever the pack says.
+  const didWhat = `You chose “${mine.title}”.`
 
   const costBits: string[] = []
   if (mine.partnerUnfunded) costBits.push('Nobody co-funded it, so it landed at half strength.')

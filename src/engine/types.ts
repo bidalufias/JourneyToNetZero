@@ -271,8 +271,12 @@ export interface RoundLog {
 export interface RoundReveal {
   role: Role
   optionId: string
+  arch: Archetype
   title: string
+  desc: string
   headline: string
+  /** Counted toward the Coalition Bonus — i.e. not Expand, Deregulate or Demand Relief. */
+  aligned: boolean
   /** Multiplier applied to this option's effects, after every rule. */
   multiplier: number
   /** Emissions actually delivered, after MAC, role scaling and multipliers. */

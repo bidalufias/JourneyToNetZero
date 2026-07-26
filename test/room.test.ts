@@ -202,6 +202,33 @@ describe('negotiation', () => {
 
     const resolved = room.promises[0]
     expect(resolved.outcome).toBe(pledged.id === actual.id ? 'kept' : 'broken')
+
+    // The engine advances the round counter the moment it resolves, so the
+    // views must narrate the round just *played* — otherwise the Reckoning
+    // filters out the very pledge it exists to judge.
+    expect(room.phase).toBe('reckoning')
+    const reckoning = dashboardView(room, content)
+    expect(reckoning.round).toBe(1)
+    expect(reckoning.promises).toHaveLength(1)
+    expect(reckoning.promises[0].outcome).not.toBe('unresolved')
+    expect(reckoning.lastRound?.round).toBe(1)
+  })
+
+  it('keeps the promise board on screen through the round summary', () => {
+    const room = seated()
+    run(room, { t: 'start' })
+    expire(room)
+    expire(room)
+    const opts = phoneView(room, content, 'government').options.filter((o) => o.available)
+    run(room, { t: 'promise', role: 'government', optionId: opts[0].id })
+    expire(room) // table -> choice
+    expire(room) // choice -> reckoning
+    expire(room) // reckoning -> summary
+
+    expect(room.phase).toBe('summary')
+    const view = dashboardView(room, content)
+    expect(view.round).toBe(1)
+    expect(view.promises).toHaveLength(1)
   })
 
   it('executes an accepted offer immediately and permanently', () => {
