@@ -1,9 +1,0 @@
-[build]
-  command = "npm run build"
-  publish = "dist"
-
-# Client-side routing: /play/ABCD and /board/ABCD must reach index.html.
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
