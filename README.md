@@ -26,6 +26,7 @@ phone, or just open `/` and pick a surface.
 | `npm test` | Engine parity + session tests |
 | `npm run fixtures` | Regenerate golden fixtures from the reference engine |
 | `npm run build:function` | Bundle the Supabase edge function |
+| `npm run deploy:function` | Bundle and deploy it (needs `SUPABASE_ACCESS_TOKEN`) |
 
 ## How it is put together
 
@@ -106,24 +107,24 @@ SUPABASE_ACCESS_TOKEN   # supabase.com/dashboard/account/tokens
 ```
 
 **The Supabase dashboard.** Edge Functions → *Deploy a new function* → *Via
-Editor*, name it `room`, and paste the contents of
-`supabase/functions/room/index.ts` (copy it straight from GitHub — no checkout
-needed). Leave JWT verification on.
+Editor*, name it `room`, and paste **both** `supabase/functions/room/index.ts`
+and `supabase/functions/room/content.gen.ts` (copy them straight from GitHub —
+no checkout needed). Leave JWT verification on.
 
-**The CLI.**
+**One command, no CLI.** Needs only a token from
+[supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens):
+
+```bash
+SUPABASE_ACCESS_TOKEN=sbp_... npm run deploy:function
+```
+
+It rebuilds first, so what ships is what the source says.
+
+**The Supabase CLI**, if you already have it:
 
 ```bash
 npm run build:function
 supabase functions deploy room --project-ref dsibzzchpokqwscjrbif
-```
-
-**The Management API.**
-
-```bash
-curl -X POST "https://api.supabase.com/v1/projects/dsibzzchpokqwscjrbif/functions/deploy?slug=room" \
-  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
-  -F "metadata={\"entrypoint_path\":\"index.ts\",\"name\":\"room\"};type=application/json" \
-  -F "file=@supabase/functions/room/index.ts;type=application/typescript"
 ```
 
 Whichever you use, rebuild first if you changed the engine, the room or the

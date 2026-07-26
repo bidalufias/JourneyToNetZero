@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc -b --noEmit",
     "fixtures": "python3 tools/gen_golden.py",
-    "build:function": "node tools/build-function.mjs"
+    "build:function": "node tools/build-function.mjs",
+    "deploy:function": "node tools/deploy-function.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",

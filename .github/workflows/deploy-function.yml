@@ -52,10 +52,10 @@ jobs:
       # somebody would be pasting yesterday's game into production.
       - name: Check the committed bundle is current
         run: |
-          if ! git diff --quiet -- supabase/functions/room/index.ts; then
-            echo "::error::supabase/functions/room/index.ts is stale."
+          if ! git diff --quiet -- supabase/functions/room/; then
+            echo "::error::the committed function bundle is stale."
             echo "Run 'npm run build:function' and commit the result."
-            git diff --stat -- supabase/functions/room/index.ts
+            git diff --stat -- supabase/functions/room/
             exit 1
           fi
 

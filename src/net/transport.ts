@@ -32,7 +32,18 @@ export interface PhoneSnapshot {
 
 export type Snapshot = DashboardSnapshot | PhoneSnapshot
 
-export type ConnectionState = 'connecting' | 'live' | 'reconnecting' | 'closed'
+export type ConnectionState =
+  | 'connecting'
+  | 'live'
+  /** Was connected, lost it. The seat is held; this usually recovers. */
+  | 'reconnecting'
+  /**
+   * Configured for Supabase but the server cannot be reached at all — almost
+   * always a missing edge function or a bad key, not a flaky network. Worth
+   * saying differently, because the fix is a deploy and not patience.
+   */
+  | 'unreachable'
+  | 'closed'
 
 export interface Transport {
   /** Fires whenever the server pushes a new view. */
