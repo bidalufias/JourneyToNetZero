@@ -36,7 +36,7 @@ import {
   type Command,
 } from '../../../src/game/room'
 import type { Room } from '../../../src/game/session'
-import { PACK_GZIP_B64 } from './content.gen.ts'
+import { PACK } from './content.gen.ts'
 
 declare const Deno: { env: { get(k: string): string | undefined }; serve(h: (r: Request) => Promise<Response> | Response): void }
 
@@ -44,19 +44,11 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 /**
- * The content pack, unpacked once at boot.
- *
- * It ships compressed and embedded rather than fetched, because every option's
+ * The content pack is embedded rather than fetched, because every option's
  * effects live in it: any URL a client could reach would hand a player the
  * numbers the whole design works to keep from them.
  */
-async function unpackContent(): Promise<Content> {
-  const bytes = Uint8Array.from(atob(PACK_GZIP_B64), (c) => c.charCodeAt(0))
-  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))
-  return loadContent(JSON.parse(await new Response(stream).text()))
-}
-
-const content: Content = await unpackContent()
+const content: Content = loadContent(PACK)
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',

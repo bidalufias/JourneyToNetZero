@@ -2,6 +2,1472 @@
 // Source: supabase/functions/_src/room.ts plus src/engine and src/game.
 // Rebuild with `npm run build:function`.
 
-var b=["government","business","community","activist"],pe=["government","business","activist"],Y=new Set(["SPEND_STEER","TRANSITION","PARTNER","COLLABORATE"]),_=new Set(["EXPAND","DEREGULATE"]);function ge(e){let t=e;if(!t?.config||!Array.isArray(t.scenarios))throw new Error("content pack: missing config or scenarios");let n={},r={};for(let i of t.scenarios)n[i.id]=i,(r[i.round]??=[]).push(i.id);for(let i of Object.values(r))i.sort();return Ke(t,n,r),{config:t.config,scenarios:n,roundVariants:r,resilienceFlags:new Set(t.resilienceFlags),privateGoals:t.privateGoals,insiderTips:t.insiderTips}}function Ke(e,t,n){let r=[];for(let s=1;s<=6;s++)n[s]?.length||r.push(`round ${s} has no scenarios`);for(let s of Object.values(t))for(let o of b){let l=s.options?.[o];if(!l?.length){r.push(`${s.id}: role ${o} has no options`);continue}for(let a of l)(typeof a.e!="number"||typeof a.g!="number")&&r.push(`${a.id}: non-numeric effects`),a.headline||r.push(`${a.id}: missing headline`)}let i=e.config;for(let s of["2","3","4"])i.coalition?.[s]||r.push(`config.coalition missing key ${s}`);if(i.driftTable?.length||r.push("config.driftTable is empty"),r.length)throw new Error(`content pack invalid:
-  ${r.join(`
-  `)}`)}function he(e,t){let n=1;for(let r=0;r<t;r++)n*=e;return n}function be(e,t){for(let n of t.config.driftTable)if(e<=n.greenShareMax)return n.k;return t.config.driftTable[t.config.driftTable.length-1].k}function We(e,t){let n=t.config;return Math.max(n.mac_lo,Math.min(n.mac_lo+n.mac_span,n.mac_lo+n.mac_span*(e-n.mac_ref)/n.mac_range))}function me(e,t){let n=t.config.start;return{path:[...e],round:0,emissions:n.e,growth:n.g,happiness:n.h,greenShare:n.gr,fiscal:n.fiscal,capital:n.capital,spotlights:n.spot,vetoes:t.config.vetoes,trust:{government:0,business:0,activist:0},flags:new Set,gdpHistory:[],happinessHistory:[],picks:[],roleEmissions:{government:0,business:0,community:0,activist:0},spotlightHits:0,vetoesUsed:0,coalitionRounds:0,collabs:0,selforg:0,selfOrganiseSucceeded:0,lastDirty:[]}}function $(e,t,n,r){let i=[];for(let s of t.options[n]){let o=s.cost??{},l=e.flags.has("GRID_UPGRADED")&&Y.has(s.arch)?1:0;o.fiscal!==void 0&&o.fiscal>0&&e.fiscal<Math.max(o.fiscal-l,0)||o.capital!==void 0&&o.capital>0&&e.capital<Math.max(o.capital-l,0)||s.gate_trust&&e.trust.government<s.gate_trust||s.block_flag&&e.flags.has(String(s.block_flag))||i.push(s)}return i.length?i:t.options[n].slice(0,1)}function K(e){let t=e.filter(n=>!_.has(n.arch));return t.length?t:e}function fe(e){let t=0;for(let n of e)n.startsWith("EVIDENCE")&&t++;return t}function ee(e,t,n){let r=n.config,i=e.round,s=n.scenarios[e.path[i]];if(!s)throw new Error(`unknown scenario ${e.path[i]} for round ${i+1}`);let o=i+1;o>=2&&(e.fiscal+=r.fiscal_income,e.growth>=r.fiscal_bonus_at&&(e.fiscal+=1),e.capital+=1,e.growth>=r.capital_income_at&&(e.capital+=1)),e.flags.has("SUBSIDY_LOCK")&&(o===4||o===5)&&(e.fiscal=Math.max(0,e.fiscal-1));let l=s.shock,a=1;if(o===5&&(e.flags.has("BUILT_COAL")||e.flags.has("REGULATORY_CAPTURE"))&&(a=1.6),o===6){e.emissions>r.r6_high_e&&(a*=r.r6_high_mult),e.flags.has("BUILT_COAL")&&(a*=1.5);let d=0;for(let u of e.flags)n.resilienceFlags.has(u)&&d++;a*=Math.max(1-Math.min(d*r.r6_flag_reduce,r.r6_flag_cap),0)}let m=l.g*a,c=l.h*a,p=l.e??0;e.fiscal=Math.max(0,e.fiscal+(l.fiscal??0)),e.capital=Math.max(0,e.capital+(l.capital??0)),e.fiscal=Math.min(e.fiscal,r.fiscal_cap),e.capital=Math.min(e.capital,r.capital_cap);let R=null;t.vetoTarget&&e.vetoes>0&&(R=t.vetoTarget,e.vetoes-=1,e.vetoesUsed+=1);let g={},y=[];for(let d of b){let u=$(e,s,d,n);if(d===R){let T=K(u);for(let O of u)T.includes(O)||y.push(O.id);u=T}let h=u.find(T=>T.id===t.choices[d]);if(!h)throw new Error(`${d} chose ${t.choices[d]}, which is not available this round (available: ${u.map(T=>T.id).join(", ")})`);g[d]=h}let f=g.government.arch==="REGULATE",w=g.government.arch==="DEREGULATE"&&b.filter(d=>d!=="government").every(d=>!_.has(g[d].arch)&&g[d].arch!=="DEMAND_RELIEF"),E=null;if(g.activist.arch==="ESCALATE"&&e.spotlights>0){let d=["business","government"].filter(u=>_.has(g[u].arch));d.length&&(E=d.reduce((u,h)=>g[h].e>g[u].e?h:u),e.spotlights-=1)}let j=We(e.emissions,n),D=0,J=0,G=0,B=0,oe=[];for(let d of b){let u=g[d],h=1,T=!1,O=!1;u.arch==="PARTNER"&&((t.coFund??!1)&&e.fiscal>=1?e.fiscal-=1:(h*=r.partner_unfunded,T=!0)),u.arch==="SELF_ORGANISE"&&(e.flags.has("MUTUAL_AID")||["government","business"].some(Q=>Y.has(g[Q].arch)))&&(h*=r.self_org_mult,e.selfOrganiseSucceeded+=1,O=!0),u.arch==="REGULATE"&&e.flags.has("REGULATORY_CAPTURE")&&o>=5&&(h*=.5),u.boost_flag&&e.flags.has(u.boost_flag)&&(h*=1.5),u.boost_evidence&&fe(e.flags)>=2&&(h*=2),d==="activist"&&(h*=he(r.credibility_decay,e.collabs)),d==="community"&&u.arch==="SELF_ORGANISE"&&(h*=he(r.volunteer_fatigue,e.selforg)),d==="activist"&&u.arch==="ESCALATE"&&E&&(h*=1.4),d===E&&(h*=r.spotlight_backdown),d==="business"&&_.has(u.arch)&&f&&(h*=r.regulation_bite),d==="government"&&w&&(h*=r.public_pressure);let V=u.e<0?r.e_green*j:r.e_dirty,Z=u.e*V*r.role_e[d];D+=Z*h,J+=u.g*h,G+=u.h*h*r.h_scale2,B+=u.gr*h,e.roleEmissions[d]+=Z*h;let L={...u.cost??{}};if(e.flags.has("GRID_UPGRADED")&&Y.has(u.arch))for(let S of Object.keys(L))L[S]>0&&(L[S]=Math.max(0,L[S]-1));if(e.fiscal=Math.max(0,e.fiscal-(L.fiscal??0)),e.capital=Math.max(0,e.capital-(L.capital??0)),u.grants){let[,S,Q]=u.grants;S==="capital"&&(e.capital+=Q)}u.arch==="DEMAND_RELIEF"&&(e.fiscal>=2?e.fiscal-=1:e.trust.government=Math.max(0,e.trust.government-1));let de=u.flags??[];for(let S of de)e.flags.add(S);u.arch==="COLLABORATE"&&(e.collabs+=1),u.arch==="SELF_ORGANISE"&&(e.selforg+=1),oe.push({role:d,optionId:u.id,arch:u.arch,title:u.title,desc:u.desc,headline:u.headline,aligned:!_.has(u.arch)&&u.arch!=="DEMAND_RELIEF",multiplier:h,emissions:Z*h,partnerUnfunded:T,selfOrganiseSupported:O,spotlit:d===E,flagsSet:[...de]})}let z=0;for(let d of b)!_.has(g[d].arch)&&g[d].arch!=="DEMAND_RELIEF"&&z++;let N=r.coalition[String(z)]??null;N&&(D+=N.emissions*r.coal_scale*j,G+=N.happiness*r.coal_scale,B+=N.green*r.coal_scale,e.coalitionRounds+=1);let H=0;f&&(H=r.regulate_abate*j*(_.has(g.business.arch)?1:.45),D-=H,e.roleEmissions.government-=H,e.capital=Math.max(0,e.capital-1)),w&&(e.trust.government=Math.max(0,e.trust.government-1)),E&&(G+=r.accountability_bonus,e.trust[E]=Math.max(0,e.trust[E]-1),e.spotlightHits+=1),e.emissions+=p+D;let Ve=e.growth-r.trend;e.growth=r.trend+r.persist*Ve+m+J,e.growth=Math.max(-5,Math.min(9,e.growth));let ae=r.h_b0+r.h_b_green*(e.greenShare/100)+r.h_b_growth*(e.growth-4.5);e.happiness=ae+r.h_persist*(e.happiness-ae)+c+G*r.h_scale,e.happiness=Math.max(0,Math.min(10,e.happiness));let Ye=fe(e.flags),le=(B+Ye*r.evidence_green)*r.green_scale;le*=Math.pow(1-e.greenShare/100,r.green_power),e.greenShare=Math.max(0,Math.min(100,e.greenShare*r.green_decay+le)),e.growth+=(e.greenShare-10)/r.green_dividend,e.growth=Math.max(-5,Math.min(9,e.growth));let ue=be(e.greenShare,n),ce=e.growth*ue;e.emissions+=ce;let X={};for(let d of["h","gr"]){let u=null,h=-99;for(let T of pe){let O=T==="business"&&e.flags.has("LAYOFFS")?1:0,V=g[T][d]-O;V>h&&(u=T,h=V)}u&&(e.trust[u]+=1,d==="h"?X.care=u:X.future=u)}return e.lastDirty=b.filter(d=>_.has(g[d].arch)),e.gdpHistory.push(e.growth),e.happinessHistory.push(e.happiness),e.picks.push(Object.fromEntries(b.map(d=>[d,g[d].id]))),e.round+=1,{round:o,scenarioId:s.id,shock:{g:m,h:c,e:p},shockMultiplier:a,vetoTarget:R,vetoBlocked:y,spotlightTarget:E,govRegulates:f,govIsolated:w,reveals:oe,alignedCount:z,coalitionBonus:N,forcedAbatement:H,deltas:{e:p+D,g:J,h:G,gr:B},trustAwarded:X,drift:ce,driftK:ue,state:te(e,n)}}function Re(e){return e.gdpHistory.length?e.gdpHistory.reduce((t,n)=>t+n,0)/e.gdpHistory.length:e.growth}function qe(e,t){let n=Math.max(0,6-e.round);return e.emissions+n*e.growth*be(e.greenShare,t)}function te(e,t){return{round:e.round,emissions:e.emissions,growth:e.growth,averageGrowth:Re(e),happiness:e.happiness,greenShare:e.greenShare,fiscal:e.fiscal,capital:e.capital,spotlights:e.spotlights,vetoes:e.vetoes,trust:{...e.trust},flags:[...e.flags].sort(),projection2050:qe(e,t)}}function ye(e,t){let n=t.config,r=Re(e),i=e.emissions<=n.tgt_e,s=r>=n.tgt_g,o=e.happiness>=n.tgt_h;return{win:i&&s&&o,pe:i,pg:s,ph:o,e:e.emissions,g:r,h:e.happiness,gr:e.greenShare,fiscal:e.fiscal,capital:e.capital,trust:{...e.trust},flags:new Set(e.flags),roleEmissions:{...e.roleEmissions},spotlightHits:e.spotlightHits,vetoesUsed:e.vetoesUsed,coalitionRounds:e.coalitionRounds,selfOrganiseSucceeded:e.selfOrganiseSucceeded,gdpHistory:[...e.gdpHistory],happinessHistory:[...e.happinessHistory],picks:e.picks.map(l=>({...l}))}}function ve(e,t){switch(e){case"G-a":return t.trust.government>=6;case"G-b":return Math.min(...t.gdpHistory)>=4;case"G-c":return t.gr>=55;case"B-a":return t.capital>=6;case"B-b":return t.roleEmissions.business<=-40;case"B-c":return t.trust.business>=2&&t.capital>=4;case"C-a":return t.h>=8;case"C-b":return Math.min(...t.happinessHistory)>=6.3;case"C-c":return t.selfOrganiseSucceeded>=4;case"A-a":return!t.flags.has("COMPROMISED")&&t.e<=175;case"A-b":return t.gr>=52;case"A-c":return t.h>=7&&t.spotlightHits>=1;default:throw new Error(`unknown goal ${e}`)}}function Je(e,t){let n=0;for(let r=0;r<e.length;r++)n=n*31+e.charCodeAt(r)>>>0;return n%t}var ze={SPEND_STEER:e=>[e.unpopular?"Expensive. Right. Not everyone will agree.":"Expensive, and the country will feel it working.","Bold. Needs the public behind you.",e.builds?"Buys a green economy. Empties the Treasury.":"Public money, pointed in one direction."],REGULATE:e=>["Makes the polluter move. Costs you friends.",e.slowsEconomy?"It works. Growth will not thank you.":"Force beats persuasion. Someone pays.","The law does what the meeting could not."],DEREGULATE:e=>[e.popular?"Popular today. Expensive by Round 6.":"Cheap now. The bill arrives later.","Protects growth. Costs the country carbon.",e.legacy?"Easy. And it closes doors you will want.":"Do nothing, and hope. It has worked before."],TRANSITION:e=>["Real money, real pain, real cuts.",e.slowsEconomy?"Hurts this year. Pays for a decade.":"The expensive answer, and the honest one.",e.builds?"The biggest green move on the table.":"Capex now. Certainty later."],EXPAND:e=>[e.popular?"Profitable. The room will notice.":"Good for the balance sheet. Bad for the air.","Faster, cheaper, dirtier. Everyone sees it.","Business as usual, at speed."],PARTNER:()=>["Halves in value unless someone co-funds it.","Only works if the Government pays its half.","A deal. It needs a partner to be worth anything."],ADAPT:e=>["Quiet, cheap, and it costs you something.",e.unpopular?"Absorb it. Nobody enjoys this one.":"Get on with it. No drama, small gains.","The unglamorous option that usually helps."],DEMAND_RELIEF:()=>["Makes the Government pay, one way or another.","Relief now. It comes out of someone else.","Loud, popular, and it breaks the coalition."],SELF_ORGANISE:()=>["Doubles if the powerful actually back you.","Do it yourselves. Better with real support.","Community power. It tires people out."],ESCALATE:()=>["Loud. Effective. Nobody here will thank you.","Pressure works. It also makes enemies.","Name them. Watch the room change."],COLLABORATE:()=>["Real influence, and a little of your soul.","A seat at the table costs you credibility.","Inside the room. Quieter every time."],EDUCATE:e=>[e.slowBurn?"Nothing today. Something big by Round 6.":"Slow, cheap, and it compounds.","Evidence now. It pays every round after.","The patient move. It always adds up."]},we=52;function Ee(e){let t=e.hint;if(t)return t.slice(0,we);let n=e.flags??[],r={cuts:e.e<0,slowsEconomy:e.g<0,unpopular:e.h<0,popular:e.h>=.5,builds:e.gr>=8,legacy:n.length>0,slowBurn:n.some(o=>o.startsWith("EVIDENCE"))},i=ze[e.arch];if(!i)return"A judgement call. Make it.";let s=i(r).filter(o=>o.length<=we);return s.length?s[Je(e.id,s.length)]:"A judgement call. Make it."}function Te(e){let t=e.cost??{},n=[];return t.fiscal&&n.push(t.fiscal>0?`${t.fiscal} FP`:`+${-t.fiscal} FP`),t.capital&&n.push(t.capital>0?`${t.capital} C`:`+${-t.capital} C`),n.length?n.join(" \xB7 "):"FREE"}var Xe={financial:{government:"The Treasury wants a decision today. Your backbenchers want a different one.",business:"The board meets in an hour. They want to know what this costs.",community:"Three people on your street lost their jobs before lunch.",activist:"Every rescue package is a chance to attach a condition. Or to be ignored."},energy:{government:"The subsidy bill is now the largest line in your budget. Everybody knows it.",business:"Your energy costs just became your biggest risk, and your biggest opportunity.",community:"The bill arrived this morning. People are talking about nothing else.",activist:"This is the round where the country picks its next thirty years of power."},health:{government:"Hospitals are calling your office directly. So are the employers.",business:"Your workforce is the exposure here, not your plant.",community:"People are frightened, and they are looking to each other, not upward.",activist:"Clean air just stopped being an abstraction. Use it or lose the moment."},election:{government:"Everything you chose in the last three rounds is now a poster or a scandal.",business:"Whoever wins writes the rules you operate under. Money talks, and it is recorded.",community:"You are the only one in this room who actually casts a vote.",activist:"Endorsement is the only currency you have. Spend it once, spend it well."},pollution:{government:"Somebody will be blamed. You get to decide whether it is a company or a law.",business:"Your permit may be lawful. That is not the same as being defensible.",community:"This happened to your neighbourhood, not to a statistic.",activist:"The evidence exists. The question is whether anyone has to look at it."},disaster:{government:"This is the last round. Whatever you do now is what you are remembered for.",business:"The rebuild is a contract. It is also the last chance to be on the right side.",community:"Your people are in the water and the boats are mostly volunteers.",activist:"Ten years of work, and one afternoon to decide what it was for."}};function _e(e,t){return Xe[e]?.[t]??"The room is waiting for you."}var ke=[{id:"pay-first",text:e=>`the ${e} pays its share before anyone else moves`},{id:"no-dirty",text:e=>`the ${e} does not take the cheap option this round`},{id:"go-public",text:e=>`the ${e} says out loud what it is about to choose`},{id:"co-fund",text:e=>`the ${e} co-funds the partnership on the table`},{id:"protect-jobs",text:e=>`the ${e} guarantees nobody loses a job over this`},{id:"no-more-delay",text:e=>`the ${e} stops asking everyone else to go first`}],ne={government:"The Government",business:"The Business",community:"The Community",activist:"The Activist"};function Se(e){return e.split(" ").map(t=>/^(RG|EV|ID|PPA|GW|[A-Z]{2,})$/.test(t)?t:t.toLowerCase()).join(" ")}function Ze(e){let t=e>>>0;return function(){t=t+1831565813>>>0;let r=t;return r=Math.imul(r^r>>>15,r|1),r^=r+Math.imul(r^r>>>7,r|61),((r^r>>>14)>>>0)/4294967296}}function F(e,t){return{value:Ze(e+t*2654435769)(),cursor:t+1}}function C(e,t,n){let r=F(t,n);return{value:e[Math.floor(r.value*e.length)],cursor:r.cursor}}function Ae(e){let t="ABCDEFGHJKLMNPQRSTUVWXYZ",n=0,r="";for(let i=0;i<4;i++){let s=F(e,n);n=s.cursor,r+=t[Math.floor(s.value*t.length)]}return r}var Ie={lobby:0,briefing:2e4,crisis:3e4,table:9e4,choice:45e3,reckoning:75e3,summary:8e3,results:0,ended:0};var U={government:{kind:"fiscal",label:"Your Fiscal Points"},business:{kind:"capital",label:"Your Capital"},community:{kind:"trust-awards",label:"Public Mandate vetoes"},activist:{kind:"spotlights",label:"Spotlights"}};function ie(e,t,n){let r=0,i=[];for(let o=1;o<=6;o++){let l=C(e.roundVariants[o],t,r);r=l.cursor,i.push(l.value)}let s=Object.fromEntries(b.map(o=>[o,{role:o,name:"",connected:!1,goalId:null,choiceId:null,autoLocked:!1,lockedAt:null}]));return{code:Ae(t),createdAt:n,phase:"lobby",phaseEndsAt:null,players:s,game:me(i,e),promises:[],offers:[],tips:[],vetoTarget:null,coFund:!1,spotlightCalled:!1,lastRound:null,history:[],tipRotation:[],seed:t,rngCursor:r}}function W(e,t){let n=e.game.path[e.game.round];return n?t.scenarios[n]??null:null}function k(e){return Math.min(e.game.round+1,6)}function I(e){return(e.phase==="reckoning"||e.phase==="summary")&&e.lastRound?e.lastRound.round:k(e)}function A(e,t,n){e.phase=t;let r=Ie[t];e.phaseEndsAt=r>0?n+r:null}function Qe(e){return b.every(t=>e.players[t].choiceId!==null)}function re(e){return Math.max(0,e.game.vetoes-(e.vetoTarget?1:0))}function se(e,t,n){let r=W(e,t);if(!r)return[];let i=$(e.game,r,n,t);return n===e.vetoTarget?K(i):i}function xe(e,t,n,r){switch(t.t){case"join":{let i=e.players[t.role];return i.connected&&i.name&&i.name!==t.name||(i.name=t.name,i.connected=!0),e}case"reconnect":return e.players[t.role].connected=!0,e;case"leave":return e.players[t.role].connected=!1,e;case"pickGoal":return e.players[t.role].goalId||(e.players[t.role].goalId=t.goalId),e;case"start":return e.phase!=="lobby"||A(e,"briefing",r),e;case"advance":return Le(e,n,r);case"promise":{if(e.phase!=="table")return e;let s=W(e,n)?.options[t.role].find(o=>o.id===t.optionId);return s&&(e.promises=e.promises.filter(o=>!(o.round===k(e)&&o.from===t.role&&o.kind==="promise")),e.promises.push({id:`${t.role}-${k(e)}-p`,round:k(e),from:t.role,kind:"promise",text:`${ne[t.role]} will ${Se(s.title)}.`,optionId:s.id,outcome:"unresolved"})),e}case"demand":{if(e.phase!=="table")return e;let i=ke.find(s=>s.id===t.phraseId);return i&&(e.promises=e.promises.filter(s=>!(s.round===k(e)&&s.from===t.role&&s.kind==="demand")),e.promises.push({id:`${t.role}-${k(e)}-d`,round:k(e),from:t.role,kind:"demand",text:`${ne[t.role]} demands ${i.text(t.target)}.`,optionId:null,outcome:"unresolved"})),e}case"offer":{if(e.phase!=="table")return e;let i=t.resource==="fiscal"?e.game.fiscal:e.game.capital;return t.amount<1||t.amount>i||e.offers.push({id:`o${e.offers.length}-${k(e)}`,round:k(e),from:t.from,to:t.to,resource:t.resource,amount:t.amount,status:"pending"}),e}case"respondOffer":{let i=e.offers.find(l=>l.id===t.offerId&&l.to===t.role);if(!i||i.status!=="pending")return e;if(!t.accept)return i.status="declined",e;i.status="accepted";let s=U[i.to].kind,o=U[i.from].kind;if(o==="fiscal"&&s==="capital"){let l=Math.min(i.amount,e.game.fiscal);e.game.fiscal-=l,e.game.capital+=l}else if(o==="capital"&&s==="fiscal"){let l=Math.min(i.amount,e.game.capital);e.game.capital-=l,e.game.fiscal+=l}return e}case"spotlight":return e.phase!=="table"||t.role!=="activist"||e.game.spotlights<=0||(e.spotlightCalled=!0),e;case"veto":{if(e.phase!=="table"||t.role!=="community"||e.game.vetoes<=0||e.vetoTarget)return e;e.vetoTarget=t.target;let i=se(e,n,t.target).map(o=>o.id),s=e.players[t.target];return s.choiceId&&!i.includes(s.choiceId)&&(s.choiceId=null,s.lockedAt=null),e}case"coFund":return t.role!=="government"||(e.coFund=t.agree),e;case"publishTip":{let i=e.tips.find(s=>s.round===k(e)&&s.to===t.role);return!i||i.published||(i.published=!0),e}case"choose":return e.phase!=="choice"&&e.phase!=="table"||!se(e,n,t.role).some(s=>s.id===t.optionId)?e:(e.players[t.role].choiceId=t.optionId,e.players[t.role].autoLocked=!1,e.players[t.role].lockedAt=r,e.phase==="choice"&&Qe(e)?Me(e,n,r):e);case"lock":return e;default:return e}}function Pe(e,t,n){return e.phaseEndsAt===null||n<e.phaseEndsAt?e:Le(e,t,n)}function Le(e,t,n){switch(e.phase){case"lobby":return A(e,"briefing",n),e;case"briefing":return Oe(e,t,n);case"crisis":return A(e,"table",n),e;case"table":return A(e,"choice",n),e;case"choice":for(let r of b)if(e.players[r].choiceId===null){let i=se(e,t,r);i.length&&(e.players[r].choiceId=i[0].id,e.players[r].autoLocked=!0,e.players[r].lockedAt=n)}return Me(e,t,n);case"reckoning":return A(e,"summary",n),e;case"summary":return e.game.round>=6?(A(e,"results",n),e):Oe(e,t,n);case"results":return A(e,"ended",n),e;default:return e}}function Oe(e,t,n){e.vetoTarget=null,e.coFund=!1,e.spotlightCalled=!1;for(let r of b)e.players[r].choiceId=null,e.players[r].autoLocked=!1,e.players[r].lockedAt=null;return tt(e,t),A(e,"crisis",n),e}function Me(e,t,n){let r=Object.fromEntries(b.map(s=>[s,e.players[s].choiceId]));if(!e.spotlightCalled&&t.scenarios[e.game.path[e.game.round]].options.activist.find(o=>o.id===r.activist)?.arch==="ESCALATE"){let o=e.game.spotlights;e.game.spotlights=0;let l=ee(e.game,{choices:r,vetoTarget:e.vetoTarget,coFund:e.coFund},t);return e.game.spotlights=o,Ce(e,l,r,t,n)}let i=ee(e.game,{choices:r,vetoTarget:e.vetoTarget,coFund:e.coFund},t);return Ce(e,i,r,t,n)}function Ce(e,t,n,r,i){for(let o of e.promises)o.round!==t.round||o.kind!=="promise"||!o.optionId||(o.outcome=n[o.from]===o.optionId?"kept":"broken");let s=e.tips.find(o=>o.round===t.round);s?.published&&(s.revealed=!0,et(e,s));for(let o of e.offers)o.round===t.round&&o.status==="pending"&&(o.status="expired");return e.lastRound=t,e.history.push(t),A(e,"reckoning",i),e}function et(e,t){if(t.to==="community"){e.game.vetoes=t.isTrue?Math.min(3,e.game.vetoes+1):Math.max(0,e.game.vetoes-1);return}let n=t.to;e.game.trust[n]=t.isTrue?e.game.trust[n]+1:Math.max(0,e.game.trust[n]-1)}function tt(e,t){let n=k(e);if(e.tips.some(a=>a.round===n))return;let r=e.rngCursor,i=b.filter(a=>!e.tipRotation.includes(a));if(i.length){if(e.tipRotation.length){let a=e.tipRotation[e.tipRotation.length-1],m=i.filter(c=>c!==a);m.length&&(i=m)}}else{let a=e.tipRotation[e.tipRotation.length-1];i=b.filter(m=>m!==a)}let s=C(i,e.seed,r);r=s.cursor;let o=s.value,l=nt(e,t,o,n,r);r=l.cursor,e.tips.push(l.tip),e.tipRotation.push(o),e.rngCursor=r}function nt(e,t,n,r,i){let s=i,o=t.insiderTips,l=e.game.path[e.game.round],a=e.game.path[e.game.round+1],m=F(e.seed,s);s=m.cursor;let c=m.value<.25&&r>=2,p=[];c||(a&&p.push("forecast"),p.push("intel"),r>=2&&p.push("dossier")),(c||!p.length)&&p.push("rumour");let R=C(p,e.seed,s);s=R.cursor;let g=R.value;if(g==="rumour"){let y=Object.keys(o.whispers),f=C(y,e.seed,s);s=f.cursor;let w=F(e.seed,s);return s=w.cursor,{tip:{id:`tip-${r}`,round:r,to:n,kind:"rumour",reliability:"UNVERIFIED",source:"A rumour going round",text:o.whispers[f.value],isTrue:w.value<o.whisperAccuracy,published:!1,revealed:!1},cursor:s}}if(g==="forecast"&&a){let y=t.scenarios[a].type,f=o.forecasts[y]??[],w=f.length?C(f,e.seed,s):{value:"",cursor:s};return s=w.cursor,{tip:{id:`tip-${r}`,round:r,to:n,kind:"forecast",reliability:"CONFIRMED",source:"Cabinet Situation Room",text:w.value||"Something is coming. Nobody will say what.",isTrue:!0,published:!1,revealed:!1},cursor:s}}if(g==="dossier"){let y=b.filter(f=>f!==n&&e.players[f].goalId);if(y.length){let f=C(y,e.seed,s);s=f.cursor;let w=e.players[f.value].goalId;return{tip:{id:`tip-${r}`,round:r,to:n,kind:"dossier",reliability:"CONFIRMED",source:"A friend in the ministry",text:o.whispers[w]??"They want something they have not said out loud.",isTrue:!0,published:!1,revealed:!1},cursor:s}}}return{tip:{id:`tip-${r}`,round:r,to:n,kind:"memo",reliability:"CONFIRMED",source:"A sealed brief",text:o.intel[l]??"The official figures are not the real ones.",isTrue:!0,published:!1,revealed:!1},cursor:s}}function De(e,t){let n=W(e,t),i=b.map(a=>e.players[a].lockedAt).filter(a=>a!==null).length===3?b.find(a=>e.players[a].choiceId===null):null,s=e.tips.find(a=>a.round===I(e)),o=s?.published&&s?{from:s.to,text:s.text,source:s.source,verdict:s.revealed?s.isTrue?"true":"false":null}:null,l=e.vetoTarget?{target:e.vetoTarget,removed:n?$(e.game,n,e.vetoTarget,t).filter(a=>_.has(a.arch)).map(a=>a.title):[],remaining:re(e)}:null;return{code:e.code,phase:e.phase,phaseEndsAt:e.phaseEndsAt,round:I(e),scenario:n?{id:n.id,title:n.title,type:n.type,situation:n.situation}:null,state:te(e.game,t),seats:b.map(a=>({role:a,name:e.players[a].name||null,connected:e.players[a].connected,locked:e.players[a].choiceId!==null,lastToLock:i===a})),promises:e.promises.filter(a=>a.round===I(e)),offersInFlight:e.offers.filter(a=>a.round===I(e)&&a.status==="pending"),tipDealtThisRound:!!s,publishedTip:o,spotlight:e.spotlightCalled?{by:"activist",target:e.lastRound?.spotlightTarget??null,remaining:e.game.spotlights}:null,veto:l,lastRound:e.lastRound,history:e.history,headlines:e.history.flatMap(a=>a.reveals.map(m=>m.headline)).slice(-12),targets:{emissions:t.config.tgt_e,growth:t.config.tgt_g,happiness:t.config.tgt_h}}}function Ge(e,t,n){let r=W(e,t),i=e.players[n],s=e.phase==="table"||e.phase==="choice",o=[];if(r&&s){let c=$(e.game,r,n,t),p=n===e.vetoTarget?K(c):c;o=r.options[n].map(R=>{let g=c.some(E=>E.id===R.id),y=p.some(E=>E.id===R.id),f=null,w=null;if(g)y||(f="veto",w='"The public will simply not accept this." \u2014 the Community, this round only');else if(R.gate_trust&&e.game.trust.government<R.gate_trust)f="gate",w=`Needs ${R.gate_trust} Trust. The country has not backed you.`;else if(R.block_flag&&e.game.flags.has(String(R.block_flag)))f="gate",w="A promise you made earlier closed this door.";else{f="afford";let E=R.cost?.fiscal??R.cost?.capital??0;w=`You have ${R.cost?.fiscal?e.game.fiscal:e.game.capital} of ${E}.`}return{id:R.id,title:R.title,desc:R.desc,cost:Te(R),hint:Ee(R),available:y,disabled:f,disabledNote:w}})}let l=U[n].kind,a=l==="fiscal"?e.game.fiscal:l==="capital"?e.game.capital:l==="spotlights"?e.game.spotlights:re(e),m=i.goalId===null?t.privateGoals[n].map(c=>({id:c.id,title:c.title,desc:c.desc})):null;return{code:e.code,role:n,name:i.name,phase:e.phase,phaseEndsAt:e.phaseEndsAt,round:I(e),scenario:r?{id:r.id,title:r.title,situation:r.situation,type:r.type}:null,privateLine:r?_e(r.type,n):null,options:o,choiceId:i.choiceId,locked:i.choiceId!==null,resource:{kind:l,value:a,label:U[n].label},trust:{...e.game.trust},vetoesRemaining:re(e),spotlightsRemaining:e.game.spotlights,goalId:i.goalId,goalChoices:m,tip:e.tips.find(c=>c.to===n&&c.round===I(e))??null,promises:e.promises.filter(c=>c.round===I(e)),incomingOffers:e.offers.filter(c=>c.to===n&&c.status==="pending"),sentOffers:e.offers.filter(c=>c.from===n&&c.round===I(e)),seats:b.map(c=>({role:c,name:e.players[c].name||null,connected:e.players[c].connected,locked:e.players[c].choiceId!==null})),roundResult:rt(e,n),waitingOn:b.filter(c=>e.players[c].choiceId===null).length}}function rt(e,t){let n=e.lastRound;if(!n||e.phase!=="reckoning"&&e.phase!=="summary")return null;let r=n.reveals.find(a=>a.role===t);if(!r)return null;let i=`You chose \u201C${r.title}\u201D.`,s=[];r.partnerUnfunded&&s.push("Nobody co-funded it, so it landed at half strength."),r.spotlit&&s.push("You were named publicly, and it cost you."),r.selfOrganiseSupported&&s.push("Real backing arrived, and it counted double."),n.govIsolated&&t==="government"&&s.push("You moved alone, and the country only half-followed."),s.length||s.push("It landed as you intended.");let o=[];n.alignedCount>=3?o.push(n.alignedCount===4?"All four of you moved together \u2014 the coalition held.":"Three of you moved together \u2014 the coalition held."):o.push("The table did not move together this round.");let l=e.promises.filter(a=>a.round===n.round&&a.outcome==="broken");return l.length&&o.push(`${l.map(a=>a.from).join(" and ")} broke a promise.`),{didWhat:i,cost:s.join(" "),others:o.join(" ")}}function Ne(e,t){let n=ye(e.game,t),r=t.config;return{win:n.win,targets:[{key:"emissions",value:n.e,target:r.tgt_e,met:n.pe},{key:"growth",value:n.g,target:r.tgt_g,met:n.pg},{key:"happiness",value:n.h,target:r.tgt_h,met:n.ph}],players:b.map(i=>{let s=e.players[i],o=t.privateGoals[i].find(a=>a.id===s.goalId)??null,l=s.goalId?ve(s.goalId,n):!1;return{role:i,name:s.name,goalId:s.goalId,goalTitle:o?.title??null,goalMet:l,title:n.win?"NATION BUILDER":l?"HOLLOW VICTORY":"NO TITLE"}})}}import{PACK_GZIP_B64 as st}from"./content.gen.ts";var je=Deno.env.get("SUPABASE_URL"),q=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");async function it(){let e=Uint8Array.from(atob(st),n=>n.charCodeAt(0)),t=new Blob([e]).stream().pipeThrough(new DecompressionStream("gzip"));return ge(JSON.parse(await new Response(t).text()))}var x=await it(),Be={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS"},v=(e,t=200)=>new Response(JSON.stringify(e),{status:t,headers:{...Be,"Content-Type":"application/json"}});async function P(e,t={}){return fetch(`${je}/rest/v1/${e}`,{...t,headers:{apikey:q,Authorization:`Bearer ${q}`,"Content-Type":"application/json",...t.headers??{}}})}function He(e){return{...e,game:{...e.game,flags:[...e.game.flags]}}}function ot(e){let t=e;return t.game.flags=new Set(t.game.flags),t}async function $e(e){let t=await P(`rooms?code=eq.${e}&select=state,revision`);if(!t.ok)return null;let n=await t.json();return n.length?{room:ot(n[0].state),revision:n[0].revision}:null}async function Fe(e,t){let n=t+1;return await P(`rooms?code=eq.${e.code}`,{method:"PATCH",body:JSON.stringify({state:He(e),revision:n,updated_at:new Date().toISOString()})}),n}async function Ue(e,t){await fetch(`${je}/realtime/v1/api/broadcast`,{method:"POST",headers:{apikey:q,Authorization:`Bearer ${q}`,"Content-Type":"application/json"},body:JSON.stringify({messages:[{topic:`room:${e}`,event:"rev",payload:{revision:t}}]})}).catch(()=>{})}async function at(e,t){let n=await P(`room_seats?code=eq.${e}&token=eq.${t}&select=role`);if(!n.ok)return null;let r=await n.json();return r.length?r[0].role:null}function M(e,t){let r=e.phase==="results"||e.phase==="ended"?Ne(e,x):null;return t==="dashboard"?{kind:"dashboard",view:De(e,x),endgame:r}:{kind:"phone",view:Ge(e,x,t),endgame:r}}function lt(e,t){if(e==="dashboard")return t.t==="start"||t.t==="advance"?t:null;switch(t.t){case"join":case"reconnect":case"leave":case"pickGoal":case"promise":case"demand":case"respondOffer":case"spotlight":case"veto":case"coFund":case"publishTip":case"choose":case"lock":return{...t,role:e};case"offer":return{...t,from:e};default:return null}}Deno.serve(async e=>{if(e.method==="OPTIONS")return new Response("ok",{headers:Be});if(e.method!=="POST")return v({error:"POST only"},405);let t;try{t=await e.json()}catch{return v({error:"bad json"},400)}let n=String(t.action??""),r=Date.now();if(n==="create"){let c=Math.floor(Math.random()*2147483648),p=ie(x,c,r);for(let y=0;y<8;y++){let f=await P("rooms",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({code:p.code,state:He(p),revision:1})});if(f.ok)break;if(f.status!==409)return v({error:"could not create room"},500);if(p=ie(x,c+y+1,r),y===7)return v({error:"no free room code"},503)}let g=await(await P("room_seats",{method:"POST",headers:{Prefer:"return=representation"},body:JSON.stringify({code:p.code,role:"dashboard"})})).json();return v({code:p.code,token:g[0].token,...M(p,"dashboard"),revision:1})}let i=String(t.code??"").toUpperCase();if(!/^[A-Z]{4}$/.test(i))return v({error:"bad room code"},400);if(n==="claim"){let c=String(t.role??"");if(!b.includes(c))return v({error:"unknown seat"},400);let p=await $e(i);if(!p)return v({error:"no such room"},404);let g=await(await P(`room_seats?code=eq.${i}&role=eq.${c}&select=token`)).json();if(g.length)return v({token:g[0].token,...M(p.room,c),revision:p.revision});let y=await P("room_seats",{method:"POST",headers:{Prefer:"return=representation"},body:JSON.stringify({code:i,role:c})});if(!y.ok)return v({error:"seat taken"},409);let f=await y.json();return v({token:f[0].token,...M(p.room,c),revision:p.revision})}let s=String(t.token??""),o=s?await at(i,s):null;if(!o)return v({error:"not your seat"},403);let l=await $e(i);if(!l)return v({error:"no such room"},404);let{room:a,revision:m}=l;if(n==="view")return v({...M(a,o),revision:m});if(n==="tick"){let c=a.phase,p=a.phaseEndsAt;return a=Pe(a,x,Date.now()),(a.phase!==c||a.phaseEndsAt!==p)&&(m=await Fe(a,m),await Ue(i,m)),v({...M(a,o),revision:m})}if(n==="cmd"){let c=t.cmd,p=c?lt(o,c):null;return p?(a=xe(a,p,x,Date.now()),m=await Fe(a,m),await Ue(i,m),v({...M(a,o),revision:m})):v({error:"not allowed from this seat"},403)}return v({error:"unknown action"},400)});
+
+// src/engine/types.ts
+var ROLES = ["government", "business", "community", "activist"];
+var TRUST_ROLES = ["government", "business", "activist"];
+var SUPPORTIVE = /* @__PURE__ */ new Set([
+  "SPEND_STEER",
+  "TRANSITION",
+  "PARTNER",
+  "COLLABORATE"
+]);
+var DIRTY = /* @__PURE__ */ new Set(["EXPAND", "DEREGULATE"]);
+
+// src/engine/content.ts
+function loadContent(raw) {
+  const pack = raw;
+  if (!pack?.config || !Array.isArray(pack.scenarios)) {
+    throw new Error("content pack: missing config or scenarios");
+  }
+  const scenarios = {};
+  const roundVariants = {};
+  for (const s of pack.scenarios) {
+    scenarios[s.id] = s;
+    (roundVariants[s.round] ??= []).push(s.id);
+  }
+  for (const ids of Object.values(roundVariants)) ids.sort();
+  validate(pack, scenarios, roundVariants);
+  return {
+    config: pack.config,
+    scenarios,
+    roundVariants,
+    resilienceFlags: new Set(pack.resilienceFlags),
+    privateGoals: pack.privateGoals,
+    insiderTips: pack.insiderTips
+  };
+}
+function validate(pack, scenarios, roundVariants) {
+  const problems = [];
+  for (let r = 1; r <= 6; r++) {
+    if (!roundVariants[r]?.length) problems.push(`round ${r} has no scenarios`);
+  }
+  for (const s of Object.values(scenarios)) {
+    for (const role of ROLES) {
+      const opts = s.options?.[role];
+      if (!opts?.length) {
+        problems.push(`${s.id}: role ${role} has no options`);
+        continue;
+      }
+      for (const o of opts) {
+        if (typeof o.e !== "number" || typeof o.g !== "number") {
+          problems.push(`${o.id}: non-numeric effects`);
+        }
+        if (!o.headline) problems.push(`${o.id}: missing headline`);
+      }
+    }
+  }
+  const c = pack.config;
+  for (const key of ["2", "3", "4"]) {
+    if (!c.coalition?.[key]) problems.push(`config.coalition missing key ${key}`);
+  }
+  if (!c.driftTable?.length) problems.push("config.driftTable is empty");
+  if (problems.length) {
+    throw new Error(`content pack invalid:
+  ${problems.join("\n  ")}`);
+  }
+}
+
+// src/engine/engine.ts
+function powInt(base, n) {
+  let out = 1;
+  for (let i = 0; i < n; i++) out *= base;
+  return out;
+}
+function driftK(greenShare, content2) {
+  for (const band of content2.config.driftTable) {
+    if (greenShare <= band.greenShareMax) return band.k;
+  }
+  return content2.config.driftTable[content2.config.driftTable.length - 1].k;
+}
+function mac(emissions, content2) {
+  const c = content2.config;
+  return Math.max(
+    c.mac_lo,
+    Math.min(c.mac_lo + c.mac_span, c.mac_lo + c.mac_span * (emissions - c.mac_ref) / c.mac_range)
+  );
+}
+function createGame(path, content2) {
+  const s = content2.config.start;
+  return {
+    path: [...path],
+    round: 0,
+    emissions: s.e,
+    growth: s.g,
+    happiness: s.h,
+    greenShare: s.gr,
+    fiscal: s.fiscal,
+    capital: s.capital,
+    spotlights: s.spot,
+    vetoes: content2.config.vetoes,
+    trust: { government: 0, business: 0, activist: 0 },
+    flags: /* @__PURE__ */ new Set(),
+    gdpHistory: [],
+    happinessHistory: [],
+    picks: [],
+    roleEmissions: { government: 0, business: 0, community: 0, activist: 0 },
+    spotlightHits: 0,
+    vetoesUsed: 0,
+    coalitionRounds: 0,
+    collabs: 0,
+    selforg: 0,
+    selfOrganiseSucceeded: 0,
+    lastDirty: []
+  };
+}
+function availableOptions(state, scenario, role, _content) {
+  const out = [];
+  for (const o of scenario.options[role]) {
+    const cost = o.cost ?? {};
+    const discount = state.flags.has("GRID_UPGRADED") && SUPPORTIVE.has(o.arch) ? 1 : 0;
+    if (cost.fiscal !== void 0 && cost.fiscal > 0) {
+      if (state.fiscal < Math.max(cost.fiscal - discount, 0)) continue;
+    }
+    if (cost.capital !== void 0 && cost.capital > 0) {
+      if (state.capital < Math.max(cost.capital - discount, 0)) continue;
+    }
+    if (o.gate_trust && state.trust.government < o.gate_trust) continue;
+    if (o.block_flag && state.flags.has(String(o.block_flag))) continue;
+    out.push(o);
+  }
+  return out.length ? out : scenario.options[role].slice(0, 1);
+}
+function applyVeto(options) {
+  const clean = options.filter((o) => !DIRTY.has(o.arch));
+  return clean.length ? clean : options;
+}
+function countEvidence(flags) {
+  let n = 0;
+  for (const f of flags) if (f.startsWith("EVIDENCE")) n++;
+  return n;
+}
+function playRound(state, input, content2) {
+  const cfg = content2.config;
+  const i = state.round;
+  const scenario = content2.scenarios[state.path[i]];
+  if (!scenario) throw new Error(`unknown scenario ${state.path[i]} for round ${i + 1}`);
+  const rnd = i + 1;
+  if (rnd >= 2) {
+    state.fiscal += cfg.fiscal_income;
+    if (state.growth >= cfg.fiscal_bonus_at) state.fiscal += 1;
+    state.capital += 1;
+    if (state.growth >= cfg.capital_income_at) state.capital += 1;
+  }
+  if (state.flags.has("SUBSIDY_LOCK") && (rnd === 4 || rnd === 5)) {
+    state.fiscal = Math.max(0, state.fiscal - 1);
+  }
+  const sh = scenario.shock;
+  let mult = 1;
+  if (rnd === 5 && (state.flags.has("BUILT_COAL") || state.flags.has("REGULATORY_CAPTURE"))) {
+    mult = 1.6;
+  }
+  if (rnd === 6) {
+    if (state.emissions > cfg.r6_high_e) mult *= cfg.r6_high_mult;
+    if (state.flags.has("BUILT_COAL")) mult *= 1.5;
+    let nres = 0;
+    for (const f of state.flags) if (content2.resilienceFlags.has(f)) nres++;
+    mult *= Math.max(1 - Math.min(nres * cfg.r6_flag_reduce, cfg.r6_flag_cap), 0);
+  }
+  const shG = sh.g * mult;
+  const shH = sh.h * mult;
+  const shE = sh.e ?? 0;
+  state.fiscal = Math.max(0, state.fiscal + (sh.fiscal ?? 0));
+  state.capital = Math.max(0, state.capital + (sh.capital ?? 0));
+  state.fiscal = Math.min(state.fiscal, cfg.fiscal_cap);
+  state.capital = Math.min(state.capital, cfg.capital_cap);
+  let vetoTarget = null;
+  if (input.vetoTarget && state.vetoes > 0) {
+    vetoTarget = input.vetoTarget;
+    state.vetoes -= 1;
+    state.vetoesUsed += 1;
+  }
+  const chosen = {};
+  const vetoBlocked = [];
+  for (const r of ROLES) {
+    let opts = availableOptions(state, scenario, r, content2);
+    if (r === vetoTarget) {
+      const after = applyVeto(opts);
+      for (const o of opts) if (!after.includes(o)) vetoBlocked.push(o.id);
+      opts = after;
+    }
+    const pick2 = opts.find((o) => o.id === input.choices[r]);
+    if (!pick2) {
+      throw new Error(
+        `${r} chose ${input.choices[r]}, which is not available this round (available: ${opts.map((o) => o.id).join(", ")})`
+      );
+    }
+    chosen[r] = pick2;
+  }
+  const govRegulates = chosen.government.arch === "REGULATE";
+  const govIsolated = chosen.government.arch === "DEREGULATE" && ROLES.filter((r) => r !== "government").every(
+    (r) => !DIRTY.has(chosen[r].arch) && chosen[r].arch !== "DEMAND_RELIEF"
+  );
+  let spotTarget = null;
+  if (chosen.activist.arch === "ESCALATE" && state.spotlights > 0) {
+    const cand = ["business", "government"].filter((r) => DIRTY.has(chosen[r].arch));
+    if (cand.length) {
+      spotTarget = cand.reduce((a, b) => chosen[b].e > chosen[a].e ? b : a);
+      state.spotlights -= 1;
+    }
+  }
+  const macNow = mac(state.emissions, content2);
+  let de = 0;
+  let dg = 0;
+  let dh = 0;
+  let dgr = 0;
+  const reveals = [];
+  for (const r of ROLES) {
+    const o = chosen[r];
+    let m = 1;
+    let partnerUnfunded = false;
+    let selfOrganiseSupported = false;
+    if (o.arch === "PARTNER") {
+      const cofunded = (input.coFund ?? false) && state.fiscal >= 1;
+      if (cofunded) {
+        state.fiscal -= 1;
+      } else {
+        m *= cfg.partner_unfunded;
+        partnerUnfunded = true;
+      }
+    }
+    if (o.arch === "SELF_ORGANISE") {
+      const supported = state.flags.has("MUTUAL_AID") || ["government", "business"].some((x) => SUPPORTIVE.has(chosen[x].arch));
+      if (supported) {
+        m *= cfg.self_org_mult;
+        state.selfOrganiseSucceeded += 1;
+        selfOrganiseSupported = true;
+      }
+    }
+    if (o.arch === "REGULATE" && state.flags.has("REGULATORY_CAPTURE") && rnd >= 5) {
+      m *= 0.5;
+    }
+    if (o.boost_flag && state.flags.has(o.boost_flag)) m *= 1.5;
+    if (o.boost_evidence && countEvidence(state.flags) >= 2) m *= 2;
+    if (r === "activist") m *= powInt(cfg.credibility_decay, state.collabs);
+    if (r === "community" && o.arch === "SELF_ORGANISE") {
+      m *= powInt(cfg.volunteer_fatigue, state.selforg);
+    }
+    if (r === "activist" && o.arch === "ESCALATE" && spotTarget) m *= 1.4;
+    if (r === spotTarget) m *= cfg.spotlight_backdown;
+    if (r === "business" && DIRTY.has(o.arch) && govRegulates) m *= cfg.regulation_bite;
+    if (r === "government" && govIsolated) m *= cfg.public_pressure;
+    const em = o.e < 0 ? cfg.e_green * macNow : cfg.e_dirty;
+    const e = o.e * em * cfg.role_e[r];
+    de += e * m;
+    dg += o.g * m;
+    dh += o.h * m * cfg.h_scale2;
+    dgr += o.gr * m;
+    state.roleEmissions[r] += e * m;
+    const c = { ...o.cost ?? {} };
+    if (state.flags.has("GRID_UPGRADED") && SUPPORTIVE.has(o.arch)) {
+      for (const k2 of Object.keys(c)) {
+        if (c[k2] > 0) c[k2] = Math.max(0, c[k2] - 1);
+      }
+    }
+    state.fiscal = Math.max(0, state.fiscal - (c.fiscal ?? 0));
+    state.capital = Math.max(0, state.capital - (c.capital ?? 0));
+    if (o.grants) {
+      const [, resource, amount] = o.grants;
+      if (resource === "capital") state.capital += amount;
+    }
+    if (o.arch === "DEMAND_RELIEF") {
+      if (state.fiscal >= 2) state.fiscal -= 1;
+      else state.trust.government = Math.max(0, state.trust.government - 1);
+    }
+    const flagsSet = o.flags ?? [];
+    for (const f of flagsSet) state.flags.add(f);
+    if (o.arch === "COLLABORATE") state.collabs += 1;
+    if (o.arch === "SELF_ORGANISE") state.selforg += 1;
+    reveals.push({
+      role: r,
+      optionId: o.id,
+      arch: o.arch,
+      title: o.title,
+      desc: o.desc,
+      headline: o.headline,
+      aligned: !DIRTY.has(o.arch) && o.arch !== "DEMAND_RELIEF",
+      multiplier: m,
+      emissions: e * m,
+      partnerUnfunded,
+      selfOrganiseSupported,
+      spotlit: r === spotTarget,
+      flagsSet: [...flagsSet]
+    });
+  }
+  let aligned = 0;
+  for (const r of ROLES) {
+    if (!DIRTY.has(chosen[r].arch) && chosen[r].arch !== "DEMAND_RELIEF") aligned++;
+  }
+  const coalition = cfg.coalition[String(aligned)] ?? null;
+  if (coalition) {
+    de += coalition.emissions * cfg.coal_scale * macNow;
+    dh += coalition.happiness * cfg.coal_scale;
+    dgr += coalition.green * cfg.coal_scale;
+    state.coalitionRounds += 1;
+  }
+  let forcedAbatement = 0;
+  if (govRegulates) {
+    forcedAbatement = cfg.regulate_abate * macNow * (DIRTY.has(chosen.business.arch) ? 1 : 0.45);
+    de -= forcedAbatement;
+    state.roleEmissions.government -= forcedAbatement;
+    state.capital = Math.max(0, state.capital - 1);
+  }
+  if (govIsolated) {
+    state.trust.government = Math.max(0, state.trust.government - 1);
+  }
+  if (spotTarget) {
+    dh += cfg.accountability_bonus;
+    state.trust[spotTarget] = Math.max(0, state.trust[spotTarget] - 1);
+    state.spotlightHits += 1;
+  }
+  state.emissions += shE + de;
+  const prevDev = state.growth - cfg.trend;
+  state.growth = cfg.trend + cfg.persist * prevDev + shG + dg;
+  state.growth = Math.max(-5, Math.min(9, state.growth));
+  const hb = cfg.h_b0 + cfg.h_b_green * (state.greenShare / 100) + cfg.h_b_growth * (state.growth - 4.5);
+  state.happiness = hb + cfg.h_persist * (state.happiness - hb) + shH + dh * cfg.h_scale;
+  state.happiness = Math.max(0, Math.min(10, state.happiness));
+  const nev = countEvidence(state.flags);
+  let add = (dgr + nev * cfg.evidence_green) * cfg.green_scale;
+  add *= Math.pow(1 - state.greenShare / 100, cfg.green_power);
+  state.greenShare = Math.max(0, Math.min(100, state.greenShare * cfg.green_decay + add));
+  state.growth += (state.greenShare - 10) / cfg.green_dividend;
+  state.growth = Math.max(-5, Math.min(9, state.growth));
+  const k = driftK(state.greenShare, content2);
+  const drift = state.growth * k;
+  state.emissions += drift;
+  const awarded = {};
+  for (const key of ["h", "gr"]) {
+    let best = null;
+    let bv = -99;
+    for (const r of TRUST_ROLES) {
+      const penalty = r === "business" && state.flags.has("LAYOFFS") ? 1 : 0;
+      const v = chosen[r][key] - penalty;
+      if (v > bv) {
+        best = r;
+        bv = v;
+      }
+    }
+    if (best) {
+      state.trust[best] += 1;
+      if (key === "h") awarded.care = best;
+      else awarded.future = best;
+    }
+  }
+  state.lastDirty = ROLES.filter((r) => DIRTY.has(chosen[r].arch));
+  state.gdpHistory.push(state.growth);
+  state.happinessHistory.push(state.happiness);
+  state.picks.push(Object.fromEntries(ROLES.map((r) => [r, chosen[r].id])));
+  state.round += 1;
+  return {
+    round: rnd,
+    scenarioId: scenario.id,
+    shock: { g: shG, h: shH, e: shE },
+    shockMultiplier: mult,
+    vetoTarget,
+    vetoBlocked,
+    spotlightTarget: spotTarget,
+    govRegulates,
+    govIsolated,
+    reveals,
+    alignedCount: aligned,
+    coalitionBonus: coalition,
+    forcedAbatement,
+    deltas: { e: shE + de, g: dg, h: dh, gr: dgr },
+    trustAwarded: awarded,
+    drift,
+    driftK: k,
+    state: publicState(state, content2)
+  };
+}
+function averageGrowth(state) {
+  if (!state.gdpHistory.length) return state.growth;
+  return state.gdpHistory.reduce((a, b) => a + b, 0) / state.gdpHistory.length;
+}
+function projection2050(state, content2) {
+  const remaining = Math.max(0, 6 - state.round);
+  return state.emissions + remaining * state.growth * driftK(state.greenShare, content2);
+}
+function publicState(state, content2) {
+  return {
+    round: state.round,
+    emissions: state.emissions,
+    growth: state.growth,
+    averageGrowth: averageGrowth(state),
+    happiness: state.happiness,
+    greenShare: state.greenShare,
+    fiscal: state.fiscal,
+    capital: state.capital,
+    spotlights: state.spotlights,
+    vetoes: state.vetoes,
+    trust: { ...state.trust },
+    flags: [...state.flags].sort(),
+    projection2050: projection2050(state, content2)
+  };
+}
+function result(state, content2) {
+  const c = content2.config;
+  const avgG = averageGrowth(state);
+  const pe = state.emissions <= c.tgt_e;
+  const pg = avgG >= c.tgt_g;
+  const ph = state.happiness >= c.tgt_h;
+  return {
+    win: pe && pg && ph,
+    pe,
+    pg,
+    ph,
+    e: state.emissions,
+    g: avgG,
+    h: state.happiness,
+    gr: state.greenShare,
+    fiscal: state.fiscal,
+    capital: state.capital,
+    trust: { ...state.trust },
+    flags: new Set(state.flags),
+    roleEmissions: { ...state.roleEmissions },
+    spotlightHits: state.spotlightHits,
+    vetoesUsed: state.vetoesUsed,
+    coalitionRounds: state.coalitionRounds,
+    selfOrganiseSucceeded: state.selfOrganiseSucceeded,
+    gdpHistory: [...state.gdpHistory],
+    happinessHistory: [...state.happinessHistory],
+    picks: state.picks.map((p) => ({ ...p }))
+  };
+}
+function goalMet(goalId, res) {
+  switch (goalId) {
+    case "G-a":
+      return res.trust.government >= 6;
+    case "G-b":
+      return Math.min(...res.gdpHistory) >= 4;
+    case "G-c":
+      return res.gr >= 55;
+    case "B-a":
+      return res.capital >= 6;
+    case "B-b":
+      return res.roleEmissions.business <= -40;
+    case "B-c":
+      return res.trust.business >= 2 && res.capital >= 4;
+    case "C-a":
+      return res.h >= 8;
+    case "C-b":
+      return Math.min(...res.happinessHistory) >= 6.3;
+    case "C-c":
+      return res.selfOrganiseSucceeded >= 4;
+    case "A-a":
+      return !res.flags.has("COMPROMISED") && res.e <= 175;
+    case "A-b":
+      return res.gr >= 52;
+    case "A-c":
+      return res.h >= 7 && res.spotlightHits >= 1;
+    default:
+      throw new Error(`unknown goal ${goalId}`);
+  }
+}
+
+// src/game/hints.ts
+function variant(id, n) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = h * 31 + id.charCodeAt(i) >>> 0;
+  return h % n;
+}
+var BY_ARCHETYPE = {
+  SPEND_STEER: (s) => [
+    s.unpopular ? "Expensive. Right. Not everyone will agree." : "Expensive, and the country will feel it working.",
+    "Bold. Needs the public behind you.",
+    s.builds ? "Buys a green economy. Empties the Treasury." : "Public money, pointed in one direction."
+  ],
+  REGULATE: (s) => [
+    "Makes the polluter move. Costs you friends.",
+    s.slowsEconomy ? "It works. Growth will not thank you." : "Force beats persuasion. Someone pays.",
+    "The law does what the meeting could not."
+  ],
+  DEREGULATE: (s) => [
+    s.popular ? "Popular today. Expensive by Round 6." : "Cheap now. The bill arrives later.",
+    "Protects growth. Costs the country carbon.",
+    s.legacy ? "Easy. And it closes doors you will want." : "Do nothing, and hope. It has worked before."
+  ],
+  TRANSITION: (s) => [
+    "Real money, real pain, real cuts.",
+    s.slowsEconomy ? "Hurts this year. Pays for a decade." : "The expensive answer, and the honest one.",
+    s.builds ? "The biggest green move on the table." : "Capex now. Certainty later."
+  ],
+  EXPAND: (s) => [
+    s.popular ? "Profitable. The room will notice." : "Good for the balance sheet. Bad for the air.",
+    "Faster, cheaper, dirtier. Everyone sees it.",
+    "Business as usual, at speed."
+  ],
+  PARTNER: () => [
+    "Halves in value unless someone co-funds it.",
+    "Only works if the Government pays its half.",
+    "A deal. It needs a partner to be worth anything."
+  ],
+  ADAPT: (s) => [
+    "Quiet, cheap, and it costs you something.",
+    s.unpopular ? "Absorb it. Nobody enjoys this one." : "Get on with it. No drama, small gains.",
+    "The unglamorous option that usually helps."
+  ],
+  DEMAND_RELIEF: () => [
+    "Makes the Government pay, one way or another.",
+    "Relief now. It comes out of someone else.",
+    "Loud, popular, and it breaks the coalition."
+  ],
+  SELF_ORGANISE: () => [
+    "Doubles if the powerful actually back you.",
+    "Do it yourselves. Better with real support.",
+    "Community power. It tires people out."
+  ],
+  ESCALATE: () => [
+    "Loud. Effective. Nobody here will thank you.",
+    "Pressure works. It also makes enemies.",
+    "Name them. Watch the room change."
+  ],
+  COLLABORATE: () => [
+    "Real influence, and a little of your soul.",
+    "A seat at the table costs you credibility.",
+    "Inside the room. Quieter every time."
+  ],
+  EDUCATE: (s) => [
+    s.slowBurn ? "Nothing today. Something big by Round 6." : "Slow, cheap, and it compounds.",
+    "Evidence now. It pays every round after.",
+    "The patient move. It always adds up."
+  ]
+};
+var MAX = 52;
+function optionHint(option) {
+  const authored = option.hint;
+  if (authored) return authored.slice(0, MAX);
+  const flags = option.flags ?? [];
+  const shape = {
+    cuts: option.e < 0,
+    slowsEconomy: option.g < 0,
+    unpopular: option.h < 0,
+    popular: option.h >= 0.5,
+    builds: option.gr >= 8,
+    legacy: flags.length > 0,
+    slowBurn: flags.some((f) => f.startsWith("EVIDENCE"))
+  };
+  const build = BY_ARCHETYPE[option.arch];
+  if (!build) return "A judgement call. Make it.";
+  const choices = build(shape).filter((s) => s.length <= MAX);
+  if (!choices.length) return "A judgement call. Make it.";
+  return choices[variant(option.id, choices.length)];
+}
+function costLabel(option) {
+  const c = option.cost ?? {};
+  const parts = [];
+  if (c.fiscal) parts.push(c.fiscal > 0 ? `${c.fiscal} FP` : `+${-c.fiscal} FP`);
+  if (c.capital) parts.push(c.capital > 0 ? `${c.capital} C` : `+${-c.capital} C`);
+  return parts.length ? parts.join(" \xB7 ") : "FREE";
+}
+
+// src/game/copy.ts
+var PRIVATE_LINE = {
+  financial: {
+    government: "The Treasury wants a decision today. Your backbenchers want a different one.",
+    business: "The board meets in an hour. They want to know what this costs.",
+    community: "Three people on your street lost their jobs before lunch.",
+    activist: "Every rescue package is a chance to attach a condition. Or to be ignored."
+  },
+  energy: {
+    government: "The subsidy bill is now the largest line in your budget. Everybody knows it.",
+    business: "Your energy costs just became your biggest risk, and your biggest opportunity.",
+    community: "The bill arrived this morning. People are talking about nothing else.",
+    activist: "This is the round where the country picks its next thirty years of power."
+  },
+  health: {
+    government: "Hospitals are calling your office directly. So are the employers.",
+    business: "Your workforce is the exposure here, not your plant.",
+    community: "People are frightened, and they are looking to each other, not upward.",
+    activist: "Clean air just stopped being an abstraction. Use it or lose the moment."
+  },
+  election: {
+    government: "Everything you chose in the last three rounds is now a poster or a scandal.",
+    business: "Whoever wins writes the rules you operate under. Money talks, and it is recorded.",
+    community: "You are the only one in this room who actually casts a vote.",
+    activist: "Endorsement is the only currency you have. Spend it once, spend it well."
+  },
+  pollution: {
+    government: "Somebody will be blamed. You get to decide whether it is a company or a law.",
+    business: "Your permit may be lawful. That is not the same as being defensible.",
+    community: "This happened to your neighbourhood, not to a statistic.",
+    activist: "The evidence exists. The question is whether anyone has to look at it."
+  },
+  disaster: {
+    government: "This is the last round. Whatever you do now is what you are remembered for.",
+    business: "The rebuild is a contract. It is also the last chance to be on the right side.",
+    community: "Your people are in the water and the boats are mostly volunteers.",
+    activist: "Ten years of work, and one afternoon to decide what it was for."
+  }
+};
+function privateLine(type, role) {
+  return PRIVATE_LINE[type]?.[role] ?? "The room is waiting for you.";
+}
+var DEMAND_PHRASES = [
+  { id: "pay-first", text: (t) => `the ${t} pays its share before anyone else moves` },
+  { id: "no-dirty", text: (t) => `the ${t} does not take the cheap option this round` },
+  { id: "go-public", text: (t) => `the ${t} says out loud what it is about to choose` },
+  { id: "co-fund", text: (t) => `the ${t} co-funds the partnership on the table` },
+  { id: "protect-jobs", text: (t) => `the ${t} guarantees nobody loses a job over this` },
+  { id: "no-more-delay", text: (t) => `the ${t} stops asking everyone else to go first` }
+];
+var BOARD_NAME = {
+  government: "The Government",
+  business: "The Business",
+  community: "The Community",
+  activist: "The Activist"
+};
+function asPledgeObject(title) {
+  return title.split(" ").map((w) => /^(RG|EV|ID|PPA|GW|[A-Z]{2,})$/.test(w) ? w : w.toLowerCase()).join(" ");
+}
+
+// src/game/rng.ts
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function next() {
+    a = a + 1831565813 >>> 0;
+    let t = a;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function draw(seed, cursor) {
+  const rand = mulberry32(seed + cursor * 2654435769);
+  return { value: rand(), cursor: cursor + 1 };
+}
+function pick(items, seed, cursor) {
+  const d = draw(seed, cursor);
+  return { value: items[Math.floor(d.value * items.length)], cursor: d.cursor };
+}
+function roomCode(seed) {
+  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  let c = 0;
+  let out = "";
+  for (let i = 0; i < 4; i++) {
+    const d = draw(seed, c);
+    c = d.cursor;
+    out += letters[Math.floor(d.value * letters.length)];
+  }
+  return out;
+}
+
+// src/game/session.ts
+var PHASE_MS = {
+  lobby: 0,
+  // ends when the facilitator starts
+  briefing: 2e4,
+  crisis: 3e4,
+  table: 9e4,
+  choice: 45e3,
+  reckoning: 75e3,
+  summary: 8e3,
+  results: 0,
+  // advances on facilitator input
+  ended: 0
+};
+var ROLE_RESOURCE = {
+  government: { kind: "fiscal", label: "Your Fiscal Points" },
+  business: { kind: "capital", label: "Your Capital" },
+  community: { kind: "trust-awards", label: "Public Mandate vetoes" },
+  activist: { kind: "spotlights", label: "Spotlights" }
+};
+
+// src/game/room.ts
+function createRoom(content2, seed, now) {
+  let cursor = 0;
+  const path = [];
+  for (let r = 1; r <= 6; r++) {
+    const p = pick(content2.roundVariants[r], seed, cursor);
+    cursor = p.cursor;
+    path.push(p.value);
+  }
+  const players = Object.fromEntries(
+    ROLES.map((role) => [
+      role,
+      { role, name: "", connected: false, goalId: null, choiceId: null, autoLocked: false, lockedAt: null }
+    ])
+  );
+  return {
+    code: roomCode(seed),
+    createdAt: now,
+    phase: "lobby",
+    phaseEndsAt: null,
+    players,
+    game: createGame(path, content2),
+    promises: [],
+    offers: [],
+    tips: [],
+    vetoTarget: null,
+    coFund: false,
+    spotlightCalled: false,
+    lastRound: null,
+    history: [],
+    tipRotation: [],
+    seed,
+    rngCursor: cursor
+  };
+}
+function currentScenario(room, content2) {
+  const id = room.game.path[room.game.round];
+  return id ? content2.scenarios[id] ?? null : null;
+}
+function roundNumber(room) {
+  return Math.min(room.game.round + 1, 6);
+}
+function displayRound(room) {
+  if ((room.phase === "reckoning" || room.phase === "summary") && room.lastRound) {
+    return room.lastRound.round;
+  }
+  return roundNumber(room);
+}
+function setPhase(room, phase, now) {
+  room.phase = phase;
+  const ms = PHASE_MS[phase];
+  room.phaseEndsAt = ms > 0 ? now + ms : null;
+}
+function everyoneLocked(room) {
+  return ROLES.every((r) => room.players[r].choiceId !== null);
+}
+function vetoesRemaining(room) {
+  return Math.max(0, room.game.vetoes - (room.vetoTarget ? 1 : 0));
+}
+function choosableOptions(room, content2, role) {
+  const scenario = currentScenario(room, content2);
+  if (!scenario) return [];
+  const opts = availableOptions(room.game, scenario, role, content2);
+  return role === room.vetoTarget ? applyVeto(opts) : opts;
+}
+function apply(room, cmd, content2, now) {
+  switch (cmd.t) {
+    case "join": {
+      const p = room.players[cmd.role];
+      if (p.connected && p.name && p.name !== cmd.name) return room;
+      p.name = cmd.name;
+      p.connected = true;
+      return room;
+    }
+    case "reconnect":
+      room.players[cmd.role].connected = true;
+      return room;
+    case "leave":
+      room.players[cmd.role].connected = false;
+      return room;
+    case "pickGoal": {
+      if (room.players[cmd.role].goalId) return room;
+      room.players[cmd.role].goalId = cmd.goalId;
+      return room;
+    }
+    case "start": {
+      if (room.phase !== "lobby") return room;
+      setPhase(room, "briefing", now);
+      return room;
+    }
+    case "advance":
+      return advance(room, content2, now);
+    case "promise": {
+      if (room.phase !== "table") return room;
+      const scenario = currentScenario(room, content2);
+      const option = scenario?.options[cmd.role].find((o) => o.id === cmd.optionId);
+      if (!option) return room;
+      room.promises = room.promises.filter(
+        (p) => !(p.round === roundNumber(room) && p.from === cmd.role && p.kind === "promise")
+      );
+      room.promises.push({
+        id: `${cmd.role}-${roundNumber(room)}-p`,
+        round: roundNumber(room),
+        from: cmd.role,
+        kind: "promise",
+        text: `${BOARD_NAME[cmd.role]} will ${asPledgeObject(option.title)}.`,
+        optionId: option.id,
+        outcome: "unresolved"
+      });
+      return room;
+    }
+    case "demand": {
+      if (room.phase !== "table") return room;
+      const phrase = DEMAND_PHRASES.find((p) => p.id === cmd.phraseId);
+      if (!phrase) return room;
+      room.promises = room.promises.filter(
+        (p) => !(p.round === roundNumber(room) && p.from === cmd.role && p.kind === "demand")
+      );
+      room.promises.push({
+        id: `${cmd.role}-${roundNumber(room)}-d`,
+        round: roundNumber(room),
+        from: cmd.role,
+        kind: "demand",
+        text: `${BOARD_NAME[cmd.role]} demands ${phrase.text(cmd.target)}.`,
+        optionId: null,
+        outcome: "unresolved"
+      });
+      return room;
+    }
+    case "offer": {
+      if (room.phase !== "table") return room;
+      const held = cmd.resource === "fiscal" ? room.game.fiscal : room.game.capital;
+      if (cmd.amount < 1 || cmd.amount > held) return room;
+      room.offers.push({
+        id: `o${room.offers.length}-${roundNumber(room)}`,
+        round: roundNumber(room),
+        from: cmd.from,
+        to: cmd.to,
+        resource: cmd.resource,
+        amount: cmd.amount,
+        status: "pending"
+      });
+      return room;
+    }
+    case "respondOffer": {
+      const offer = room.offers.find((o) => o.id === cmd.offerId && o.to === cmd.role);
+      if (!offer || offer.status !== "pending") return room;
+      if (!cmd.accept) {
+        offer.status = "declined";
+        return room;
+      }
+      offer.status = "accepted";
+      const toResource = ROLE_RESOURCE[offer.to].kind;
+      const fromResource = ROLE_RESOURCE[offer.from].kind;
+      if (fromResource === "fiscal" && toResource === "capital") {
+        const moved = Math.min(offer.amount, room.game.fiscal);
+        room.game.fiscal -= moved;
+        room.game.capital += moved;
+      } else if (fromResource === "capital" && toResource === "fiscal") {
+        const moved = Math.min(offer.amount, room.game.capital);
+        room.game.capital -= moved;
+        room.game.fiscal += moved;
+      }
+      return room;
+    }
+    case "spotlight": {
+      if (room.phase !== "table" || cmd.role !== "activist") return room;
+      if (room.game.spotlights <= 0) return room;
+      room.spotlightCalled = true;
+      return room;
+    }
+    case "veto": {
+      if (room.phase !== "table" || cmd.role !== "community") return room;
+      if (room.game.vetoes <= 0 || room.vetoTarget) return room;
+      room.vetoTarget = cmd.target;
+      const removed = choosableOptions(room, content2, cmd.target).map((o) => o.id);
+      const p = room.players[cmd.target];
+      if (p.choiceId && !removed.includes(p.choiceId)) {
+        p.choiceId = null;
+        p.lockedAt = null;
+      }
+      return room;
+    }
+    case "coFund": {
+      if (cmd.role !== "government") return room;
+      room.coFund = cmd.agree;
+      return room;
+    }
+    case "publishTip": {
+      const tip = room.tips.find((t) => t.round === roundNumber(room) && t.to === cmd.role);
+      if (!tip || tip.published) return room;
+      tip.published = true;
+      return room;
+    }
+    case "choose": {
+      if (room.phase !== "choice" && room.phase !== "table") return room;
+      const allowed = choosableOptions(room, content2, cmd.role);
+      if (!allowed.some((o) => o.id === cmd.optionId)) return room;
+      room.players[cmd.role].choiceId = cmd.optionId;
+      room.players[cmd.role].autoLocked = false;
+      room.players[cmd.role].lockedAt = now;
+      if (room.phase === "choice" && everyoneLocked(room)) {
+        return resolveRound(room, content2, now);
+      }
+      return room;
+    }
+    case "lock":
+      return room;
+    default:
+      return room;
+  }
+}
+function tick(room, content2, now) {
+  if (room.phaseEndsAt === null || now < room.phaseEndsAt) return room;
+  return advance(room, content2, now);
+}
+function advance(room, content2, now) {
+  switch (room.phase) {
+    case "lobby":
+      setPhase(room, "briefing", now);
+      return room;
+    case "briefing":
+      return openRound(room, content2, now);
+    case "crisis":
+      setPhase(room, "table", now);
+      return room;
+    case "table":
+      setPhase(room, "choice", now);
+      return room;
+    case "choice":
+      for (const role of ROLES) {
+        if (room.players[role].choiceId === null) {
+          const opts = choosableOptions(room, content2, role);
+          if (opts.length) {
+            room.players[role].choiceId = opts[0].id;
+            room.players[role].autoLocked = true;
+            room.players[role].lockedAt = now;
+          }
+        }
+      }
+      return resolveRound(room, content2, now);
+    case "reckoning":
+      setPhase(room, "summary", now);
+      return room;
+    case "summary":
+      if (room.game.round >= 6) {
+        setPhase(room, "results", now);
+        return room;
+      }
+      return openRound(room, content2, now);
+    case "results":
+      setPhase(room, "ended", now);
+      return room;
+    default:
+      return room;
+  }
+}
+function openRound(room, content2, now) {
+  room.vetoTarget = null;
+  room.coFund = false;
+  room.spotlightCalled = false;
+  for (const role of ROLES) {
+    room.players[role].choiceId = null;
+    room.players[role].autoLocked = false;
+    room.players[role].lockedAt = null;
+  }
+  dealTip(room, content2);
+  setPhase(room, "crisis", now);
+  return room;
+}
+function resolveRound(room, content2, now) {
+  const choices = Object.fromEntries(
+    ROLES.map((r) => [r, room.players[r].choiceId])
+  );
+  if (!room.spotlightCalled) {
+    const activistOption = content2.scenarios[room.game.path[room.game.round]].options.activist.find(
+      (o) => o.id === choices.activist
+    );
+    if (activistOption?.arch === "ESCALATE") {
+      const held = room.game.spotlights;
+      room.game.spotlights = 0;
+      const log2 = playRound(room.game, { choices, vetoTarget: room.vetoTarget, coFund: room.coFund }, content2);
+      room.game.spotlights = held;
+      return finishRound(room, log2, choices, content2, now);
+    }
+  }
+  const log = playRound(room.game, { choices, vetoTarget: room.vetoTarget, coFund: room.coFund }, content2);
+  return finishRound(room, log, choices, content2, now);
+}
+function finishRound(room, log, choices, content2, now) {
+  for (const p of room.promises) {
+    if (p.round !== log.round || p.kind !== "promise" || !p.optionId) continue;
+    p.outcome = choices[p.from] === p.optionId ? "kept" : "broken";
+  }
+  const tip = room.tips.find((t) => t.round === log.round);
+  if (tip?.published) {
+    tip.revealed = true;
+    applyTipStake(room, tip);
+  }
+  for (const o of room.offers) {
+    if (o.round === log.round && o.status === "pending") o.status = "expired";
+  }
+  room.lastRound = log;
+  room.history.push(log);
+  void content2;
+  setPhase(room, "reckoning", now);
+  return room;
+}
+function applyTipStake(room, tip) {
+  if (tip.to === "community") {
+    room.game.vetoes = tip.isTrue ? Math.min(3, room.game.vetoes + 1) : Math.max(0, room.game.vetoes - 1);
+    return;
+  }
+  const role = tip.to;
+  room.game.trust[role] = tip.isTrue ? room.game.trust[role] + 1 : Math.max(0, room.game.trust[role] - 1);
+}
+function dealTip(room, content2) {
+  const round = roundNumber(room);
+  if (room.tips.some((t) => t.round === round)) return;
+  let cursor = room.rngCursor;
+  let candidates = ROLES.filter((r) => !room.tipRotation.includes(r));
+  if (!candidates.length) {
+    const last = room.tipRotation[room.tipRotation.length - 1];
+    candidates = ROLES.filter((r) => r !== last);
+  } else if (room.tipRotation.length) {
+    const last = room.tipRotation[room.tipRotation.length - 1];
+    const withoutLast = candidates.filter((r) => r !== last);
+    if (withoutLast.length) candidates = withoutLast;
+  }
+  const chosen = pick(candidates, room.seed, cursor);
+  cursor = chosen.cursor;
+  const to = chosen.value;
+  const built = buildTip(room, content2, to, round, cursor);
+  cursor = built.cursor;
+  room.tips.push(built.tip);
+  room.tipRotation.push(to);
+  room.rngCursor = cursor;
+}
+function buildTip(room, content2, to, round, cursorIn) {
+  let cursor = cursorIn;
+  const tips = content2.insiderTips;
+  const scenarioId = room.game.path[room.game.round];
+  const nextScenarioId = room.game.path[room.game.round + 1];
+  const roll = draw(room.seed, cursor);
+  cursor = roll.cursor;
+  const wantRumour = roll.value < 0.25 && round >= 2;
+  const kinds = [];
+  if (!wantRumour) {
+    if (nextScenarioId) kinds.push("forecast");
+    kinds.push("intel");
+    if (round >= 2) kinds.push("dossier");
+  }
+  if (wantRumour || !kinds.length) kinds.push("rumour");
+  const kindPick = pick(kinds, room.seed, cursor);
+  cursor = kindPick.cursor;
+  const kind = kindPick.value;
+  if (kind === "rumour") {
+    const whisperIds = Object.keys(tips.whispers);
+    const w = pick(whisperIds, room.seed, cursor);
+    cursor = w.cursor;
+    const truth = draw(room.seed, cursor);
+    cursor = truth.cursor;
+    return {
+      tip: {
+        id: `tip-${round}`,
+        round,
+        to,
+        kind: "rumour",
+        reliability: "UNVERIFIED",
+        source: "A rumour going round",
+        text: tips.whispers[w.value],
+        isTrue: truth.value < tips.whisperAccuracy,
+        published: false,
+        revealed: false
+      },
+      cursor
+    };
+  }
+  if (kind === "forecast" && nextScenarioId) {
+    const nextType = content2.scenarios[nextScenarioId].type;
+    const lines = tips.forecasts[nextType] ?? [];
+    const line = lines.length ? pick(lines, room.seed, cursor) : { value: "", cursor };
+    cursor = line.cursor;
+    return {
+      tip: {
+        id: `tip-${round}`,
+        round,
+        to,
+        kind: "forecast",
+        reliability: "CONFIRMED",
+        source: "Cabinet Situation Room",
+        text: line.value || "Something is coming. Nobody will say what.",
+        isTrue: true,
+        published: false,
+        revealed: false
+      },
+      cursor
+    };
+  }
+  if (kind === "dossier") {
+    const others = ROLES.filter((r) => r !== to && room.players[r].goalId);
+    if (others.length) {
+      const target = pick(others, room.seed, cursor);
+      cursor = target.cursor;
+      const goalId = room.players[target.value].goalId;
+      return {
+        tip: {
+          id: `tip-${round}`,
+          round,
+          to,
+          kind: "dossier",
+          reliability: "CONFIRMED",
+          source: "A friend in the ministry",
+          text: tips.whispers[goalId] ?? "They want something they have not said out loud.",
+          isTrue: true,
+          published: false,
+          revealed: false
+        },
+        cursor
+      };
+    }
+  }
+  return {
+    tip: {
+      id: `tip-${round}`,
+      round,
+      to,
+      kind: "memo",
+      reliability: "CONFIRMED",
+      source: "A sealed brief",
+      text: tips.intel[scenarioId] ?? "The official figures are not the real ones.",
+      isTrue: true,
+      published: false,
+      revealed: false
+    },
+    cursor
+  };
+}
+function dashboardView(room, content2) {
+  const scenario = currentScenario(room, content2);
+  const lockOrder = ROLES.map((r) => room.players[r].lockedAt).filter((t) => t !== null);
+  const lastLock = lockOrder.length === 3 ? ROLES.find((r) => room.players[r].choiceId === null) : null;
+  const tip = room.tips.find((t) => t.round === displayRound(room));
+  const published = tip?.published && tip ? {
+    from: tip.to,
+    text: tip.text,
+    source: tip.source,
+    verdict: tip.revealed ? tip.isTrue ? "true" : "false" : null
+  } : null;
+  const veto = room.vetoTarget ? {
+    target: room.vetoTarget,
+    removed: scenario ? availableOptions(room.game, scenario, room.vetoTarget, content2).filter((o) => DIRTY.has(o.arch)).map((o) => o.title) : [],
+    remaining: vetoesRemaining(room)
+  } : null;
+  return {
+    code: room.code,
+    phase: room.phase,
+    phaseEndsAt: room.phaseEndsAt,
+    round: displayRound(room),
+    scenario: scenario ? { id: scenario.id, title: scenario.title, type: scenario.type, situation: scenario.situation } : null,
+    state: publicState(room.game, content2),
+    seats: ROLES.map((role) => ({
+      role,
+      name: room.players[role].name || null,
+      connected: room.players[role].connected,
+      locked: room.players[role].choiceId !== null,
+      lastToLock: lastLock === role
+    })),
+    promises: room.promises.filter((p) => p.round === displayRound(room)),
+    offersInFlight: room.offers.filter((o) => o.round === displayRound(room) && o.status === "pending"),
+    tipDealtThisRound: Boolean(tip),
+    publishedTip: published,
+    spotlight: room.spotlightCalled ? {
+      by: "activist",
+      // Whoever takes the dirtiest option this round wears it. Nobody
+      // knows who that is until the choices lock, so do not pretend to.
+      target: room.lastRound?.spotlightTarget ?? null,
+      remaining: room.game.spotlights
+    } : null,
+    veto,
+    lastRound: room.lastRound,
+    history: room.history,
+    headlines: room.history.flatMap((h) => h.reveals.map((r) => r.headline)).slice(-12),
+    targets: {
+      emissions: content2.config.tgt_e,
+      growth: content2.config.tgt_g,
+      happiness: content2.config.tgt_h
+    }
+  };
+}
+function phoneView(room, content2, role) {
+  const scenario = currentScenario(room, content2);
+  const player = room.players[role];
+  const showOptions = room.phase === "table" || room.phase === "choice";
+  let options = [];
+  if (scenario && showOptions) {
+    const affordableAndOpen = availableOptions(room.game, scenario, role, content2);
+    const afterVeto = role === room.vetoTarget ? applyVeto(affordableAndOpen) : affordableAndOpen;
+    options = scenario.options[role].map((o) => {
+      const open = affordableAndOpen.some((a) => a.id === o.id);
+      const choosable = afterVeto.some((a) => a.id === o.id);
+      let disabled = null;
+      let note = null;
+      if (!open) {
+        if (o.gate_trust && room.game.trust.government < o.gate_trust) {
+          disabled = "gate";
+          note = `Needs ${o.gate_trust} Trust. The country has not backed you.`;
+        } else if (o.block_flag && room.game.flags.has(String(o.block_flag))) {
+          disabled = "gate";
+          note = "A promise you made earlier closed this door.";
+        } else {
+          disabled = "afford";
+          const need = o.cost?.fiscal ?? o.cost?.capital ?? 0;
+          const have = o.cost?.fiscal ? room.game.fiscal : room.game.capital;
+          note = `You have ${have} of ${need}.`;
+        }
+      } else if (!choosable) {
+        disabled = "veto";
+        note = '"The public will simply not accept this." \u2014 the Community, this round only';
+      }
+      return {
+        id: o.id,
+        title: o.title,
+        desc: o.desc,
+        cost: costLabel(o),
+        hint: optionHint(o),
+        available: choosable,
+        disabled,
+        disabledNote: note
+      };
+    });
+  }
+  const resourceKind = ROLE_RESOURCE[role].kind;
+  const resourceValue = resourceKind === "fiscal" ? room.game.fiscal : resourceKind === "capital" ? room.game.capital : resourceKind === "spotlights" ? room.game.spotlights : vetoesRemaining(room);
+  const goalChoices = player.goalId === null ? content2.privateGoals[role].map((g) => ({ id: g.id, title: g.title, desc: g.desc })) : null;
+  return {
+    code: room.code,
+    role,
+    name: player.name,
+    phase: room.phase,
+    phaseEndsAt: room.phaseEndsAt,
+    round: displayRound(room),
+    scenario: scenario ? { id: scenario.id, title: scenario.title, situation: scenario.situation, type: scenario.type } : null,
+    privateLine: scenario ? privateLine(scenario.type, role) : null,
+    options,
+    choiceId: player.choiceId,
+    locked: player.choiceId !== null,
+    resource: { kind: resourceKind, value: resourceValue, label: ROLE_RESOURCE[role].label },
+    trust: { ...room.game.trust },
+    vetoesRemaining: vetoesRemaining(room),
+    spotlightsRemaining: room.game.spotlights,
+    goalId: player.goalId,
+    goalChoices,
+    // Only ever your own tip, and only while it is yours to act on.
+    tip: room.tips.find((t) => t.to === role && t.round === displayRound(room)) ?? null,
+    promises: room.promises.filter((p) => p.round === displayRound(room)),
+    incomingOffers: room.offers.filter((o) => o.to === role && o.status === "pending"),
+    sentOffers: room.offers.filter((o) => o.from === role && o.round === displayRound(room)),
+    seats: ROLES.map((r) => ({
+      role: r,
+      name: room.players[r].name || null,
+      connected: room.players[r].connected,
+      locked: room.players[r].choiceId !== null
+    })),
+    roundResult: roundResultCopy(room, role),
+    waitingOn: ROLES.filter((r) => room.players[r].choiceId === null).length
+  };
+}
+function roundResultCopy(room, role) {
+  const log = room.lastRound;
+  if (!log || room.phase !== "reckoning" && room.phase !== "summary") return null;
+  const mine = log.reveals.find((r) => r.role === role);
+  if (!mine) return null;
+  const didWhat = `You chose \u201C${mine.title}\u201D.`;
+  const costBits = [];
+  if (mine.partnerUnfunded) costBits.push("Nobody co-funded it, so it landed at half strength.");
+  if (mine.spotlit) costBits.push("You were named publicly, and it cost you.");
+  if (mine.selfOrganiseSupported) costBits.push("Real backing arrived, and it counted double.");
+  if (log.govIsolated && role === "government") {
+    costBits.push("You moved alone, and the country only half-followed.");
+  }
+  if (!costBits.length) costBits.push("It landed as you intended.");
+  const others = [];
+  if (log.alignedCount >= 3) {
+    others.push(
+      log.alignedCount === 4 ? "All four of you moved together \u2014 the coalition held." : "Three of you moved together \u2014 the coalition held."
+    );
+  } else {
+    others.push("The table did not move together this round.");
+  }
+  const broken = room.promises.filter((p) => p.round === log.round && p.outcome === "broken");
+  if (broken.length) others.push(`${broken.map((b) => b.from).join(" and ")} broke a promise.`);
+  return { didWhat, cost: costBits.join(" "), others: others.join(" ") };
+}
+function endgame(room, content2) {
+  const res = result(room.game, content2);
+  const c = content2.config;
+  return {
+    win: res.win,
+    targets: [
+      { key: "emissions", value: res.e, target: c.tgt_e, met: res.pe },
+      { key: "growth", value: res.g, target: c.tgt_g, met: res.pg },
+      { key: "happiness", value: res.h, target: c.tgt_h, met: res.ph }
+    ],
+    players: ROLES.map((role) => {
+      const player = room.players[role];
+      const goal = content2.privateGoals[role].find((g) => g.id === player.goalId) ?? null;
+      const met = player.goalId ? goalMet(player.goalId, res) : false;
+      return {
+        role,
+        name: player.name,
+        goalId: player.goalId,
+        goalTitle: goal?.title ?? null,
+        goalMet: met,
+        title: res.win ? "NATION BUILDER" : met ? "HOLLOW VICTORY" : "NO TITLE"
+      };
+    })
+  };
+}
+
+// supabase/functions/_src/room.ts
+import { PACK } from "./content.gen.ts";
+var SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+var SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+var content = loadContent(PACK);
+var CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS"
+};
+var json = (body, status = 200) => new Response(JSON.stringify(body), {
+  status,
+  headers: { ...CORS, "Content-Type": "application/json" }
+});
+async function rest(path, init = {}) {
+  return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...init,
+    headers: {
+      apikey: SERVICE_KEY,
+      Authorization: `Bearer ${SERVICE_KEY}`,
+      "Content-Type": "application/json",
+      ...init.headers ?? {}
+    }
+  });
+}
+function serialise(room) {
+  return { ...room, game: { ...room.game, flags: [...room.game.flags] } };
+}
+function deserialise(raw) {
+  const room = raw;
+  room.game.flags = new Set(room.game.flags);
+  return room;
+}
+async function readRoom(code) {
+  const res = await rest(`rooms?code=eq.${code}&select=state,revision`);
+  if (!res.ok) return null;
+  const rows = await res.json();
+  if (!rows.length) return null;
+  return { room: deserialise(rows[0].state), revision: rows[0].revision };
+}
+async function writeRoom(room, revision) {
+  const next = revision + 1;
+  await rest(`rooms?code=eq.${room.code}`, {
+    method: "PATCH",
+    body: JSON.stringify({ state: serialise(room), revision: next, updated_at: (/* @__PURE__ */ new Date()).toISOString() })
+  });
+  return next;
+}
+async function broadcastRevision(code, revision) {
+  await fetch(`${SUPABASE_URL}/realtime/v1/api/broadcast`, {
+    method: "POST",
+    headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messages: [{ topic: `room:${code}`, event: "rev", payload: { revision } }]
+    })
+  }).catch(() => {
+  });
+}
+async function seatForToken(code, token) {
+  const res = await rest(`room_seats?code=eq.${code}&token=eq.${token}&select=role`);
+  if (!res.ok) return null;
+  const rows = await res.json();
+  return rows.length ? rows[0].role : null;
+}
+function viewFor(room, seat) {
+  const finished = room.phase === "results" || room.phase === "ended";
+  const end = finished ? endgame(room, content) : null;
+  return seat === "dashboard" ? { kind: "dashboard", view: dashboardView(room, content), endgame: end } : { kind: "phone", view: phoneView(room, content, seat), endgame: end };
+}
+function authorise(seat, cmd) {
+  if (seat === "dashboard") {
+    return cmd.t === "start" || cmd.t === "advance" ? cmd : null;
+  }
+  switch (cmd.t) {
+    case "join":
+    case "reconnect":
+    case "leave":
+    case "pickGoal":
+    case "promise":
+    case "demand":
+    case "respondOffer":
+    case "spotlight":
+    case "veto":
+    case "coFund":
+    case "publishTip":
+    case "choose":
+    case "lock":
+      return { ...cmd, role: seat };
+    case "offer":
+      return { ...cmd, from: seat };
+    default:
+      return null;
+  }
+}
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  if (req.method !== "POST") return json({ error: "POST only" }, 405);
+  let body;
+  try {
+    body = await req.json();
+  } catch {
+    return json({ error: "bad json" }, 400);
+  }
+  const action = String(body.action ?? "");
+  const now = Date.now();
+  if (action === "create") {
+    const seed = Math.floor(Math.random() * 2 ** 31);
+    let room2 = createRoom(content, seed, now);
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const res = await rest("rooms", {
+        method: "POST",
+        headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({ code: room2.code, state: serialise(room2), revision: 1 })
+      });
+      if (res.ok) break;
+      if (res.status !== 409) return json({ error: "could not create room" }, 500);
+      room2 = createRoom(content, seed + attempt + 1, now);
+      if (attempt === 7) return json({ error: "no free room code" }, 503);
+    }
+    const seat2 = await rest("room_seats", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({ code: room2.code, role: "dashboard" })
+    });
+    const rows = await seat2.json();
+    return json({ code: room2.code, token: rows[0].token, ...viewFor(room2, "dashboard"), revision: 1 });
+  }
+  const code = String(body.code ?? "").toUpperCase();
+  if (!/^[A-Z]{4}$/.test(code)) return json({ error: "bad room code" }, 400);
+  if (action === "claim") {
+    const role = String(body.role ?? "");
+    if (!ROLES.includes(role)) return json({ error: "unknown seat" }, 400);
+    const existing = await readRoom(code);
+    if (!existing) return json({ error: "no such room" }, 404);
+    const held = await rest(`room_seats?code=eq.${code}&role=eq.${role}&select=token`);
+    const heldRows = await held.json();
+    if (heldRows.length) {
+      return json({ token: heldRows[0].token, ...viewFor(existing.room, role), revision: existing.revision });
+    }
+    const res = await rest("room_seats", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({ code, role })
+    });
+    if (!res.ok) return json({ error: "seat taken" }, 409);
+    const rows = await res.json();
+    return json({ token: rows[0].token, ...viewFor(existing.room, role), revision: existing.revision });
+  }
+  const token = String(body.token ?? "");
+  const seat = token ? await seatForToken(code, token) : null;
+  if (!seat) return json({ error: "not your seat" }, 403);
+  const loaded = await readRoom(code);
+  if (!loaded) return json({ error: "no such room" }, 404);
+  let { room, revision } = loaded;
+  if (action === "view") {
+    return json({ ...viewFor(room, seat), revision });
+  }
+  if (action === "tick") {
+    const before = room.phase;
+    const beforeEnds = room.phaseEndsAt;
+    room = tick(room, content, Date.now());
+    if (room.phase !== before || room.phaseEndsAt !== beforeEnds) {
+      revision = await writeRoom(room, revision);
+      await broadcastRevision(code, revision);
+    }
+    return json({ ...viewFor(room, seat), revision });
+  }
+  if (action === "cmd") {
+    const requested = body.cmd;
+    const allowed = requested ? authorise(seat, requested) : null;
+    if (!allowed) return json({ error: "not allowed from this seat" }, 403);
+    room = apply(room, allowed, content, Date.now());
+    revision = await writeRoom(room, revision);
+    await broadcastRevision(code, revision);
+    return json({ ...viewFor(room, seat), revision });
+  }
+  return json({ error: "unknown action" }, 400);
+});
