@@ -18,6 +18,7 @@ shots/
 __pycache__/
 *.pyc
 
-# Generated bundle for the edge function
-supabase/functions/room/bundle.ts
-supabase/functions/room/content.gen.ts
+# Generated, but committed: bundle.ts is the deployable unit, so keeping it in
+# the repo means the function can be deployed from the Supabase dashboard or
+# the Management API without any local tooling. CI checks it stays in sync.
+supabase/functions/_src/content.gen.ts
