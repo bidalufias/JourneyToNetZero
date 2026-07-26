@@ -14,7 +14,7 @@ import type { Command } from './game/room'
 import type { DashboardView, PhoneView } from './game/session'
 import { ROLE_CHARACTER, ROLE_LABEL } from './game/session'
 import type { Endgame } from './game/room'
-import { createLocalTransport } from './net/local'
+import { createTransport } from './net'
 import type { ConnectionState, Snapshot, Transport } from './net/transport'
 import { Dashboard } from './dashboard/Dashboard'
 import { Phone } from './phone/Phone'
@@ -86,7 +86,7 @@ function useTransport(make: () => Transport) {
 
 function DashboardSurface({ code }: { code: string }) {
   const { snapshot, send } = useTransport(() =>
-    createLocalTransport({ kind: 'dashboard', code: code || undefined }),
+    createTransport({ kind: 'dashboard', code: code || undefined }),
   )
 
   // The dashboard is a broadcast, not an admin panel, so the facilitator
@@ -116,7 +116,7 @@ function DashboardSurface({ code }: { code: string }) {
 
 function PhoneSurface({ code, role }: { code: string; role: Role }) {
   const { snapshot, connection, send } = useTransport(() =>
-    createLocalTransport({ kind: 'phone', code, role }),
+    createTransport({ kind: 'phone', code, role }),
   )
   const [name, setName] = useState('')
 
