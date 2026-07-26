@@ -75,6 +75,8 @@ class SupabaseTransport implements Transport {
   private ticker: ReturnType<typeof setInterval> | null = null
   private closed = false
   private fetching = false
+  private everConnected = false
+  private attempts = 0
 
   constructor(opts: TransportOptions) {
     this.seat = opts.kind === 'dashboard' ? 'dashboard' : opts.role
@@ -111,6 +113,8 @@ class SupabaseTransport implements Transport {
       }
 
       if (this.token) localStorage.setItem(tokenKey(this.code, this.seat), this.token)
+      this.everConnected = true
+      this.attempts = 0
       this.setState('live')
       this.subscribe()
 
@@ -124,9 +128,14 @@ class SupabaseTransport implements Transport {
         this.ticker = setInterval(() => void this.tick(), 500)
       }
     } catch (err) {
+      // Never having reached the server is a different problem from losing it:
+      // it means the edge function is not deployed or the key is wrong, and no
+      // amount of waiting fixes either.
       console.error('[jtnz] could not join room:', err)
-      this.setState('reconnecting')
-      setTimeout(() => !this.closed && void this.start(opts), 2000)
+      this.setState(this.everConnected ? 'reconnecting' : 'unreachable')
+      this.attempts += 1
+      const backoff = Math.min(30_000, 2000 * 2 ** Math.min(this.attempts - 1, 4))
+      setTimeout(() => !this.closed && void this.start(opts), backoff)
     }
   }
 

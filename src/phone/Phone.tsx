@@ -71,7 +71,11 @@ export function Phone({ view, endgame, connection, send }: PhoneProps) {
 
       {connection !== 'live' ? (
         <div className="reconnect" role="status">
-          {connection === 'reconnecting' ? 'RECONNECTING — YOUR SEAT IS HELD' : 'CONNECTING…'}
+          {connection === 'reconnecting'
+            ? 'RECONNECTING — YOUR SEAT IS HELD'
+            : connection === 'unreachable'
+              ? "CAN'T REACH THE GAME SERVER — TELL THE FACILITATOR"
+              : 'CONNECTING…'}
         </div>
       ) : null}
     </div>
