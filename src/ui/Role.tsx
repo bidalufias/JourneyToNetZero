@@ -41,6 +41,41 @@ export function RoleBadge({
 }
 
 /**
+ * The four-up role summary on the main screen: a circular icon tile, the role
+ * name and a short accent rule. Sized in vw so all four names stay legible and
+ * uncut from 320px up, where a fixed size would clip "Government".
+ */
+export function RoleTile({ role }: { role: RoleId }) {
+  const { color, light, icon: Icon } = roleTheme(role)
+  return (
+    <div className="flex flex-col items-center gap-1.5 rounded-[var(--radius-small)] border border-line bg-surface px-1 py-3 shadow-[var(--shadow-card)]">
+      <span
+        className="grid place-items-center rounded-full"
+        style={{
+          width: 'clamp(34px, 11vw, 46px)',
+          height: 'clamp(34px, 11vw, 46px)',
+          background: light,
+          color,
+        }}
+      >
+        <Icon size={22} strokeWidth={1.9} aria-hidden="true" />
+      </span>
+      <span
+        className="w-full text-center leading-tight font-[650]"
+        style={{ color, fontSize: 'clamp(9px, 2.95vw, 12px)' }}
+      >
+        {ROLES[role].name}
+      </span>
+      <span
+        className="h-[3px] w-5 rounded-full"
+        style={{ background: color }}
+        aria-hidden="true"
+      />
+    </div>
+  )
+}
+
+/**
  * A selectable role. Selected state is carried by the border, the pale role
  * wash and a tick — not by colour on its own.
  */

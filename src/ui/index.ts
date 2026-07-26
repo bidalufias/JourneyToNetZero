@@ -9,6 +9,6 @@ export {
   StatusChip,
 } from './Cards'
 export { BrandMark, CityHero, SkylineBand } from './Illustrations'
-export { RoleBadge, RoleCard } from './Role'
+export { RoleBadge, RoleCard, RoleTile } from './Role'
 export { INDICATOR_COLOR, roleTheme } from './roleTheme'
 export type { RoleTheme } from './roleTheme'

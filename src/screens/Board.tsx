@@ -321,7 +321,7 @@ function Frame({ children, hero = false }: { children: React.ReactNode; hero?: b
     <main className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-canvas px-10 py-8">
       {hero && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[46%] overflow-hidden">
-          <CityHero className="absolute inset-0 h-full w-full opacity-55" />
+          <CityHero fit="slice" className="absolute inset-0 h-full w-full opacity-60" />
           <div
             className="absolute inset-x-0 top-0 h-2/3 bg-gradient-to-b from-canvas to-transparent"
             aria-hidden="true"
