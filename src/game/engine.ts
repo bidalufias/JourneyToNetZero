@@ -65,6 +65,29 @@ export function isUnlocked(action: Action, transfers: Transfer[]): boolean {
 }
 
 /** Actions a player can currently afford and has unlocked. */
+/**
+ * Currency a role can actually commit right now, given the deals already
+ * struck this round.
+ *
+ * `resolveRound` is the single place a transfer moves money — it settles at
+ * resolution along with costs and income. Until then a seat's stored balance
+ * is its pre-deal balance, so anything gating on affordability mid-round has
+ * to net the pending transfers itself. Applying them to the seat as well would
+ * charge every deal twice.
+ */
+export function spendable(
+  currency: number,
+  role: RoleId,
+  transfers: Transfer[],
+): number {
+  let n = currency
+  for (const t of transfers) {
+    if (t.from === role) n -= t.amount
+    if (t.to === role) n += t.amount
+  }
+  return n
+}
+
 export function availableActions(
   round: number,
   role: RoleId,

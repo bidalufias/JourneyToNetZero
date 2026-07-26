@@ -1,23 +1,30 @@
 import { useState } from 'react'
 import { ArrowRightLeft, Send } from 'lucide-react'
 import { ROLES } from '../game/roles'
-import type { RoleId } from '../game/types'
+import { spendable } from '../game/engine'
+import type { RoleId, Transfer } from '../game/types'
 import { ROLE_IDS } from '../game/types'
 import type { SeatRow } from '../lib/supabase'
 import { Card, roleTheme } from '../ui'
 
 /**
- * Currency moves the instant it is sent, and everyone sees it on the board.
- * What the recipient then does with it is entirely up to them — that gap is
- * where the game lives.
+ * A deal is binding the instant it is struck, and everyone sees it on the
+ * board. What the recipient then does with it is entirely up to them — that
+ * gap is where the game lives.
+ *
+ * The money itself settles at resolution, so the balance shown here is the
+ * seat's stored currency net of the deals already made this round.
  */
 export function TransferPanel({
   me,
   seats,
+  transfers,
   onSend,
 }: {
   me: RoleId
   seats: Partial<Record<RoleId, SeatRow>>
+  /** Deals already struck this round; they settle at resolution, not now. */
+  transfers: Transfer[]
   onSend: (to: RoleId, amount: number) => void
 }) {
   const mySeat = seats[me]
@@ -26,7 +33,7 @@ export function TransferPanel({
   if (!mySeat) return null
 
   const others = ROLE_IDS.filter((r) => r !== me && seats[r])
-  const max = mySeat.currency
+  const max = spendable(mySeat.currency, me, transfers)
   const value = Math.min(amount, Math.max(1, max))
 
   return (
