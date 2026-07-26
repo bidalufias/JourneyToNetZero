@@ -6,6 +6,7 @@ import {
   TrendingUp,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { TARGET_YEAR } from '../game/situations'
 import { THRESHOLDS } from '../game/synergies'
 import type { IndicatorId } from '../game/types'
 
@@ -146,7 +147,7 @@ export function Meter({
 
       <div className="mt-1.5 flex flex-wrap justify-between gap-x-3 text-[12px] font-medium">
         <span className="text-muted">
-          2050 target {m.lowerIsBetter ? '≤' : '≥'} {THRESHOLDS[id]}
+          {TARGET_YEAR} target {m.lowerIsBetter ? '≤' : '≥'} {THRESHOLDS[id]}
         </span>
         <span className={met ? 'text-positive' : 'text-warning'}>
           {met ? 'on track' : 'off track'}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ChevronRight, Clock, Leaf, LogIn, Users } from 'lucide-react'
+import { ArrowLeft, BookOpen, ChevronRight, Clock, Leaf, LogIn, Users } from 'lucide-react'
 import { ROLES, ROLE_ORDER } from '../game/roles'
 import { TOTAL_ROUNDS } from '../game/situations'
 import type { RoleId } from '../game/types'
@@ -10,6 +10,7 @@ import {
   BrandMark,
   Card,
   CityHero,
+  HowToPlay,
   PrimaryButton,
   RoleCard,
   RoleTile,
@@ -28,6 +29,7 @@ export default function Home() {
   const [role, setRole] = useState<RoleId | null>(null)
   const [taken, setTaken] = useState<RoleId[]>([])
   const [lookupError, setLookupError] = useState<string | null>(null)
+  const [showRules, setShowRules] = useState(false)
 
   async function checkCode(next: string) {
     setCode(next)
@@ -59,6 +61,7 @@ export default function Home() {
 
   return (
     <main className="min-h-dvh bg-canvas">
+      <HowToPlay open={showRules} onClose={() => setShowRules(false)} />
       <div className="screen-in mx-auto flex min-h-dvh w-full max-w-[var(--content-max)] flex-col">
         {/* A Malaysian low-carbon city — rooftop and utility-scale solar, an
             electric transit line, a clean river and a planted riverside walk —
@@ -134,6 +137,9 @@ export default function Home() {
                 >
                   Join with a code
                 </SecondaryButton>
+                <TertiaryButton icon={BookOpen} onClick={() => setShowRules(true)}>
+                  How to play
+                </TertiaryButton>
 
                 {/* The table size and the round count, both read from the game
                     rather than written here. */}

@@ -34,6 +34,10 @@ minutes:
 Any player can add 45 seconds to a discussion. The board carries no controls at
 all, so it can sit unattended.
 
+A **How to play** guide sits on the main screen and on every in-game screen.
+It reads the round count, the 2050 thresholds, the phase lengths and the roles
+straight from the game, so it cannot drift out of step with the rules.
+
 ### The three shapes
 
 Every role gets the same three kinds of action each round, so the grammar is

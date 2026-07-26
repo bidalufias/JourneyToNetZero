@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { LucideIcon } from 'lucide-react'
+import { BookOpen, type LucideIcon } from 'lucide-react'
 import { roleTheme } from './roleTheme'
 import type { RoleId } from '../game/types'
 
@@ -13,6 +13,7 @@ export function AppShell({
   role,
   wide = false,
   bleed,
+  onHelp,
   className = '',
 }: {
   children: ReactNode
@@ -21,6 +22,8 @@ export function AppShell({
   wide?: boolean
   /** Full-width artwork rendered above the padded content. */
   bleed?: ReactNode
+  /** Opens the rules. Present on every in-game screen. */
+  onHelp?: () => void
   className?: string
 }) {
   return (
@@ -37,6 +40,18 @@ export function AppShell({
         className={`screen-in mx-auto w-full ${wide ? '' : 'max-w-[var(--content-max)]'}`}
         style={{ padding: wide ? '20px 24px 32px' : '20px 20px 32px' }}
       >
+        {onHelp && (
+          <div className="mb-1 flex justify-end">
+            <button
+              type="button"
+              onClick={onHelp}
+              className="-mt-1 -mr-2 inline-flex h-12 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-muted transition-colors duration-[var(--t-interaction)] hover:bg-surface-2 hover:text-navy"
+            >
+              <BookOpen size={16} strokeWidth={2} aria-hidden="true" />
+              How to play
+            </button>
+          </div>
+        )}
         {children}
       </div>
     </main>

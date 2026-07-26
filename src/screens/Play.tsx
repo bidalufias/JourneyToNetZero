@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowRight,
@@ -32,6 +32,7 @@ import {
   AppShell,
   BottomActionArea,
   Card,
+  HowToPlay,
   LoadingState,
   PrimaryButton,
   ProgressIndicator,
@@ -73,6 +74,10 @@ export default function Play() {
     return () => clearInterval(t)
   }, [tick])
 
+  const [showRules, setShowRules] = useState(false)
+  const rules = <HowToPlay open={showRules} onClose={() => setShowRules(false)} />
+  const openRules = () => setShowRules(true)
+
   const seconds = useCountdown(room?.phase_ends_at ?? null, room?.paused ?? false)
 
   if (!room || !me) {
@@ -113,7 +118,8 @@ export default function Play() {
   if (room.phase === 'lobby') {
     const isHost = room.host_id === me.id
     return (
-      <AppShell role={me.role}>
+      <AppShell role={me.role} onHelp={openRules}>
+        {rules}
         <div className="rounded-[var(--radius-card)] border border-line bg-surface p-5 text-center shadow-[var(--shadow-card)]">
           <p className="text-[12px] font-medium text-muted">Table code</p>
           <p className="tabular mt-1.5 text-[52px] leading-none font-bold tracking-[0.16em] text-brand">
@@ -154,7 +160,7 @@ export default function Play() {
                           <button
                             type="button"
                             onClick={() => void removeComputerPlayer(r)}
-                            className="-my-2 -mr-2 inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-muted transition-colors duration-[var(--t-interaction)] hover:bg-surface-2 hover:text-navy"
+                            className="-my-2 -mr-2 inline-flex h-12 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-muted transition-colors duration-[var(--t-interaction)] hover:bg-surface-2 hover:text-navy"
                           >
                             <X size={15} strokeWidth={2.25} aria-hidden="true" />
                             Open seat
@@ -210,7 +216,8 @@ export default function Play() {
   if (room.phase === 'briefing') {
     const agenda = seat.agendaId ? agendaById(seat.agendaId) : null
     return (
-      <AppShell role={me.role}>
+      <AppShell role={me.role} onHelp={openRules}>
+        {rules}
         <ScreenHeader
           eyebrow="You are"
           title={role.name}
@@ -280,6 +287,7 @@ export default function Play() {
     return (
       <AppShell
         role={me.role}
+        onHelp={openRules}
         bleed={
           <div className="relative h-24 w-full overflow-hidden">
             <SkylineBand className="absolute inset-0 h-full w-full" />
@@ -290,6 +298,7 @@ export default function Play() {
           </div>
         }
       >
+        {rules}
         <ReportCard room={room} highlight={me.role} />
         {/* The report is long and meant to be read end to end, so Finish sits
             after it rather than floating over the debrief. */}
@@ -316,7 +325,8 @@ export default function Play() {
   const waitingOn = ROLE_IDS.filter((r) => !room.seats[r]?.locked)
 
   return (
-    <AppShell role={me.role}>
+    <AppShell role={me.role} onHelp={openRules}>
+      {rules}
       <ScreenHeader
         eyebrow={`Round ${room.round} of ${TOTAL_ROUNDS} · ${situation.year}`}
         title={situation.title}
