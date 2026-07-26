@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ChevronRight, Leaf, LogIn, Users } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Clock, Leaf, LogIn, Users } from 'lucide-react'
 import { ROLES, ROLE_ORDER } from '../game/roles'
+import { TOTAL_ROUNDS } from '../game/situations'
 import type { RoleId } from '../game/types'
 import { transport } from '../lib/transport'
 import { useRoom } from '../store/useRoom'
@@ -10,8 +11,8 @@ import {
   Card,
   CityHero,
   PrimaryButton,
-  RoleBadge,
   RoleCard,
+  RoleTile,
   SecondaryButton,
   TertiaryButton,
 } from '../ui'
@@ -59,68 +60,66 @@ export default function Home() {
   return (
     <main className="min-h-dvh bg-canvas">
       <div className="screen-in mx-auto flex min-h-dvh w-full max-w-[var(--content-max)] flex-col">
-        {/* A Malaysian low-carbon city: rooftop solar, electric transit, a
-            clean river and planted riverside. The title sits on open sky above
-            it rather than over the buildings. */}
-        <div className="relative w-full shrink-0 overflow-hidden">
+        {/* A Malaysian low-carbon city — rooftop and utility-scale solar, an
+            electric transit line, a clean river and a planted riverside walk —
+            carrying the wordmark on open sky above it. */}
+        <div className="relative w-full shrink-0">
+          <CityHero
+            className="block w-full"
+            style={{ aspectRatio: '390 / 420' }}
+          />
+          {/* Keeps the wordmark legible over the skyline at every width. */}
           <div
-            className="absolute inset-0 bg-gradient-to-b from-[#CFE6F9] via-[#E4F1FB] to-[#F5F9FC]"
+            className="pointer-events-none absolute inset-x-0 top-0 h-[52%] bg-gradient-to-b from-white/55 via-white/20 to-transparent"
             aria-hidden="true"
           />
-          <div className="relative flex flex-col items-center px-5 pt-7 text-center">
-            <BrandMark size={58} />
-            <h1 className="mt-2 text-[40px] leading-[1.05] font-bold tracking-[-0.02em] text-navy">
+          <div className="absolute inset-x-0 top-0 flex flex-col items-center px-5 pt-[5%] text-center">
+            <BrandMark size={70} />
+            <h1
+              className="mt-3 font-bold tracking-[-0.025em] text-navy"
+              style={{ fontSize: 'clamp(33px, 10.4vw, 46px)', lineHeight: 1.06 }}
+            >
               Journey to
               <br />
               <span className="text-leaf-dark">Net </span>
               <span className="text-brand">Zero</span>
             </h1>
-            <p className="mt-2 text-[13px] font-medium text-muted">
+            <p className="mt-2.5 text-[13px] font-medium text-muted">
               Malaysia · 2026 — 2050
             </p>
           </div>
-          <CityHero className="relative mt-3 block h-[172px] w-full" />
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-canvas"
-            aria-hidden="true"
-          />
         </div>
 
         <div className="flex flex-1 flex-col px-5 pb-6">
           {mode === 'idle' && (
             <>
-              <Card>
-                <div className="flex gap-3">
-                  <span
-                    className="grid size-10 shrink-0 place-items-center rounded-full bg-leaf-light text-leaf-dark"
-                    aria-hidden="true"
-                  >
-                    <Leaf size={20} strokeWidth={2} />
-                  </span>
-                  <p className="text-[15px] leading-6 text-body">
-                    Four stakeholders. Eight rounds. One country that has to
-                    grow its economy, cut its emissions and improve people’s
-                    lives — all at once.
-                  </p>
-                </div>
-              </Card>
-
-              {/* Two-up rather than four-across: "Government" does not fit in
-                  a quarter of a 320px screen without being clipped. */}
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {ROLE_ORDER.map((r) => (
-                  <div
-                    key={r}
-                    className="rounded-[var(--radius-small)] border border-line bg-surface px-2.5 py-2.5"
-                  >
-                    <RoleBadge role={r} size="sm" />
-                  </div>
+                  <RoleTile key={r} role={r} />
                 ))}
+              </div>
+
+              <div className="mt-3">
+                <Card>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="grid size-11 shrink-0 place-items-center rounded-full bg-leaf-light text-leaf-dark"
+                      aria-hidden="true"
+                    >
+                      <Leaf size={21} strokeWidth={2} />
+                    </span>
+                    <p className="text-[15px] leading-6 text-body">
+                      Four stakeholders. Eight rounds. One country that has to
+                      grow its economy, cut its emissions and improve people’s
+                      lives — all at once.
+                    </p>
+                  </div>
+                </Card>
               </div>
 
               <div className="flex-1" />
 
-              <div className="mt-6 space-y-3">
+              <div className="mt-5 space-y-3">
                 <PrimaryButton
                   icon={Users}
                   trailingIcon={ChevronRight}
@@ -135,7 +134,26 @@ export default function Home() {
                 >
                   Join with a code
                 </SecondaryButton>
-                <p className="pt-1 text-center text-[13px] leading-5 text-muted">
+
+                {/* The table size and the round count, both read from the game
+                    rather than written here. */}
+                <div className="flex items-center justify-center gap-4 rounded-[var(--radius-small)] border border-line bg-surface px-4 py-3">
+                  <span className="flex items-center gap-2 text-[14px] text-body">
+                    <Users size={17} strokeWidth={2} className="text-brand" aria-hidden="true" />
+                    <span className="tabular font-bold text-navy">
+                      {ROLE_ORDER.length}
+                    </span>
+                    Players
+                  </span>
+                  <span className="h-4 w-px bg-line-strong" aria-hidden="true" />
+                  <span className="flex items-center gap-2 text-[14px] text-body">
+                    <Clock size={17} strokeWidth={2} className="text-leaf-dark" aria-hidden="true" />
+                    <span className="tabular font-bold text-navy">{TOTAL_ROUNDS}</span>
+                    Rounds
+                  </span>
+                </div>
+
+                <p className="pt-0.5 text-center text-[13px] leading-5 text-muted">
                   Best with four players in the same room, and a big screen for
                   the board.
                 </p>
