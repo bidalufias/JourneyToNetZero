@@ -36,7 +36,7 @@ import {
   type Command,
 } from '../../../src/game/room'
 import type { Room } from '../../../src/game/session'
-import { PACK_GZIP_B64 } from './content.gen'
+import { PACK_GZIP_B64 } from './content.gen.ts'
 
 declare const Deno: { env: { get(k: string): string | undefined }; serve(h: (r: Request) => Promise<Response> | Response): void }
 
