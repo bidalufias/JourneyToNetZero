@@ -76,6 +76,18 @@ export default function Home() {
             className="pointer-events-none absolute inset-x-0 top-0 h-[52%] bg-gradient-to-b from-white/55 via-white/20 to-transparent"
             aria-hidden="true"
           />
+          {/* The button in the stack below is past the fold on a phone, so the
+              rules also get a control that is always on screen — in the same
+              corner they sit in during the game. */}
+          <button
+            type="button"
+            onClick={() => setShowRules(true)}
+            className="absolute top-2 right-2 z-10 inline-flex h-12 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-navy/80 transition-colors duration-[var(--t-interaction)] hover:bg-surface/80 hover:text-navy active:scale-[0.97]"
+          >
+            <BookOpen size={16} strokeWidth={2} className="text-brand" aria-hidden="true" />
+            How to play
+          </button>
+
           <div className="absolute inset-x-0 top-0 flex flex-col items-center px-5 pt-[5%] text-center">
             <BrandMark size={70} />
             <h1
