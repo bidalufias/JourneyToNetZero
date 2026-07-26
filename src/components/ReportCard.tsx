@@ -1,5 +1,6 @@
 import { CircleAlert, CircleCheckBig, KeyRound, TriangleAlert } from 'lucide-react'
 import { buildReport } from '../game/engine'
+import { TARGET_YEAR } from '../game/situations'
 import { THRESHOLDS } from '../game/synergies'
 import type { RoleId } from '../game/types'
 import type { RoomRow } from '../lib/supabase'
@@ -39,7 +40,7 @@ export function ReportCard({
   return (
     <div className={large ? 'grid grid-cols-[1.05fr_1fr] gap-12' : ''}>
       <div>
-        <p className="text-[12px] font-medium text-muted">Malaysia, 2050</p>
+        <p className="text-[12px] font-medium text-muted">Malaysia, {TARGET_YEAR}</p>
         <h1
           className={`mt-1.5 font-bold tracking-[-0.015em] text-navy ${
             large ? 'text-[52px] leading-[1.05]' : 'text-[28px] leading-[1.15]'

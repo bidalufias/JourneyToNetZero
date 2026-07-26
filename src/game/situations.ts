@@ -109,6 +109,13 @@ export const SITUATIONS: Situation[] = [
 
 export const TOTAL_ROUNDS = SITUATIONS.length
 
+/**
+ * The year the table is judged in. The last round is set in 2048; the report
+ * card scores what that left behind two years later, which is the horizon the
+ * thresholds in `synergies.ts` are written against.
+ */
+export const TARGET_YEAR = 2050
+
 export function situationFor(round: number): Situation {
   const s = SITUATIONS.find((x) => x.round === round)
   if (!s) throw new Error(`No situation for round ${round}`)

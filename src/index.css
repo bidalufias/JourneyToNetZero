@@ -179,6 +179,47 @@
   }
 }
 
+/* A bottom sheet on a phone, a centred panel once there is room. Built on the
+   native <dialog>, so focus trapping, Escape and inertness come for free. */
+@utility ch-sheet {
+  width: 100%;
+  max-width: var(--content-max);
+  margin: auto auto 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  background: var(--surface);
+  color: var(--body-text);
+  box-shadow: 0 -12px 40px rgba(22, 52, 92, 0.18);
+  padding-bottom: env(safe-area-inset-bottom);
+
+  &::backdrop {
+    background: rgba(22, 52, 92, 0.45);
+  }
+
+  &[open] {
+    animation: sheet-in var(--t-screen) var(--ease) both;
+  }
+
+  @media (min-height: 720px) {
+    margin: auto;
+    border-bottom: 1px solid var(--border);
+    border-radius: var(--radius-card);
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 @utility card {
   border-radius: var(--radius-card);
   background: var(--surface);

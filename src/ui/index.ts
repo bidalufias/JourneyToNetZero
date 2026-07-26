@@ -8,6 +8,7 @@ export {
   ScenarioCard,
   StatusChip,
 } from './Cards'
+export { HowToPlay } from './HowToPlay'
 export { BrandMark, CityHero, SkylineBand } from './Illustrations'
 export { RoleBadge, RoleCard, RoleTile } from './Role'
 export { INDICATOR_COLOR, roleTheme } from './roleTheme'
