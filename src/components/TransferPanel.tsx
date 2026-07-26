@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { ArrowRightLeft, Send } from 'lucide-react'
 import { ROLES } from '../game/roles'
 import type { RoleId } from '../game/types'
 import { ROLE_IDS } from '../game/types'
 import type { SeatRow } from '../lib/supabase'
+import { Card, roleTheme } from '../ui'
 
 /**
  * Currency moves the instant it is sent, and everyone sees it on the board.
@@ -25,33 +27,46 @@ export function TransferPanel({
 
   const others = ROLE_IDS.filter((r) => r !== me && seats[r])
   const max = mySeat.currency
+  const value = Math.min(amount, Math.max(1, max))
 
   return (
-    <section className="card p-4">
-      <div className="flex items-baseline justify-between">
-        <h2 className="font-semibold">Move {ROLES[me].currency}</h2>
-        <span className="tabular text-sm text-mist-400">{max} available</span>
+    <Card>
+      <div className="flex items-baseline justify-between gap-2">
+        <h2 className="flex items-center gap-2 text-[17px] font-[650] text-navy">
+          <ArrowRightLeft size={18} strokeWidth={2} className="text-brand" aria-hidden="true" />
+          Move {ROLES[me].currency}
+        </h2>
+        <span className="tabular shrink-0 text-[13px] font-medium text-muted">
+          {max} available
+        </span>
       </div>
-      <p className="mt-1 text-xs leading-relaxed text-mist-400">
+      <p className="mt-1.5 text-[13px] leading-5 text-body">
         Sending is binding and immediate. What they do with it afterwards is
         not — that is the risk you are taking.
       </p>
 
       <div className="mt-3 grid grid-cols-3 gap-2">
-        {others.map((r) => (
-          <button
-            key={r}
-            onClick={() => setTarget(target === r ? null : r)}
-            className={`rounded-xl border px-2 py-2.5 text-xs font-medium transition ${
-              target === r
-                ? 'border-mist-100 bg-ink-600'
-                : 'border-mist-400/20 bg-ink-800'
-            }`}
-            style={target === r ? { color: ROLES[r].accent } : undefined}
-          >
-            {ROLES[r].name}
-          </button>
-        ))}
+        {others.map((r) => {
+          const { color, light, icon: Icon } = roleTheme(r)
+          const on = target === r
+          return (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setTarget(on ? null : r)}
+              aria-pressed={on}
+              className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-[var(--radius-small)] border px-1.5 py-2 text-[12px] font-[650] transition-[background-color,border-color] duration-[var(--t-interaction)] ease-out"
+              style={{
+                borderColor: on ? color : 'var(--border)',
+                background: on ? light : 'var(--surface)',
+                color: on ? color : 'var(--body-text)',
+              }}
+            >
+              <Icon size={16} strokeWidth={2} aria-hidden="true" />
+              <span className="w-full truncate text-center">{ROLES[r].name}</span>
+            </button>
+          )
+        })}
       </div>
 
       {target && (
@@ -60,26 +75,28 @@ export function TransferPanel({
             type="range"
             min={1}
             max={Math.max(1, max)}
-            value={Math.min(amount, Math.max(1, max))}
+            value={value}
             onChange={(e) => setAmount(Number(e.target.value))}
-            className="flex-1 accent-mist-100"
-            aria-label="Amount to send"
+            className="h-11 flex-1 accent-[var(--primary-blue)]"
+            aria-label={`Amount to send to ${ROLES[target].name}`}
           />
-          <span className="tabular w-6 text-center text-lg font-semibold">
-            {Math.min(amount, Math.max(1, max))}
+          <span className="tabular w-6 shrink-0 text-center text-[17px] font-bold text-navy">
+            {value}
           </span>
           <button
+            type="button"
             disabled={max < 1}
             onClick={() => {
               onSend(target, Math.min(amount, max))
               setTarget(null)
             }}
-            className="rounded-xl bg-mist-100 px-4 py-2 text-sm font-semibold text-ink-900 disabled:opacity-30"
+            className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-[var(--radius-small)] bg-brand px-4 text-[15px] font-[650] text-white transition-transform duration-[var(--t-interaction)] ease-out active:scale-[0.98] disabled:opacity-40"
           >
+            <Send size={16} strokeWidth={2} aria-hidden="true" />
             Send
           </button>
         </div>
       )}
-    </section>
+    </Card>
   )
 }

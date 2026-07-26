@@ -121,9 +121,8 @@ so coasting through the 2020s and bartering hard from 2034 cannot win.
 
 ## How it is built
 
-React 19 · TypeScript · Vite · Tailwind v4 · Zustand · Supabase Realtime.
-Around 120 KB of gzipped JavaScript on the phone route, no animation library,
-no UI framework.
+React 19 · TypeScript · Vite · Tailwind v4 · Zustand · Supabase Realtime ·
+Lucide icons. No animation library, no UI framework.
 
 ```
 src/game/        rules, content and the resolution engine — no React
@@ -131,8 +130,19 @@ src/lib/         transport (Supabase or local), config
 src/store/       room state and the phase machine
 src/screens/     Home, Play (phone), Board (big screen)
 src/components/  meters, timer, action cards, report card
+src/ui/          Clean Horizon design system — tokens, buttons, cards,
+                 role badges, progress, illustrations
 scripts/         balance simulation, tuning table, end-to-end playthrough
 ```
+
+**Clean Horizon** is the visual system: a bright, mobile-first Malaysian
+climate palette built on CSS variables in `src/index.css` (blue for the
+interface, green for sustainability, one fixed colour per role), a 20px card
+radius, restrained 180/240ms transitions and a `prefers-reduced-motion`
+opt-out. The artwork in `src/ui/Illustrations.tsx` is inline SVG drawing
+rooftop and utility-scale solar, electrified transit, efficient buildings,
+rivers and forests — the technologies that actually carry Malaysia's
+transition. There are no wind turbines anywhere in the interface.
 
 `src/game/` is deliberately free of UI: the engine is a pure function from
 `(indicators, choices, transfers)` to a resolved round, which is what makes the

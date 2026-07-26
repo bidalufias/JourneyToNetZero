@@ -213,6 +213,12 @@ of that situation.
 
 - React 19 + TypeScript + Vite
 - Tailwind CSS v4 — small, fast, consistent
+- Clean Horizon design system in `src/ui/` — tokens live as CSS variables in
+  `src/index.css`; every screen composes the same shell, buttons, cards and
+  role badges rather than styling itself
+- Lucide for a single consistent line-icon family. Energy and sustainability
+  are shown as solar, grid, transit, industry, forest and water — never as
+  wind turbines, which are not part of Malaysia's realistic energy mix
 - Zustand for client state
 - Supabase (new dedicated project) — Postgres + Realtime for room sync
 - Motion for animation, used sparingly on reveals and meters

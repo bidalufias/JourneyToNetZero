@@ -31,39 +31,42 @@ export function TimerRing({
   const urgent = seconds <= 10
 
   return (
-    <div className="flex items-center gap-3">
-      <svg width={size} height={size} className="-rotate-90" aria-hidden>
+    <div className="flex items-center gap-2.5">
+      <svg width={size} height={size} className="-rotate-90 shrink-0" aria-hidden="true">
         <circle
           cx={size / 2}
           cy={size / 2}
           r={r}
           fill="none"
-          strokeWidth="3"
-          className="stroke-mist-400/25"
+          strokeWidth="3.5"
+          stroke="var(--border)"
         />
         <circle
           cx={size / 2}
           cy={size / 2}
           r={r}
           fill="none"
-          strokeWidth="3"
+          strokeWidth="3.5"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={circumference * (1 - progress)}
-          className={`transition-[stroke-dashoffset] duration-300 ease-linear ${
-            urgent ? 'stroke-emissions' : 'stroke-mist-200'
-          }`}
+          stroke={urgent ? 'var(--warning)' : 'var(--primary-blue)'}
+          className="transition-[stroke-dashoffset] duration-300 ease-linear"
         />
       </svg>
       <div>
         <div
-          className={`tabular text-xl font-semibold ${urgent ? 'text-emissions' : ''}`}
+          className={`tabular text-[20px] leading-none font-bold ${
+            urgent ? 'text-warning' : 'text-navy'
+          }`}
           role="timer"
           aria-live="off"
         >
           {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}
         </div>
-        {label && <div className="text-xs text-mist-400">{label}</div>}
+        {label && (
+          <div className="mt-1 text-[12px] font-medium text-muted">{label}</div>
+        )}
       </div>
     </div>
   )
