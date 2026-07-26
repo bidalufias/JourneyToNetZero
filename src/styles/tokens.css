@@ -1,0 +1,202 @@
+/*
+ * Journey to Net Zero — design tokens.
+ *
+ * Modernist is the law of the system: Archivo throughout, zero radius, 2px
+ * rules, flush-left labels. The four roles are not four visual languages —
+ * they share one type ramp and one 8px rhythm, and differ only by accent ink,
+ * one signature texture, and information density. Glance at a neighbour's
+ * phone and you should read the role in under a second, from ink and texture,
+ * never from a different typeface.
+ *
+ * Values come from `design/Journey-to-Net-Zero-UI.dc.html` §1a.
+ */
+
+:root {
+  /* ── System colour, inherited from Modernist ─────────────────────── */
+  --color-bg: #f3f2f2;
+  --color-surface: #eae9e9;
+  --color-text: #201e1d;
+  --color-accent: #ec3013;
+  --color-accent-2: #e15b47;
+  --color-divider: color-mix(in srgb, #201e1d 40%, transparent);
+
+  --color-neutral-100: #f8f4f4;
+  --color-neutral-200: #eae7e7;
+  --color-neutral-300: #d7d3d3;
+  --color-neutral-400: #bab6b6;
+  --color-neutral-500: #9b9797;
+  --color-neutral-600: #7d7979;
+  --color-neutral-700: #605d5d;
+  --color-neutral-800: #444141;
+  --color-neutral-900: #2d2b2b;
+
+  --color-accent-100: #fff2ef;
+  --color-accent-200: #ffe0d9;
+  --color-accent-300: #ffc4b8;
+  --color-accent-400: #ff9783;
+  --color-accent-500: #ff563c;
+  --color-accent-600: #dd2b0f;
+  --color-accent-700: #ae1800;
+  --color-accent-800: #7c1405;
+  --color-accent-900: #4d170e;
+
+  /* ── Broadcast surface ───────────────────────────────────────────── */
+  /* The projector floor is an assumption, not a colour you paint: a washed-out
+     projector lifts pure black to roughly #3A3A3A and crushes anything below
+     18% lightness together. Every dashboard value is therefore chosen to hold
+     3:1 against #3A3A3A, never against #000. */
+  --jtnz-broadcast: #0e0d0d;
+  --jtnz-glare: #b9b5b0;
+  --jtnz-floor: #3a3a3a;
+  --jtnz-broadcast-raise: #1a1918;
+  --jtnz-broadcast-line: #3a3736;
+  --jtnz-page: #e4e2de;
+
+  /* ── The four role palettes ──────────────────────────────────────── */
+  --jtnz-gov-base: #7b2d3b;
+  --jtnz-gov-deep: #521c26;
+  --jtnz-gov-seal: #c9a227;
+  --jtnz-gov-tint: #f2e7e9;
+  --jtnz-gov-lift: #c97b87;
+
+  --jtnz-biz-base: #1b3a5c;
+  --jtnz-biz-deep: #10263d;
+  --jtnz-biz-data: #5b8fb9;
+  --jtnz-biz-tint: #e6ecf3;
+  --jtnz-biz-lift: #9ec4e0;
+
+  --jtnz-com-base: #b85f2a;
+  --jtnz-com-deep: #7e3d18;
+  --jtnz-com-warm: #e8c27a;
+  --jtnz-com-tint: #f7ebe0;
+  --jtnz-com-lift: #e8a45b;
+
+  --jtnz-act-base: #1f6b3f;
+  --jtnz-act-deep: #124228;
+  --jtnz-act-ink2: #ec3013;
+  --jtnz-act-tint: #e4efe7;
+  --jtnz-act-lift: #a7c9b4;
+
+  /* ── Meters ──────────────────────────────────────────────────────── */
+  --jtnz-meter-emissions: #ec3013;
+  --jtnz-meter-growth: #5b8fb9;
+  --jtnz-meter-happiness: #e8a45b;
+  --jtnz-meter-green: #2e9159;
+  --jtnz-meter-track: #3a3736;
+  --jtnz-good: #2e9159;
+  --jtnz-warn: #e8c27a;
+  --jtnz-bad: #ec3013;
+
+  /* ── Type ────────────────────────────────────────────────────────── */
+  --font-heading: 'Archivo', system-ui, sans-serif;
+  --font-heading-weight: 800;
+  --font-body: 'Archivo', system-ui, sans-serif;
+  --font-mono: ui-monospace, Menlo, Consolas, monospace;
+
+  /* ── Spacing — one 8px rhythm, shared by every role ──────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Modernist is a zero-radius system. Nothing here is ever rounded. */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+
+  --rule: 2px;
+
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #2d2b2b 14%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #2d2b2b 16%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #2d2b2b 22%, transparent);
+
+  /* ── Motion ──────────────────────────────────────────────────────── */
+  /* The gap is the design: cards flip 3s apart and the meters travel on their
+     own 900ms curves in between, staggered so three bars never move as one
+     block. */
+  --jtnz-flip-ms: 400ms;
+  --jtnz-reveal-gap-ms: 3000ms;
+  --jtnz-meter-ms: 900ms;
+  --jtnz-meter-stagger-ms: 1000ms;
+  --jtnz-sheet-ms: 240ms;
+  --jtnz-press-ms: 120ms;
+  --jtnz-sting-hold-ms: 2500ms;
+  --jtnz-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Role skin. Set `data-role` on any subtree and the four --skin-* variables
+   resolve to that role's palette; components never name a role directly. */
+[data-role='government'] {
+  --skin-base: var(--jtnz-gov-base);
+  --skin-deep: var(--jtnz-gov-deep);
+  --skin-mark: var(--jtnz-gov-seal);
+  --skin-tint: var(--jtnz-gov-tint);
+  --skin-lift: var(--jtnz-gov-lift);
+}
+[data-role='business'] {
+  --skin-base: var(--jtnz-biz-base);
+  --skin-deep: var(--jtnz-biz-deep);
+  --skin-mark: var(--jtnz-biz-data);
+  --skin-tint: var(--jtnz-biz-tint);
+  --skin-lift: var(--jtnz-biz-lift);
+}
+[data-role='community'] {
+  --skin-base: var(--jtnz-com-base);
+  --skin-deep: var(--jtnz-com-deep);
+  --skin-mark: var(--jtnz-com-warm);
+  --skin-tint: var(--jtnz-com-tint);
+  --skin-lift: var(--jtnz-com-lift);
+}
+[data-role='activist'] {
+  --skin-base: var(--jtnz-act-base);
+  --skin-deep: var(--jtnz-act-deep);
+  --skin-mark: var(--jtnz-act-ink2);
+  --skin-tint: var(--jtnz-act-tint);
+  --skin-lift: var(--jtnz-act-lift);
+}
+
+/* ── Motion keyframes, verbatim from the design's motion spec ───────── */
+@keyframes jtnz-flip {
+  0% { transform: rotateY(90deg); }
+  100% { transform: rotateY(0); }
+}
+@keyframes jtnz-flash {
+  0%, 100% { opacity: 0; }
+  6% { opacity: 1; }
+  50% { opacity: 1; }
+}
+@keyframes jtnz-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+@keyframes jtnz-ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes jtnz-rise {
+  0% { transform: translateY(14px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes jtnz-card {
+  0% { opacity: 0; transform: rotateY(88deg); }
+  4% { opacity: 1; transform: rotateY(0); }
+  100% { opacity: 1; transform: rotateY(0); }
+}
+@keyframes jtnz-sheet-up {
+  0% { transform: translateY(100%); }
+  100% { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}

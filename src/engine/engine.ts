@@ -109,7 +109,12 @@ export function createGame(path: string[], content: Content): GameState {
  * flags. Falls back to the first authored option when everything is filtered
  * out, so a bankrupt table can still act and the session never stalls.
  */
-export function availableOptions(state: GameState, scenario: Scenario, role: Role, content: Content): Option[] {
+export function availableOptions(
+  state: GameState,
+  scenario: Scenario,
+  role: Role,
+  _content: Content,
+): Option[] {
   const out: Option[] = []
   for (const o of scenario.options[role]) {
     const cost = o.cost ?? {}
