@@ -1,0 +1,104 @@
+{
+  "_meta": {
+    "module": "Insider Tips",
+    "version": "1.0",
+    "purpose": "Creates information asymmetry. One player each round knows something the others don't, and has to decide whether to share it, sit on it, or lie about it. This is the module that makes THE TABLE phase loud.",
+    "balanceNote": "Tips carry no direct effect on emissions, growth, happiness or green share. The only mechanical hook is the optional Publish action, which moves at most 1 Trust or 1 Veto per round. Not included in the ~200,000-game balance run; impact is small but should be watched in live playtesting."
+  },
+
+  "rules": {
+    "dealing": "Exactly one tip per round, to exactly one player. Deal so that every player receives at least one across the six rounds, and two players receive two. Randomise the order each game.",
+    "timing": "The tip lands on that player's phone the moment the crisis is revealed, before THE TABLE phase opens. Nobody else is told a tip was dealt, or to whom.",
+    "visibility": "Never shown on the dashboard. The holder may say anything about it, including nothing, including something untrue.",
+    "reliability": [
+      {"label": "CONFIRMED", "meaning": "Always true. Generated at runtime from real game state.", "share": 0.75},
+      {"label": "UNVERIFIED", "meaning": "True 50% of the time. Resolved by the server at the moment it is dealt, and revealed at the end of the round.", "share": 0.25}
+    ],
+    "publish": {
+      "action": "The holder may tap PUBLISH TO THE NATION at any point during THE TABLE phase. The tip appears on the dashboard, attributed to them.",
+      "ifTrue":  {"government": "+1 Trust", "business": "+1 Trust", "activist": "+1 Trust", "community": "+1 Public Mandate veto (max 3)"},
+      "ifFalse": {"government": "-1 Trust", "business": "-1 Trust", "activist": "-1 Trust", "community": "-1 Public Mandate veto (min 0)"},
+      "note": "A CONFIRMED tip is always safe to publish. An UNVERIFIED tip is a gamble. Choosing to keep a true tip private costs nothing mechanically and everything socially."
+    },
+    "endOfRound": "The dashboard reveals whether any published tip was true or false, and only then. Unpublished tips are never revealed to anyone."
+  },
+
+  "runtimeTemplates": [
+    {
+      "id": "forecast",
+      "reliability": "CONFIRMED",
+      "source": "Cabinet Situation Room",
+      "template": "Early warning: next month's crisis will be {nextKind}.",
+      "fill": {
+        "nextKind": {
+          "financial": "financial - money, markets, the Ringga",
+          "energy": "an energy crisis - power, fuel, the grid",
+          "health": "a public health emergency",
+          "election": "political - the country goes to the polls",
+          "pollution": "an environmental disaster - something has been contaminated",
+          "disaster": "a natural disaster - weather, water, land"
+        }
+      },
+      "availableRounds": [1, 2, 3, 4, 5]
+    },
+    {
+      "id": "dossier",
+      "reliability": "CONFIRMED",
+      "source": "A friend in the ministry",
+      "template": "You have learned something about the {targetRole}. Their private goal is about {category}.",
+      "fill": {
+        "category": {
+          "G-a": "public support", "G-b": "keeping the economy steady", "G-c": "building the green economy",
+          "B-a": "money", "B-b": "cutting their own emissions", "B-c": "reputation and money together",
+          "C-a": "national happiness", "C-b": "protecting the worst-off", "C-c": "community self-reliance",
+          "A-a": "ideological purity", "A-b": "the green economy", "A-c": "justice and accountability"
+        }
+      },
+      "availableRounds": [2, 3, 4, 5, 6]
+    },
+    {
+      "id": "memo",
+      "reliability": "CONFIRMED",
+      "source": "A leaked internal memo",
+      "template": "{flagConsequence}",
+      "fill": {
+        "BUILT_COAL": "Because coal capacity was brought online, the next pollution emergency will hit roughly twice as hard.",
+        "SUBSIDY_LOCK": "The frozen fuel subsidy is quietly draining the Treasury. The Government will have less to spend in the next two rounds.",
+        "REGULATORY_CAPTURE": "Political donations have blunted the regulator. Government enforcement will be half as effective from here on.",
+        "POPULIST_PLEDGE": "The Government promised no new burdens on industry. It will not legally be able to pass the pollution law when it is needed.",
+        "GRID_UPGRADED": "The upgraded grid means every clean option from here costs one resource less.",
+        "GREEN_MANDATE": "The green mandate is real. The Government can pass binding climate law in the final round, and it will land 50% harder.",
+        "RIVER_WATCH": "The citizen river network is now the country's early warning system. The final disaster will do noticeably less damage.",
+        "LAYOFFS": "The layoffs have not been forgotten. The public will be slow to trust Business for the rest of the game.",
+        "MUTUAL_AID": "The mutual aid networks have held. Community-led action will succeed from here whether or not anyone funds it."
+      },
+      "availableRounds": [3, 4, 5, 6],
+      "condition": "Only deal this tip if at least one of the listed flags is active."
+    }
+  ],
+
+  "rumourCards": [
+    {"id":"RUM-01","reliability":"UNVERIFIED","source":"A trader on the exchange","round":[1,2],"text":"Word is the Ringga is about to be downgraded again. Anyone holding out for a rescue package will be disappointed."},
+    {"id":"RUM-02","reliability":"UNVERIFIED","source":"A journalist at the Damai Herald","round":[1,2,3],"text":"They're saying the Business already has a green transition plan written and costed, and is waiting to be paid to announce it."},
+    {"id":"RUM-03","reliability":"UNVERIFIED","source":"Someone in the Treasury","round":[2,3],"text":"The Treasury is far emptier than anyone has admitted. The Government cannot afford two big moves this game."},
+    {"id":"RUM-04","reliability":"UNVERIFIED","source":"A union organiser","round":[2,3,4],"text":"The Community will accept a price rise if - and only if - someone offers them something concrete first."},
+    {"id":"RUM-05","reliability":"UNVERIFIED","source":"An anonymous message","round":[3,4],"text":"The Activist has already agreed a private deal with the Government. Whatever they say at the table today is theatre."},
+    {"id":"RUM-06","reliability":"UNVERIFIED","source":"A pollster","round":[3,4],"text":"The Government's support is far weaker than the numbers suggest. They cannot afford one more unpopular decision."},
+    {"id":"RUM-07","reliability":"UNVERIFIED","source":"A supplier","round":[4,5],"text":"The Business is quietly moving assets offshore. Nothing they promise about the rebuild is going to happen."},
+    {"id":"RUM-08","reliability":"UNVERIFIED","source":"A retired inspector","round":[4,5],"text":"The discharge records everyone is arguing about have already been destroyed. Nobody will ever be able to prove who did it."},
+    {"id":"RUM-09","reliability":"UNVERIFIED","source":"A meteorologist","round":[5,6],"text":"The final crisis is going to be far worse than the forecasts are saying publicly. Whatever you are planning, plan bigger."},
+    {"id":"RUM-10","reliability":"UNVERIFIED","source":"A backbencher","round":[5,6],"text":"There are enough votes to pass a binding climate law right now - but only if the Government is asked publicly, at the table, by someone else."}
+  ],
+
+  "phoneCardSpec": {
+    "layout": "Full-bleed card that slides up over the crisis screen. Must feel private - dark, sealed-envelope treatment, distinct from every other screen in the app.",
+    "elements": [
+      "Header: INSIDER TIP - FOR YOUR EYES ONLY",
+      "Reliability chip: CONFIRMED (solid) or UNVERIFIED (outlined, warning colour)",
+      "Source line: e.g. 'A friend in the ministry'",
+      "Body text: the tip itself, large and readable",
+      "Two actions: KEEP IT QUIET (dismisses, no record) and PUBLISH TO THE NATION (with a confirm step showing the Trust or Veto at stake)",
+      "A one-line reminder: 'Nobody knows you received this.'"
+    ]
+  }
+}

@@ -10,3 +10,10 @@ build
 *.tsbuildinfo
 .vite
 .cache
+
+# Playwright/browser scratch
+shots/
+
+# Python
+__pycache__/
+*.pyc
