@@ -11,7 +11,9 @@
     "typecheck": "tsc -b --noEmit",
     "balance": "tsx scripts/balance.ts",
     "tune": "tsx scripts/tune.ts",
-    "playthrough": "tsx scripts/playthrough.ts"
+    "playthrough": "tsx scripts/playthrough.ts",
+    "solo": "tsx scripts/solo.ts",
+    "seats": "tsx scripts/seats.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

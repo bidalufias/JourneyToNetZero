@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowRight,
+  Bot,
   CircleCheckBig,
   Eye,
   EyeOff,
@@ -12,6 +13,7 @@ import {
   Plus,
   Sparkles,
   Wallet,
+  X,
 } from 'lucide-react'
 import { ActionCard, RevealCard } from '../components/ActionCard'
 import { Meter } from '../components/Meter'
@@ -20,7 +22,7 @@ import { TransferPanel } from '../components/TransferPanel'
 import { ReportCard } from '../components/ReportCard'
 import { actionById } from '../game/actions'
 import { agendaById } from '../game/agendas'
-import { availableActions } from '../game/engine'
+import { availableActions, spendable } from '../game/engine'
 import { ROLES } from '../game/roles'
 import { situationFor, TOTAL_ROUNDS } from '../game/situations'
 import { ROLE_IDS } from '../game/types'
@@ -38,6 +40,7 @@ import {
   ScenarioCard,
   ScreenHeader,
   Section,
+  SecondaryButton,
   SkylineBand,
   StatusChip,
   TertiaryButton,
@@ -46,8 +49,21 @@ import {
 export default function Play() {
   const { code = '' } = useParams()
   const nav = useNavigate()
-  const { room, me, myChoice, watch, tick, start, chooseAction, sendTransfer, extendDiscussion, advance, leave } =
-    useRoom()
+  const {
+    room,
+    me,
+    myChoice,
+    watch,
+    tick,
+    start,
+    chooseAction,
+    sendTransfer,
+    extendDiscussion,
+    advance,
+    leave,
+    addComputerPlayers,
+    removeComputerPlayer,
+  } = useRoom()
 
   useEffect(() => watch(code), [code, watch])
 
@@ -103,9 +119,16 @@ export default function Play() {
           <p className="tabular mt-1.5 text-[52px] leading-none font-bold tracking-[0.16em] text-brand">
             {code}
           </p>
-          <p className="mt-3 text-[15px] leading-6 text-body">
-            Share this with the other three players.
-          </p>
+          {filled < 4 ? (
+            <p className="mt-3 text-[15px] leading-6 text-body">
+              Share this with the other {['one', 'two', 'three'][3 - filled - 1]}{' '}
+              player{4 - filled === 1 ? '' : 's'}.
+            </p>
+          ) : (
+            <p className="mt-3 text-[15px] leading-6 text-body">
+              Everyone is seated.
+            </p>
+          )}
           <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-surface-2 px-3 py-1.5 text-[13px] font-medium text-navy">
             <Monitor size={15} strokeWidth={2} className="text-brand" aria-hidden="true" />
             Open /board/{code} on a big screen
@@ -120,7 +143,29 @@ export default function Play() {
                 <RoleCard
                   key={r}
                   role={r}
-                  status={s ? s.name : 'Waiting…'}
+                  status={s?.bot ? undefined : s ? s.name : 'Waiting…'}
+                  description={
+                    s?.bot ? (
+                      <span className="flex items-center justify-between gap-2">
+                        <StatusChip tone="information" icon={Bot}>
+                          Computer
+                        </StatusChip>
+                        {isHost && (
+                          <button
+                            type="button"
+                            onClick={() => void removeComputerPlayer(r)}
+                            className="-my-2 -mr-2 inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-muted transition-colors duration-[var(--t-interaction)] hover:bg-surface-2 hover:text-navy"
+                          >
+                            <X size={15} strokeWidth={2.25} aria-hidden="true" />
+                            Open seat
+                            <span className="sr-only">
+                              for a player to take {ROLES[r].name}
+                            </span>
+                          </button>
+                        )}
+                      </span>
+                    ) : undefined
+                  }
                 />
               )
             })}
@@ -129,13 +174,26 @@ export default function Play() {
 
         <BottomActionArea>
           {isHost ? (
-            <PrimaryButton
-              disabled={filled < 4}
-              trailingIcon={filled < 4 ? undefined : ArrowRight}
-              onClick={() => void start()}
-            >
-              {filled < 4 ? `Waiting for ${4 - filled} more` : 'Begin — 2026'}
-            </PrimaryButton>
+            <>
+              {filled < 4 && (
+                <>
+                  <SecondaryButton icon={Bot} onClick={() => void addComputerPlayers()}>
+                    Fill {4 - filled} seat{4 - filled === 1 ? '' : 's'} with the computer
+                  </SecondaryButton>
+                  <p className="text-center text-[13px] leading-5 text-muted">
+                    A computer seat chooses at random from what it can afford,
+                    and never opens a deal.
+                  </p>
+                </>
+              )}
+              <PrimaryButton
+                disabled={filled < 4}
+                trailingIcon={filled < 4 ? undefined : ArrowRight}
+                onClick={() => void start()}
+              >
+                {filled < 4 ? `Waiting for ${4 - filled} more` : 'Begin — 2026'}
+              </PrimaryButton>
+            </>
           ) : (
             <p className="py-2 text-center text-[15px] text-muted" role="status">
               {filled < 4
@@ -252,7 +310,8 @@ export default function Play() {
   /* ------------------------------------------------------- round loop */
   const situation = situationFor(room.round)
   const transfers = room.pending_transfers
-  const options = availableActions(room.round, me.role, seat.currency, transfers)
+  const purse = spendable(seat.currency, me.role, transfers)
+  const options = availableActions(room.round, me.role, purse, transfers)
   const total = PHASE_SECONDS[room.phase as keyof typeof PHASE_SECONDS] ?? 0
   const waitingOn = ROLE_IDS.filter((r) => !room.seats[r]?.locked)
 
@@ -291,6 +350,7 @@ export default function Play() {
             <TransferPanel
               me={me.role}
               seats={room.seats}
+              transfers={transfers}
               onSend={(to, amount) => void sendTransfer(to, amount)}
             />
             {transfers.length > 0 && (

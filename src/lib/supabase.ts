@@ -30,6 +30,15 @@ export interface SeatRow {
    * change their mind. That is what keeps the round genuinely simultaneous.
    */
   locked: boolean
+  /**
+   * A seat nobody took, played by the computer so a table of one, two or three
+   * can still run all four stakeholders. It chooses at random from whatever is
+   * playable and never opens a deal — the point being that the seat is filled,
+   * not represented.
+   *
+   * Stored inside the seats JSON, so this needs no schema change.
+   */
+  bot?: boolean
 }
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
