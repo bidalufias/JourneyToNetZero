@@ -15,7 +15,7 @@ export const ROLES: Record<RoleId, Role> = {
       description:
         'Once per game, override another player’s action and force your own outcome. Costs you legitimacy with the public.',
     },
-    accent: '#e0b341',
+    accent: 'var(--government)',
   },
   business: {
     id: 'business',
@@ -31,7 +31,7 @@ export const ROLES: Record<RoleId, Role> = {
       description:
         'Your actions carry the largest raw effect on both Economy and Emissions. What you build, the country lives with for decades.',
     },
-    accent: '#3f9ecb',
+    accent: 'var(--business)',
   },
   community: {
     id: 'community',
@@ -47,7 +47,7 @@ export const ROLES: Record<RoleId, Role> = {
       description:
         'Government actions that raise the cost of living are diluted or fail outright unless you back them.',
     },
-    accent: '#5fbf8f',
+    accent: 'var(--community)',
   },
   activist: {
     id: 'activist',
@@ -63,7 +63,7 @@ export const ROLES: Record<RoleId, Role> = {
       description:
         'Once per game, force this situation to return next round with double the stakes. Nobody gets to move on.',
     },
-    accent: '#d4705f',
+    accent: 'var(--activist)',
   },
 }
 

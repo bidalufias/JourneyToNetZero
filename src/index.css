@@ -1,46 +1,135 @@
 @import 'tailwindcss';
 
-@theme {
-  /* Deep petrol green — the colour of a Malaysian forest at dusk, and dark
-     enough to read from across a room when projected. */
-  --color-ink-900: #060f0d;
-  --color-ink-800: #0a1917;
-  --color-ink-700: #102523;
-  --color-ink-600: #17332f;
-  --color-ink-500: #21453f;
+/* ---------------------------------------------------------------------------
+   Clean Horizon
+   A bright, credible, Malaysian climate palette. Blue carries the interface;
+   green is reserved for sustainability and positive environmental outcomes.
+   --------------------------------------------------------------------------- */
 
-  --color-mist-100: #f2f7f5;
-  --color-mist-200: #d8e6e1;
-  --color-mist-300: #a8c2bb;
-  --color-mist-400: #6f8b84;
+:root {
+  --primary-blue: #2563eb;
+  --primary-blue-dark: #1d4ed8;
+  --primary-blue-light: #dbeafe;
 
-  /* Indicator hues, kept distinct in both light and dark and distinguishable
-     without relying on red/green alone. */
-  --color-economy: #f0b429;
-  --color-emissions: #e2725b;
-  --color-living: #4fb286;
+  --primary-green: #65a30d;
+  --primary-green-dark: #4d7c0f;
+  --primary-green-light: #ecfccb;
 
-  --color-gov: #e0b341;
-  --color-biz: #3f9ecb;
-  --color-com: #5fbf8f;
-  --color-act: #d4705f;
+  --teal: #0d9488;
+  --teal-light: #ccfbf1;
 
-  --font-display: 'Inter Tight', system-ui, -apple-system, sans-serif;
-  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --navy-text: #16345c;
+  --body-text: #334155;
+  --muted-text: #64748b;
+
+  --background: #f5f9fc;
+  --surface: #ffffff;
+  --surface-secondary: #edf5fa;
+
+  --border: #d9e4ec;
+  --border-strong: #b8cad8;
+
+  --government: #2563eb;
+  --government-light: #dbeafe;
+
+  --business: #65a30d;
+  --business-light: #ecfccb;
+
+  --community: #0d9488;
+  --community-light: #ccfbf1;
+
+  --activist: #7c3aed;
+  --activist-light: #ede9fe;
+
+  --positive: #16a34a;
+  --warning: #d97706;
+  --negative: #dc2626;
+  --information: #0284c7;
+
+  /* Layout scale */
+  --page-padding: 20px;
+  --section-gap: 24px;
+  --card-gap: 12px;
+  --radius-card: 20px;
+  --radius-button: 16px;
+  --radius-small: 12px;
+  --content-max: 480px;
+
+  /* Motion */
+  --t-interaction: 180ms;
+  --t-screen: 240ms;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  --shadow-card: 0 8px 24px rgba(22, 52, 92, 0.08);
+  --shadow-raised: 0 12px 32px rgba(22, 52, 92, 0.12);
+}
+
+/* Bridge the design tokens into Tailwind so utilities stay in sync with the
+   variables above rather than duplicating hex values. */
+@theme inline {
+  --color-brand: var(--primary-blue);
+  --color-brand-dark: var(--primary-blue-dark);
+  --color-brand-light: var(--primary-blue-light);
+
+  --color-leaf: var(--primary-green);
+  --color-leaf-dark: var(--primary-green-dark);
+  --color-leaf-light: var(--primary-green-light);
+
+  --color-teal: var(--teal);
+  --color-teal-light: var(--teal-light);
+
+  --color-navy: var(--navy-text);
+  --color-body: var(--body-text);
+  --color-muted: var(--muted-text);
+
+  --color-canvas: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-secondary);
+
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+
+  --color-gov: var(--government);
+  --color-gov-light: var(--government-light);
+  --color-biz: var(--business);
+  --color-biz-light: var(--business-light);
+  --color-com: var(--community);
+  --color-com-light: var(--community-light);
+  --color-act: var(--activist);
+  --color-act-light: var(--activist-light);
+
+  --color-positive: var(--positive);
+  --color-warning: var(--warning);
+  --color-negative: var(--negative);
+  --color-information: var(--information);
+
+  /* Indicator hues. Distinguishable without relying on red/green alone, and
+     always paired with a sign or a written label. */
+  --color-economy: var(--primary-blue);
+  --color-emissions: var(--warning);
+  --color-living: var(--teal);
+
+  --font-sans:
+    Inter, 'SF Pro Display', 'SF Pro Text', system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-sans);
 }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    background: var(--color-ink-900);
+    background: var(--background);
   }
 
   body {
     margin: 0;
     font-family: var(--font-sans);
-    color: var(--color-mist-100);
-    background: var(--color-ink-900);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--body-text);
+    background: var(--background);
     overscroll-behavior-y: none;
+    /* Nothing in this layout scrolls sideways. */
+    overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -49,6 +138,14 @@
     min-height: 100dvh;
     padding: env(safe-area-inset-top) env(safe-area-inset-right)
       env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--navy-text);
+    text-wrap: balance;
   }
 
   button {
@@ -60,6 +157,14 @@
 
   input {
     font: inherit;
+    color: var(--navy-text);
+  }
+
+  /* One visible focus treatment everywhere, on the keyboard only. */
+  :focus-visible {
+    outline: 3px solid var(--primary-blue);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -67,31 +172,63 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 }
 
 @utility card {
-  border-radius: 1rem;
-  background: color-mix(in oklab, var(--color-ink-700) 92%, transparent);
-  border: 1px solid color-mix(in oklab, var(--color-mist-400) 22%, transparent);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
 }
 
 @utility tabular {
   font-variant-numeric: tabular-nums;
 }
 
-/* A slow drift behind the title screens — one element, no library, no jank. */
-@keyframes drift {
+/* Screens fade up once on mount; 240ms, no parallax, no looping. */
+@keyframes screen-in {
   from {
-    transform: translate3d(0, 0, 0) scale(1.05);
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
   }
   to {
-    transform: translate3d(0, -2%, 0) scale(1.12);
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 }
 
-@utility bg-drift {
-  animation: drift 24s ease-in-out infinite alternate;
+@utility screen-in {
+  animation: screen-in var(--t-screen) var(--ease) both;
+}
+
+/* A single soft sweep for waiting states — no spinner jitter, no pulsing. */
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@utility shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+@utility shimmer-bar {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--primary-blue) 18%, transparent),
+    transparent
+  );
+  animation: shimmer 1.8s var(--ease) infinite;
 }

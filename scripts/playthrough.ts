@@ -21,7 +21,7 @@ const BOARD = { width: 1600, height: 900 }
 const ROLES = ['Government', 'Business', 'Community', 'Activist'] as const
 const NAMES = ['Aina', 'Faiz', 'Mei Ling', 'Ravi'] as const
 
-const shot = (n: string) => `/tmp/claude-0/-home-user-JourneyToNetZero/d1f2bbfd-903b-5dcb-bb17-7f2c91ac9bf5/scratchpad/pt-${n}.png`
+const shot = (n: string) => `/tmp/claude-0/-home-user-JourneyToNetZero/4a01ab4d-5427-551d-a98a-1a36a4188a68/scratchpad/pt-${n}.png`
 
 let sharedCtx: Awaited<ReturnType<Browser['newContext']>>
 
