@@ -117,8 +117,9 @@ export function ChoiceCard({
   note,
   noteTone = 'neutral',
   selected,
-  disabled,
+  disabled = false,
   onSelect,
+  preview = false,
 }: {
   role: RoleId
   kicker: ReactNode
@@ -128,27 +129,48 @@ export function ChoiceCard({
   note?: ReactNode
   noteTone?: 'neutral' | 'negative'
   selected: boolean
-  disabled: boolean
-  onSelect: () => void
+  disabled?: boolean
+  onSelect?: () => void
+  /**
+   * Render a picture of a card rather than a card. Used by the rules, where an
+   * example must not appear in the accessibility tree as a pressable control —
+   * or, for that matter, in any query looking for the real ones.
+   */
+  preview?: boolean
 }) {
   const { color, light } = roleTheme(role)
+
+  // Once the round is locked every card is disabled — but the one you picked
+  // should stay legible, so only the unpicked ones fade back.
+  const className = `w-full rounded-[var(--radius-card)] border p-4 text-left transition-[transform,background-color,border-color] duration-[var(--t-interaction)] ease-out not-disabled:active:scale-[0.99] ${
+    disabled && !selected ? 'opacity-45' : ''
+  }`
+  const style = {
+    borderColor: selected ? color : 'var(--border)',
+    background: selected ? light : 'var(--surface)',
+    boxShadow: selected ? 'none' : 'var(--shadow-card)',
+  }
+  const Wrapper = preview
+    ? ({ children }: { children: ReactNode }) => (
+        <div className={className} style={style}>
+          {children}
+        </div>
+      )
+    : ({ children }: { children: ReactNode }) => (
+        <button
+          type="button"
+          onClick={onSelect}
+          disabled={disabled}
+          aria-pressed={selected}
+          className={className}
+          style={style}
+        >
+          {children}
+        </button>
+      )
+
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      disabled={disabled}
-      aria-pressed={selected}
-      // Once the round is locked every card is disabled — but the one you
-      // picked should stay legible, so only the unpicked ones fade back.
-      className={`w-full rounded-[var(--radius-card)] border p-4 text-left transition-[transform,background-color,border-color] duration-[var(--t-interaction)] ease-out not-disabled:active:scale-[0.99] ${
-        disabled && !selected ? 'opacity-45' : ''
-      }`}
-      style={{
-        borderColor: selected ? color : 'var(--border)',
-        background: selected ? light : 'var(--surface)',
-        boxShadow: selected ? 'none' : 'var(--shadow-card)',
-      }}
-    >
+    <Wrapper>
       <div className="flex items-center justify-between gap-3">
         <span className="min-w-0 truncate text-[13px] font-medium" style={{ color }}>
           {kicker}
@@ -178,7 +200,7 @@ export function ChoiceCard({
           {note}
         </p>
       )}
-    </button>
+    </Wrapper>
   )
 }
 

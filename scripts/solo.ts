@@ -57,15 +57,19 @@ async function main() {
   }
 
   await host.getByRole('button', { name: /Fill \d seats? with the computer/ }).click()
-  await waitForText(host, 'Begin', 20_000)
-  const lobby = (await host.textContent('body')) ?? ''
-  const computers = (lobby.match(/Computer/g) ?? []).length
+  // By role, not by text: the rules dialog sits in the DOM on every screen and
+  // contains the word "begins".
+  await host.getByRole('button', { name: /Begin/ }).waitFor({ state: 'visible', timeout: 20_000 })
+  // Scoped to the seat list: the rules dialog is always mounted and mentions
+  // computer seats too, so counting across the whole page overcounts.
+  const table = host.locator('section').filter({ hasText: 'At the table' })
+  const computers = await table.getByText('Computer', { exact: true }).count()
   if (computers !== 4 - HUMANS) {
     failures.push(`expected ${4 - HUMANS} computer seats in the lobby, saw ${computers}`)
   }
 
   await host.getByRole('button', { name: /Begin/ }).click()
-  await waitForText(host, 'Start round 1', 20_000)
+  await host.getByRole('button', { name: 'Start round 1' }).waitFor({ state: 'visible', timeout: 20_000 })
   await host.getByRole('button', { name: 'Start round 1' }).click()
 
   for (let round = 1; round <= 8; round++) {
@@ -90,7 +94,7 @@ async function main() {
 
   await waitForText(host, 'Malaysia, 2050')
   await host.waitForTimeout(1200)
-  const report = (await host.textContent('body')) ?? ''
+  const report = (await host.locator('main').innerText()) ?? ''
   const ending = await host.locator('h1').first().textContent()
   console.log(`  ending: ${ending}`)
   if (!report.includes('of 3 national targets met')) {
