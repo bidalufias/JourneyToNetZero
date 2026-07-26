@@ -91,7 +91,9 @@ Both persist for the tab once set, and can be combined.
 npm run dev         # development server
 npm run build       # typecheck and production build
 npm run balance     # replay archetypal tables through all eight rounds
+npm run seats       # what an empty seat costs, over 2,000 tables per lineup
 npm run playthrough # drive a real four-player game in a browser
+npm run solo        # drive a game with computer seats (HUMANS=1|2|3)
 ```
 
 ---
@@ -117,6 +119,31 @@ being asserted, which is the whole point.
 Emissions added in the early rounds are weighted to be harder to remove later,
 so coasting through the 2020s and bartering hard from 2034 cannot win.
 
+## Playing without four people
+
+Any empty seat can be filled by the computer from the lobby, so the game runs
+with one, two or three players. A computer seat picks at random from whatever
+it can afford, and it funds the player who depends on it only sometimes and
+never on request — you cannot negotiate with a seat that is merely filled.
+
+`npm run seats` replays 2,000 tables per lineup. What it finds:
+
+| Lineup | Avg targets met | 0/3 | 1/3 | 2/3 | 3/3 |
+|---|---|---|---|---|---|
+| 4 players | 3.00 | 0% | 0% | 0% | 100% |
+| 3 players, 1 computer | 3.00 | 0% | 0% | 0% | 100% |
+| 2 players, 2 computers | 2.37 | 0% | 16% | 30% | 54% |
+| 1 player, 3 computers | 0.64 | 43% | 51% | 6% | 0% |
+
+The honest reading is narrower than "leave a stakeholder out and you fail".
+**Losing one stakeholder costs nothing measurable** — the conditional actions
+mostly depend on the other three, so the remaining players route around the
+gap. The cost appears at two missing and dominates at three, where no table
+reached all three targets in 2,000 attempts.
+
+These humans play greedily, always taking the strongest option open to them,
+so treat the levels as a ceiling and the gradient as the finding.
+
 ---
 
 ## How it is built
@@ -132,7 +159,8 @@ src/screens/     Home, Play (phone), Board (big screen)
 src/components/  meters, timer, action cards, report card
 src/ui/          Clean Horizon design system — tokens, buttons, cards,
                  role badges, progress, illustrations
-scripts/         balance simulation, tuning table, end-to-end playthrough
+scripts/         balance and seat-count simulations, tuning table,
+                 end-to-end playthroughs
 ```
 
 **Clean Horizon** is the visual system: a bright, mobile-first Malaysian
