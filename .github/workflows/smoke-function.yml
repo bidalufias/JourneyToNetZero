@@ -112,12 +112,18 @@ jobs:
             js=$(printf '%s' "$html" | grep -o '/assets/index-[A-Za-z0-9_-]*\.js' | head -1)
             if [ -n "$js" ]; then
               bundle=$(curl -fsS --max-time 30 "$SITE$js" || true)
-              if printf '%s' "$bundle" | grep -q 'dsibzzchpokqwscjrbif\.supabase\.co'; then
+              has_url=no; has_key=no
+              printf '%s' "$bundle" | grep -q 'dsibzzchpokqwscjrbif\.supabase\.co' && has_url=yes
+              # Both are needed: the client only takes the Supabase path when it
+              # has a URL *and* a key, so a half-configured build silently falls
+              # back to the local transport and looks fine until four people join.
+              printf '%s' "$bundle" | grep -q 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' && has_key=yes
+              echo "attempt $attempt: $js url=$has_url key=$has_key"
+              if [ "$has_url" = yes ] && [ "$has_key" = yes ]; then
                 wired=yes
-                echo "Bundle $js points at the room function."
+                echo "Bundle $js carries both the Supabase URL and the anon key."
                 break
               fi
-              echo "attempt $attempt: $js does not carry the Supabase URL yet"
             else
               echo "attempt $attempt: no bundle found on the page"
             fi
@@ -125,7 +131,12 @@ jobs:
           done
 
           if [ "$wired" = yes ]; then
-            echo "### Live site is wired to Supabase" >> "$GITHUB_STEP_SUMMARY"
+            {
+              echo "### Live site is wired to Supabase"
+              echo
+              echo "Bundle \`$js\` carries the URL and the anon key, so phones on"
+              echo "separate devices will share one authoritative room."
+            } >> "$GITHUB_STEP_SUMMARY"
           else
             {
               echo "### Live site is still on the local transport"
