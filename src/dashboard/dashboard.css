@@ -446,6 +446,11 @@
  * own puts it bottom right — the crisis sting has nothing else down there — and
  * covering the clock, even for the four seconds the bar is up, is the one thing
  * these buttons must not do.
+ *
+ * `bottom` is set inline from the measured height of whatever strip that screen
+ * ends in, so the bar sits above the ticker or the briefing line rather than
+ * straddling it. The value here is only the fallback for the frame before the
+ * first measurement lands.
  */
 .faccon {
   position: fixed;
