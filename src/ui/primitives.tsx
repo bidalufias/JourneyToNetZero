@@ -1,7 +1,7 @@
 /**
  * Shared primitives for both surfaces.
  *
- * The four roles are told apart by glyph and ink, never by typeface — Archivo
+ * The four roles are told apart by glyph and ink, never by typeface. Archivo
  * is the law of the system. The glyphs are the four "private objects" from the
  * brief, reduced to marks that survive being 12px on a phone and 200px on a
  * projector.

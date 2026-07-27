@@ -2,14 +2,14 @@
  * The Reckoning's clock.
  *
  * These four cards are the payoff of the whole round, and until this was fixed
- * they were drawn entirely from `phaseEndsAt − Date.now()` — a deadline stamped
+ * they were drawn entirely from `phaseEndsAt - Date.now()`, a deadline stamped
  * by the edge function, minus whatever the machine driving the projector
  * believed the time to be. Those are two clocks, and nothing makes them agree.
  * A screen a minute slow put every card a minute further away than it was and
  * the phase came and went with nothing on it.
  *
  * So the arithmetic is pinned here: what is due when, which readings of the
- * deadline are believable, and — the case that broke — that a wrong clock costs
+ * deadline are believable, and, in the case that broke, that a wrong clock costs
  * the room nothing, because the sequence falls back to a stopwatch that cannot
  * be wrong about how long the screen has been up.
  */

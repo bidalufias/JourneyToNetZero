@@ -1,5 +1,5 @@
 /**
- * The phone — join, take a seat, seal a goal, argue, choose, look up.
+ * The phone: join, take a seat, seal a goal, argue, choose, look up.
  *
  * The design rule this file exists to honour: every second on the phone is a
  * second not spent negotiating. Nothing here scrolls when it could fit, no
@@ -7,7 +7,7 @@
  * would turn a judgement call into a spreadsheet call.
  *
  * The one thing the phone now does when it is *not* your turn is remember. BACK
- * walks the round you are in — the crisis, the board, your own locked card —
+ * walks the round you are in, meaning the crisis, the board and your own
  * without ever letting you change a thing you have committed to.
  */
 import { useEffect, useState } from 'react'
@@ -92,11 +92,11 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
     <div className="phone" data-role={view.role} data-skin={skin}>
       {/* Above the header, and on every screen the phone has. A frozen clock
           with no explanation is indistinguishable from a phone that has lost
-          the room — and the answer to those two is not the same. */}
+          the room, and the answer to those two is not the same. */}
       {view.paused ? (
         <div className="paused" role="status">
           <span className="paused__mark">❙❙</span>
-          <span>PAUSED — look up. Nothing you tap counts until the room restarts.</span>
+          <span>PAUSED. Look up. Nothing you tap counts until the room restarts.</span>
         </div>
       ) : null}
       {!bare ? (
@@ -122,9 +122,9 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
       {connection !== 'live' ? (
         <div className="reconnect" role="status">
           {connection === 'reconnecting'
-            ? 'RECONNECTING — YOUR SEAT IS HELD'
+            ? 'RECONNECTING · YOUR SEAT IS HELD'
             : connection === 'unreachable'
-              ? "CAN'T REACH THE GAME SERVER — TELL THE FACILITATOR"
+              ? "CAN'T REACH THE GAME SERVER · TELL THE FACILITATOR"
               : 'CONNECTING…'}
         </div>
       ) : null}
@@ -143,7 +143,7 @@ function Endgame({ view, endgame }: { view: PhoneView; endgame: Endgame | null }
       <p className="ptext">
         {endgame.win
           ? 'Three targets. All three. 34 million people live in a country that still works.'
-          : 'The country missed. Look up — the room is reading the rest of it together.'}
+          : 'The country missed. Look up. The room is reading the rest of it together.'}
       </p>
       {me ? (
         <div className="bubble">

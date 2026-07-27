@@ -1,12 +1,12 @@
 /*
- * The phone — a control surface, not the game.
+ * The phone: a control surface, not the game.
  *
  * Every second spent on the phone is a second not spent negotiating, so the
  * app is built to be got out of: 48px targets, flush-left labels, two taps
  * maximum for any Table action, and never a raw number anywhere.
  *
  * Each role keeps the same type ramp and the same 8px rhythm and differs by
- * accent ink, one signature texture, and information density — so a glance at
+ * accent ink, one signature texture, and information density, so a glance at
  * a neighbour's phone reads the role in under a second.
  */
 
@@ -44,8 +44,8 @@
 /*
  * White, not the role's accent ink.
  *
- * The accent marks were between 1.6:1 and 3.8:1 against their own header — the
- * Activist's red on green was effectively unreadable — and this line names the
+ * The accent marks were between 1.6:1 and 3.8:1 against their own header, and the
+ * Activist's red on green was effectively unreadable. This line names the
  * organisation you are playing, on nearly every screen in the game. White
  * clears 4.5:1 on three of the four; the Community's warmer base sits just
  * under, so only that header drops to the role's own deep tone.
@@ -201,7 +201,7 @@ a.btn {
 
 .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 
-/* ── Option card — the most important component in the game ─────────── */
+/* ── Option card: the most important component in the game ──────────── */
 
 /* Fixed anatomy so the eye lands in the same four places every round:
    cost chip top-right, title, one line, hint rule. */
@@ -256,11 +256,11 @@ a.btn {
 
 .ocard__check { position: absolute; right: var(--space-4); bottom: var(--space-4); font-size: 18px; }
 
-/* Not the card you locked. Still legible — once the round is committed this
+/* Not the card you locked. Still legible, because once the round is committed this
    screen stops being a decision and becomes a record of one. */
 .ocard--muted { opacity: 0.5; }
 
-/* Three disabled states, three different edges — "I can't", "she stopped me"
+/* Three disabled states, three different edges: "I can't", "she stopped me"
    and "I did this to myself" are three different feelings. */
 .ocard--afford {
   background: var(--color-neutral-200);
@@ -352,7 +352,7 @@ a.btn {
   gap: var(--space-3);
 }
 
-/* ── Insider tip — the only dark screen on any phone ────────────────── */
+/* ── Insider tip: the only dark screen on any phone ─────────────────── */
 
 .tip {
   position: fixed;
@@ -419,7 +419,7 @@ a.btn {
 .lookup__rule { width: 96px; height: 6px; background: var(--skin-lift); }
 .lookup__note { margin-top: var(--space-6); font: 400 17px/1.45 var(--font-body); opacity: 0.9; }
 
-/* ── Round result — the group chat ──────────────────────────────────── */
+/* ── Round result: the group chat ───────────────────────────────────── */
 
 .chat { display: flex; flex-direction: column; gap: var(--space-3); }
 
@@ -519,7 +519,7 @@ a.btn {
  * plus the commit button ran about 70px past the fold, so the one button the
  * round depends on sat off-screen with the clock running and nothing to
  * suggest the page scrolled. Tighten the card anatomy rather than drop
- * anything from it — every line on the card is load-bearing.
+ * anything from it. Every line on the card is load-bearing.
  */
 @media (max-height: 730px) {
   .pbody { gap: var(--space-2); padding: var(--space-3); }
@@ -531,7 +531,7 @@ a.btn {
   .btn { min-height: 44px; }
 }
 
-/* The smallest phones still in the room — an iPhone SE is 568px tall. */
+/* The smallest phones still in the room. An iPhone SE is 568px tall. */
 @media (max-height: 620px) {
   .pbody { gap: 6px; padding: var(--space-2); padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom)); }
   .ocard__desc { display: none; }
@@ -546,7 +546,7 @@ a.btn {
  *
  * In flow rather than fixed, so it never lands on top of the reconnect strip
  * and never covers a card. It is the first thing on the screen because the
- * instruction it carries — look up — is the whole point of a pause.
+ * instruction it carries, look up, is the whole point of a pause.
  */
 .paused {
   display: flex;

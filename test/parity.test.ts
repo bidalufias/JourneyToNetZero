@@ -1,8 +1,8 @@
 /**
  * The single most valuable test in this project.
  *
- * Replays 240 games recorded from `reference/engine.py` — the balance-tested
- * implementation — and asserts the TypeScript port reproduces every round's
+ * Replays 240 games recorded from `reference/engine.py`, the balance-tested
+ * implementation, and asserts the TypeScript port reproduces every round's
  * state. Regenerate the fixtures with `npm run fixtures`.
  *
  * Everything discrete is compared with `toBe`: flags, trust, fiscal, capital,
@@ -16,13 +16,13 @@
  * and V8's `Math.pow` is a fast approximation while CPython's is the
  * correctly-rounded glibc `pow`. They disagree on roughly 10% of inputs by a
  * single unit in the last place. Measured over these fixtures, 97.3% of rounds
- * are bit-identical anyway and the worst deviation anywhere is 5.2e-16 —
+ * are bit-identical anyway and the worst deviation anywhere is 5.2e-16,
  * about two ULP, on `growth` and `greenShare` only; emissions, happiness and
  * per-role emissions are bit-exact everywhere. The tolerance is therefore some
  * four orders of magnitude tighter than any genuine logic error could hide in,
  * and four orders looser than the float noise it exists to absorb.
  *
- * Integer exponents — credibility decay and volunteer fatigue — use repeated
+ * Integer exponents, credibility decay and volunteer fatigue, use repeated
  * multiplication in the port precisely so they stay bit-exact.
  */
 import { describe, expect, it } from 'vitest'
@@ -78,7 +78,7 @@ interface Golden {
   }[]
 }
 
-/** Float noise from the `^green_power` term only — see the header. */
+/** Float noise from the `^green_power` term only. See the header. */
 const TOLERANCE = 1e-12
 
 function expectClose(actual: number, expected: number, label: string): number {
@@ -121,7 +121,7 @@ describe('engine parity with reference/engine.py', () => {
         const g = rec.state
         const at = where(rec.round)
 
-        // Meters — the three the country is judged on, plus the green economy.
+        // Meters: the three the country is judged on, plus the green economy.
         let deviation = 0
         deviation = Math.max(deviation, expectClose(state.emissions, g.e, `${at} emissions`))
         deviation = Math.max(deviation, expectClose(state.growth, g.g, `${at} growth`))

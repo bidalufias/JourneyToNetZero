@@ -18,7 +18,7 @@
   margin-bottom: var(--space-4);
 }
 
-/* The only element on the dashboard ever set this large — legible across any
+/* The only element on the dashboard ever set this large, legible across any
    training room, and read aloud without ambiguity. */
 .attract__code {
   font: 800 clamp(96px, 15.5cqw, 300px) / 0.82 var(--font-heading);
@@ -104,7 +104,7 @@
 /*
  * Light, not dark. A projected QR is read off a washed-out surface by four
  * phones at once, and dark modules on a lit field is the arrangement every
- * camera is tuned for — the inverse costs seconds per phone and some phones
+ * camera is tuned for. The inverse costs seconds per phone and some phones
  * entirely.
  */
 .joinover {
@@ -404,7 +404,7 @@
   background: var(--jtnz-broadcast-line);
 }
 
-/* 400ms rotateY from 88°. One card at a time — the gap is the design. */
+/* 400ms rotateY from 88°. One card at a time, because the gap is the design. */
 .rcard--in {
   animation: jtnz-flip var(--jtnz-flip-ms) var(--jtnz-ease) both;
 }
@@ -528,7 +528,7 @@
   place-items: center;
 }
 
-/* The fourth glyph stays visibly hollow — the room should feel the better
+/* The fourth glyph stays visibly hollow, because the room should feel the better
    number they didn't get. */
 .coalition__glyph--hollow {
   background: transparent;

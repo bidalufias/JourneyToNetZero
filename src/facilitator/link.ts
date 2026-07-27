@@ -3,8 +3,8 @@
  *
  * Publishes where the session has got to, answers a script window that has
  * just opened, and forwards the commands that window is allowed to send. Those
- * are exactly the ones the big screen's own keys send — `start`, `advance`,
- * `pause` and `resume` — and the room refuses anything else from a dashboard
+ * are exactly the ones the big screen's own keys send: `start`, `advance`,
+ * `pause` and `resume`, and the room refuses anything else from a dashboard
  * client anyway, so the channel cannot become a back door into the game state.
  *
  * State is only posted when something a facilitator would notice changes. The

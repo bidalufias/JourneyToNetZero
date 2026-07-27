@@ -1,9 +1,9 @@
 /**
- * Local transport — the whole game in one browser.
+ * Local transport: the whole game in one browser.
  *
  * The dashboard tab is the host: it owns the `Room`, ticks the clock, and
  * broadcasts fresh views. Phone tabs send commands and render what comes back.
- * Nothing about that arrangement changes the trust model — a phone tab still
+ * Nothing about that arrangement changes the trust model. A phone tab still
  * only ever receives a `PhoneView`, so the numbers behind an option are as
  * unreachable here as they are across a network.
  *
@@ -95,7 +95,7 @@ class LocalHost implements Transport {
   private timer: ReturnType<typeof setInterval>
   private snapshotSubs = new Set<(s: Snapshot) => void>()
   private connectionSubs = new Set<(c: ConnectionState) => void>()
-  /** Which tab holds which chair — the local half of a seat token. */
+  /** Which tab holds which chair: the local half of a seat token. */
   private owners = new Map<Role, string>()
   private closed = false
 
@@ -127,7 +127,7 @@ class LocalHost implements Transport {
    * Whether this tab may act as this seat.
    *
    * A chair with a name on it belongs to whoever claimed it. An unnamed chair
-   * is free, and the first tab to ask gets it — which is also what lets a
+   * is free, and the first tab to ask gets it, which is also what lets a
    * player who left take a seat again, on this phone or another.
    */
   private grant(role: Role, client: string): boolean {

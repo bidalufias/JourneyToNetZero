@@ -1,8 +1,8 @@
 /*
- * Journey to Net Zero — design tokens.
+ * Journey to Net Zero: design tokens.
  *
  * Modernist is the law of the system: Archivo throughout, zero radius, 2px
- * rules, flush-left labels. The four roles are not four visual languages —
+ * rules, flush-left labels. The four roles are not four visual languages.
  * they share one type ramp and one 8px rhythm, and differ only by accent ink,
  * one signature texture, and information density. Glance at a neighbour's
  * phone and you should read the role in under a second, from ink and texture,
@@ -93,7 +93,7 @@
   --font-body: 'Archivo', system-ui, sans-serif;
   --font-mono: ui-monospace, Menlo, Consolas, monospace;
 
-  /* ── Spacing — one 8px rhythm, shared by every role ──────────────── */
+  /* ── Spacing: one 8px rhythm, shared by every role ───────────────── */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;

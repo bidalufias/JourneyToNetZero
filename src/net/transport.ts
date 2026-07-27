@@ -1,5 +1,5 @@
 /**
- * Transport — how a client reaches the authoritative room.
+ * Transport: how a client reaches the authoritative room.
  *
  * The UI talks only to this interface. Two implementations exist:
  *
@@ -11,7 +11,7 @@
  *
  * Both obey the same contract: clients send `Command`s and receive views. A
  * client never computes game state, so swapping transports cannot change what
- * the game does — and a player cannot reach the numbers by reaching past the UI.
+ * the game does, and a player cannot reach the numbers by reaching past the UI.
  */
 import type { Role } from '../engine/types'
 import type { Command } from '../game/room'
@@ -41,7 +41,7 @@ export interface RosterSeat {
  * The seat was refused, or the room does not exist.
  *
  * A refusal has to carry the roster, otherwise the only thing the phone can
- * say is "no" — and the player's next question is always "then which seat can
+ * say is "no", and the player's next question is always "then which seat can
  * I have?". Names on the roster are already public: they are on the projector.
  */
 export interface DeniedSnapshot {
@@ -59,7 +59,7 @@ export type ConnectionState =
   /** Was connected, lost it. The seat is held; this usually recovers. */
   | 'reconnecting'
   /**
-   * Configured for Supabase but the server cannot be reached at all — almost
+   * Configured for Supabase but the server cannot be reached at all. Almost
    * always a missing edge function or a bad key, not a flaky network. Worth
    * saying differently, because the fix is a deploy and not patience.
    */
@@ -99,7 +99,7 @@ export type TransportOptions = DashboardTransportOptions | PhoneTransportOptions
  * Wire messages for the local BroadcastChannel implementation.
  *
  * `hello` carries a per-tab client id because the local host has to answer the
- * same question the edge function does — is this the phone that holds the seat,
+ * same question the edge function does: is this the phone that holds the seat,
  * or a second one that wants it? A tab is the closest thing this transport has
  * to a device, so `sessionStorage` supplies the id.
  */

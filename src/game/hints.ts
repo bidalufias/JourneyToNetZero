@@ -2,7 +2,7 @@
  * Plain-English trade-off hints for option cards.
  *
  * The design is explicit: option cards show title, one line, cost, and a
- * trade-off hint — never raw numbers. Players should be making judgement
+ * trade-off hint, never raw numbers. Players should be making judgement
  * calls, not spreadsheet calls. The hint is capped at 52 characters and reads
  * as a verdict, not a stat line.
  *
@@ -11,8 +11,8 @@
  * corporate, schools) would need all of them rewritten. A pack may still
  * override any single card by adding a `hint` field to the option.
  *
- * The generator reads only the *shape* of an option — its archetype, the signs
- * of its growth and happiness effects, whether it sets a legacy flag — so a
+ * The generator reads only the *shape* of an option: its archetype, the signs
+ * of its growth and happiness effects, whether it sets a legacy flag. So a
  * hint can never be reverse-engineered into a value.
  */
 import type { Option } from '../engine/types'
@@ -129,7 +129,7 @@ export function optionHint(option: Option): string {
   return choices[variant(option.id, choices.length)]
 }
 
-/** "2 FP", "3 C", "+1 FP" or "FREE" — a chip, never an effect. */
+/** "2 FP", "3 C", "+1 FP" or "FREE": a chip, never an effect. */
 export function costLabel(option: Option): string {
   const c = option.cost ?? {}
   const parts: string[] = []

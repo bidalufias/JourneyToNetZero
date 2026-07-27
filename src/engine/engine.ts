@@ -1,12 +1,12 @@
 /**
- * Journey to Net Zero — the engine.
+ * Journey to Net Zero: the engine.
  *
  * A direct port of `play_round()` in `reference/engine.py`, which is the
  * authoritative implementation: roughly 200,000 simulated games were run
  * against it and every constant in the content pack was fitted to it.
  *
  * The resolution order below is subtle and already correct. Do not reorder it,
- * and do not adjust a constant to make a number look rounder — `test/parity.test.ts`
+ * and do not adjust a constant to make a number look rounder. `test/parity.test.ts`
  * replays the reference implementation and will fail if you do.
  *
  * Two things differ from the reference, both because the reference drove those
@@ -52,7 +52,7 @@ function powInt(base: number, n: number): number {
   return out
 }
 
-/** Growth–carbon drift coefficient for the current green economy share. */
+/** Growth-carbon drift coefficient for the current green economy share. */
 export function driftK(greenShare: number, content: Content): number {
   for (const band of content.config.driftTable) {
     if (greenShare <= band.greenShareMax) return band.k
@@ -62,8 +62,8 @@ export function driftK(greenShare: number, content: Content): number {
 
 /**
  * The marginal abatement curve. The last tonnes are the hardest.
- * Applies to every emissions *cut* — option effects, forced abatement and the
- * Coalition Bonus alike — and never to an increase.
+ * Applies to every emissions *cut*, meaning option effects, forced abatement
+ * and the Coalition Bonus alike, and never to an increase.
  */
 export function mac(emissions: number, content: Content): number {
   const c = content.config
@@ -160,7 +160,7 @@ export function playRound(state: GameState, input: RoundInput, content: Content)
   if (!scenario) throw new Error(`unknown scenario ${state.path[i]} for round ${i + 1}`)
   const rnd = i + 1
 
-  // 1. Treasury and corporate income — the economy pays for the transition.
+  // 1. Treasury and corporate income. The economy pays for the transition.
   if (rnd >= 2) {
     state.fiscal += cfg.fiscal_income
     if (state.growth >= cfg.fiscal_bonus_at) state.fiscal += 1
@@ -267,7 +267,7 @@ export function playRound(state: GameState, input: RoundInput, content: Content)
     }
     if (o.arch === 'SELF_ORGANISE') {
       // Applause is not backing. Only real support from Government or Business
-      // — or a standing Mutual Aid network — doubles a community action.
+      // or a standing Mutual Aid network, doubles a community action.
       const supported =
         state.flags.has('MUTUAL_AID') ||
         (['government', 'business'] as const).some((x) => SUPPORTIVE.has(chosen[x].arch))
@@ -344,7 +344,7 @@ export function playRound(state: GameState, input: RoundInput, content: Content)
     })
   }
 
-  // 7. The Coalition Bonus — things only possible when the table pulls
+  // 7. The Coalition Bonus: things only possible when the table pulls
   // together. Holding a defector to account is cooperation too, so regulating
   // and escalating both count as aligned.
   let aligned = 0
@@ -379,7 +379,7 @@ export function playRound(state: GameState, input: RoundInput, content: Content)
     state.spotlightHits += 1
   }
 
-  // 9. Apply to meters. Happiness reverts toward a dynamic baseline —
+  // 9. Apply to meters. Happiness reverts toward a dynamic baseline,
   // you cannot buy your way to 7.0, you have to build a country that sustains it.
   state.emissions += shE + de
 
@@ -402,12 +402,12 @@ export function playRound(state: GameState, input: RoundInput, content: Content)
   state.growth += (state.greenShare - 10) / cfg.green_dividend
   state.growth = Math.max(-5.0, Math.min(9.0, state.growth))
 
-  // 12. Growth–carbon drift. Growth is never free.
+  // 12. Growth-carbon drift. Growth is never free.
   const k = driftK(state.greenShare, content)
   const drift = state.growth * k
   state.emissions += drift
 
-  // 13. The Community awards two Trust tokens — one for who cared most,
+  // 13. The Community awards two Trust tokens: one for who cared most,
   // one for who did most for the future.
   const awarded = {} as { care: TrustRole; future: TrustRole }
   for (const key of ['h', 'gr'] as const) {
@@ -465,7 +465,7 @@ export function averageGrowth(state: GameState): number {
 
 /**
  * Where emissions land if nothing changes: the remaining rounds at the current
- * growth and drift. Display only — it feeds the dashboard's 2050 line and has
+ * growth and drift. Display only: it feeds the dashboard's 2050 line and has
  * no effect on any meter or outcome.
  */
 export function projection2050(state: GameState, content: Content): number {

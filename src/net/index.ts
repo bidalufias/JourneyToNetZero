@@ -4,7 +4,7 @@
  * With Supabase configured the game runs the way a workshop needs it to: four
  * phones on four devices, one dashboard on the projector, one authoritative
  * room in an edge function. Without it, everything falls back to the local
- * one-browser transport so the app runs with no backend at all — which is what
+ * one-browser transport so the app runs with no backend at all, which is what
  * makes `npm run dev` useful and lets a facilitator rehearse on a laptop.
  *
  * Both satisfy the same contract, so nothing above this line knows which is in

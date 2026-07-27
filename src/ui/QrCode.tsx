@@ -6,7 +6,7 @@
  * room by a different route, so both are on offer and neither is required.
  *
  * Drawn as SVG rather than canvas so it stays sharp at whatever size the
- * screen gives it — the same component renders 120px in the corner of the
+ * screen gives it. The same component renders 120px in the corner of the
  * lobby and full-height in the overlay.
  */
 import { useMemo } from 'react'
@@ -31,7 +31,7 @@ export function QrCode({
 
   return (
     // Width and height are attributes rather than inline style so a class can
-    // still size it — an inline style would win over the stylesheet, which is
+    // still size it. An inline style would win over the stylesheet, which is
     // how the lobby's modest QR first rendered a metre wide.
     <svg
       className={className}

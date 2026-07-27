@@ -2,7 +2,7 @@
  * The facilitator's script, as a surface of its own.
  *
  * The dashboard is a broadcast and must never look like a control room, so
- * everything a facilitator needs to *read* lives here instead — in a window
+ * everything a facilitator needs to *read* lives here instead, in a window
  * they keep on their own laptop, beside the projector output rather than on
  * it. The whole run of show is on one scrolling page, and the phase the room
  * is actually in is pulled to the top and marked, because a facilitator
@@ -41,7 +41,7 @@ export function Facilitator({
   onClose,
 }: {
   code: string
-  /** Null when nothing is publishing — the script still reads. */
+  /** Null when nothing is publishing. The script still reads. */
   state: FacilitatorState | null
   onCommand?: (cmd: FacilitatorCommand) => void
   /** Present when this is an overlay on the big screen rather than its own window. */
@@ -61,7 +61,7 @@ export function Facilitator({
   /**
    * Follow the room.
    *
-   * When the session moves on, the page moves with it — to the facilitator's
+   * When the session moves on, the page moves with it, to the facilitator's
    * moment if this phase has one, because that prompt is worth more than
    * anything else on the page and is easy to sail past, and otherwise to the
    * beat now on screen. The advance button does not move: it lives in the
@@ -92,7 +92,7 @@ export function Facilitator({
         </div>
 
         {/* Pause is offered wherever the room has got to, including the two
-            phases with no advance left — stopping is the one control that is
+            phases with no advance left, because stopping is the one control that is
             never inapplicable. */}
         {live && onCommand ? (
           <div className="fac__head-action">
@@ -141,7 +141,7 @@ export function Facilitator({
                 <span className="fac__seat-name">{s.name ?? 'empty'}</span>
                 <span className="fac__seat-state">
                   {!s.name
-                    ? '—'
+                    ? 'empty'
                     : !s.connected
                       ? 'reconnecting'
                       : s.locked
@@ -180,7 +180,7 @@ export function Facilitator({
               </ul>
               {/* The rules a table needs once. Hidden from round two on, so
                   the live script stops offering an explanation the room has
-                  already had — but always here when reading it cold. */}
+                  already had, but always here when reading it cold. */}
               {beat.firstTime && (!live || round <= 1) ? (
                 <>
                   <p className="fac__label fac__label--aside">FIRST ROUND ONLY</p>
@@ -238,7 +238,7 @@ export function Facilitator({
         <h2 className="fac__h2">The big screen's controls</h2>
         <p className="fac__lead">
           The dashboard is a broadcast, so PAUSE and NEXT sit in the bottom corner and fade out
-          after a few seconds — move the mouse and they come back. The keys below do the same
+          after a few seconds. Move the mouse and they come back. The keys below do the same
           things, and work whenever the big screen has focus.
         </p>
         <dl className="fac__keys">
@@ -255,8 +255,9 @@ export function Facilitator({
             The written player guide is at{' '}
             <a href={HOW_TO_PLAY_URL} target="_blank" rel="noreferrer">
               /how-to-play.html
-            </a>{' '}
-            — characters, goals, every word explained. Players do not need it to play.
+            </a>
+            . It has the characters, the goals and every word explained. Players do not need
+            it to play.
           </p>
         </footer>
       </div>

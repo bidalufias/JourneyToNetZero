@@ -2,7 +2,7 @@
  * The phone's chrome: the header, the back affordance, and the menu.
  *
  * Two things live here that the phone had no room for before, and both are
- * answers to the same complaint — the app knew things about you and would not
+ * answers to the same complaint: the app knew things about you and would not
  * say them.
  *
  * The header now carries the one number the onboarding screen tells you to

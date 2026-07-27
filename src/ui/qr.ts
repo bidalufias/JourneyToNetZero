@@ -4,7 +4,7 @@
  * The room code is four letters and the join URL is under a hundred bytes, so
  * the whole of QR is not needed: byte mode, error correction level M, versions
  * 1 through 10. That is a few hundred lines and no third dependency in a build
- * that has exactly two — and a projector has to render this without a CDN,
+ * that has exactly two, and a projector has to render this without a CDN,
  * because the room the game is played in usually has worse wifi than the
  * phones scanning it.
  *
@@ -20,11 +20,11 @@
 /** A square grid of dark/light modules, quiet zone not included. */
 export interface QrMatrix {
   size: number
-  /** `modules[y][x]` — true is dark. */
+  /** `modules[y][x]`, where true is dark. */
   modules: boolean[][]
 }
 
-/** Block structure for error correction level M, versions 1–10. */
+/** Block structure for error correction level M, versions 1 to 10. */
 const BLOCKS: Record<
   number,
   { ec: number; group1: number; data1: number; group2: number; data2: number }
@@ -94,7 +94,7 @@ function generator(n: number): number[] {
   return poly
 }
 
-/** The remainder of `data` divided by the generator — the EC codewords. */
+/** The remainder of `data` divided by the generator: the EC codewords. */
 function errorCorrection(data: number[], n: number): number[] {
   const gen = generator(n)
   const rem = new Array<number>(n).fill(0)
@@ -128,7 +128,7 @@ function pickVersion(bytes: number): number {
   throw new Error(`QR: ${bytes} bytes is more than version ${MAX_VERSION}-M holds`)
 }
 
-/** Mode, length, payload, terminator, padding — one codeword array. */
+/** Mode, length, payload, terminator, padding: one codeword array. */
 function codewords(bytes: number[], version: number): number[] {
   const bits: number[] = []
   const push = (value: number, width: number) => {
@@ -421,8 +421,8 @@ function penalty(c: Canvas): number {
 /**
  * Encode `text` as a QR symbol.
  *
- * The mask is chosen the way the standard says to — all eight drawn, each
- * scored, the lowest kept — rather than fixed, because a fixed mask on a
+ * The mask is chosen the way the standard says to, with all eight drawn, each
+ * scored and the lowest kept, rather than fixed, because a fixed mask on a
  * projected code is how you end up with a large light field a phone reads as
  * the wall behind it.
  */

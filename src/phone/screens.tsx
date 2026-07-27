@@ -10,10 +10,10 @@ import { ROLE_CHARACTER, ROLE_LABEL } from '../game/session'
 import { RoleGlyph, formatClock } from '../ui/primitives'
 
 /**
- * P-03 — the role reveal. The skin applies here and never changes again.
+ * P-03: the role reveal. The skin applies here and never changes again.
  *
  * This now comes *before* the sealed goal rather than after it. The goals are
- * written in units — Capital, Trust, Mt — that mean nothing until you have been
+ * written in units, Capital, Trust and Mt, that mean nothing until you have been
  * told what you hold, and asking somebody to commit to a win condition before
  * then is asking them to guess.
  */
@@ -30,7 +30,7 @@ export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => vo
 
       <span className="plabel">YOUR RESOURCE</span>
       <p className="ptext">
-        <strong>{view.resource.label}</strong> — {view.resource.value} to start. It stays in the
+        <strong>{view.resource.label}</strong>: {view.resource.value} to start. It stays in the
         corner of your screen all game. The big screen tracks everything else.
       </p>
       <p className="pmono">TAP ⋯ AT ANY POINT FOR WHAT THE WORDS MEAN.</p>
@@ -42,7 +42,7 @@ export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => vo
   )
 }
 
-/** P-04 — three sealed cards. Lying about which you took is legal and expected. */
+/** P-04: three sealed cards. Lying about which you took is legal and expected. */
 export function GoalPicker({ view, send }: { view: PhoneView; send: (c: Command) => void }) {
   const choices = view.goalChoices ?? []
   const [picked, setPicked] = useState<string | null>(null)
@@ -83,7 +83,7 @@ export function GoalPicker({ view, send }: { view: PhoneView; send: (c: Command)
       <h1 className="pheading">What you want.</h1>
       <p className="ptext">
         Three of the twelve in this game are yours to pick from. What stays hidden is which one you
-        took — and everyone else is choosing in secret too.
+        took, and everyone else is choosing in secret too.
       </p>
       {choices.map((g) => (
         <button key={g.id} className="goal" onClick={() => setPicked(g.id)}>
@@ -95,7 +95,7 @@ export function GoalPicker({ view, send }: { view: PhoneView; send: (c: Command)
   )
 }
 
-/** P-02 — the waiting lobby. */
+/** P-02: the waiting lobby. */
 export function Lobby({ view }: { view: PhoneView }) {
   const filled = view.seats.filter((s) => s.name).length
   return (
@@ -133,7 +133,7 @@ export function Lobby({ view }: { view: PhoneView }) {
   )
 }
 
-/** P-06 — the crisis, plus the one line written for this seat alone. */
+/** P-06: the crisis, plus the one line written for this seat alone. */
 export function Crisis({ view }: { view: PhoneView }) {
   const s = view.scenario
   if (!s) return null
@@ -152,7 +152,7 @@ export function Crisis({ view }: { view: PhoneView }) {
 }
 
 /**
- * P-07 — the insider tip. The only dark screen on any phone, and the only
+ * P-07: the insider tip. The only dark screen on any phone, and the only
  * place the app uses a large shadow: it should feel like the app has gone
  * quiet around you.
  */
@@ -178,7 +178,7 @@ export function TipCard({
       <span className="tip__label">INSIDER TIP</span>
       <span className="tip__eyes">FOR YOUR EYES ONLY</span>
       {/* This is the only overlay that covers the whole phone, so it has to
-          carry the clock it is hiding — otherwise it is a timed decision with
+          carry the clock it is hiding, because otherwise it is a timed decision with
           the timer behind it. */}
       {clock ? <span className="tip__clock">{clock}</span> : null}
 
@@ -215,7 +215,7 @@ export function TipCard({
   )
 }
 
-/** P-10 — locked. The phone gets out of the way. */
+/** P-10: locked. The phone gets out of the way. */
 export function LookUp({ view, reckoning = false }: { view: PhoneView; reckoning?: boolean }) {
   return (
     <div className="lookup" data-role={view.role}>
@@ -240,7 +240,7 @@ export function LookUp({ view, reckoning = false }: { view: PhoneView; reckoning
   )
 }
 
-/** P-11 — the round result. Three sentences, no numbers. */
+/** P-11: the round result. Three sentences, no numbers. */
 export function RoundResult({ view }: { view: PhoneView }) {
   const r = view.roundResult
   if (!r) return <LookUp view={view} reckoning />

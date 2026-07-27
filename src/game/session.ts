@@ -1,5 +1,5 @@
 /**
- * Session types — the room around the engine.
+ * Session types: the room around the engine.
  *
  * The engine knows about a country. This module knows about four people in a
  * room with phones, a countdown, and a shared screen. Everything here is owned
@@ -19,7 +19,7 @@ export type Phase =
   | 'ended'
 
 /**
- * Phase lengths in milliseconds — the 30-minute session from the design doc:
+ * Phase lengths in milliseconds, for the 30-minute session from the design doc:
  * 3 setup, 24 play across six 4-minute rounds, 3 results.
  */
 export const PHASE_MS: Record<Phase, number> = {
@@ -62,7 +62,7 @@ export interface Player {
 }
 
 /**
- * A public pledge. Recorded and displayed, never enforced — the first time
+ * A public pledge. Recorded and displayed, never enforced. The first time
  * somebody breaks one, the room changes, and that moment is the training.
  */
 export interface Promise_ {
@@ -123,7 +123,7 @@ export interface Room {
    * A paused room is frozen rather than rewound: the deadline it was heading
    * for is kept as it was and pushed forward by however long the pause lasted,
    * so a table that stops for two minutes gets back exactly the seconds it had
-   * left. It is also the room's clock while it is set — every phase change made
+   * left. It is also the room's clock while it is set, and every phase change made
    * during a pause is timed from this instant, so stepping through phases with
    * the Next button hands each one its full length once the room restarts.
    */
@@ -155,7 +155,7 @@ export interface Room {
   rngCursor: number
 }
 
-/** What the dashboard renders. Public by definition — the whole room sees it. */
+/** What the dashboard renders. Public by definition: the whole room sees it. */
 export interface DashboardView {
   code: string
   phase: Phase
@@ -190,7 +190,7 @@ export interface DashboardView {
   /** Announced, but never who received it. */
   tipDealtThisRound: boolean
   publishedTip: { from: Role; text: string; source: string; verdict: 'true' | 'false' | null } | null
-  /** Target is null until the choices resolve — the engine derives it. */
+  /** Target is null until the choices resolve. The engine derives it. */
   spotlight: { by: Role; target: Role | null; remaining: number } | null
   veto: { target: Role; removed: string[]; remaining: number } | null
   lastRound: RoundLog | null
@@ -233,7 +233,7 @@ export interface PhoneView {
   trust: Record<TrustRole, number>
   vetoesRemaining: number
   spotlightsRemaining: number
-  /** Declared this round — the Activist's only confirmation that it landed. */
+  /** Declared this round: the Activist's only confirmation that it landed. */
   spotlightCalled: boolean
   /** The Government has agreed to co-fund the Business's partnership option. */
   coFund: boolean
@@ -247,7 +247,7 @@ export interface PhoneView {
   incomingOffers: Offer[]
   sentOffers: Offer[]
   seats: { role: Role; name: string | null; connected: boolean; locked: boolean }[]
-  /** Written in plain language, no numbers — the phone's only interpretation. */
+  /** Written in plain language, no numbers: the phone's only interpretation. */
   roundResult: { didWhat: string; cost: string; others: string } | null
   waitingOn: number
 }
@@ -282,7 +282,7 @@ export const ROLE_CHARACTER: Record<Role, { name: string; title: string; org: st
     name: 'Aisyah Kamal',
     title: 'the Founder',
     org: 'Bangkit Iklim',
-    blurb: 'Can make ignoring her more expensive than listening — three times, and only three.',
+    blurb: 'Can make ignoring her more expensive than listening. Three times, and only three.',
   },
 }
 
@@ -298,12 +298,12 @@ export interface PhoneOption {
   id: string
   title: string
   desc: string
-  /** "2 FP", "3 C" or "FREE" — never a raw effect. */
+  /** "2 FP", "3 C" or "FREE": never a raw effect. */
   cost: string
   /** Plain-English trade-off, capped at 52 characters. */
   hint: string
   available: boolean
-  /** Why it cannot be chosen — the three disabled states get three edges. */
+  /** Why it cannot be chosen. The three disabled states get three edges. */
   disabled: 'afford' | 'veto' | 'gate' | null
   disabledNote: string | null
 }

@@ -3,7 +3,7 @@
  *
  * Built from `window.location.origin` rather than configured, because the same
  * build is opened from a laptop on a projector, a Netlify domain, and a Vite
- * dev server on a hotel LAN — and the QR code on the wall has to be whichever
+ * dev server on a hotel LAN, and the QR code on the wall has to be whichever
  * of those the facilitator actually typed.
  */
 
@@ -17,5 +17,5 @@ export function facilitatorUrl(code: string): string {
   return `${window.location.origin}/facilitator${code ? `?room=${code}` : ''}`
 }
 
-/** The written player guide — a static page, not part of the app. */
+/** The written player guide: a static page, not part of the app. */
 export const HOW_TO_PLAY_URL = '/how-to-play.html'

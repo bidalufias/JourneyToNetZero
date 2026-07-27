@@ -10,7 +10,7 @@
  * Two rules this file exists to enforce:
  *   1. A player can never inspect the numbers behind an option. `phoneView`
  *      builds option cards from title, description, cost chip and a derived
- *      hint — the effect values never cross the boundary.
+ *      hint. The effect values never cross the boundary.
  *   2. The session never stalls. Every timed phase has a deadline and `tick`
  *      resolves it, auto-locking a default choice if somebody stopped playing.
  */
@@ -25,7 +25,7 @@ import {
 } from '../engine/engine'
 import { DIRTY, ROLES, type Content, type Option, type Role, type Scenario } from '../engine/types'
 import { costLabel, optionHint } from './hints'
-import { asPledgeObject, BOARD_NAME, DEMAND_PHRASES, privateLine } from './copy'
+import { BOARD_NAME, DEMAND_PHRASES, privateLine } from './copy'
 import { draw, pick, roomCode, shuffle } from './rng'
 import {
   PHASE_MS,
@@ -101,7 +101,7 @@ function currentScenario(room: Room, content: Content): Scenario | null {
   return id ? (content.scenarios[id] ?? null) : null
 }
 
-/** The round now being played — used for choices, tips and new pledges. */
+/** The round now being played, used for choices, tips and new pledges. */
 function roundNumber(room: Room): number {
   return Math.min(room.game.round + 1, 6)
 }
@@ -111,8 +111,8 @@ function roundNumber(room: Room): number {
  *
  * The engine advances `game.round` the instant a round resolves, so from the
  * Reckoning onward `roundNumber` already names the next one. Everything the
- * room is still narrating — the promise board, the kept/broken badges, the
- * published tip — belongs to the round just played, so the views use this.
+ * room is still narrating, meaning the promise board, the kept/broken badges
+ * and the published tip, belongs to the round just played, so the views use this.
  */
 function displayRound(room: Room): number {
   if ((room.phase === 'reckoning' || room.phase === 'summary') && room.lastRound) {
@@ -143,7 +143,7 @@ function isPaused(room: Room): boolean {
  *
  * Everything that sets a deadline is timed from this rather than from the
  * wall, so a phase opened during a pause starts counting from the instant the
- * pause began — and therefore gets its full length when the room restarts,
+ * pause began, and therefore gets its full length when the room restarts,
  * instead of having however long the facilitator was talking already spent.
  */
 function clockNow(room: Room, now: number): number {
@@ -169,7 +169,7 @@ function everyoneLocked(room: Room): boolean {
  * The engine decrements the reserve when it resolves the round, which keeps
  * parity with the reference implementation. But a veto declared during THE
  * TABLE is already gone as far as the room is concerned, and the dashboard
- * says so the moment it lands — so the views subtract the pending one.
+ * says so the moment it lands, so the views subtract the pending one.
  */
 function vetoesRemaining(room: Room): number {
   return Math.max(0, room.game.vetoes - (room.vetoTarget ? 1 : 0))
@@ -230,11 +230,11 @@ export type Command =
  * Every command names a role and a client could name somebody else's, so the
  * seat is never read from the wire. This lives here rather than in a transport
  * because both the edge function and the local host have to enforce exactly the
- * same rule — two copies would be two chances for them to drift apart.
+ * same rule. Two copies would be two chances for them to drift apart.
  */
 export function authorise(seat: Role | 'dashboard', cmd: Command): Command | null {
   if (seat === 'dashboard') {
-    // The facilitator's screen may run the session — start it, step it on,
+    // The facilitator's screen may run the session: start it, step it on,
     // stop the clock and start it again. It may not choose, pledge or spend
     // anybody's resources.
     return cmd.t === 'start' || cmd.t === 'advance' || cmd.t === 'pause' || cmd.t === 'resume'
@@ -267,8 +267,8 @@ export function authorise(seat: Role | 'dashboard', cmd: Command): Command | nul
  * What a paused room refuses.
  *
  * Pausing stops the game, not the workshop. Taking a seat, sealing a goal and
- * reconnecting all still work — a latecomer arriving is one of the two reasons
- * anybody presses pause — but nothing that moves the round does, because a
+ * reconnecting all still work, because a latecomer arriving is one of the two
+ * reasons anybody presses pause, but nothing that moves the round does, because a
  * table that can still lock while the facilitator is mid-sentence would resolve
  * the round out from under them. The refusal has to live here rather than in a
  * surface: the phones are not the only thing that could send these.
@@ -312,7 +312,7 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
      *
      * A seat that stays named for the rest of the workshop is unrecoverable
      * without a new room, so the one thing `leave` must do is make the seat
-     * takeable again — by somebody else, or by the same person on a new phone.
+     * takeable again, by somebody else or by the same person on a new phone.
      * A sealed goal belongs to the person, not the chair, so it goes with them.
      */
     case 'leave': {
@@ -364,7 +364,7 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
      *
      * The deadline moves forward by the length of the pause rather than being
      * recomputed, so a table stopped with nine seconds of THE CHOICE remaining
-     * restarts with nine seconds — not with a fresh forty-five, and not with
+     * restarts with nine seconds, not with a fresh forty-five, and not with
      * the phase already over.
      */
     case 'resume': {
@@ -379,7 +379,7 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
       const scenario = currentScenario(room, content)
       const option = scenario?.options[cmd.role].find((o) => o.id === cmd.optionId)
       if (!option) return room
-      // One live pledge per player per round — a second replaces the first.
+      // One live pledge per player per round. A second replaces the first.
       room.promises = room.promises.filter(
         (p) => !(p.round === roundNumber(room) && p.from === cmd.role && p.kind === 'promise'),
       )
@@ -388,7 +388,7 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
         round: roundNumber(room),
         from: cmd.role,
         kind: 'promise',
-        text: `${BOARD_NAME[cmd.role]} will ${asPledgeObject(option.title)}.`,
+        text: `${BOARD_NAME[cmd.role]} promises to choose “${option.title}”.`,
         optionId: option.id,
         outcome: 'unresolved',
       })
@@ -500,7 +500,7 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
      * Selecting a card. Not committing to it.
      *
      * Tapping to read a card more closely must never be the same act as
-     * spending the round on it, so this only moves the selection — `lock` is
+     * spending the round on it, so this only moves the selection. `lock` is
      * the irreversible half, and until it lands a player may change their mind
      * as often as they like.
      */
@@ -635,7 +635,7 @@ function resolveRound(room: Room, content: Content, now: number): Room {
   ) as Record<Role, string>
 
   // The Activist's Spotlight is a Table action, but the engine derives its
-  // target from the choices — it only lands on a role that actually went
+  // target from the choices, and it only lands on a role that actually went
   // dirty. Calling it without a dirty target simply spends nothing.
   if (!room.spotlightCalled) {
     // Suppress the engine's automatic spotlight when it was never called.
@@ -691,7 +691,7 @@ function finishRound(
 }
 
 /**
- * Publishing stakes one Trust — or, for the Community, one veto. A CONFIRMED
+ * Publishing stakes one Trust, or, for the Community, one veto. A CONFIRMED
  * tip is always safe; an UNVERIFIED one is a gamble.
  */
 function applyTipStake(room: Room, tip: InsiderTip): void {
@@ -711,7 +711,7 @@ function applyTipStake(room: Room, tip: InsiderTip): void {
 
 /**
  * Exactly one tip per round to exactly one player, dealt the moment the crisis
- * is revealed. Nobody is told a tip was dealt to whom — the dashboard only
+ * is revealed. Nobody is told a tip was dealt to whom. The dashboard only
  * announces that one was. Rotation never repeats a role twice in a row and
  * gives everyone at least one across six rounds.
  */
@@ -775,7 +775,7 @@ function buildTip(
     const whisperIds = Object.keys(tips.whispers)
     const w = pick(whisperIds, room.seed, cursor)
     cursor = w.cursor
-    // The UNVERIFIED truth roll happens here, server-side, at deal time —
+    // The UNVERIFIED truth roll happens here, server-side, at deal time,
     // and the answer never leaves the server until the holder publishes.
     const truth = draw(room.seed, cursor)
     cursor = truth.cursor
@@ -952,7 +952,7 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
       let note: string | null = null
 
       if (!open) {
-        // Three disabled states, three different edges — because "I can't",
+        // Three disabled states, three different edges, because "I can't",
         // "she stopped me" and "I did this to myself" are three feelings.
         if (o.gate_trust && room.game.trust.government < o.gate_trust) {
           disabled = 'gate'
@@ -968,7 +968,7 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
         }
       } else if (!choosable) {
         disabled = 'veto'
-        note = '"The public will simply not accept this." — the Community, this round only'
+        note = '“The public will simply not accept this.” Removed by the Community, this round only.'
       }
 
       return {
@@ -1000,7 +1000,7 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
       : null
 
   // Your own sealed goal, so the phone can answer "what am I chasing again?"
-  // without waiting until 2050. Still only ever yours — no other seat's goal is
+  // without waiting until 2050. Still only ever yours. No other seat's goal is
   // built into any view.
   const ownGoal = player.goalId
     ? (content.privateGoals[role].find((g) => g.id === player.goalId) ?? null)
@@ -1091,14 +1091,14 @@ function roundResultCopy(room: Room, role: Role): PhoneView['roundResult'] {
   if (log.alignedCount >= 3) {
     others.push(
       log.alignedCount === 4
-        ? 'All four of you moved together — the coalition held.'
-        : 'Three of you moved together — the coalition held.',
+        ? 'All four of you moved together, and the coalition held.'
+        : 'Three of you moved together, and the coalition held.',
     )
   } else {
     others.push('The table did not move together this round.')
   }
   const broken = room.promises.filter((p) => p.round === log.round && p.outcome === 'broken')
-  if (broken.length) others.push(`${broken.map((b) => b.from).join(' and ')} broke a promise.`)
+  if (broken.length) others.push(`${broken.map((b) => BOARD_NAME[b.from]).join(' and ')} broke a promise.`)
 
   return { didWhat, cost: costBits.join(' '), others: others.join(' ') }
 }

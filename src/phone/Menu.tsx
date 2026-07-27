@@ -1,8 +1,8 @@
 /**
  * The ⋯ sheet: how to play, your sealed goal, and the way out.
  *
- * Leaving is destructive in a way nothing else on the phone is — it empties
- * your chair, drops your sealed goal, and lets somebody else sit down — so it
+ * Leaving is destructive in a way nothing else on the phone is. It empties
+ * your chair, drops your sealed goal, and lets somebody else sit down, so it
  * asks twice and says plainly what it will cost. It is still worth having: a
  * player who took the wrong seat previously had no way to give it back, and the
  * whole workshop had to start a new room.
@@ -36,7 +36,7 @@ export function MenuSheet({
         <div className="sheet__body">
           <HowToPlay view={view} />
 
-          {/* The written guide is the long version — characters, every goal,
+          {/* The written guide is the long version: characters, every goal,
               every word explained. It opens in a tab of its own so a player
               who wanders into it mid-round has not left the game. */}
           <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>

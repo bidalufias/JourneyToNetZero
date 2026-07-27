@@ -9,7 +9,7 @@ decision) and the complete resulting state.
 
 `test/parity.test.ts` feeds those same inputs to the TypeScript port and asserts
 the state matches exactly. If a refactor breaks the resolution order, that test
-fails — which is the whole point of it.
+fails, which is the whole point of it.
 
 Usage:  npm run fixtures
 """
@@ -55,8 +55,8 @@ def veto_decision(gm, rnd):
     """
     Recompute the reference's veto choice.
 
-    The condition reads only pre-round state — vetoes, last_dirty, the round
-    number, the Community policy's cooperativeness and emissions — none of which
+    The condition reads only pre-round state: vetoes, last_dirty, the round
+    number, the Community policy's cooperativeness and emissions, none of which
     the treasury or shock steps touch, so evaluating it here matches what
     `play_round` will decide a moment later.
     """

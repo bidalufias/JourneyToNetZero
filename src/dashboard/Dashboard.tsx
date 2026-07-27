@@ -1,10 +1,10 @@
 /**
- * The dashboard — a broadcast on a TV or projector, seen by everyone.
+ * The dashboard: a broadcast on a TV or projector, seen by everyone.
  *
  * Semenanjara Tonight, anchored by Aida Rahman. If this ends up looking like a
  * control room, the session dies, so nothing from the first crisis onward
  * carries a control: the facilitator's affordances are keys, and what they
- * open — the join code, the script — covers the broadcast only for as long as
+ * open, the join code and the script, covers the broadcast only for as long as
  * it is wanted. The lobby is the one exception, because nothing has started
  * there and the alternative is four people watching somebody hunt for a
  * shortcut they were never told about.
@@ -46,8 +46,8 @@ const PHASE_LABEL: Record<string, string> = {
  *
  * Both ends of the subtraction have to come from the same clock or the number
  * is meaningless: the deadline is stamped on the server, so the near end is
- * `serverNow()` — this machine's clock plus whatever offset the transport has
- * measured — rather than a raw `Date.now()` that may be minutes out.
+ * `serverNow()`, this machine's clock plus whatever offset the transport has
+ * measured, rather than a raw `Date.now()` that may be minutes out.
  *
  * While the room is paused the clock reads from the server's own `pausedAt`
  * instead, which does two things: it holds still, and it holds still at the
@@ -105,7 +105,7 @@ export function Dashboard({
 
       {view.phase === 'crisis' && view.scenario ? <CrisisSting view={view} clock={clock} /> : null}
       {/* The Reckoning owns its own beats, including when the Coalition Bonus
-          is allowed to interrupt — it must land after the meters settle. */}
+          is allowed to interrupt. It must land after the meters settle. */}
       {/* Keyed on the round so every Reckoning starts its own stopwatch, even
           in the case where one follows another without the screen unmounting. */}
       {view.phase === 'reckoning' && view.lastRound ? (
@@ -242,7 +242,7 @@ function LockRow({ view }: { view: DashboardView }) {
 
 /**
  * Every option carries a pre-written headline. Cheap to build, enormous for
- * atmosphere — the ticker is the country talking about what the table just did.
+ * atmosphere. The ticker is the country talking about what the table just did.
  */
 function Ticker({ headlines }: { headlines: string[] }) {
   const items = headlines.length
@@ -267,7 +267,7 @@ function Ticker({ headlines }: { headlines: string[] }) {
   )
 }
 
-/** The one screen that fills with accent — Modernist's poster statement. */
+/** The one screen that fills with accent: Modernist's poster statement. */
 function CrisisSting({ view, clock }: { view: DashboardView; clock: string | null }) {
   const s = view.scenario!
   const kicker: Record<string, string> = {
