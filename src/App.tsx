@@ -25,12 +25,13 @@ import { Facilitator, FacilitatorWindow } from './facilitator/Facilitator'
 import { useFacilitatorLink } from './facilitator/link'
 import { Phone } from './phone/Phone'
 import { RoleGlyph } from './ui/primitives'
-import { HOW_TO_PLAY_URL, facilitatorUrl } from './ui/links'
+import { HOW_TO_PLAY_URL, facilitatorUrl, howToPlayUrl } from './ui/links'
+import { canHostSession, measureDevice } from './ui/device'
 import './phone/phone.css'
 
 type Surface = 'home' | 'dashboard' | 'phone' | 'facilitator'
 
-function readRoute(): { surface: Surface; code: string; role: Role | null } {
+function readRoute(): { surface: Surface; code: string; role: Role | null; ready: boolean } {
   const path = window.location.pathname
   const params = new URLSearchParams(window.location.search)
   const surface: Surface = path.startsWith('/dashboard')
@@ -44,6 +45,9 @@ function readRoute(): { surface: Surface; code: string; role: Role | null } {
     surface,
     code: (params.get('room') ?? '').toUpperCase(),
     role: (params.get('seat') as Role) ?? null,
+    // Set by the guide's way back in. It means the read-first choice has
+    // already been answered, so asking it again would be a loop.
+    ready: params.get('ready') === '1',
   }
 }
 
@@ -78,7 +82,7 @@ export function App() {
   }
   // A scanned QR carries the room but no seat, and lands here with the four
   // letters already filled in: the join page, minus the typing.
-  return <Home go={go} initialCode={route.code} />
+  return <Home go={go} initialCode={route.code} ready={route.ready} />
 }
 
 /** Subscribes to a transport and re-renders on every snapshot. */
@@ -443,11 +447,37 @@ function Booting({
  * letters everyone else is being told out loud, and can still correct them if
  * they scanned the wrong room's code off somebody's laptop.
  */
-function Home({ go, initialCode = '' }: { go: (url: string) => void; initialCode?: string }) {
+function Home({
+  go,
+  initialCode = '',
+  ready = false,
+}: {
+  go: (url: string) => void
+  initialCode?: string
+  ready?: boolean
+}) {
   const [code, setCode] = useState(initialCode.slice(0, 4))
   // Arriving with a code means a camera brought you here. Lead with the seats:
   // that player is not looking for a projector, they are looking for a chair.
   const scanned = Boolean(initialCode)
+
+  // Only a laptop, a desktop or a tablet is offered the big screen. A phone is
+  // a player's phone: the dashboard is unreadable at that size, and the button
+  // that starts and ends the session does not belong in a player's hand.
+  // Measured once on mount, because nothing here changes device mid-session.
+  const [canHost] = useState(() => {
+    const { finePointer, shortestSide } = measureDevice()
+    return canHostSession(finePointer, shortestSide)
+  })
+
+  // Somebody who scanned a code is asked one question before anything else:
+  // read the rules, or sit down. They arrive knowing nothing, and the guide is
+  // the only place that explains the game before it starts happening to them.
+  // `ready` is the guide sending them back, so the question is not repeated.
+  const [answered, setAnswered] = useState(ready)
+  if (scanned && !answered) {
+    return <ScanChoice code={code} onProceed={() => setAnswered(true)} />
+  }
 
   const joining = (
     <>
@@ -485,7 +515,7 @@ function Home({ go, initialCode = '' }: { go: (url: string) => void; initialCode
   // offering them the host's lines is an invitation to read the crib sheet for
   // a game that works because nobody has seen it before. The script belongs to
   // the big screen, which is the one surface only the facilitator ever opens.
-  const running = (
+  const running = canHost ? (
     <>
       <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
         RUNNING THE SESSION
@@ -497,7 +527,7 @@ function Home({ go, initialCode = '' }: { go: (url: string) => void; initialCode
         OPEN THE BIG SCREEN
       </button>
     </>
-  )
+  ) : null
 
   return (
     <div className="phone" data-role="government" data-skin="role">
@@ -523,6 +553,53 @@ function Home({ go, initialCode = '' }: { go: (url: string) => void; initialCode
         <a className="btn btn--ghost" href={HOW_TO_PLAY_URL} target="_blank" rel="noreferrer">
           HOW TO PLAY
         </a>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * The one question a scanned code asks before anything else.
+ *
+ * Three of the four players arrive by pointing a camera at a wall, knowing
+ * nothing. Before this they landed straight on a seat list, which is a decision
+ * about a role they have not been told anything about yet, taken under the
+ * social pressure of three other people already choosing.
+ *
+ * The guide opens in this tab rather than a new one. It is a long read, and the
+ * point of it is to come back: a second tab leaves the player to find their own
+ * way to a chair, which is exactly the thing they did not know how to do.
+ */
+function ScanChoice({ code, onProceed }: { code: string; onProceed: () => void }) {
+  return (
+    <div className="phone" data-role="government" data-skin="role">
+      <div className="pbody">
+        <span className="plabel">REPUBLIC OF SEMENANJARA{code ? ` · ROOM ${code}` : ''}</span>
+        <h1 className="pbig">
+          Journey
+          <br />
+          to Net Zero
+        </h1>
+        <div style={{ height: 6, background: 'var(--color-accent)', width: 96 }} />
+        <p className="ptext">
+          Six crises. Thirty minutes. Four of you, and none of you can do it alone.
+        </p>
+
+        <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
+          FIRST TIME?
+        </span>
+        <a className="btn btn--ghost" href={howToPlayUrl(code)}>
+          HOW TO PLAY
+        </a>
+        <p className="pmono">THE FULL RULES. YOU CAN COME STRAIGHT BACK HERE AFTERWARDS.</p>
+
+        <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
+          READY
+        </span>
+        <button className="btn btn--primary" onClick={onProceed}>
+          PROCEED TO THE GAME
+        </button>
+        <p className="pmono">PICK YOUR SEAT. THE PHONE TEACHES THE REST AS IT GOES.</p>
       </div>
     </div>
   )
