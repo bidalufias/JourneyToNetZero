@@ -22,10 +22,13 @@ export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => vo
   return (
     <div className="pbody">
       <span className="plabel">{c.org.toUpperCase()}</span>
-      <p className="ptext">You are</p>
+      <p className="ptext">You are the</p>
       <h1 className="pbig">{c.title}</h1>
       <div style={{ height: 4, background: 'var(--skin-mark)', width: 120 }} />
-      <h2 className="pheading">{c.name}</h2>
+      {/* The seat has a job, not a name. The name below it is the player's own,
+          typed when they took the chair, so the room addresses a real person
+          holding an office rather than a stranger they have to remember. */}
+      {view.name ? <h2 className="pheading">{view.name}</h2> : null}
       <p className="ptext">{c.blurb}</p>
 
       <span className="plabel">YOUR RESOURCE</span>

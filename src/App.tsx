@@ -282,7 +282,7 @@ function PhoneSurface({
           <span className="plabel">{c.org.toUpperCase()}</span>
           <h1 className="pheading">Take a seat</h1>
           <p className="ptext">
-            You are the <strong>{ROLE_LABEL[role]}</strong>, {c.name}.
+            You are the <strong>{c.title}</strong>.
           </p>
           <span className="plabel">YOUR NAME</span>
           <input
@@ -502,7 +502,7 @@ function Home({
               className="btn btn--ghost"
               onClick={() => go(`/play?room=${code}&seat=${r}`)}
             >
-              <RoleGlyph role={r} size={14} /> {ROLE_LABEL[r]} · {ROLE_CHARACTER[r].name}
+              <RoleGlyph role={r} size={14} /> {ROLE_LABEL[r]} · {ROLE_CHARACTER[r].title}
             </button>
           ))}
         </>

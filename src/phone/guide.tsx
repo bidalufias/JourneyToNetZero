@@ -12,7 +12,7 @@
  */
 import type { Role } from '../engine/types'
 import type { PhoneView } from '../game/session'
-import { ROLE_CHARACTER, ROLE_LABEL } from '../game/session'
+import { ROLE_CHARACTER } from '../game/session'
 
 interface Entry {
   term: string
@@ -83,7 +83,7 @@ export function HowToPlay({ view }: { view: PhoneView }) {
   return (
     <>
       <p className="ptext">
-        You are the <strong>{ROLE_LABEL[view.role]}</strong>, {character.name}. {character.blurb}
+        You are the <strong>{character.title}</strong>. {character.blurb}
       </p>
 
       <span className="plabel">WHAT YOU SPEND</span>

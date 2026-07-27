@@ -70,10 +70,10 @@ export function TheTable({ view }: { view: DashboardView }) {
             <p className="spotlight-panel__body">
               {view.spotlight.target ? (
                 <>
-                  Aisyah named the <strong>{ROLE_LABEL[view.spotlight.target]}</strong>.
+                  The Activist named the <strong>{ROLE_LABEL[view.spotlight.target]}</strong>.
                 </>
               ) : (
-                <>Aisyah has called a Spotlight.</>
+                <>The Activist has called a Spotlight.</>
               )}
             </p>
             <p className="spotlight-panel__rule">
