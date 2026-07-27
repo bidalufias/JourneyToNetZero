@@ -1454,10 +1454,15 @@ var CORS = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS"
 };
-var json = (body, status = 200) => new Response(JSON.stringify(body), {
-  status,
-  headers: { ...CORS, "Content-Type": "application/json" }
-});
+var json = (body, status = 200) => new Response(
+  JSON.stringify(
+    body && typeof body === "object" && !Array.isArray(body) ? { ...body, now: Date.now() } : body
+  ),
+  {
+    status,
+    headers: { ...CORS, "Content-Type": "application/json" }
+  }
+);
 async function rest(path, init = {}) {
   return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     ...init,

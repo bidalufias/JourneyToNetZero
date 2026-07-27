@@ -8,55 +8,90 @@
  * Card 1 at 0s, card 2 at 3s, card 3 at 6s, card 4 at 9s. Each flip is a
  * 400ms rotateY from 88°. The promise-broken sting fires *after* the fourth
  * card, never interrupting the sequence, and holds 2.5 seconds before cutting.
+ *
+ * A card that has not flipped yet is still a card — face-down, its role on it,
+ * holding its quarter of the screen. The gap between flips is meant to be a
+ * pause, not a hole, and the four slots have to look like a hand waiting to be
+ * turned over rather than a dashboard that has failed to draw.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Role } from '../engine/types'
 import type { DashboardView } from '../game/session'
 import { ROLE_LABEL } from '../game/session'
-import { COALITION_HOLD_MS, PHASE_MS, PROMISE_STING_MS, RECKONING_CARD_GAP_MS, RECKONING_FIRST_CARD_MS } from '../game/session'
+import { COALITION_HOLD_MS, PROMISE_STING_MS } from '../game/session'
+import { serverNow } from '../net/clock'
 import { RoleGlyph } from '../ui/primitives'
 import { CoalitionBonus } from './screens'
+import {
+  STING_START_MS,
+  coalitionStartMs,
+  deadlineElapsed,
+  revealElapsed,
+  revealedCount as cardsDue,
+} from './reckoning-clock'
 
 /**
- * Milliseconds since the Reckoning began, from the server's own deadline.
+ * Milliseconds since the Reckoning began.
+ *
+ * Two sources, because neither is enough on its own. The server's deadline
+ * knows how far in the room really is — but reading it means subtracting this
+ * machine's clock from the server's, and a projector laptop that is a minute
+ * slow makes the first card look like it is a minute away from being due.
+ * That is a blank screen for the whole phase. So the sequence runs on a local
+ * stopwatch, which cannot be wrong about how long this screen has been up, and
+ * defers to the deadline only when the deadline says we are further in than
+ * that — which is exactly the case the stopwatch gets wrong, a dashboard
+ * opened or reloaded halfway through the round.
  *
  * A pause holds the sequence where it is — cards already flipped stay flipped,
  * the ones still to come wait. Freezing this is what lets a facilitator stop on
  * the third card and talk about it, which is the single most useful place in
  * the session to be able to stop.
  */
-function useElapsed(endsAt: number | null, total: number, pausedAt: number | null): number {
-  const [now, setNow] = useState(() => Date.now())
+function useElapsed(endsAt: number | null, pausedAt: number | null): number {
+  // `performance.now()` rather than `Date.now()`: it only ever moves forward,
+  // at one second per second, whatever the machine believes the time is.
+  const [start] = useState(() => performance.now())
+  const heldSince = useRef<number | null>(null)
+  const spentHeld = useRef(0)
+  const [, setBeat] = useState(0)
+
+  // Held time is taken off the stopwatch rather than the stopwatch being
+  // stopped, which keeps the one source of truth monotonic. Both branches are
+  // no-ops the second time through, so a double render costs nothing.
+  const paused = pausedAt !== null
+  if (paused && heldSince.current === null) heldSince.current = performance.now()
+  if (!paused && heldSince.current !== null) {
+    spentHeld.current += performance.now() - heldSince.current
+    heldSince.current = null
+  }
+
   useEffect(() => {
-    if (pausedAt !== null) return
-    setNow(Date.now())
-    const id = setInterval(() => setNow(Date.now()), 100)
+    if (paused) return
+    setBeat((b) => b + 1)
+    const id = setInterval(() => setBeat((b) => b + 1), 100)
     return () => clearInterval(id)
-  }, [pausedAt])
-  if (endsAt === null) return total
-  return Math.max(0, total - (endsAt - (pausedAt ?? now)))
+  }, [paused])
+
+  const local = (heldSince.current ?? performance.now()) - start - spentHeld.current
+  return revealElapsed(local, deadlineElapsed(endsAt, pausedAt ?? serverNow()))
 }
 
 export function Reckoning({ view }: { view: DashboardView }) {
   const log = view.lastRound!
-  const elapsed = useElapsed(view.phaseEndsAt, PHASE_MS.reckoning, view.pausedAt)
+  const elapsed = useElapsed(view.phaseEndsAt, view.pausedAt)
 
-  const revealedCount = Math.max(
-    0,
-    Math.min(4, Math.floor((elapsed - RECKONING_FIRST_CARD_MS) / RECKONING_CARD_GAP_MS) + 1),
-  )
+  const revealedCount = cardsDue(elapsed)
   const allRevealed = revealedCount >= 4
   // The four flips, then the sting if a promise broke, then the coalition —
   // each beat waits for the one before it to clear.
-  const stingStart = RECKONING_FIRST_CARD_MS + 4 * RECKONING_CARD_GAP_MS
   const broken = view.promises.filter((p) => p.round === log.round && p.outcome === 'broken')
   const showSting =
-    broken.length > 0 && elapsed >= stingStart && elapsed < stingStart + PROMISE_STING_MS
+    broken.length > 0 && elapsed >= STING_START_MS && elapsed < STING_START_MS + PROMISE_STING_MS
 
   // Fires only once the meters have finished travelling, so the room reads it
   // as consequence rather than decoration.
-  const coalitionStart =
-    stingStart + (broken.length ? PROMISE_STING_MS : 0) + 1000
+  const coalitionStart = coalitionStartMs(broken.length > 0)
   const showCoalition =
     Boolean(log.coalitionBonus) &&
     log.alignedCount >= 3 &&
@@ -90,9 +125,8 @@ export function Reckoning({ view }: { view: DashboardView }) {
           return (
             <article
               key={reveal.role}
-              className={`rcard${shown ? ' rcard--in' : ''}`}
+              className={`rcard${shown ? ' rcard--in' : ' rcard--back'}`}
               data-role={reveal.role}
-              style={{ animationDelay: '0ms' }}
               aria-hidden={!shown}
             >
               {shown ? (
@@ -123,7 +157,19 @@ export function Reckoning({ view }: { view: DashboardView }) {
                     <p className="rcard__headline">“{reveal.headline}”</p>
                   </div>
                 </>
-              ) : null}
+              ) : (
+                // Face-down. The role is on the back because it was never a
+                // secret — the four seats always reveal in the same order — and
+                // naming it is what makes the room read a card about to turn
+                // rather than a screen that has gone out.
+                <>
+                  <div className="rcard__role">
+                    <RoleGlyph role={reveal.role} size={18} />
+                    <span>{ROLE_LABEL[reveal.role].toUpperCase()}</span>
+                  </div>
+                  <div className="rcard__back-mark" aria-hidden="true" />
+                </>
+              )}
             </article>
           )
         })}

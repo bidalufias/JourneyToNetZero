@@ -169,6 +169,21 @@ Nothing runs server-side between requests, so the dashboard asks the server to
 look at its clock twice a second. It cannot say what time it is — the function
 uses `Date.now()`, and nothing advances before its own deadline.
 
+Which makes every deadline a timestamp from the *server's* clock, read by a
+browser holding its own. Those are two clocks and nothing makes them agree, so
+each response carries the server's `now` and the client keeps a running offset
+(`src/net/clock.ts`); anything comparing against a deadline reads `serverNow()`
+rather than `Date.now()`. Without that, a projector laptop an hour out of date
+runs a countdown an hour long — and used to sit through the Reckoning on a
+blank screen, because every card was due at a time that never arrived. The
+Reckoning no longer trusts the subtraction on its own: it runs on a local
+stopwatch and defers to the deadline only when the deadline says the room is
+further in, which is how a dashboard opened mid-round still catches up.
+
+A deployed function older than this change simply omits `now`, the offset stays
+at zero, and everything behaves as it did before — so redeploy it after
+pulling, or the countdown keeps whatever error the projector's clock has.
+
 ## Running a session
 
 30-minute version: 3 setup, 24 play, 3 results. The facilitator drives it from
@@ -236,7 +251,9 @@ Four moments worth catching, all of them in the script:
   verbal commitments are unenforceable by design. The first broken promise is
   the whole training course.
 - **Never all four cards at once.** The Reckoning flips them three seconds
-  apart. The gap is where the drama lives.
+  apart. The gap is where the drama lives — and the cards that have not turned
+  yet are face-down on the screen, not missing from it, so the pause never
+  reads as a dashboard that has crashed.
 - **Growth is never free.** Even a fully green economy still emits when it
   grows. That is the point of the drift table.
 

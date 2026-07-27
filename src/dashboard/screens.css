@@ -381,12 +381,31 @@
   display: flex;
   flex-direction: column;
   transform-origin: left center;
-  opacity: 0;
+}
+
+/* Face-down, and visibly a card. The three seconds between flips are a pause
+   for the room to react in, not a hole in the broadcast: four empty slots on a
+   projector read as a screen that has crashed, and that reading is worse than
+   anything the gap buys. */
+.rcard--back {
+  background-color: color-mix(in srgb, #fff 5%, transparent);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 18px 18px;
+  box-shadow: inset 0 0 0 2px var(--jtnz-broadcast-line);
+}
+
+.rcard--back .rcard__role { color: var(--jtnz-glare); }
+
+/* The rule the title will sit under, drawn early so the back has the same
+   bones as the face and the flip lands on something rather than into it. */
+.rcard__back-mark {
+  height: 8px;
+  width: 38%;
+  background: var(--jtnz-broadcast-line);
 }
 
 /* 400ms rotateY from 88°. One card at a time — the gap is the design. */
 .rcard--in {
-  opacity: 1;
   animation: jtnz-flip var(--jtnz-flip-ms) var(--jtnz-ease) both;
 }
 

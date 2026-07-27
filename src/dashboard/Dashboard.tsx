@@ -13,6 +13,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Role } from '../engine/types'
 import { driftK } from '../engine/engine'
 import { localContent } from '../net/local'
+import { serverNow } from '../net/clock'
 import type { DashboardView } from '../game/session'
 import type { Endgame } from '../game/room'
 import { ROLE_LABEL } from '../game/session'
@@ -43,18 +44,22 @@ const PHASE_LABEL: Record<string, string> = {
 /**
  * Ticks locally between server snapshots so the countdown stays smooth.
  *
+ * Both ends of the subtraction have to come from the same clock or the number
+ * is meaningless: the deadline is stamped on the server, so the near end is
+ * `serverNow()` — this machine's clock plus whatever offset the transport has
+ * measured — rather than a raw `Date.now()` that may be minutes out.
+ *
  * While the room is paused the clock reads from the server's own `pausedAt`
- * instead of from this machine's, which does two things: it holds still, and it
- * holds still at the same number on every surface, because both ends of the
- * subtraction now come from the same clock.
+ * instead, which does two things: it holds still, and it holds still at the
+ * same number on every surface.
  */
 export function useCountdown(endsAt: number | null, pausedAt: number | null = null): number | null {
-  const [now, setNow] = useState(() => Date.now())
+  const [now, setNow] = useState(() => serverNow())
   useEffect(() => {
     if (endsAt === null || pausedAt !== null) return
     // Resuming must not leave the display a quarter-second behind the room.
-    setNow(Date.now())
-    const id = setInterval(() => setNow(Date.now()), 250)
+    setNow(serverNow())
+    const id = setInterval(() => setNow(serverNow()), 250)
     return () => clearInterval(id)
   }, [endsAt, pausedAt])
   if (endsAt === null) return null
@@ -101,7 +106,11 @@ export function Dashboard({
       {view.phase === 'crisis' && view.scenario ? <CrisisSting view={view} clock={clock} /> : null}
       {/* The Reckoning owns its own beats, including when the Coalition Bonus
           is allowed to interrupt — it must land after the meters settle. */}
-      {view.phase === 'reckoning' && view.lastRound ? <Reckoning view={view} /> : null}
+      {/* Keyed on the round so every Reckoning starts its own stopwatch, even
+          in the case where one follows another without the screen unmounting. */}
+      {view.phase === 'reckoning' && view.lastRound ? (
+        <Reckoning key={view.lastRound.round} view={view} />
+      ) : null}
     </div>
   )
 }

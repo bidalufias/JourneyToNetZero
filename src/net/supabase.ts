@@ -17,6 +17,7 @@
  */
 import type { Role } from '../engine/types'
 import type { Command } from '../game/room'
+import { noteServerTime } from './clock'
 import type {
   ConnectionState,
   DashboardSnapshot,
@@ -47,6 +48,12 @@ interface FnResult {
   token?: string
   error?: string
   seats?: RosterSeat[]
+  /**
+   * The server's own clock, on every response. Deadlines are stamped with it,
+   * so the browser has to know how far its clock sits from it before it can
+   * subtract one from the other.
+   */
+  now?: number
 }
 
 /**
@@ -69,6 +76,7 @@ class Refused extends Error {
 class StaleToken extends Error {}
 
 async function callFunction(body: Record<string, unknown>): Promise<FnResult> {
+  const sentAt = Date.now()
   const res = await fetch(`${URL_}/functions/v1/room`, {
     method: 'POST',
     headers: {
@@ -78,7 +86,11 @@ async function callFunction(body: Record<string, unknown>): Promise<FnResult> {
     },
     body: JSON.stringify(body),
   })
+  const receivedAt = Date.now()
   const data = (await res.json()) as FnResult
+  // Every response carries the server's clock, refusals included — a phone
+  // that was turned away still has a countdown to draw on the way out.
+  if (typeof data.now === 'number') noteServerTime(data.now, sentAt, receivedAt)
   if (res.status === 403) throw new StaleToken(data.error ?? 'not your seat')
   if (res.status === 409) throw new Refused('seat-taken', data.seats ?? [])
   if (res.status === 404) throw new Refused('no-room', [])

@@ -57,11 +57,28 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+/**
+ * Every response carries `now`.
+ *
+ * Deadlines are stamped with this function's `Date.now()` and then read by a
+ * browser subtracting its own. A projector laptop whose clock is a minute out
+ * would otherwise put every deadline a minute out with it — and the Reckoning,
+ * which decides when each card is due, would sit on a blank screen waiting for
+ * a moment that had already passed. Sending the clock alongside the deadline
+ * costs one number and lets the client correct for the difference.
+ */
 const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...CORS, 'Content-Type': 'application/json' },
-  })
+  new Response(
+    JSON.stringify(
+      body && typeof body === 'object' && !Array.isArray(body)
+        ? { ...(body as Record<string, unknown>), now: Date.now() }
+        : body,
+    ),
+    {
+      status,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    },
+  )
 
 // ── Storage ────────────────────────────────────────────────────────────────
 
