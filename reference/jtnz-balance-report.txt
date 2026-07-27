@@ -30,8 +30,13 @@ mixed tables end net negative, which is the same population that used to clear
   community   C-a  37.4% [38.0]   C-b  35.0% [35.8]   C-c  46.5% [47.0]
   activist    A-a  42.0% [40.9]   A-b  43.9% [44.0]   A-c  23.8% [22.1]
 
-  Note: no option in the pack sets COMPROMISED, so the "never collaborate" half
-  of A-a has never had any effect and the bar is the carbon figure alone.
+  Note: A-a is the one goal that forbids an archetype, so measuring it against
+  agents that do not know their goal measures their taste for Collaborate rather
+  than the goal. They take it in about 95% of games, which caps A-a at 5% here
+  however the carbon bar is set. Measured instead against an Activist who plays
+  for the goal (the "nocompromise" policy, excluded from the random mix): 40.1%,
+  against a published 40.9%. Every Collaborate card now sets COMPROMISED, so
+  both halves of the goal bite; before this they never did.
 
 --- option usage (dead / dominant options in mixed tables) ---
   dead options (<5% share within its role): 3      [v1.0: 3]

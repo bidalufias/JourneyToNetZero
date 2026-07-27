@@ -299,9 +299,9 @@
    {
     "id": "A-a",
     "title": "No Compromise",
-    "desc": "Never collaborate, and still take the country 25 Mt past net zero.",
+    "desc": "Never take a Collaborate card, and still take the country 25 Mt past net zero.",
     "check": "!flags.COMPROMISED && emissions <= -25",
-    "measured": 0.42
+    "measured": 0.401
    },
    {
     "id": "A-b",
@@ -513,7 +513,8 @@
       "h": 0.3,
       "gr": 5,
       "flags": [
-       "AT_THE_TABLE"
+       "AT_THE_TABLE",
+       "COMPROMISED"
       ],
       "headline": "Movement leader joins recovery taskforce"
      },
@@ -724,7 +725,10 @@
       "g": 0.3,
       "h": 0.3,
       "gr": 5,
-      "headline": "Campaigner takes seat on economic council"
+      "headline": "Campaigner takes seat on economic council",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R1B-A3",
@@ -932,7 +936,8 @@
       "h": 0.3,
       "gr": 6,
       "flags": [
-       "GREEN_CONDITIONS"
+       "GREEN_CONDITIONS",
+       "COMPROMISED"
       ],
       "headline": "Loan conditions rewritten around clean investment"
      },
@@ -1141,7 +1146,10 @@
       "g": 0.2,
       "h": 0.3,
       "gr": 6,
-      "headline": "Campaigners co-write the national energy roadmap"
+      "headline": "Campaigners co-write the national energy roadmap",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R2A-A3",
@@ -1344,7 +1352,10 @@
       "g": 0.2,
       "h": 0.3,
       "gr": 6,
-      "headline": "Campaigner joins national grid taskforce"
+      "headline": "Campaigner joins national grid taskforce",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R2B-A3",
@@ -1554,7 +1565,10 @@
       "g": 0.3,
       "h": 0.4,
       "gr": 6,
-      "headline": "Civil society helps design the new system"
+      "headline": "Civil society helps design the new system",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R2C-A3",
@@ -1760,7 +1774,10 @@
       "g": 0.3,
       "h": 0.4,
       "gr": 5,
-      "headline": "Campaigner joins national recovery council"
+      "headline": "Campaigner joins national recovery council",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R3A-A3",
@@ -1963,7 +1980,10 @@
       "g": 0.2,
       "h": 0.4,
       "gr": 6,
-      "headline": "Activist appointed to regional haze panel"
+      "headline": "Activist appointed to regional haze panel",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R3B-A3",
@@ -2164,7 +2184,10 @@
       "g": 0.2,
       "h": 0.4,
       "gr": 6,
-      "headline": "Campaigner joins health adaptation board"
+      "headline": "Campaigner joins health adaptation board",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R3C-A3",
@@ -2373,7 +2396,8 @@
       "h": 0.3,
       "gr": 7,
       "flags": [
-       "MANIFESTO_DEAL"
+       "MANIFESTO_DEAL",
+       "COMPROMISED"
       ],
       "headline": "Endorsement traded for binding climate pledges"
      },
@@ -2586,7 +2610,8 @@
       "h": 0.5,
       "gr": 8,
       "flags": [
-       "MANIFESTO_DEAL"
+       "MANIFESTO_DEAL",
+       "COMPROMISED"
       ],
       "headline": "Unions and greens sign historic pact"
      },
@@ -2792,7 +2817,8 @@
       "h": 0.4,
       "gr": 8,
       "flags": [
-       "MANIFESTO_DEAL"
+       "MANIFESTO_DEAL",
+       "COMPROMISED"
       ],
       "headline": "All sides sign a climate commitment"
      },
@@ -3003,7 +3029,10 @@
       "g": 0.1,
       "h": 0.5,
       "gr": 7,
-      "headline": "Clean Water Accord signed by all parties"
+      "headline": "Clean Water Accord signed by all parties",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R5A-A3",
@@ -3211,7 +3240,10 @@
       "g": 0.1,
       "h": 0.5,
       "gr": 7,
-      "headline": "Campaigner co-chairs waste policy review"
+      "headline": "Campaigner co-chairs waste policy review",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R5B-A3",
@@ -3419,7 +3451,10 @@
       "g": 0.1,
       "h": 0.5,
       "gr": 7,
-      "headline": "Coastal accord signed by industry and villages"
+      "headline": "Coastal accord signed by industry and villages",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R5C-A3",
@@ -3606,7 +3641,10 @@
       "g": 0.3,
       "h": 0.6,
       "gr": 9,
-      "headline": "2050 National Accord signed"
+      "headline": "2050 National Accord signed",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R6A-A3",
@@ -3791,7 +3829,10 @@
       "g": 0.3,
       "h": 0.6,
       "gr": 9,
-      "headline": "Allocation council rewrites the rules"
+      "headline": "Allocation council rewrites the rules",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R6B-A3",
@@ -3976,7 +4017,10 @@
       "g": 0.3,
       "h": 0.6,
       "gr": 9,
-      "headline": "New planning code written with civil society"
+      "headline": "New planning code written with civil society",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R6C-A3",

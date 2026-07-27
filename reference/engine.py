@@ -395,11 +395,11 @@ def goal_met(gid, res):
         "C-a": h >= 8.0,
         "C-b": min(res["h_hist"]) >= 6.3,
         "C-c": res["self_org_ok"] >= 4,
-        # No option in the pack has ever set COMPROMISED, so the "never
-        # collaborate" half of this goal has never done anything and the bar is
-        # the carbon figure alone. Left as it is here rather than fixed, because
-        # making the flag real changes what this goal measures and the threshold
-        # would have to be found again against the fixed version.
+        # Every Collaborate card sets COMPROMISED, so both halves of this goal
+        # now bite. Measured against an Activist who plays for it (the
+        # "nocompromise" policy) rather than against agents that do not know
+        # their goal and take Collaborate in 95% of games: 40.1%, against a
+        # published 40.9%. The carbon bar did not have to move.
         "A-a": "COMPROMISED" not in f and e <= -25,
         "A-b": gr >= 52,
         "A-c": h >= 7.0 and res["spot_hits"] >= 1,
@@ -458,6 +458,21 @@ class Policy:
         return max(scored, key=lambda x: x[0])[1]
 
 
+class NoCompromise(Policy):
+    """An Activist who took the No Compromise goal and plays for it.
+
+    The stock policies do not know their private goal, so measuring a goal that
+    forbids a whole archetype against them measures the agents' taste for that
+    archetype rather than the goal's difficulty. Collaborate is taken in about
+    95% of games, which capped No Compromise at 5% however the carbon bar was
+    set. A player who takes the goal avoids the card. This is that player.
+    """
+
+    def pick(self, gm, opts, role, rnd):
+        clean = [o for o in opts if o["arch"] != "COLLABORATE"] or opts
+        return Policy.pick(self, gm, clean, role, rnd)
+
+
 POLICIES = {
     "selfish":    Policy("selfish",    dict(e=0.05, g=1.0, h=0.3, gr=0.02, res=1.2), 0.15),
     "cooperator": Policy("cooperator", dict(e=0.35, g=0.5, h=0.6, gr=0.30, res=0.2, gap=1.0), 0.9),
@@ -466,6 +481,16 @@ POLICIES = {
     "ideologue":  Policy("ideologue",  dict(e=0.60, g=0.05, h=0.2, gr=0.55, res=0.1), 0.35),
     "random":     Policy("random",     dict(e=0, g=0, h=0, gr=0, res=0), 0.5),
 }
+
+# The six policies a random table is drawn from. Named separately because
+# POLICIES also holds measurement-only agents, and a random mix that quietly
+# included one would not be measuring the same game the report describes.
+MIX_POLICIES = list(POLICIES)
+
+# Measurement only: it exists to measure one goal against a player who is
+# actually chasing it. See goal_met("A-a"). Never drawn into a random table.
+POLICIES["nocompromise"] = NoCompromise(
+    "nocompromise", POLICIES["balanced"].w, POLICIES["balanced"].coop)
 
 
 def all_paths():
@@ -481,7 +506,7 @@ def run_many(n, mix=None, cfg=CFG, seed=0):
         if mix:
             pol = {r: POLICIES[mix[r]] for r in ROLES}
         else:
-            pol = {r: POLICIES[rng.choice(list(POLICIES))] for r in ROLES}
+            pol = {r: POLICIES[rng.choice(MIX_POLICIES)] for r in ROLES}
         gm = Game(path, pol, cfg, seed=rng.randrange(10**9))
         res = gm.run()
         res["path"] = path
