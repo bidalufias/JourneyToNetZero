@@ -259,30 +259,40 @@ export const ROLE_LABEL: Record<Role, string> = {
   activist: 'Activist',
 }
 
-export const ROLE_CHARACTER: Record<Role, { name: string; title: string; org: string; blurb: string }> = {
+/**
+ * The four seats, as archetypes rather than people.
+ *
+ * Nobody here has a name. The player types their own when they take the chair,
+ * and a second name printed beside it only competes with it: a table spends the
+ * session calling each other Minister and Tycoon anyway, never the invented
+ * names they were given. So the seat carries a job, and the person in it is
+ * whoever sat down.
+ *
+ * `title` omits its article, because the places it appears want different ones:
+ * a sentence needs "the Climate Minister" and a seat list wants none at all.
+ *
+ * Nothing here is gendered. The archetype is played by whoever takes it.
+ */
+export const ROLE_CHARACTER: Record<Role, { title: string; org: string; blurb: string }> = {
   government: {
-    name: 'Datuk Nurul Aziz',
-    title: 'the Honourable Minister',
+    title: 'Climate Minister',
     org: 'Ministry of Energy, Environment and Climate',
     blurb: 'Holds the budget and the law. Moves faster than anyone. Can also be voted out in an afternoon.',
   },
   business: {
-    name: 'Tan Sri Lim Wei Sheng',
-    title: 'the Group CEO',
+    title: 'Business Tycoon',
     org: 'Sawit Prima Group',
     blurb: 'Owns the emissions. Also owns the jobs, exports and tax base.',
   },
   community: {
-    name: 'Mak Cik Rohani',
-    title: 'the Chair',
+    title: 'Community Leader',
     org: "Kampung Baru Jernih residents' association",
     blurb: '34 million people who want clean air, a job, and petrol under two Ringga a litre.',
   },
   activist: {
-    name: 'Aisyah Kamal',
-    title: 'the Founder',
+    title: 'Climate Campaigner',
     org: 'Bangkit Iklim',
-    blurb: 'Can make ignoring her more expensive than listening. Three times, and only three.',
+    blurb: 'Can make ignoring them more expensive than listening. Three times, and only three.',
   },
 }
 

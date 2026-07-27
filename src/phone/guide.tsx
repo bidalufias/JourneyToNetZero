@@ -83,7 +83,8 @@ export function HowToPlay({ view }: { view: PhoneView }) {
   return (
     <>
       <p className="ptext">
-        You are the <strong>{ROLE_LABEL[view.role]}</strong>, {character.name}. {character.blurb}
+        You are the <strong>{ROLE_LABEL[view.role]}</strong>, the {character.title}.{' '}
+        {character.blurb}
       </p>
 
       <span className="plabel">WHAT YOU SPEND</span>
