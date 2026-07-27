@@ -1,7 +1,7 @@
 # JOURNEY TO NET ZERO
 ### Complete Game Design Document · v3.0 · build-ready
 
-**A 30-minute, 4-player strategy simulation for climate training.**
+**A 35-minute, 4-player strategy simulation for climate training.**
 
 This is the single source of truth. It replaces all earlier drafts. Every rule and number here has been verified across roughly 200,000 simulated games; the measured outcomes are in Part 12.
 
@@ -20,7 +20,7 @@ This is the single source of truth. It replaces all earlier drafts. Every rule a
 ## PART 1 — THE BIG IDEA
 
 ### The pitch
-Four people who don't trust each other have 30 minutes and six crises to save a country — and none of them can do it alone.
+Four people who don't trust each other have 35 minutes and six crises to save a country, and none of them can do it alone.
 
 ### What it's actually about
 Everyone already agrees on net zero. That's not the hard part. The hard part is that the Government needs votes, the Business needs profit, the Community needs cheap petrol, and the Activist needs to be able to look at themselves in the mirror. Every one of those needs is legitimate. Every one of them, pushed too hard, sinks the country.
@@ -56,20 +56,20 @@ Fictional, but recognisable to anyone from the region. That recognition is what 
 
 ### The four seats
 
-**🏛 THE GOVERNMENT — Datuk Nurul Aziz, 52, Minister for Energy, Environment and Climate**
+**🏛 THE GOVERNMENT — the Minister for Energy and Climate**
 Holds the budget and the law. Moves faster than anyone. Can also be voted out in an afternoon. Every good decision is paid for by someone who votes.
-*Resource: **Fiscal Points**, 4 to start, +2 per round from Round 2 (+1 more if growth ≥5.5%), capped at 8.*
+*Resource: **Budget**, 4 to start, +2 per round from Round 2 (+1 more if growth ≥5.5%), capped at 8.*
 
-**🏭 THE BUSINESS — Tan Sri Lim Wei Sheng, 58, Group CEO of Sawit Prima**
+**🏭 THE BUSINESS — the Company Boss, Group CEO of Sawit Prima**
 Owns the emissions. Also owns the jobs, exports and tax base. Will go green the moment it's cheaper than not going green — or the moment someone makes staying dirty more expensive.
-*Resource: **Capital**, 5 to start, +1 per round (+1 more if growth ≥5.0%), capped at 12.*
+*Resource: **Company Money**, 5 to start, +1 per round (+1 more if growth ≥5.0%), capped at 12.*
 
-**🏘 THE COMMUNITY — Mak Cik Rohani, 47, stallholder and residents' association chair**
+**🏘 THE COMMUNITY — the Community Leader, stallholder and residents' association head**
 34 million people who want clean air, a job, and petrol under two Ringga a litre. No money, no law. Something better: they decide who is trusted.
-*Resource: awards **2 Trust tokens** every round — one for who cared most, one for who did most for the future. Holds **2 Public Mandate vetoes** for the game.*
+*Resource: **2 vetoes** for the game. **Public Trust** is awarded by the engine every round, one for who cared most and one for who did most for the future; the Community does not choose who gets it.*
 
-**✊ THE ACTIVIST — Aisyah Kamal, 26, founder of Bangkit Iklim**
-Can't build or fund anything. Can make ignoring her more expensive than listening — three times, and only three, before people stop hearing her.
+**✊ THE ACTIVIST — the Youth Activist, founder of Bangkit Iklim**
+Can't build or fund anything. Can make ignoring them more expensive than listening, three times and only three, before people stop hearing them.
 *Resource: **3 Spotlights** for the whole game, plus finite credibility.*
 
 > **On complexity:** each player tracks exactly one number. The dashboard tracks everything else. Nobody does arithmetic.
@@ -83,9 +83,9 @@ By the end of Round 6, Semenanjara must hit **all three**:
 
 | Target | Start | Goal |
 |---|---|---|
-| 🌍 Emissions | 100 Mt CO₂e net | **net zero (≤ 0)** |
+| 🌍 Carbon | 100 Mt CO₂e net | **net zero (≤ 0)** |
 | 📈 Economy | 4.5% growth | **≥ 5.0% average across the six rounds** |
-| 😊 Happiness | 6.0 | **≥ 7.0** |
+| 😊 Quality of life | 6.0 | **≥ 7.0** |
 
 Two out of three is a failure. That's the point.
 
@@ -100,12 +100,12 @@ Every threshold below was calibrated against realistic simulated tables to land 
 | 🏛 | **Steady Hand** | Growth never below 4.0% in any round | 47.4% |
 | 🏛 | **The Legacy** | Green Economy Share reaches 55% | 28.7% |
 | 🏭 | **Market Dominance** | End with 6+ Capital | 39.4% |
-| 🏭 | **Green Champion** | Personally deliver 40+ Mt of cuts | 40.9% |
+| 🏭 | **Green Champion** | Personally deliver 33+ Mt of cuts | 41.4% |
 | 🏭 | **Licence to Operate** | End with 2+ Trust and 4+ Capital | 33.8% |
 | 🏘 | **A Happy Nation** | Happiness ends at 8.0+ | 38.0% |
 | 🏘 | **Nobody Left Behind** | Happiness never drops below 6.3 | 35.8% |
 | 🏘 | **Our Own Two Hands** | Land 4+ successful community-led actions | 47.0% |
-| ✊ | **No Compromise** | Never collaborate, and still finish ≤175 Mt | 40.9% |
+| ✊ | **No Compromise** | Never collaborate, and still finish ≤ −25 Mt | 42.0% |
 | ✊ | **The Long Game** | Green Economy Share reaches 52% | 44.0% |
 | ✊ | **Justice First** | Happiness 7.0+ and at least one Spotlight lands | 22.1% |
 
@@ -1035,7 +1035,7 @@ Design so every second on the phone is a second not spent negotiating. The phone
 
 ## PART 9 — RUNNING IT AS A TRAINING SESSION
 
-**30-minute version:** 3 setup · 24 play · 3 results. Fast, loud, slightly chaotic. Good conference session.
+**35-minute version:** setup and onboarding · six rounds of play · results. Fast, loud, slightly chaotic. Good conference session. A table that has played before can skip the onboarding and finish in about 29.
 
 **45-minute workshop version (recommended):** 5 setup and role briefing · 30 play with 5-minute rounds · 10 structured debrief.
 

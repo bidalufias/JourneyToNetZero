@@ -1,5 +1,5 @@
 /**
- * THE TABLE: ninety seconds. Argue, plead, threaten, trade.
+ * THE TALK: ninety seconds. Argue, plead, threaten, trade.
  *
  * The phone's job here is to get out of the way. Five actions, each two taps,
  * each in a sheet that rises from the bottom and never covers the timer. An
@@ -36,7 +36,7 @@ export function TableActions({
 
   return (
     <div className="pbody">
-      <span className="plabel">ROUND {view.round} · THE TABLE</span>
+      <span className="plabel">ROUND {view.round} \u00B7 THE TALK</span>
       <h1 className="pheading">Talk to each other.</h1>
       <p className="ptext">{view.privateLine}</p>
 
@@ -45,11 +45,9 @@ export function TableActions({
         <div key={o.id} className="bubble bubble--them">
           <div className="bubble__label">INCOMING OFFER</div>
           <div className="bubble__lead">
-            {ROLE_LABEL[o.from]} sends you {o.amount}{' '}
-            {o.resource === 'fiscal' ? 'Fiscal Point' : 'Capital'}
-            {o.amount > 1 ? 's' : ''}.
+            {ROLE_LABEL[o.from]} sends you {o.amount} {o.resource === 'fiscal' ? 'Budget' : 'Company Money'}.
           </div>
-          <p className="bubble__text">It expires when the round does. Nothing is owed in return.</p>
+          <p className="bubble__text">It ends when the round does. You owe nothing in return.</p>
           <div className="btn-row" style={{ marginTop: 'var(--space-3)' }}>
             <button
               className="btn btn--ghost"
@@ -76,15 +74,15 @@ export function TableActions({
         <div key={o.id} className="bubble">
           <div className="bubble__label">YOU SENT</div>
           <p className="bubble__text">
-            {o.amount} {o.resource === 'fiscal' ? 'Fiscal Point' : 'Capital'}
-            {o.amount > 1 ? 's' : ''} to the {ROLE_LABEL[o.to]}:{' '}
+            {o.amount} {o.resource === 'fiscal' ? 'Budget' : 'Company Money'} to the{' '}
+            {ROLE_LABEL[o.to]}:{' '}
             {o.status === 'pending'
               ? 'waiting for them to accept.'
               : o.status === 'accepted'
                 ? 'accepted, and gone.'
                 : o.status === 'declined'
                   ? 'declined.'
-                  : 'it expired unanswered.'}
+                  : 'nobody answered.'}
           </p>
         </div>
       ))}
@@ -107,15 +105,15 @@ export function TableActions({
       )}
 
       {view.role === 'community' && view.vetoesRemaining < 2 ? (
-        <p className="pmono">PUBLIC MANDATE SPENT THIS ROUND. THE BIG SCREEN NAMED YOU.</p>
+        <p className="pnote">You used a veto this round. The big screen named you.</p>
       ) : null}
       {view.role === 'activist' && view.spotlightCalled ? (
-        <p className="pmono">
-          SPOTLIGHT CALLED. IT ONLY LANDS IF YOU ESCALATE WITH YOUR OWN CARD THIS ROUND.
+        <p className="pnote">
+          Spotlight called. It only lands if you also escalate with your own card this round.
         </p>
       ) : null}
       {view.role === 'government' && view.coFund ? (
-        <p className="pmono">CO-FUNDING THE PARTNERSHIP. COSTS YOU 1 FP WHEN THE ROUND RESOLVES.</p>
+        <p className="pnote">Paying half of the partnership. It costs you 1 Budget this round.</p>
       ) : null}
 
       <div className="btn-row" style={{ marginTop: 'auto' }}>
@@ -138,7 +136,7 @@ export function TableActions({
             disabled={readOnly || view.spotlightsRemaining <= 0 || view.spotlightCalled}
             onClick={() => setSheet('spotlight')}
           >
-            SPOTLIGHT · {view.spotlightsRemaining}
+            SPOTLIGHT \u00B7 {view.spotlightsRemaining}
           </button>
         ) : null}
         {view.role === 'community' ? (
@@ -147,7 +145,7 @@ export function TableActions({
             disabled={readOnly || view.vetoesRemaining <= 0}
             onClick={() => setSheet('veto')}
           >
-            MANDATE · {view.vetoesRemaining}
+            SAY NO \u00B7 {view.vetoesRemaining}
           </button>
         ) : null}
         {view.role === 'government' ? (
@@ -156,7 +154,7 @@ export function TableActions({
             disabled={readOnly}
             onClick={() => send({ t: 'coFund', role: 'government', agree: !view.coFund })}
           >
-            {view.coFund ? 'STOP CO-FUNDING' : 'CO-FUND'}
+            {view.coFund ? 'STOP PAYING HALF' : 'PAY HALF'}
           </button>
         ) : null}
       </div>
@@ -180,10 +178,10 @@ function ActionSheet({
   const others = ROLES.filter((r) => r !== view.role)
   const titles: Record<Exclude<Sheet, null>, string> = {
     offer: 'SEND AN OFFER',
-    promise: 'MAKE A PUBLIC PROMISE',
-    demand: 'MAKE A DEMAND',
+    promise: 'PROMISE SOMETHING',
+    demand: 'ASK FOR SOMETHING',
     spotlight: 'CALL A SPOTLIGHT',
-    veto: 'PUBLIC MANDATE',
+    veto: 'THE PUBLIC SAYS NO',
   }
 
   return (
@@ -201,9 +199,7 @@ function ActionSheet({
 
           {kind === 'promise' ? (
             <>
-              <p className="pmono">
-                THE BIG SCREEN WILL SAY IT. NOTHING MAKES YOU KEEP IT.
-              </p>
+              <p className="pnote">The big screen will show it. Nothing makes you keep it.</p>
               {view.options.map((o) => (
                 <button
                   key={o.id}
@@ -221,9 +217,9 @@ function ActionSheet({
 
           {kind === 'demand' ? (
             <>
-              <p className="pmono">
-                A DEMAND IS PRESSURE, NOT A RULE. NOTHING MAKES THEM DO IT, AND EVERYONE SEES YOU
-                ASK. ONE PER ROUND; A SECOND REPLACES IT.
+              <p className="pnote">
+                This is pressure, not a rule. Nothing makes them do it, and everyone sees you ask.
+                One per round. A second one replaces it.
               </p>
               {others.map((target) => (
                 <div key={target}>
@@ -248,14 +244,16 @@ function ActionSheet({
           {kind === 'spotlight' ? (
             <>
               <p className="ptext">
-                It lands on whoever takes the dirtiest option this round. For them it only half
-                works, it costs them standing, and the country notices.
+                It hits whoever takes the dirtiest card this round. Their card only half works and
+                they lose Public Trust.
               </p>
-              <p className="pmono">
-                IT ONLY FIRES IF YOU ALSO ESCALATE WITH YOUR OWN CARD THIS ROUND. IF NOBODY GOES
-                DIRTY, IT COSTS YOU NOTHING.
+              <p className="pnote">
+                It only fires if you also escalate with your own card this round. If nobody goes
+                dirty, it costs you nothing.
               </p>
-              <p className="pmono">THREE FOR THE WHOLE GAME. {view.spotlightsRemaining} LEFT.</p>
+              <p className="pnote">
+                Three for the whole game. You have {view.spotlightsRemaining} left.
+              </p>
               <button
                 className="btn btn--accent"
                 onClick={() => {
@@ -289,14 +287,12 @@ function OfferSheet({
 }) {
   const [to, setTo] = useState<Role | null>(null)
   const resource = view.resource.kind === 'capital' ? 'capital' : 'fiscal'
-  const unit = resource === 'fiscal' ? 'Fiscal Point' : 'Capital'
+  const unit = resource === 'fiscal' ? 'Budget' : 'Company Money'
   const canSend = view.resource.kind === 'fiscal' || view.resource.kind === 'capital'
 
   if (!canSend) {
     return (
-      <p className="ptext">
-        You hold no transferable resource. Your power is the mandate, not the money.
-      </p>
+      <p className="ptext">You have no money to send. Your power is saying no.</p>
     )
   }
 
@@ -313,7 +309,6 @@ function OfferSheet({
     <>
       <span className="plabel">
         YOU HOLD {view.resource.value} {unit.toUpperCase()}
-        {view.resource.value === 1 ? '' : 'S'}
       </span>
       <span className="plabel">TO WHOM</span>
       {recipients.map((r) => (
@@ -325,8 +320,8 @@ function OfferSheet({
           <RoleGlyph role={r} size={14} /> {ROLE_LABEL[r]}
         </button>
       ))}
-      <p className="pmono">
-        ONLY THE GOVERNMENT AND THE BUSINESS HOLD MONEY. THE OTHERS CANNOT BE PAID.
+      <p className="pnote">
+        Only the Government and the Business hold money. The others cannot be paid.
       </p>
       <span className="plabel">HOW MANY</span>
       <div className="btn-row">
@@ -345,8 +340,8 @@ function OfferSheet({
           </button>
         ))}
       </div>
-      <p className="pmono">
-        THEY HAVE TO ACCEPT. ONCE THEY DO IT IS GONE, AND NOTHING OBLIGES THEM TO REPAY IT.
+      <p className="pnote">
+        They have to accept. Once they do it is gone, and nothing makes them repay it.
       </p>
     </>
   )
@@ -372,7 +367,7 @@ function VetoSheet({
   return (
     <>
       <p className="ptext">You are about to take a choice away.</p>
-      <span className="plabel">REMOVING FROM</span>
+      <span className="plabel">TAKE IT FROM</span>
       {ROLES.filter((r) => r !== 'community').map((r) => (
         <button
           key={r}
@@ -382,16 +377,16 @@ function VetoSheet({
           <RoleGlyph role={r} size={14} /> {ROLE_LABEL[r]}
         </button>
       ))}
-      <p className="pmono">
-        THIS ROUND ONLY. EVERYONE WILL BE TOLD IT WAS YOU, AND YOU WILL HAVE{' '}
-        {view.vetoesRemaining - 1} LEFT.
+      <p className="pnote">
+        This round only. Everyone will be told it was you. You will have{' '}
+        {view.vetoesRemaining - 1} left.
       </p>
-      <p className="pmono" style={{ color: 'var(--jtnz-com-deep)' }}>
-        “THE PUBLIC WILL SIMPLY NOT ACCEPT THIS.”
+      <p className="pnote" style={{ color: 'var(--jtnz-com-deep)' }}>
+        \u201CThe public will not accept this.\u201D
       </p>
 
       <label className="plabel" htmlFor="veto-slide">
-        HOLD AND SLIDE TO VETO →
+        HOLD AND SLIDE TO SAY NO \u2192
       </label>
       <input
         id="veto-slide"

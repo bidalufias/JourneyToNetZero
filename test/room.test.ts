@@ -10,7 +10,8 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 import { loadContent } from '../src/engine/content'
-import { ROLES, type Role } from '../src/engine/types'
+import { DIRTY, ROLES, type Role } from '../src/engine/types'
+import { optionCondition } from '../src/game/impact'
 import {
   apply,
   authorise,
@@ -240,6 +241,22 @@ describe('a seat can be given up', () => {
 })
 
 describe('the phone can never see the numbers', () => {
+  it('never tells a card it is constructive when the engine disagrees', () => {
+    // The coalition note on a card and the `aligned` test in playRound are two
+    // statements of one rule. The Community's veto trigger was duplicated the
+    // same way and the copies drifted, so this asserts they agree for all 216
+    // options rather than trusting that they were written to match.
+    const breaks = 'The table will not count this as moving together.'
+    for (const scenario of Object.values(content.scenarios)) {
+      for (const options of Object.values(scenario.options)) {
+        for (const o of options) {
+          const aligned = !DIRTY.has(o.arch) && o.arch !== 'DEMAND_RELIEF'
+          expect(optionCondition(o) === breaks).toBe(!aligned)
+        }
+      }
+    }
+  })
+
   it('sends no effect values with an option card', () => {
     const room = seated()
     run(room, { t: 'start' })
@@ -255,8 +272,15 @@ describe('the phone can never see the numbers', () => {
     const parsed = JSON.parse(wire)
     for (const card of parsed.options) {
       expect(Object.keys(card).sort()).toEqual(
-        ['available', 'cost', 'desc', 'disabled', 'disabledNote', 'hint', 'id', 'title'].sort(),
+        ['available', 'condition', 'cost', 'desc', 'disabled', 'disabledNote', 'id', 'impact', 'title'].sort(),
       )
+      // The chips carry a direction and never a value. -3 to 3 is the whole
+      // range they may take, so no effect can be read back off one.
+      for (const chip of card.impact) {
+        expect(Object.keys(chip).sort()).toEqual(['dir', 'good', 'label', 'meter'].sort())
+        expect(Number.isInteger(chip.dir)).toBe(true)
+        expect(Math.abs(chip.dir)).toBeLessThanOrEqual(3)
+      }
     }
 
     const scenario = content.scenarios[room.game.path[0]]
@@ -569,7 +593,7 @@ describe('the facilitator can stop the clock', () => {
   })
 })
 
-describe('phase timings match the 30-minute session', () => {
+describe('phase timings match the published session', () => {
   it('spends 24 minutes on six rounds of play', () => {
     const perRound = PHASE_MS.crisis + PHASE_MS.table + PHASE_MS.choice + PHASE_MS.reckoning
     expect(perRound).toBe(4 * 60 * 1000)

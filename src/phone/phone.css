@@ -243,16 +243,46 @@ a.btn {
 
 .ocard__desc { display: block; margin-top: var(--space-2); font: 400 14px/1.4 var(--font-body); }
 
-/* The hint reads as a verdict, not a stat line. 8-second read target. */
-.ocard__hint {
-  display: block;
+/*
+ * The four impact chips: which way this card pushes each meter, and roughly how
+ * hard. A 2x2 grid rather than a row of four, because four labels across a
+ * 360px phone wraps into unreadable stacks.
+ *
+ * Colour carries the verdict and the arrows carry the direction, so the card
+ * still reads correctly in greyscale and for a colour-blind player.
+ */
+.impact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
   margin-top: auto;
   padding-top: var(--space-3);
   border-top: var(--rule) solid color-mix(in srgb, currentColor 22%, transparent);
-  font: 700 12px/1.35 var(--font-mono);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
 }
+
+.impact__cell {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 3px 0;
+}
+
+.impact__label {
+  font: 700 9px/1.2 var(--font-mono);
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+
+.impact__arrows { font: 700 12px/1 var(--font-mono); letter-spacing: -0.05em; }
+
+.impact__cell--good .impact__arrows { color: var(--jtnz-meter-green); }
+.impact__cell--bad .impact__arrows { color: var(--color-accent); }
+.impact__cell--flat .impact__arrows { opacity: 0.35; }
+
+/* On the selected card the tints sit on a dark ground and lose their contrast. */
+.ocard--selected .impact__cell--good .impact__arrows { color: #7BE0A5; }
+.ocard--selected .impact__cell--bad .impact__arrows { color: #FFAF96; }
 
 .ocard__check { position: absolute; right: var(--space-4); bottom: var(--space-4); font-size: 18px; }
 
@@ -502,15 +532,36 @@ a.btn {
 }
 
 /* The one place the app is allowed to be rude. */
-.nudge {
+/*
+ * A note, not a nudge. The phone states facts and leaves the pressure to the
+ * clock and to the three people sitting opposite.
+ */
+.pnote { font: 400 13px/1.5 var(--font-body); color: var(--color-neutral-700); }
+
+.pnote--urgent {
   background: var(--color-accent-100);
-  border: var(--rule) solid var(--color-accent);
+  border-left: 3px solid var(--color-accent);
   color: var(--color-accent-700);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  font-weight: 600;
 }
 
-.nudge__lead { font: 800 20px/1.15 var(--font-heading); }
-.nudge__sub { margin-top: var(--space-2); font: 700 12px/1.3 var(--font-mono); }
+/*
+ * The three national numbers, under the header, on every screen. Small enough
+ * to ignore while talking and always there when somebody asks where we are.
+ */
+.nation {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: var(--rule) solid var(--color-line);
+  background: var(--color-surface);
+}
+
+.nation__cell { padding: 5px var(--space-3); text-align: center; }
+.nation__cell + .nation__cell { border-left: var(--rule) solid var(--color-line); }
+.nation__label { display: block; font: 700 8px/1.2 var(--font-mono); letter-spacing: 0.1em; opacity: 0.6; }
+.nation__value { display: block; font: 800 15px/1.2 var(--font-heading); }
+.nation__value--met { color: var(--jtnz-meter-green); }
 
 /* ── Short screens ──────────────────────────────────────────────────── */
 

@@ -5,10 +5,10 @@
  * answers to the same complaint: the app knew things about you and would not
  * say them.
  *
- * The header now carries the one number the onboarding screen tells you to
- * track. It said "it is the only number you have to track" and then showed it
- * exactly once, which made every card price unreadable and every transfer a
- * guess.
+ * The header carries the one number this seat spends, and under it the three
+ * numbers the whole country is judged on. Both used to be shown once and then
+ * hidden: card prices were unreadable and the score existed only on a projector
+ * some players could not see from where they sat.
  *
  * BACK steps through the round you are already in, read-only. It is not browser
  * history: it cannot change anything, it cannot reach another round, and it can
@@ -27,7 +27,7 @@ export const SCREEN_ORDER: Screen[] = ['crisis', 'table', 'choice']
 
 export const SCREEN_LABEL: Record<Screen, string> = {
   crisis: 'THE CRISIS',
-  table: 'THE TABLE',
+  table: 'THE TALK',
   choice: 'THE CHOICE',
 }
 
@@ -89,16 +89,17 @@ export function PhoneHeader({
       <div className="phead__bar">
         <span className="phead__bar-fill" style={{ width: `${pct}%` }} />
       </div>
+      <Nation view={view} />
     </>
   )
 }
 
 /** Short enough for a header, and it names the unit the cost chips use. */
 const RESOURCE_CHIP: Record<PhoneView['resource']['kind'], string> = {
-  fiscal: 'FP',
-  capital: 'C',
-  'trust-awards': 'MANDATE',
-  spotlights: 'SPOTLIGHT',
+  fiscal: 'BUDGET',
+  capital: 'MONEY',
+  vetoes: 'VETOES',
+  spotlights: 'SPOTLIGHTS',
 }
 
 function Resource({ view }: { view: PhoneView }) {
@@ -107,6 +108,33 @@ function Resource({ view }: { view: PhoneView }) {
       <span className="phead__res-unit">{RESOURCE_CHIP[view.resource.kind]}</span>
       <span className="phead__res-value">{view.resource.value}</span>
     </span>
+  )
+}
+
+/**
+ * Where the country stands, on the phone, on every screen.
+ *
+ * These three numbers used to exist only on the projector, so a player sitting
+ * where they could not read it had no access to the score they were playing
+ * for. Carbon is the one that has to reach zero; the other two are the ones
+ * tables actually miss.
+ */
+function Nation({ view }: { view: PhoneView }) {
+  const n = view.nation
+  const cells = [
+    { label: 'CARBON', value: n.carbon.toFixed(0), met: n.carbon <= n.targets.carbon },
+    { label: 'ECONOMY', value: `${n.economy.toFixed(1)}%`, met: n.economy >= n.targets.economy },
+    { label: 'QUALITY OF LIFE', value: n.life.toFixed(1), met: n.life >= n.targets.life },
+  ]
+  return (
+    <div className="nation">
+      {cells.map((c) => (
+        <div key={c.label} className="nation__cell">
+          <span className="nation__label">{c.label}</span>
+          <span className={`nation__value${c.met ? ' nation__value--met' : ''}`}>{c.value}</span>
+        </div>
+      ))}
+    </div>
   )
 }
 

@@ -1,10 +1,11 @@
 # Journey to Net Zero
 
-A 30-minute, 4-player climate strategy simulation for training workshops. Four
+A 35-minute, 4-player climate strategy simulation for training workshops. Four
 players join on their phones; a fifth screen shows a shared broadcast on a TV or
-projector. Six crises, four minutes each.
+projector. Six crises, about four minutes each. A table that has played before
+can skip the onboarding and finish in about 29.
 
-> Four people who don't trust each other have thirty minutes to save a country.
+> Four people who don't trust each other have six crises to save a country.
 
 `JOURNEY-TO-NET-ZERO-design.md` is the authority on rules and numbers.
 `design/Journey-to-Net-Zero-UI.dc.html` is the authority on how it looks.
@@ -186,7 +187,7 @@ pulling, or the countdown keeps whatever error the projector's clock has.
 
 ## Running a session
 
-30-minute version: 3 setup, 24 play, 3 results. The facilitator drives it from
+35 minutes end to end. The facilitator drives it from
 the dashboard, which carries exactly two buttons — PAUSE and NEXT — in the
 bottom corner of every screen. They behave like a video player's: a few seconds
 of no mouse movement and they fade out, and the first twitch brings them back,

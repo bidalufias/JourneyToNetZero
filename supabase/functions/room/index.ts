@@ -75,8 +75,8 @@ function powInt(base, n) {
   return out;
 }
 function driftK(greenShare, content2) {
-  for (const band of content2.config.driftTable) {
-    if (greenShare <= band.greenShareMax) return band.k;
+  for (const band2 of content2.config.driftTable) {
+    if (greenShare <= band2.greenShareMax) return band2.k;
   }
   return content2.config.driftTable[content2.config.driftTable.length - 1].k;
 }
@@ -465,137 +465,87 @@ function goalMet(goalId, res) {
   }
 }
 
-// src/game/hints.ts
-function variant(id, n) {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = h * 31 + id.charCodeAt(i) >>> 0;
-  return h % n;
-}
-var BY_ARCHETYPE = {
-  SPEND_STEER: (s) => [
-    s.unpopular ? "Expensive. Right. Not everyone will agree." : "Expensive, and the country will feel it working.",
-    "Bold. Needs the public behind you.",
-    s.builds ? "Buys a green economy. Empties the Treasury." : "Public money, pointed in one direction."
-  ],
-  REGULATE: (s) => [
-    "Makes the polluter move. Costs you friends.",
-    s.slowsEconomy ? "It works. Growth will not thank you." : "Force beats persuasion. Someone pays.",
-    "The law does what the meeting could not."
-  ],
-  DEREGULATE: (s) => [
-    s.popular ? "Popular today. Expensive by Round 6." : "Cheap now. The bill arrives later.",
-    "Protects growth. Costs the country carbon.",
-    s.legacy ? "Easy. And it closes doors you will want." : "Do nothing, and hope. It has worked before."
-  ],
-  TRANSITION: (s) => [
-    "Real money, real pain, real cuts.",
-    s.slowsEconomy ? "Hurts this year. Pays for a decade." : "The expensive answer, and the honest one.",
-    s.builds ? "The biggest green move on the table." : "Capex now. Certainty later."
-  ],
-  EXPAND: (s) => [
-    s.popular ? "Profitable. The room will notice." : "Good for the balance sheet. Bad for the air.",
-    "Faster, cheaper, dirtier. Everyone sees it.",
-    "Business as usual, at speed."
-  ],
-  PARTNER: () => [
-    "Halves in value unless someone co-funds it.",
-    "Only works if the Government pays its half.",
-    "A deal. It needs a partner to be worth anything."
-  ],
-  ADAPT: (s) => [
-    "Quiet, cheap, and it costs you something.",
-    s.unpopular ? "Absorb it. Nobody enjoys this one." : "Get on with it. No drama, small gains.",
-    "The unglamorous option that usually helps."
-  ],
-  DEMAND_RELIEF: () => [
-    "Makes the Government pay, one way or another.",
-    "Relief now. It comes out of someone else.",
-    "Loud, popular, and it breaks the coalition."
-  ],
-  SELF_ORGANISE: () => [
-    "Doubles if the powerful actually back you.",
-    "Do it yourselves. Better with real support.",
-    "Community power. It tires people out."
-  ],
-  ESCALATE: () => [
-    "Loud. Effective. Nobody here will thank you.",
-    "Pressure works. It also makes enemies.",
-    "Name them. Watch the room change."
-  ],
-  COLLABORATE: () => [
-    "Real influence, and a little of your soul.",
-    "A seat at the table costs you credibility.",
-    "Inside the room. Quieter every time."
-  ],
-  EDUCATE: (s) => [
-    s.slowBurn ? "Nothing today. Something big by Round 6." : "Slow, cheap, and it compounds.",
-    "Evidence now. It pays every round after.",
-    "The patient move. It always adds up."
-  ]
+// src/game/impact.ts
+var BANDS = {
+  carbon: { key: "e", label: "CARBON", t: [8, 4, 0.5], upIsGood: false },
+  economy: { key: "g", label: "ECONOMY", t: [0.6, 0.3, 0.05], upIsGood: true },
+  life: { key: "h", label: "QUALITY OF LIFE", t: [0.6, 0.35, 0.05], upIsGood: true },
+  clean: { key: "gr", label: "CLEAN ECONOMY", t: [8, 4, 0.5], upIsGood: true }
 };
-var MAX = 52;
-function optionHint(option) {
-  const authored = option.hint;
-  if (authored) return authored.slice(0, MAX);
-  const flags = option.flags ?? [];
-  const shape = {
-    cuts: option.e < 0,
-    slowsEconomy: option.g < 0,
-    unpopular: option.h < 0,
-    popular: option.h >= 0.5,
-    builds: option.gr >= 8,
-    legacy: flags.length > 0,
-    slowBurn: flags.some((f) => f.startsWith("EVIDENCE"))
-  };
-  const build = BY_ARCHETYPE[option.arch];
-  if (!build) return "A judgement call. Make it.";
-  const choices = build(shape).filter((s) => s.length <= MAX);
-  if (!choices.length) return "A judgement call. Make it.";
-  return choices[variant(option.id, choices.length)];
+var METERS = ["carbon", "economy", "life", "clean"];
+function band(value, [t3, t2, t1]) {
+  const a = Math.abs(value);
+  const size = a >= t3 ? 3 : a >= t2 ? 2 : a >= t1 ? 1 : 0;
+  return value < 0 ? -size : size;
 }
+function optionImpact(option) {
+  return METERS.map((meter) => {
+    const spec = BANDS[meter];
+    const dir = band(option[spec.key] ?? 0, spec.t);
+    return {
+      meter,
+      label: spec.label,
+      dir,
+      good: dir === 0 ? true : spec.upIsGood ? dir > 0 : dir < 0
+    };
+  });
+}
+function optionCondition(option) {
+  if (BREAKS_COALITION.has(option.arch)) return "The table will not count this as moving together.";
+  if (option.arch === "PARTNER") return "Only half works unless the Government pays too.";
+  if (option.arch === "SELF_ORGANISE") return "Twice as strong if the Government or Business helps.";
+  if (option.arch === "COLLABORATE") return "You gain influence. You lose some support.";
+  if ((option.flags ?? []).some((f) => f.startsWith("EVIDENCE"))) return "Nothing now. It pays off every round after.";
+  return null;
+}
+var BREAKS_COALITION = /* @__PURE__ */ new Set([
+  "EXPAND",
+  "DEREGULATE",
+  "DEMAND_RELIEF"
+]);
 function costLabel(option) {
   const c = option.cost ?? {};
   const parts = [];
-  if (c.fiscal) parts.push(c.fiscal > 0 ? `${c.fiscal} FP` : `+${-c.fiscal} FP`);
-  if (c.capital) parts.push(c.capital > 0 ? `${c.capital} C` : `+${-c.capital} C`);
-  return parts.length ? parts.join(" \xB7 ") : "FREE";
+  if (c.fiscal) parts.push(c.fiscal > 0 ? `${c.fiscal} Budget` : `+${-c.fiscal} Budget`);
+  if (c.capital) parts.push(c.capital > 0 ? `${c.capital} Company Money` : `+${-c.capital} Company Money`);
+  return parts.length ? parts.join(" \xB7 ") : "Free";
 }
 
 // src/game/copy.ts
 var PRIVATE_LINE = {
   financial: {
-    government: "The Treasury wants a decision today. Your backbenchers want a different one.",
+    government: "Your finance team wants one answer. Your own party wants another.",
     business: "The board meets in an hour. They want to know what this costs.",
     community: "Three people on your street lost their jobs before lunch.",
-    activist: "Every rescue package is a chance to attach a condition. Or to be ignored."
+    activist: "Every rescue is a chance to attach a condition. Or to be ignored."
   },
   energy: {
-    government: "The subsidy bill is now the largest line in your budget. Everybody knows it.",
+    government: "Fuel subsidies are now the biggest line in your budget. Everyone knows it.",
     business: "Your energy costs just became your biggest risk, and your biggest opportunity.",
     community: "The bill arrived this morning. People are talking about nothing else.",
-    activist: "This is the round where the country picks its next thirty years of power."
+    activist: "This round decides the country\u2019s power supply for thirty years."
   },
   health: {
     government: "Hospitals are calling your office directly. So are the employers.",
     business: "Your workforce is the exposure here, not your plant.",
-    community: "People are frightened, and they are looking to each other, not upward.",
-    activist: "Clean air just stopped being an abstraction. Use it or lose the moment."
+    community: "People are frightened. They are looking to each other, not upward.",
+    activist: "Clean air just became real to people. Use that now or lose it."
   },
   election: {
-    government: "Everything you chose in the last three rounds is now a poster or a scandal.",
-    business: "Whoever wins writes the rules you operate under. Money talks, and it is recorded.",
+    government: "Every choice you made so far is now a poster or a scandal.",
+    business: "Whoever wins writes your rules. Money talks, and it is on the record.",
     community: "You are the only one in this room who actually casts a vote.",
-    activist: "Endorsement is the only currency you have. Spend it once, spend it well."
+    activist: "Your backing is all you have to give. Spend it once, spend it well."
   },
   pollution: {
-    government: "Somebody will be blamed. You get to decide whether it is a company or a law.",
-    business: "Your permit may be lawful. That is not the same as being defensible.",
+    government: "Somebody will be blamed. You decide if it is a company or a law.",
+    business: "Your permit may be legal. That is not the same as defensible.",
     community: "This happened to your neighbourhood, not to a statistic.",
-    activist: "The evidence exists. The question is whether anyone has to look at it."
+    activist: "The evidence exists. The question is whether anyone has to look."
   },
   disaster: {
-    government: "This is the last round. Whatever you do now is what you are remembered for.",
-    business: "The rebuild is a contract. It is also the last chance to be on the right side.",
+    government: "Last round. Whatever you do now is what you are remembered for.",
+    business: "The rebuild is a contract. It is also your last chance to be right.",
     community: "Your people are in the water and the boats are mostly volunteers.",
     activist: "Ten years of work, and one afternoon to decide what it was for."
   }
@@ -605,10 +555,10 @@ function privateLine(type, role) {
 }
 var DEMAND_PHRASES = [
   { id: "pay-first", text: (t) => `the ${t} pays its share before anyone else moves` },
-  { id: "no-dirty", text: (t) => `the ${t} does not take the cheap option this round` },
-  { id: "go-public", text: (t) => `the ${t} says out loud what it is about to choose` },
-  { id: "co-fund", text: (t) => `the ${t} co-funds the partnership on the table` },
-  { id: "protect-jobs", text: (t) => `the ${t} guarantees nobody loses a job over this` },
+  { id: "no-dirty", text: (t) => `the ${t} does not take the cheap card this round` },
+  { id: "go-public", text: (t) => `the ${t} says out loud what it is about to pick` },
+  { id: "co-fund", text: (t) => `the ${t} pays half of the partnership` },
+  { id: "protect-jobs", text: (t) => `the ${t} promises nobody loses a job over this` },
   { id: "no-more-delay", text: (t) => `the ${t} stops asking everyone else to go first` }
 ];
 var BOARD_NAME = {
@@ -670,10 +620,10 @@ var ROLE_LABEL = {
   activist: "Activist"
 };
 var ROLE_RESOURCE = {
-  government: { kind: "fiscal", label: "Your Fiscal Points" },
-  business: { kind: "capital", label: "Your Capital" },
-  community: { kind: "trust-awards", label: "Public Mandate vetoes" },
-  activist: { kind: "spotlights", label: "Spotlights" }
+  government: { kind: "fiscal", label: "Your Budget" },
+  business: { kind: "capital", label: "Your Company Money" },
+  community: { kind: "vetoes", label: "Your vetoes" },
+  activist: { kind: "spotlights", label: "Your Spotlights" }
 };
 
 // src/game/room.ts
@@ -1337,7 +1287,8 @@ function phoneView(room, content2, role) {
         title: o.title,
         desc: o.desc,
         cost: costLabel(o),
-        hint: optionHint(o),
+        impact: optionImpact(o),
+        condition: optionCondition(o),
         available: choosable,
         disabled,
         disabledNote: note
@@ -1349,10 +1300,22 @@ function phoneView(room, content2, role) {
   const goalChoices = player.goalId === null ? content2.privateGoals[role].map((g) => ({ id: g.id, title: g.title, desc: g.desc })) : null;
   const ownGoal = player.goalId ? content2.privateGoals[role].find((g) => g.id === player.goalId) ?? null : null;
   const narrating = room.phase === "reckoning" || room.phase === "summary";
+  const nation = publicState(room.game, content2);
   return {
     code: room.code,
     role,
     name: player.name,
+    nation: {
+      carbon: nation.emissions,
+      economy: nation.averageGrowth,
+      life: nation.happiness,
+      clean: nation.greenShare,
+      targets: {
+        carbon: content2.config.tgt_e,
+        economy: content2.config.tgt_g,
+        life: content2.config.tgt_h
+      }
+    },
     phase: room.phase,
     phaseEndsAt: room.phaseEndsAt,
     paused: isPaused(room),
