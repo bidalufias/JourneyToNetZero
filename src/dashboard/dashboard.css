@@ -429,8 +429,8 @@
 /* ── The facilitator's controls ─────────────────────────────────────── */
 
 /*
- * These sit outside `.dash` — they are drawn over every screen the broadcast
- * has, including the ones that return early — so none of the container units
+ * These sit outside `.dash`, because they are drawn over every screen the broadcast
+ * has, including the ones that return early, so none of the container units
  * the rest of this file uses apply. Fixed sizes, deliberately: this is the one
  * thing on the projector that is meant to be read from the laptop rather than
  * from the back of the room.
@@ -443,7 +443,7 @@
 
 /*
  * Bottom left, not bottom right. Every screen that carries a countdown of its
- * own puts it bottom right — the crisis sting has nothing else down there — and
+ * own puts it bottom right, since the crisis sting has nothing else down there, and
  * covering the clock, even for the four seconds the bar is up, is the one thing
  * these buttons must not do.
  *
@@ -460,7 +460,7 @@
   display: flex;
   gap: var(--space-2);
   /* One dark panel rather than two floating buttons. Something is behind this
-     corner on every screen — the ticker, the lock row, the anchor card — and a
+     corner on every screen: the ticker, the lock row, the anchor card. And a
      control that half-dissolves into whatever it lands on is a control the
      facilitator has to look twice at. */
   padding: var(--space-2);

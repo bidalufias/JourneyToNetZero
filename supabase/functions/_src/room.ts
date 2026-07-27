@@ -2,7 +2,7 @@
  * The authoritative room, running server-side.
  *
  * This is the only thing in the system that reads or writes room state. It
- * imports the very same reducer the tests exercise (`src/game/room.ts`) — the
+ * imports the very same reducer the tests exercise (`src/game/room.ts`), and the
  * module has no React, DOM or transport imports precisely so it can run here
  * unchanged, which is what makes "all game logic server-side" a fact about the
  * code rather than a claim in a README.
@@ -62,7 +62,7 @@ const CORS = {
  *
  * Deadlines are stamped with this function's `Date.now()` and then read by a
  * browser subtracting its own. A projector laptop whose clock is a minute out
- * would otherwise put every deadline a minute out with it — and the Reckoning,
+ * would otherwise put every deadline a minute out with it, and the Reckoning,
  * which decides when each card is due, would sit on a blank screen waiting for
  * a moment that had already passed. Sending the clock alongside the deadline
  * costs one number and lets the client correct for the difference.
@@ -118,7 +118,7 @@ async function readRoom(code: string): Promise<{ room: Room; revision: number } 
  *
  * Four phones negotiating for ninety seconds means concurrent commands are
  * normal, not exceptional. A blind PATCH lets two of them read the same state
- * and write in turn, so the second silently erases the first — an accepted
+ * and write in turn, so the second silently erases the first: an accepted
  * offer or a declared veto simply never happened. Matching on the revision the
  * caller read makes the loser detectable, and `withRoom` retries it.
  *
@@ -137,7 +137,7 @@ async function writeRoom(room: Room, revision: number): Promise<number | null> {
 }
 
 /**
- * Read, mutate, write — retrying from a fresh read whenever another request
+ * Read, mutate, write, retrying from a fresh read whenever another request
  * beat us to it. The mutation runs again rather than being replayed onto stale
  * state, so the reducer always sees the room as it actually is.
  */
@@ -158,7 +158,7 @@ async function withRoom(
 /**
  * Tells every client in the room that something moved.
  *
- * The payload is a revision number and nothing else — clients then fetch their
+ * The payload is a revision number and nothing else. Clients then fetch their
  * own view. Pushing the state itself down a shared channel would hand every
  * phone every other phone's secrets, which is the one thing this design exists
  * to prevent.
@@ -194,7 +194,7 @@ function viewFor(room: Room, seat: Role | 'dashboard') {
 }
 
 /**
- * Who is in which chair. Already public — it is on the projector — so it is
+ * Who is in which chair. Already public, since it is on the projector, so it is
  * safe to hand to somebody who has just been refused a seat, and it is the
  * only thing that makes the refusal actionable.
  */
@@ -268,7 +268,7 @@ Deno.serve(async (req: Request) => {
      * loses signal still recovers, because their own device kept the token and
      * resumes with it before ever reaching this path.
      *
-     * A row with no name on it is a claim that never became a player — someone
+     * A row with no name on it is a claim that never became a player: someone
      * who opened the link and closed it. That chair is still free.
      */
     const held = await rest(`room_seats?code=eq.${code}&role=eq.${role}&select=token`)
@@ -305,7 +305,7 @@ Deno.serve(async (req: Request) => {
   if (action === 'tick') {
     // The caller asks the server to look at the clock; it does not get to say
     // what time it is. Nothing advances before its own deadline, and a paused
-    // room has no deadline it is heading for — `tick` would refuse anyway, but
+    // room has no deadline it is heading for. `tick` would refuse anyway, but
     // checking here keeps a stopped session from writing the room twice a
     // second and bumping a revision every client would then go and re-fetch.
     if (room.pausedAt != null || room.phaseEndsAt === null || Date.now() < room.phaseEndsAt) {
@@ -340,7 +340,7 @@ Deno.serve(async (req: Request) => {
     const written = await withRoom(code, (r) => apply(r, allowed, content, Date.now()))
     // 503, not 409: a busy room is a retry, whereas 409 tells a phone its seat
     // was refused and sends the player to pick a different chair.
-    if (!written) return json({ error: 'the room is busy — try again' }, 503)
+    if (!written) return json({ error: 'the room is busy, try again' }, 503)
     await broadcastRevision(code, written.revision)
     return json({ ...viewFor(written.room, seat), revision: written.revision })
   }

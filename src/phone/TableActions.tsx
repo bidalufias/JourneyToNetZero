@@ -1,5 +1,5 @@
 /**
- * THE TABLE — ninety seconds. Argue, plead, threaten, trade.
+ * THE TABLE: ninety seconds. Argue, plead, threaten, trade.
  *
  * The phone's job here is to get out of the way. Five actions, each two taps,
  * each in a sheet that rises from the bottom and never covers the timer. An
@@ -12,7 +12,7 @@ import { ROLES, type Role } from '../engine/types'
 import type { Command } from '../game/room'
 import type { PhoneView } from '../game/session'
 import { ROLE_LABEL, ROLE_RESOURCE } from '../game/session'
-import { DEMAND_PHRASES } from '../game/copy'
+import { BOARD_NAME, DEMAND_PHRASES } from '../game/copy'
 import { RoleGlyph } from '../ui/primitives'
 
 type Sheet = 'offer' | 'promise' | 'demand' | 'spotlight' | 'veto' | null
@@ -77,7 +77,7 @@ export function TableActions({
           <div className="bubble__label">YOU SENT</div>
           <p className="bubble__text">
             {o.amount} {o.resource === 'fiscal' ? 'Fiscal Point' : 'Capital'}
-            {o.amount > 1 ? 's' : ''} to the {ROLE_LABEL[o.to]} —{' '}
+            {o.amount > 1 ? 's' : ''} to the {ROLE_LABEL[o.to]}:{' '}
             {o.status === 'pending'
               ? 'waiting for them to accept.'
               : o.status === 'accepted'
@@ -213,7 +213,7 @@ function ActionSheet({
                     onClose()
                   }}
                 >
-                  “{ROLE_LABEL[view.role]} will {o.title.toLowerCase()}.”
+                  {BOARD_NAME[view.role]} promises to choose “{o.title}”.
                 </button>
               ))}
             </>
@@ -222,7 +222,7 @@ function ActionSheet({
           {kind === 'demand' ? (
             <>
               <p className="pmono">
-                A DEMAND IS PRESSURE, NOT A RULE. NOTHING MAKES THEM DO IT — AND EVERYONE SEES YOU
+                A DEMAND IS PRESSURE, NOT A RULE. NOTHING MAKES THEM DO IT, AND EVERYONE SEES YOU
                 ASK. ONE PER ROUND; A SECOND REPLACES IT.
               </p>
               {others.map((target) => (
@@ -295,7 +295,7 @@ function OfferSheet({
   if (!canSend) {
     return (
       <p className="ptext">
-        You hold no transferable resource — your power is the mandate, not the money.
+        You hold no transferable resource. Your power is the mandate, not the money.
       </p>
     )
   }

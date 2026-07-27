@@ -3,9 +3,10 @@
  *
  * Two kinds live here: the private line each role sees under a crisis brief
  * (the design gives every phone "the same news plus one private line each"),
- * and the preset phrasings promises are composed from — players pick a subject
- * and an object, they never type, so every line on the promise board is
- * grammatical and one line long.
+ * and the preset phrasings promises are composed from. Players pick a subject
+ * and an object, they never type, and a pledge quotes its option title
+ * verbatim, so every line on the promise board is grammatical and one line
+ * long.
  *
  * This is copy, not content: it is keyed by crisis *type* and role, so it
  * survives a content-pack swap without edits.
@@ -57,7 +58,7 @@ export function privateLine(type: string, role: Role): string {
 }
 
 /**
- * Demands are public conditions with no mechanical hook — they raise the cost
+ * Demands are public conditions with no mechanical hook. They raise the cost
  * of ignoring somebody, socially. Composed, never typed.
  */
 export const DEMAND_PHRASES: { id: string; text: (target: string) => string }[] = [
@@ -77,11 +78,3 @@ export const BOARD_NAME: Record<Role, string> = {
   activist: 'The Activist',
 }
 
-/** Lowercases an option title for use inside a composed sentence. */
-export function asPledgeObject(title: string): string {
-  // Titles are headline-cased; keep proper nouns, lower the rest.
-  return title
-    .split(' ')
-    .map((w) => (/^(RG|EV|ID|PPA|GW|[A-Z]{2,})$/.test(w) ? w : w.toLowerCase()))
-    .join(' ')
-}

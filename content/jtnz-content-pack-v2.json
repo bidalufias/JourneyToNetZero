@@ -84,7 +84,7 @@
    "R3A": "The virus is milder than feared but far more transmissible. The economic damage will outrun the medical damage.",
    "R3B": "Wind patterns turn in nine days. The haze will clear on its own, and whoever acts before then will get the credit.",
    "R3C": "Hospital admissions are being recorded under old codes, so the official heat-illness numbers are roughly half the real ones.",
-   "R4A": "Internal polling shows climate ranks fourth with voters, behind cost of living, jobs and healthcare - but first with under-thirties.",
+   "R4A": "Internal polling shows climate ranks fourth with voters, behind cost of living, jobs and healthcare, but first with under-thirties.",
    "R4B": "The refinery has eight years of viable life left at most. Everyone campaigning on saving it knows this.",
    "R4C": "Two of the four defectors can be won back with a project in their constituency. The other two cannot be won back at all.",
    "R5A": "The discharge was not a one-off. Plant logs show a pattern going back at least four years.",
@@ -689,7 +689,7 @@
       "id": "R1B-C3",
       "arch": "SELF_ORGANISE",
       "title": "Neighbourhood Buying Groups",
-      "desc": "Buy in bulk, cut out the middle.",
+      "desc": "Buy in bulk, cut out the middleman.",
       "cost": {},
       "e": -4,
       "g": 0.2,
@@ -960,7 +960,7 @@
    "variant": "A",
    "type": "energy",
    "title": "The Gas Shock",
-   "situation": "Global LNG prices triple. Semenanjara exports gas and subsidises it at home, so the country is somehow both richer and broker. The subsidy bill hits RG 52 billion.",
+   "situation": "Global LNG prices triple. Semenanjara exports gas and subsidises it at home, so the country is somehow both richer and poorer. The subsidy bill hits RG 52 billion.",
    "shock": {
     "g": -0.55,
     "h": -0.44,
@@ -1060,7 +1060,7 @@
       "id": "R2A-B3",
       "arch": "PARTNER",
       "title": "Corporate Power Purchase Agreement",
-      "desc": "Twenty-year clean power deal - needs the state to sign.",
+      "desc": "Twenty-year clean power deal. Needs the state to sign.",
       "cost": {
        "capital": 1
       },
@@ -1786,7 +1786,7 @@
    "variant": "B",
    "type": "health",
    "title": "The Long Haze",
-   "situation": "Peat and plantation fires push the air pollution index past 300 for eleven straight days. Schools shut. Respiratory admissions triple. Half the smoke comes from across the border and half of it does not.",
+   "situation": "Peat and plantation fires push the air pollution index past 300 for eleven straight days. Schools shut. Respiratory admissions triple. Half the smoke comes from across the border, and half of it does not.",
    "shock": {
     "g": -0.66,
     "h": -0.77,
@@ -2886,7 +2886,7 @@
      {
       "id": "R5A-B1",
       "arch": "TRANSITION",
-      "title": "Own It - Pay for Full Restoration",
+      "title": "Own It and Pay for Full Restoration",
       "desc": "Before anyone asks. Every Ringga of it.",
       "cost": {
        "capital": 3
@@ -2940,7 +2940,7 @@
       "id": "R5A-C1",
       "arch": "ADAPT",
       "title": "Ration and Endure",
-      "desc": "Buckets, tankers, and six days of queueing.",
+      "desc": "Buckets, tankers, and six days of queuing.",
       "cost": {},
       "e": -3,
       "g": -0.1,
@@ -3175,7 +3175,7 @@
       "id": "R5B-C3",
       "arch": "SELF_ORGANISE",
       "title": "Neighbourhood Zero-Waste Scheme",
-      "desc": "Cut what we send, by seventy percent.",
+      "desc": "Cut what we send by seventy percent.",
       "cost": {},
       "e": -5,
       "g": 0.0,
@@ -3505,7 +3505,7 @@
      {
       "id": "R6A-B1",
       "arch": "TRANSITION",
-      "title": "Fund the Rebuild - Build Back Green",
+      "title": "Fund the Rebuild, Build Back Green",
       "desc": "Rebuild it better than it was.",
       "cost": {
        "capital": 3
@@ -3815,7 +3815,7 @@
    "variant": "C",
    "type": "disaster",
    "title": "The Hillside",
-   "situation": "After three days of rain a hillside above a new township gives way. Thirty-one dead. The development approval was signed four years ago by someone who is in this room.",
+   "situation": "After three days of rain, a hillside above a new township gives way. Thirty-one dead. The development approval was signed four years ago by someone who is in this room.",
    "shock": {
     "g": -1.16,
     "h": -0.77,

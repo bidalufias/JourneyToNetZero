@@ -3,7 +3,7 @@
  *
  * The status words are computed, not decorative. "Off track" means measured
  * against the pace the country actually has to hold to land at 200 Mt by
- * Round 6 — so the word changes the moment the arithmetic does.
+ * Round 6, so the word changes the moment the arithmetic does.
  */
 import type { PublicState } from '../engine/types'
 import type { MeterSpec } from '../ui/primitives'
@@ -86,7 +86,7 @@ export function happinessMeter(state: PublicState, targets: Targets): MeterSpec 
   }
 }
 
-/** The carbon coupling sentence — the one interpreted line on the screen. */
+/** The carbon coupling sentence: the one interpreted line on the screen. */
 export function driftSentence(k: number): string {
   return `Every 1% of growth now adds ${k.toFixed(1)} Mt of carbon.`
 }
@@ -102,7 +102,7 @@ export function projectionNote(
   if (projection <= target) {
     return { text: `On this path the country lands inside its budget.`, onTrack: true, dead: false }
   }
-  // Once no remaining round can close the gap, say so plainly — the tone of
+  // Once no remaining round can close the gap, say so plainly. The tone of
   // the rest of the session should change.
   const bestCase = 45 * roundsLeft
   if (roundsLeft > 0 && over > bestCase) {

@@ -1,5 +1,5 @@
 /**
- * How to play — the screen the game did not have.
+ * How to play: the screen the game did not have.
  *
  * Four people arrive knowing nothing, on their own phones, with a projector
  * they may not be able to read from where they are sitting. Everything here is
@@ -23,11 +23,11 @@ interface Entry {
 const RESOURCE_NOTE: Record<Role, Entry> = {
   government: {
     term: 'Fiscal Points (FP)',
-    what: 'Public money. Option cards priced “2 FP” cost you two; “+1 FP” gives you one back. You cannot pick a card you cannot afford — it greys out and says so.',
+    what: 'Public money. Option cards priced “2 FP” cost you two; “+1 FP” gives you one back. You cannot pick a card you cannot afford. It greys out and says so.',
   },
   business: {
     term: 'Capital (C)',
-    what: 'Your company’s money. Cards priced “3 C” cost you three; “+2 C” earns you two. You cannot pick a card you cannot afford — it greys out and says so.',
+    what: 'Your company\'s money. Cards priced “3 C” cost you three; “+2 C” earns you two. You cannot pick a card you cannot afford. It greys out and says so.',
   },
   community: {
     term: 'Public Mandate',
@@ -35,7 +35,7 @@ const RESOURCE_NOTE: Record<Role, Entry> = {
   },
   activist: {
     term: 'Spotlights',
-    what: 'Three for the whole game. A Spotlight lands on whoever takes the dirtiest option this round — but only if you also escalate with your own card that round.',
+    what: 'Three for the whole game. A Spotlight lands on whoever takes the dirtiest option this round, but only if you also escalate with your own card that round.',
   },
 }
 
@@ -48,7 +48,7 @@ const SHARED: Entry[] = [
     term: 'Mt',
     what: 'Megatonnes of carbon a year. The country starts at 300 and the big screen tracks it.',
   },
-  { term: 'RG', what: 'Ringga — the money in the news stories. Flavour, not a resource you hold.' },
+  { term: 'RG', what: 'Ringga, the money in the news stories. Flavour, not a resource you hold.' },
   {
     term: 'Trust',
     what: 'How much the country backs you. The Community hands two out every round, and some option cards will not unlock without enough of it.',
@@ -67,7 +67,7 @@ const PHASES: Entry[] = [
   { term: 'THE CRISIS', what: 'The news, plus one line written for you alone. Nothing to tap.' },
   {
     term: 'THE TABLE',
-    what: 'Ninety seconds to talk. Promise things, demand things, send resources. Nothing said here is binding — that is the point.',
+    what: 'Ninety seconds to talk. Promise things, demand things, send resources. Nothing said here is binding, and that is the point.',
   },
   {
     term: 'THE CHOICE',
@@ -83,7 +83,7 @@ export function HowToPlay({ view }: { view: PhoneView }) {
   return (
     <>
       <p className="ptext">
-        You are the <strong>{ROLE_LABEL[view.role]}</strong> — {character.name}. {character.blurb}
+        You are the <strong>{ROLE_LABEL[view.role]}</strong>, {character.name}. {character.blurb}
       </p>
 
       <span className="plabel">WHAT YOU SPEND</span>
@@ -110,21 +110,21 @@ export function HowToPlay({ view }: { view: PhoneView }) {
       <span className="plabel">HOW A ROUND GOES</span>
       {PHASES.map((e) => (
         <p key={e.term} className="ptext">
-          <strong>{e.term}</strong> — {e.what}
+          <strong>{e.term}</strong>: {e.what}
         </p>
       ))}
 
       <span className="plabel">IF YOU RUN OUT OF TIME</span>
       <p className="ptext">
         The round never waits. If you selected a card but did not lock it, that card is used. If you
-        selected nothing, the clock picks one for you — so select something early, even if you change
+        selected nothing, the clock picks one for you, so select something early, even if you change
         it later.
       </p>
 
       <span className="plabel">WORDS ON YOUR SCREEN</span>
       {SHARED.map((e) => (
         <p key={e.term} className="ptext">
-          <strong>{e.term}</strong> — {e.what}
+          <strong>{e.term}</strong>: {e.what}
         </p>
       ))}
     </>

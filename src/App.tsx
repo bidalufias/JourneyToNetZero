@@ -2,12 +2,12 @@
  * One build, three surfaces.
  *
  *   /               choose a surface (and, on a phone, join a room)
- *   /dashboard      the broadcast — TV or projector
+ *   /dashboard      the broadcast, on a TV or projector
  *   /play?room=X    the phone; with &seat=Y it goes straight to that chair
  *   /facilitator    the run of show, for the person holding the session
  *
  * The phone is a PWA: no app store, no login, no install. A player types a
- * four-letter code and takes a seat — or scans the code off the big screen,
+ * four-letter code and takes a seat, or scans the code off the big screen,
  * which lands on the same page with the letters already in the box.
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -65,7 +65,7 @@ export function App() {
   if (route.surface === 'facilitator') return <FacilitatorWindow code={route.code} />
   if (route.surface === 'phone' && route.code && route.role) {
     // Keyed on the seat: changing room or chair has to build a new transport,
-    // and without this React reuses the component and keeps the old one — so
+    // and without this React reuses the component and keeps the old one, so
     // picking a free seat after being refused would silently do nothing.
     return (
       <PhoneSurface
@@ -77,7 +77,7 @@ export function App() {
     )
   }
   // A scanned QR carries the room but no seat, and lands here with the four
-  // letters already filled in — the join page, minus the typing.
+  // letters already filled in: the join page, minus the typing.
   return <Home go={go} initialCode={route.code} />
 }
 
@@ -118,7 +118,7 @@ function DashboardSurface({ code }: { code: string }) {
   const [overlay, setOverlay] = useState<'none' | 'qr' | 'script'>('none')
 
   // Publishes the session to a facilitator window, and accepts start/advance
-  // back from it — the same two commands the spacebar sends.
+  // back from it, the same two commands the spacebar sends.
   const facilitatorState = useFacilitatorLink(view, send)
 
   // Read inside the key handler, which is registered once and must not go
@@ -236,7 +236,7 @@ function DashboardSurface({ code }: { code: string }) {
  */
 function openScript(code: string, fallback: () => void) {
   // No `noopener` here: with it, `window.open` returns null by definition, and
-  // a null return is how a blocked pop-up is detected — every open would look
+  // a null return is how a blocked pop-up is detected, and every open would look
   // like a refusal and raise the overlay over the projector as well.
   const opened = window.open(facilitatorUrl(code), 'jtnz-facilitator', 'width=560,height=900')
   if (!opened) fallback()
@@ -278,7 +278,7 @@ function PhoneSurface({
           <span className="plabel">{c.org.toUpperCase()}</span>
           <h1 className="pheading">Take a seat</h1>
           <p className="ptext">
-            You are the <strong>{ROLE_LABEL[role]}</strong> — {c.name}.
+            You are the <strong>{ROLE_LABEL[role]}</strong>, {c.name}.
           </p>
           <span className="plabel">YOUR NAME</span>
           <input
@@ -341,7 +341,7 @@ function SeatRefused({
           <>
             <h1 className="pheading">No room with that code.</h1>
             <p className="ptext">
-              Check the four letters on the big screen — it is easy to read an O as a zero. They are
+              Check the four letters on the big screen. It is easy to read an O as a zero. They are
               always letters.
             </p>
           </>
@@ -356,7 +356,7 @@ function SeatRefused({
             <p className="ptext">
               {free.length
                 ? 'Take one of the free ones instead.'
-                : 'All four seats are taken. Tell the facilitator — if somebody left, they can free their seat from the ⋯ menu.'}
+                : 'All four seats are taken. Tell the facilitator. If somebody left, they can free their seat from the ⋯ menu.'}
             </p>
           </>
         )}
@@ -372,7 +372,7 @@ function SeatRefused({
                 onClick={() => go(`/play?room=${snapshot.code || code}&seat=${s.role}`)}
               >
                 <RoleGlyph role={s.role} size={14} /> {ROLE_LABEL[s.role]}
-                {s.taken ? ` — ${s.name} is here` : ' — free'}
+                {s.taken ? ` · ${s.name} is here` : ' · free'}
               </button>
             ))}
           </>
@@ -387,7 +387,7 @@ function SeatRefused({
 }
 
 /**
- * Connecting, and — after a few seconds — a way out.
+ * Connecting, and, after a few seconds, a way out.
  *
  * The escape hatch matters more than the spinner. A phone that cannot reach the
  * room has no back button of its own, so without this the only exit is the
@@ -420,7 +420,7 @@ function Booting({
           <>
             <p className="ptext">
               {connection === 'unreachable'
-                ? 'The game server is not answering. Tell the facilitator — this one is not your phone.'
+                ? 'The game server is not answering. Tell the facilitator. This one is not your phone.'
                 : 'This is taking longer than it should. The big screen has to be open for the room to exist.'}
             </p>
             {go ? (
@@ -439,7 +439,7 @@ function Booting({
  * The entry point: start a session, or join one.
  *
  * `initialCode` is what a scanned QR carries. Filling the box rather than
- * skipping it keeps one page for both routes — the scanner sees the same four
+ * skipping it keeps one page for both routes: the scanner sees the same four
  * letters everyone else is being told out loud, and can still correct them if
  * they scanned the wrong room's code off somebody's laptop.
  */
@@ -472,7 +472,7 @@ function Home({ go, initialCode = '' }: { go: (url: string) => void; initialCode
               className="btn btn--ghost"
               onClick={() => go(`/play?room=${code}&seat=${r}`)}
             >
-              <RoleGlyph role={r} size={14} /> {ROLE_LABEL[r]} — {ROLE_CHARACTER[r].name}
+              <RoleGlyph role={r} size={14} /> {ROLE_LABEL[r]} · {ROLE_CHARACTER[r].name}
             </button>
           ))}
         </>
@@ -481,7 +481,7 @@ function Home({ go, initialCode = '' }: { go: (url: string) => void; initialCode
   )
 
   // No route to the facilitator's script from here. This page is what four
-  // players see — three of whom scanned a code off a wall — and a button
+  // players see, three of whom scanned a code off a wall, and a button
   // offering them the host's lines is an invitation to read the crib sheet for
   // a game that works because nobody has seen it before. The script belongs to
   // the big screen, which is the one surface only the facilitator ever opens.
@@ -514,8 +514,8 @@ function Home({ go, initialCode = '' }: { go: (url: string) => void; initialCode
         {scanned ? joining : running}
         {scanned ? running : joining}
 
-        {/* Last, and quiet. Nobody has to read it to play — the phone teaches
-            the game as it goes — but the person who wants the rules before
+        {/* Last, and quiet. Nobody has to read it to play, because the phone
+            teaches the game as it goes, but the person who wants the rules before
             they sit down should not have to ask for them. */}
         <span className="plabel" style={{ marginTop: 'var(--space-6)' }}>
           NEW TO IT

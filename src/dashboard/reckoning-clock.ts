@@ -41,7 +41,7 @@ export function revealedCount(elapsedMs: number): number {
 
 /**
  * Two clocks disagreeing by more than this are not merely out of step over the
- * network — one of them is wrong, and it is not the server's.
+ * network. One of them is wrong, and it is not the server's.
  */
 const SKEW_SLACK_MS = 2_000
 
@@ -49,7 +49,7 @@ const SKEW_SLACK_MS = 2_000
  * How far into the Reckoning the server's deadline says we are, or null when
  * that subtraction cannot be believed.
  *
- * `endsAt` is stamped on the server. `now` should be `serverNow()` — the same
+ * `endsAt` is stamped on the server. `now` should be `serverNow()`, the same
  * clock, as best this machine can estimate it. When the two ends of the
  * subtraction genuinely come from the same clock the answer lands inside the
  * phase; when it lands outside, what is being measured is the gap between two
@@ -73,7 +73,7 @@ export function deadlineElapsed(
  * The elapsed time the sequence actually runs on.
  *
  * `local` is this client's own stopwatch, started when it first saw the
- * Reckoning — immune to a wrong clock, but it starts at zero, so a dashboard
+ * Reckoning. Immune to a wrong clock, but it starts at zero, so a dashboard
  * that reloads halfway through would replay the whole round. The deadline
  * knows how far in we really are, when it can be trusted. Taking the later of
  * the two gets both: the stopwatch drives the sequence, and a client that

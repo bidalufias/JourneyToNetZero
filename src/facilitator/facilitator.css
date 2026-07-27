@@ -1,11 +1,11 @@
 /*
- * The facilitator's window — the one surface in this game meant to be read
+ * The facilitator's window: the one surface in this game meant to be read
  * rather than watched.
  *
  * It is a document, not a broadcast: paper ground, dark ink, a measure that
  * holds around 70 characters, and type at the size you read a script from a
  * laptop on a lectern rather than the size a projector needs. The Modernist
- * law still applies — Archivo, zero radius, 2px rules, flush-left labels — so
+ * law still applies, with Archivo, zero radius, 2px rules and flush-left labels, so
  * it is recognisably the same product as the screens beside it.
  *
  * Everything live is marked with the accent and nothing else is, so a glance
@@ -81,7 +81,7 @@
 
 /*
  * The one control the facilitator ever needs is in the header, which is
- * sticky, because the page scrolls itself to follow the session — and a
+ * sticky, because the page scrolls itself to follow the session, and a
  * session control that scrolls out of reach is worse than no control at all.
  */
 .fac__head-main { flex: 1; min-width: 0; }
@@ -240,7 +240,7 @@
  * The lines to actually say, set hard apart from the notes about them.
  *
  * They are read aloud, at pace, by somebody whose eyes are mostly on the room
- * — so they are the largest type on the page and the only thing wearing a
+ * so they are the largest type on the page and the only thing wearing a
  * rule. Anything a facilitator is meant to think rather than speak is grey,
  * smaller, and unruled.
  */

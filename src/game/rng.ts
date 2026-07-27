@@ -1,5 +1,5 @@
 /**
- * Deterministic PRNG for room-level randomness — scenario path, tip dealing,
+ * Deterministic PRNG for room-level randomness: scenario path, tip dealing,
  * and the UNVERIFIED truth roll.
  *
  * Seeded and cursor-based so a room can be replayed exactly from its seed when
@@ -42,7 +42,7 @@ export function shuffle<T>(items: readonly T[], seed: number, cursor: number): {
 
 /** A 4-letter room code, readable from the back of a training room. */
 export function roomCode(seed: number): string {
-  // No vowels-only words, no I/O/0/1 — read aloud across a room without ambiguity.
+  // No vowels-only words, no I/O/0/1, so it reads aloud across a room without ambiguity.
   const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
   let c = 0
   let out = ''

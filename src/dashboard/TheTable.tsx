@@ -1,5 +1,5 @@
 /**
- * THE TABLE — the dashboard becomes the record of what was said out loud.
+ * THE TABLE: the dashboard becomes the record of what was said out loud.
  *
  * The phones go quiet during this phase and this screen does the remembering,
  * which is what lets the promise-broken moment land later. An offer in flight

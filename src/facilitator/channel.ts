@@ -11,7 +11,7 @@
  * `BroadcastChannel` is same-origin and same-browser, which is exactly the
  * shape of the problem: the facilitator's laptop drives the projector, and the
  * script sits on the laptop's own screen next to it. A script window opened
- * anywhere else still works — it just shows the run of show without knowing
+ * anywhere else still works. It just shows the run of show without knowing
  * which phase is live, which is what a printout would have given them.
  */
 import type { Role } from '../engine/types'
@@ -42,7 +42,7 @@ export type FacilitatorMessage =
 
 export const channelName = (code: string) => `jtnz:facilitator:${code || 'new'}`
 
-/** Null where BroadcastChannel is missing — the script degrades, nothing breaks. */
+/** Null where BroadcastChannel is missing. The script degrades, nothing breaks. */
 export function openChannel(code: string): BroadcastChannel | null {
   if (typeof BroadcastChannel === 'undefined') return null
   try {

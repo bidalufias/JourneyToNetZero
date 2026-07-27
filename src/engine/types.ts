@@ -1,5 +1,5 @@
 /**
- * Journey to Net Zero — engine types.
+ * Journey to Net Zero: engine types.
  *
  * These mirror `reference/engine.py` and `reference/content.py`, which are the
  * authoritative implementation. Nothing here may re-derive a number: every
@@ -74,7 +74,7 @@ export interface Option {
   boost_flag?: string
   /** ×2 when two or more EVIDENCE flags are set. */
   boost_evidence?: boolean
-  /** [recipient, resource, amount] — grants a resource to another player. */
+  /** [recipient, resource, amount]: grants a resource to another player. */
   grants?: [Role, 'capital' | 'fiscal', number]
 }
 
@@ -95,7 +95,7 @@ export interface DriftBand {
 }
 
 export interface CoalitionEffect {
-  /** Negative — an emissions cut. */
+  /** Negative for an emissions cut. */
   emissions: number
   happiness: number
   green: number
@@ -215,9 +215,9 @@ export interface GameState {
   spotlightHits: number
   vetoesUsed: number
   coalitionRounds: number
-  /** Prior Collaborates — each costs the Activist 8% of all future effect. */
+  /** Prior Collaborates. Each costs the Activist 8% of all future effect. */
   collabs: number
-  /** Prior Self-Organises — each costs the Community 6%. */
+  /** Prior Self-Organises. Each costs the Community 6%. */
   selforg: number
   /** Self-Organise actions that landed with real backing. */
   selfOrganiseSucceeded: number
@@ -262,7 +262,7 @@ export interface RoundLog {
   /** Meter deltas applied this round. */
   deltas: { e: number; g: number; h: number; gr: number }
   trustAwarded: { care: TrustRole; future: TrustRole }
-  /** Emissions added by growth–carbon drift. */
+  /** Emissions added by growth-carbon drift. */
   drift: number
   driftK: number
   state: PublicState
@@ -275,7 +275,7 @@ export interface RoundReveal {
   title: string
   desc: string
   headline: string
-  /** Counted toward the Coalition Bonus — i.e. not Expand, Deregulate or Demand Relief. */
+  /** Counted toward the Coalition Bonus, i.e. not Expand, Deregulate or Demand Relief. */
   aligned: boolean
   /** Multiplier applied to this option's effects, after every rule. */
   multiplier: number

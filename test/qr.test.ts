@@ -1,14 +1,14 @@
 /**
  * The QR encoder, pinned against a reference implementation.
  *
- * `src/ui/qr.ts` is written out rather than installed, so the tables in it —
- * block structure, alignment centres, the BCH constants, the mask penalties —
+ * `src/ui/qr.ts` is written out rather than installed, so the tables in it,
+ * block structure, alignment centres, the BCH constants and the mask penalties,
  * are only as good as something independent that agrees with them. Every
  * matrix here was produced by the `qrcode` package at error correction level M
  * and compared module for module, which also pins the mask choice: get the
  * penalty scoring wrong and the symbol still scans, but it stops matching.
  *
- * The samples cover versions 1, 3, 4, 6 and 10 — the join URL sits at 3 or 4,
+ * The samples cover versions 1, 3, 4, 6 and 10. The join URL sits at 3 or 4,
  * and the outer two are there so a table edited for the common case cannot
  * quietly break the ends of the supported range.
  *

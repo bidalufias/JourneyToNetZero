@@ -1,5 +1,5 @@
 /**
- * THE RECKONING — the drama.
+ * THE RECKONING: the drama.
  *
  * Cards flip one at a time, three seconds apart, meters travelling between
  * them. Never all four at once: the gap is where the drama lives, and a room
@@ -9,7 +9,7 @@
  * 400ms rotateY from 88°. The promise-broken sting fires *after* the fourth
  * card, never interrupting the sequence, and holds 2.5 seconds before cutting.
  *
- * A card that has not flipped yet is still a card — face-down, its role on it,
+ * A card that has not flipped yet is still a card: face-down, its role on it,
  * holding its quarter of the screen. The gap between flips is meant to be a
  * pause, not a hole, and the four slots have to look like a hand waiting to be
  * turned over rather than a dashboard that has failed to draw.
@@ -34,16 +34,16 @@ import {
  * Milliseconds since the Reckoning began.
  *
  * Two sources, because neither is enough on its own. The server's deadline
- * knows how far in the room really is — but reading it means subtracting this
+ * knows how far in the room really is, but reading it means subtracting this
  * machine's clock from the server's, and a projector laptop that is a minute
  * slow makes the first card look like it is a minute away from being due.
  * That is a blank screen for the whole phase. So the sequence runs on a local
  * stopwatch, which cannot be wrong about how long this screen has been up, and
  * defers to the deadline only when the deadline says we are further in than
- * that — which is exactly the case the stopwatch gets wrong, a dashboard
+ * that, which is exactly the case the stopwatch gets wrong, a dashboard
  * opened or reloaded halfway through the round.
  *
- * A pause holds the sequence where it is — cards already flipped stay flipped,
+ * A pause holds the sequence where it is. Cards already flipped stay flipped,
  * the ones still to come wait. Freezing this is what lets a facilitator stop on
  * the third card and talk about it, which is the single most useful place in
  * the session to be able to stop.
@@ -83,7 +83,7 @@ export function Reckoning({ view }: { view: DashboardView }) {
 
   const revealedCount = cardsDue(elapsed)
   const allRevealed = revealedCount >= 4
-  // The four flips, then the sting if a promise broke, then the coalition —
+  // The four flips, then the sting if a promise broke, then the coalition.
   // each beat waits for the one before it to clear.
   const broken = view.promises.filter((p) => p.round === log.round && p.outcome === 'broken')
   const showSting =
@@ -159,7 +159,7 @@ export function Reckoning({ view }: { view: DashboardView }) {
                 </>
               ) : (
                 // Face-down. The role is on the back because it was never a
-                // secret — the four seats always reveal in the same order — and
+                // secret, because the four seats always reveal in the same order, and
                 // naming it is what makes the room read a card about to turn
                 // rather than a screen that has gone out.
                 <>

@@ -1,5 +1,5 @@
 /**
- * Supabase transport — the real thing.
+ * Supabase transport: the real thing.
  *
  * Room state lives in Postgres, every mutation runs inside the `room` edge
  * function, and clients hold nothing but a seat token and whatever view the
@@ -88,7 +88,7 @@ async function callFunction(body: Record<string, unknown>): Promise<FnResult> {
   })
   const receivedAt = Date.now()
   const data = (await res.json()) as FnResult
-  // Every response carries the server's clock, refusals included — a phone
+  // Every response carries the server's clock, refusals included, so a phone
   // that was turned away still has a countdown to draw on the way out.
   if (typeof data.now === 'number') noteServerTime(data.now, sentAt, receivedAt)
   if (res.status === 403) throw new StaleToken(data.error ?? 'not your seat')
@@ -138,14 +138,14 @@ class SupabaseTransport implements Transport {
         this.token = created.token!
         this.emit(created)
       } else if (stored && (await this.resume(stored))) {
-        // Reload, lost signal, phone locked — the token proves the seat is
+        // Reload, lost signal, phone locked: the token proves the seat is
         // still ours and nothing else needs to happen.
       } else if (opts.kind === 'phone') {
         const claimed = await callFunction({ action: 'claim', code: this.code, role: opts.role })
         this.token = claimed.token!
         this.emit(claimed)
       } else {
-        // Reopening a dashboard whose token was lost — the seat is already
+        // Reopening a dashboard whose token was lost. The seat is already
         // taken, so there is nothing to reclaim. Say so rather than hang.
         throw new Error('this browser does not hold that room')
       }
@@ -160,7 +160,7 @@ class SupabaseTransport implements Transport {
       this.poller = setInterval(() => void this.refresh(), 4000)
 
       // Nothing runs server-side between requests, so the dashboard asks the
-      // server to look at its own clock. It cannot say what time it is — the
+      // server to look at its own clock. It cannot say what time it is. The
       // function uses Date.now() and nothing advances before its deadline.
       if (this.seat === 'dashboard') {
         this.ticker = setInterval(() => void this.tick(), 500)
@@ -193,8 +193,8 @@ class SupabaseTransport implements Transport {
   }
 
   /**
-   * Try a stored token. A token that no longer names a seat — because the
-   * player left, or a facilitator reset the room — must not strand them on a
+   * Try a stored token. A token that no longer names a seat, because the
+   * player left or a facilitator reset the room, must not strand them on a
    * reconnect spinner, so a failure here falls back to claiming the seat afresh.
    */
   private async resume(stored: string): Promise<boolean> {
@@ -203,7 +203,7 @@ class SupabaseTransport implements Transport {
       this.token = stored
       return true
     } catch (err) {
-      // Anything else — a dropped request, a slow network — is not evidence
+      // Anything else, a dropped request or a slow network, is not evidence
       // that the seat is gone, so it propagates and the caller retries.
       if (!(err instanceof StaleToken)) throw err
       try {
@@ -251,8 +251,8 @@ class SupabaseTransport implements Transport {
   /**
    * Realtime, over the raw websocket rather than supabase-js.
    *
-   * The client needs exactly one thing from Realtime — a nudge that the room
-   * moved — and the whole SDK is a large dependency to carry for that.
+   * The client needs exactly one thing from Realtime, a nudge that the room
+   * moved, and the whole SDK is a large dependency to carry for that.
    */
   private subscribe(): void {
     if (this.closed) return

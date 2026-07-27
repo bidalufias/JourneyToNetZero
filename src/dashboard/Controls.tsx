@@ -1,7 +1,7 @@
 /**
  * The facilitator's two buttons, on every screen of the broadcast.
  *
- * The dashboard is a broadcast and must never look like a control room — which
+ * The dashboard is a broadcast and must never look like a control room, which
  * is why, from the first crisis onward, it used to carry nothing at all and the
  * whole session was driven by keys nobody in the room had been told about. That
  * holds right up until the moment a facilitator needs to stop: a fire alarm, a
@@ -15,7 +15,7 @@
  * each button prints its own, so using the buttons teaches the shortcut.
  *
  * The two exceptions to the hiding are the lobby, where nothing has started and
- * a visible control is a kindness, and a paused room — the bar is the way back
+ * a visible control is a kindness, and a paused room, where the bar is the way back
  * out of a pause and must never be the thing you have to go hunting for.
  */
 import { useEffect, useState } from 'react'
@@ -38,16 +38,16 @@ export function nextStep(phase: Phase): { cmd: 'start' | 'advance'; label: strin
 /**
  * Everything the broadcast has already put along the bottom of the screen.
  *
- * Every screen ends in a strip — the ticker on the dashboard, the briefing line
- * on the attract, the briefing and both endings — and the playing screens stack
+ * Every screen ends in a strip: the ticker on the dashboard, the briefing line
+ * on the attract, the briefing and both endings. The playing screens stack
  * the four seats above it. Both are type-scaled, so they are one height on a
  * laptop and another on a projector, and a number guessed at design time put
  * the bar half on the strip and half off it: the one arrangement that reads as
  * broken rather than as floating.
  *
  * The lock row is in here as well as the strip, and it is the one that matters.
- * During THE CHOICE those four cards are the most-watched thing on the screen —
- * they name the seat everybody is waiting on — and a control panel parked on
+ * During THE CHOICE those four cards are the most-watched thing on the screen,
+ * they name the seat everybody is waiting on, and a control panel parked on
  * top of the Government's card is worse than no control panel at all.
  *
  * Re-measured when the phase changes, because that is when this furniture is

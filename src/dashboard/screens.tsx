@@ -9,7 +9,7 @@ import { RoleGlyph } from '../ui/primitives'
 import { JoinPanel } from './Join'
 
 /**
- * D-01 — the code has to be readable from the back of the room.
+ * D-01: the code has to be readable from the back of the room.
  *
  * The lobby is the one screen where the facilitator is allowed visible
  * controls: nothing has started, nobody is in character, and the alternative
@@ -89,12 +89,12 @@ export function Attract({
 }
 
 /**
- * D-02 — the twenty seconds before the first crisis.
+ * D-02: the twenty seconds before the first crisis.
  *
  * Four people who have never played are about to be asked to make a decision
  * with consequences they cannot see. This is the only moment in the session
  * where the room can be told, together, what it is doing and what it takes to
- * win — and until the facilitator's spacebar stopped skipping the phase, it was
+ * win, and until the facilitator's spacebar stopped skipping the phase, it was
  * never on screen at all.
  */
 export function Briefing({ view, clock }: { view: DashboardView; clock: string | null }) {
@@ -155,7 +155,7 @@ export function Briefing({ view, clock }: { view: DashboardView; clock: string |
 }
 
 /**
- * D-06 — the only celebratory screen in the game before the ending.
+ * D-06: the only celebratory screen in the game before the ending.
  *
  * Fires after the meters have settled, so it reads as consequence rather than
  * decoration. The fourth glyph stays visibly hollow when only three aligned,
@@ -196,7 +196,7 @@ export function CoalitionBonus({ view }: { view: DashboardView }) {
           <p className="coalition__note">
             {aligned === 4
               ? 'No single player can produce this.'
-              : 'No single player can produce this. All four would have been −9.5.'}
+              : 'No single player can produce this. All four would have been -9.5 Mt.'}
           </p>
         </div>
       </div>
@@ -204,7 +204,7 @@ export function CoalitionBonus({ view }: { view: DashboardView }) {
   )
 }
 
-/** D-07 — one sentence per round, written from the actual choices. */
+/** D-07: one sentence per round, written from the actual choices. */
 export function RoundSummary({ view }: { view: DashboardView }) {
   const s = view.state
   const shortfalls = [
@@ -278,7 +278,7 @@ export function RoundSummary({ view }: { view: DashboardView }) {
   )
 }
 
-/** Computed, not decorative — the tone of the session changes when it flips. */
+/** Computed, not decorative. The tone of the session changes when it flips. */
 function reachable(view: DashboardView): boolean {
   const roundsLeft = 6 - view.state.round
   if (roundsLeft <= 0) return view.state.emissions <= view.targets.emissions
@@ -297,7 +297,7 @@ function roundSentence(view: DashboardView, round: number): string {
   return parts.join('. ') + '.'
 }
 
-/** D-08/09 — targets one at a time, then the titles. */
+/** D-08/09: targets one at a time, then the titles. */
 export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endgame }) {
   // Hollow Victory names a specific cruelty: you got exactly what you wanted
   // and the country still failed. If nobody hit their goal there is nothing
@@ -356,7 +356,7 @@ export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endga
                 </div>
                 <div className="ending__player-name">{p.name}</div>
                 <div className="ending__player-goal">
-                  {p.goalTitle ?? '—'} {p.goalMet ? '✓' : '✕'}
+                  {p.goalTitle ?? 'No sealed goal'} {p.goalMet ? '✓' : '✕'}
                 </div>
                 <div className="ending__player-title">{p.title}</div>
               </div>

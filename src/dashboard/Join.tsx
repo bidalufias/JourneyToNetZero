@@ -2,8 +2,8 @@
  * How four people get into the room.
  *
  * Two routes to the same seat: four letters typed, or a code scanned. The
- * letters are still the headline — they are readable from the back of the room
- * and can be said out loud over a noisy table — and the QR is for the person
+ * letters are still the headline, because they are readable from the back of the room
+ * and can be said out loud over a noisy table. The QR is for the person
  * who cannot see the screen well, or is on the far side of it, or has simply
  * mistyped it twice.
  *
@@ -14,7 +14,7 @@
 import { QrCode } from '../ui/QrCode'
 import { joinUrl } from '../ui/links'
 
-/** The lobby's own QR — modest, beside the code, always there. */
+/** The lobby's own QR: modest, beside the code, always there. */
 export function JoinPanel({ code }: { code: string }) {
   if (!code) return null
   return (

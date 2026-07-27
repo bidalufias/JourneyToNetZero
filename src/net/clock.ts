@@ -1,8 +1,9 @@
 /**
  * The server's clock, as seen from this machine.
  *
- * Every deadline in the game — the countdown, the Reckoning's card flips, the
- * held clock — is a timestamp the server stamped with *its* `Date.now()`. The
+ * Every deadline in the game, including the countdown, the Reckoning's card
+ * flips and the held clock, is a timestamp the server stamped with *its*
+ * `Date.now()`. The
  * browser then subtracts *its own* `Date.now()` from it. Those are two
  * different clocks, and nothing in the room forces them to agree: a projector
  * laptop whose clock is a minute slow makes every deadline look a minute
@@ -22,7 +23,7 @@ const MAX_USEFUL_RTT_MS = 10_000
 const KEEP = 8
 
 interface Sample {
-  /** serverNow − clientNow, in milliseconds. */
+  /** serverNow minus clientNow, in milliseconds. */
   offset: number
   /** How wide the window was, and so how wrong this sample can be. */
   rtt: number
@@ -45,7 +46,7 @@ export function clockOffset(): number {
  * Record what the server said the time was, and when we asked.
  *
  * The stamp happened somewhere inside the round trip, so the midpoint of the
- * request is the best guess at when it was taken — and the tightest round trip
+ * request is the best guess at when it was taken, and the tightest round trip
  * is the one whose midpoint is least wrong, which is why the estimate is the
  * fastest recent sample rather than an average of all of them.
  */

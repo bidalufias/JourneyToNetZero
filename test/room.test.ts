@@ -1,7 +1,7 @@
 /**
  * Session-level tests: the room around the engine.
  *
- * These cover the promises the design makes about a live workshop — the
+ * These cover the promises the design makes about a live workshop: the
  * session never stalls, a phone can never see the numbers, promises are
  * recorded but never enforced, and Hollow Victory stays sharp.
  */
@@ -195,7 +195,7 @@ describe('choosing is not committing', () => {
     const gov = room.players.government
     expect(gov.choiceId).toBe(wanted.id)
     expect(gov.autoLocked).toBe(true)
-    // The clock locked it, but it did not pick it — and the summary must not
+    // The clock locked it, but it did not pick it, and the summary must not
     // claim the player chose something they never selected.
     expect(gov.defaulted).toBe(false)
     expect(room.players.business.defaulted).toBe(true)
@@ -308,7 +308,11 @@ describe('negotiation', () => {
 
     const board = dashboardView(room, content).promises
     expect(board).toHaveLength(1)
-    expect(board[0].text).toMatch(/^The Government will /)
+    // The pledge quotes the option title rather than folding it into the
+    // sentence: titles are a mix of imperatives ("Bail Out the Big Exporters")
+    // and noun phrases ("Green Stimulus Package"), and only a quotation is
+    // grammatical for both.
+    expect(board[0].text).toBe(`The Government promises to choose “${pledged.title}”.`)
 
     expire(room) // -> choice
     // The player is free to break it. Nothing stops them.
@@ -321,7 +325,7 @@ describe('negotiation', () => {
     expect(resolved.outcome).toBe(pledged.id === actual.id ? 'kept' : 'broken')
 
     // The engine advances the round counter the moment it resolves, so the
-    // views must narrate the round just *played* — otherwise the Reckoning
+    // views must narrate the round just *played*, because otherwise the Reckoning
     // filters out the very pledge it exists to judge.
     expect(room.phase).toBe('reckoning')
     const reckoning = dashboardView(room, content)
