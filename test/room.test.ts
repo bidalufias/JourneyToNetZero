@@ -13,6 +13,7 @@ import { loadContent } from '../src/engine/content'
 import { ROLES, type Role } from '../src/engine/types'
 import {
   apply,
+  authorise,
   createRoom,
   dashboardView,
   endgame,
@@ -422,6 +423,145 @@ describe('the endgame', () => {
     }
     // No partial credit: a missed country is a missed country.
     if (!end.win) expect(end.players.every((p) => p.title !== 'NATION BUILDER')).toBe(true)
+  })
+})
+
+describe('the facilitator can stop the clock', () => {
+  /** A room sitting in THE CHOICE, which is the tightest phase to be stopped in. */
+  const atChoice = () => {
+    const room = seated()
+    run(room, { t: 'start' })
+    expire(room)
+    expire(room)
+    expire(room)
+    return room
+  }
+
+  it('holds the phase open however long the deadline has passed', () => {
+    const room = atChoice()
+    const deadline = room.phaseEndsAt!
+
+    clock = deadline - 9_000
+    run(room, { t: 'pause' })
+    expect(dashboardView(room, content).paused).toBe(true)
+    expect(phoneView(room, content, 'government').paused).toBe(true)
+
+    // Ten minutes of real time go by. The round is exactly where it was.
+    clock = deadline + 600_000
+    tick(room, content, clock)
+    expect(room.phase).toBe('choice')
+    expect(room.lastRound).toBeNull()
+  })
+
+  it('gives back exactly the seconds that were left', () => {
+    const room = atChoice()
+    const deadline = room.phaseEndsAt!
+
+    clock = deadline - 9_000
+    run(room, { t: 'pause' })
+    clock += 300_000
+    run(room, { t: 'resume' })
+
+    expect(room.pausedAt).toBeNull()
+    expect(room.phaseEndsAt! - clock).toBe(9_000)
+
+    // And it expires on its own once those nine seconds are actually spent.
+    clock += 9_001
+    tick(room, content, clock)
+    expect(room.phase).toBe('reckoning')
+  })
+
+  it('freezes the countdown every surface is reading', () => {
+    const room = atChoice()
+    clock = room.phaseEndsAt! - 12_000
+    run(room, { t: 'pause' })
+
+    const dash = dashboardView(room, content)
+    const phone = phoneView(room, content, 'government')
+    // Both surfaces subtract from `pausedAt` rather than from their own clock,
+    // so the number they show is identical and does not move.
+    expect(dash.pausedAt).toBe(clock)
+    expect(phone.pausedAt).toBe(clock)
+    expect(dash.phaseEndsAt! - dash.pausedAt!).toBe(12_000)
+  })
+
+  it('stops the table from resolving the round behind the facilitator', () => {
+    const room = atChoice()
+    run(room, { t: 'pause' })
+
+    for (const role of ROLES) {
+      const opt = phoneView(room, content, role).options.find((o) => o.available)!
+      run(room, { t: 'choose', role, optionId: opt.id })
+      run(room, { t: 'lock', role })
+    }
+
+    // All four "locked" and nothing happened, which is the point: a pause that
+    // could be played through would resolve the round mid-sentence.
+    expect(room.phase).toBe('choice')
+    expect(ROLES.every((r) => !room.players[r].locked)).toBe(true)
+    expect(room.lastRound).toBeNull()
+
+    run(room, { t: 'resume' })
+    for (const role of ROLES) lockIn(room, role, firstAvailable(room, role))
+    expect(room.phase).toBe('reckoning')
+  })
+
+  it('still seats a latecomer, which is half the reason to pause', () => {
+    const room = atChoice()
+    run(room, { t: 'leave', role: 'business' })
+    run(room, { t: 'pause' })
+
+    run(room, { t: 'join', role: 'business', name: 'Nadia' })
+    expect(room.players.business.name).toBe('Nadia')
+    const view = phoneView(room, content, 'business')
+    run(room, { t: 'pickGoal', role: 'business', goalId: view.goalChoices![0].id })
+    expect(room.players.business.goalId).toBe(view.goalChoices![0].id)
+  })
+
+  it('hands a phase stepped through while stopped its full length', () => {
+    const room = atChoice()
+    run(room, { t: 'pause' })
+    // The facilitator talks for two minutes, then steps the room on by hand.
+    clock += 120_000
+    run(room, { t: 'advance' })
+    expect(room.phase).toBe('reckoning')
+
+    run(room, { t: 'resume' })
+    expect(room.phaseEndsAt! - clock).toBe(PHASE_MS.reckoning)
+  })
+
+  it('is refused twice, and resumed only from a pause', () => {
+    const room = atChoice()
+    run(room, { t: 'pause' })
+    const first = room.pausedAt
+    clock += 5_000
+    run(room, { t: 'pause' })
+    expect(room.pausedAt).toBe(first)
+
+    run(room, { t: 'resume' })
+    const deadline = room.phaseEndsAt
+    run(room, { t: 'resume' })
+    expect(room.phaseEndsAt).toBe(deadline)
+  })
+
+  it('reads as running for a room saved before pause existed', () => {
+    const room = atChoice()
+    // Postgres and localStorage both hand back rooms written by an older build,
+    // and an absent field must never be mistaken for a stopped clock.
+    delete (room as Partial<Room>).pausedAt
+    expect(dashboardView(room, content).paused).toBe(false)
+
+    clock = room.phaseEndsAt! + 1
+    tick(room, content, clock)
+    expect(room.phase).toBe('reckoning')
+  })
+
+  it('belongs to the big screen and to nobody else', () => {
+    expect(authorise('dashboard', { t: 'pause' })).toEqual({ t: 'pause' })
+    expect(authorise('dashboard', { t: 'resume' })).toEqual({ t: 'resume' })
+    // A phone naming the command gets nothing: the pause is the facilitator's.
+    expect(authorise('government', { t: 'pause' })).toBeNull()
+    expect(authorise('activist', { t: 'resume' })).toBeNull()
   })
 })
 

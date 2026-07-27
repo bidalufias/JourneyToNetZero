@@ -540,3 +540,23 @@ a.btn {
   /* The trade-off hint outranks the description here: it is the line that
      tells you what the card costs you, and only one of them fits. */
 }
+
+/*
+ * The facilitator has stopped the clock.
+ *
+ * In flow rather than fixed, so it never lands on top of the reconnect strip
+ * and never covers a card. It is the first thing on the screen because the
+ * instruction it carries — look up — is the whole point of a pause.
+ */
+.paused {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-accent);
+  color: #fff;
+  padding: var(--space-3) var(--space-4);
+  font: 800 12px/1.3 var(--font-heading);
+  letter-spacing: 0.08em;
+}
+
+.paused__mark { font-size: 14px; letter-spacing: 0.06em; }

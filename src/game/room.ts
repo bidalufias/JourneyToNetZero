@@ -77,6 +77,7 @@ export function createRoom(content: Content, seed: number, now: number): Room {
     createdAt: now,
     phase: 'lobby',
     phaseEndsAt: null,
+    pausedAt: null,
     players,
     game: createGame(path, content),
     promises: [],
@@ -124,6 +125,29 @@ function setPhase(room: Room, phase: Phase, now: number): void {
   room.phase = phase
   const ms = PHASE_MS[phase]
   room.phaseEndsAt = ms > 0 ? now + ms : null
+}
+
+/**
+ * The clock is stopped.
+ *
+ * `!= null` rather than `!== null` on purpose: rooms written to storage or to
+ * Postgres before pause existed come back with no field at all, and an
+ * `undefined` read as "paused" would freeze a session that nobody stopped.
+ */
+function isPaused(room: Room): boolean {
+  return room.pausedAt != null
+}
+
+/**
+ * The room's own clock, which stops when the facilitator does.
+ *
+ * Everything that sets a deadline is timed from this rather than from the
+ * wall, so a phase opened during a pause starts counting from the instant the
+ * pause began — and therefore gets its full length when the room restarts,
+ * instead of having however long the facilitator was talking already spent.
+ */
+function clockNow(room: Room, now: number): number {
+  return room.pausedAt ?? now
 }
 
 /**
@@ -186,6 +210,8 @@ export type Command =
   | { t: 'pickGoal'; role: Role; goalId: string }
   | { t: 'start' }
   | { t: 'advance' }
+  | { t: 'pause' }
+  | { t: 'resume' }
   | { t: 'promise'; role: Role; optionId: string }
   | { t: 'demand'; role: Role; target: Role; phraseId: string }
   | { t: 'offer'; from: Role; to: Role; resource: 'fiscal' | 'capital'; amount: number }
@@ -208,9 +234,12 @@ export type Command =
  */
 export function authorise(seat: Role | 'dashboard', cmd: Command): Command | null {
   if (seat === 'dashboard') {
-    // The facilitator's screen may start and advance the session. It may not
-    // choose, pledge or spend anybody's resources.
-    return cmd.t === 'start' || cmd.t === 'advance' ? cmd : null
+    // The facilitator's screen may run the session — start it, step it on,
+    // stop the clock and start it again. It may not choose, pledge or spend
+    // anybody's resources.
+    return cmd.t === 'start' || cmd.t === 'advance' || cmd.t === 'pause' || cmd.t === 'resume'
+      ? cmd
+      : null
   }
   switch (cmd.t) {
     case 'join':
@@ -234,7 +263,37 @@ export function authorise(seat: Role | 'dashboard', cmd: Command): Command | nul
   }
 }
 
+/**
+ * What a paused room refuses.
+ *
+ * Pausing stops the game, not the workshop. Taking a seat, sealing a goal and
+ * reconnecting all still work — a latecomer arriving is one of the two reasons
+ * anybody presses pause — but nothing that moves the round does, because a
+ * table that can still lock while the facilitator is mid-sentence would resolve
+ * the round out from under them. The refusal has to live here rather than in a
+ * surface: the phones are not the only thing that could send these.
+ */
+const FROZEN_WHILE_PAUSED: ReadonlySet<Command['t']> = new Set<Command['t']>([
+  'promise',
+  'demand',
+  'offer',
+  'respondOffer',
+  'spotlight',
+  'veto',
+  'coFund',
+  'publishTip',
+  'choose',
+  'lock',
+])
+
 export function apply(room: Room, cmd: Command, content: Content, now: number): Room {
+  if (isPaused(room) && FROZEN_WHILE_PAUSED.has(cmd.t)) return room
+
+  // Every deadline this command might set is timed from the room's clock, so a
+  // phase stepped through during a pause is not silently spending its own
+  // length while the facilitator talks over it.
+  const at = clockNow(room, now)
+
   switch (cmd.t) {
     case 'join': {
       const p = room.players[cmd.role]
@@ -280,12 +339,40 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
 
     case 'start': {
       if (room.phase !== 'lobby') return room
-      setPhase(room, 'briefing', now)
+      setPhase(room, 'briefing', at)
       return room
     }
 
     case 'advance':
-      return advance(room, content, now)
+      return advance(room, content, at)
+
+    /**
+     * Stop the clock, wherever the room has got to.
+     *
+     * The one control a facilitator asks for by the second session: a fire
+     * alarm, a latecomer, a question worth answering properly, or a table that
+     * has just started arguing well and should not be cut off by a countdown.
+     */
+    case 'pause': {
+      if (isPaused(room)) return room
+      room.pausedAt = now
+      return room
+    }
+
+    /**
+     * Start it again, giving back exactly what was left.
+     *
+     * The deadline moves forward by the length of the pause rather than being
+     * recomputed, so a table stopped with nine seconds of THE CHOICE remaining
+     * restarts with nine seconds — not with a fresh forty-five, and not with
+     * the phase already over.
+     */
+    case 'resume': {
+      if (!isPaused(room)) return room
+      if (room.phaseEndsAt !== null) room.phaseEndsAt += now - (room.pausedAt as number)
+      room.pausedAt = null
+      return room
+    }
 
     case 'promise': {
       if (room.phase !== 'table') return room
@@ -437,8 +524,8 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
       p.locked = true
       p.autoLocked = false
       p.defaulted = false
-      p.lockedAt = now
-      if (everyoneLocked(room)) return resolveRound(room, content, now)
+      p.lockedAt = at
+      if (everyoneLocked(room)) return resolveRound(room, content, at)
       return room
     }
 
@@ -451,6 +538,10 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
 
 /** Drives the clock. Call on every server tick; safe to call repeatedly. */
 export function tick(room: Room, content: Content, now: number): Room {
+  // A paused room does not expire. This is the whole of the pause as far as the
+  // phase machine is concerned: the deadline it was heading for is still there,
+  // untouched, and `resume` pushes it forward by however long this lasted.
+  if (isPaused(room)) return room
   if (room.phaseEndsAt === null || now < room.phaseEndsAt) return room
   return advance(room, content, now)
 }
@@ -804,6 +895,8 @@ export function dashboardView(room: Room, content: Content): DashboardView {
     code: room.code,
     phase: room.phase,
     phaseEndsAt: room.phaseEndsAt,
+    paused: isPaused(room),
+    pausedAt: room.pausedAt ?? null,
     round: displayRound(room),
     scenario: scenario
       ? { id: scenario.id, title: scenario.title, type: scenario.type, situation: scenario.situation }
@@ -923,6 +1016,8 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
     name: player.name,
     phase: room.phase,
     phaseEndsAt: room.phaseEndsAt,
+    paused: isPaused(room),
+    pausedAt: room.pausedAt ?? null,
     round: displayRound(room),
     scenario:
       scenario && !narrating

@@ -17,7 +17,12 @@ import { ROLE_LABEL } from '../game/session'
 import type { Phase } from '../game/session'
 import { QrCode } from '../ui/QrCode'
 import { HOW_TO_PLAY_URL, joinUrl } from '../ui/links'
-import { openChannel, type FacilitatorMessage, type FacilitatorState } from './channel'
+import {
+  openChannel,
+  type FacilitatorCommand,
+  type FacilitatorMessage,
+  type FacilitatorState,
+} from './channel'
 import { BEATS, CONTROLS, DEBRIEF, MOMENTS, SETUP, TROUBLE } from './script'
 import './facilitator.css'
 
@@ -38,7 +43,7 @@ export function Facilitator({
   code: string
   /** Null when nothing is publishing — the script still reads. */
   state: FacilitatorState | null
-  onCommand?: (cmd: 'start' | 'advance') => void
+  onCommand?: (cmd: FacilitatorCommand) => void
   /** Present when this is an overlay on the big screen rather than its own window. */
   onClose?: () => void
 }) {
@@ -46,6 +51,7 @@ export function Facilitator({
   const round = state?.round ?? 0
   const action = nextAction(phase)
   const live = state !== null
+  const paused = state?.paused ?? false
 
   const moment = useMemo(
     () => MOMENTS.find((m) => m.round === round && m.phase === phase) ?? null,
@@ -78,17 +84,32 @@ export function Facilitator({
           </h1>
           <p className="fac__status">
             {live
-              ? `Room ${state!.code} · ${state!.seats.filter((s) => s.name).length} of 4 seated`
+              ? `Room ${state!.code} · ${state!.seats.filter((s) => s.name).length} of 4 seated${
+                  paused ? ' · PAUSED' : ''
+                }`
               : 'Not connected to a big screen. Everything below still applies.'}
           </p>
         </div>
 
-        {live && action && onCommand ? (
+        {/* Pause is offered wherever the room has got to, including the two
+            phases with no advance left — stopping is the one control that is
+            never inapplicable. */}
+        {live && onCommand ? (
           <div className="fac__head-action">
-            <button className="fac__btn fac__btn--primary" onClick={() => onCommand(action.cmd)}>
-              {action.label}
+            {action ? (
+              <button className="fac__btn fac__btn--primary" onClick={() => onCommand(action.cmd)}>
+                {action.label}
+              </button>
+            ) : null}
+            <button
+              className={`fac__btn${paused ? ' fac__btn--primary' : ' fac__btn--ghost'}`}
+              onClick={() => onCommand(paused ? 'resume' : 'pause')}
+            >
+              {paused ? '▶ RESUME THE CLOCK' : '❙❙ PAUSE'}
             </button>
-            <p className="fac__next">{beatFor(phase!).next}</p>
+            <p className="fac__next">
+              {paused ? 'The clock is stopped. It restarts with the seconds it had left.' : beatFor(phase!).next}
+            </p>
           </div>
         ) : null}
 
@@ -216,8 +237,9 @@ export function Facilitator({
 
         <h2 className="fac__h2">The big screen's controls</h2>
         <p className="fac__lead">
-          The dashboard is a broadcast, so its controls are keys rather than buttons. They work
-          whenever the big screen has focus.
+          The dashboard is a broadcast, so PAUSE and NEXT sit in the bottom corner and fade out
+          after a few seconds — move the mouse and they come back. The keys below do the same
+          things, and work whenever the big screen has focus.
         </p>
         <dl className="fac__keys">
           {CONTROLS.map((c) => (
@@ -290,7 +312,7 @@ export function FacilitatorWindow({ code }: { code: string }) {
     }
   }, [code])
 
-  const onCommand = (cmd: 'start' | 'advance') =>
+  const onCommand = (cmd: FacilitatorCommand) =>
     channelRef.current?.postMessage({ t: 'cmd', cmd } satisfies FacilitatorMessage)
 
   return <Facilitator code={code} state={state} onCommand={onCommand} />

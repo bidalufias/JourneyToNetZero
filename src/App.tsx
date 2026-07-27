@@ -19,6 +19,7 @@ import type { Endgame } from './game/room'
 import { createTransport } from './net'
 import type { ConnectionState, DeniedSnapshot, Snapshot, Transport } from './net/transport'
 import { Dashboard } from './dashboard/Dashboard'
+import { FacilitatorControls, PausedBanner, nextStep } from './dashboard/Controls'
 import { JoinOverlay } from './dashboard/Join'
 import { Facilitator, FacilitatorWindow } from './facilitator/Facilitator'
 import { useFacilitatorLink } from './facilitator/link'
@@ -122,17 +123,28 @@ function DashboardSurface({ code }: { code: string }) {
 
   // Read inside the key handler, which is registered once and must not go
   // stale as the session moves through its phases.
-  const phaseRef = useRef<string>('lobby')
+  const phaseRef = useRef<DashboardView['phase']>('lobby')
   const codeRef = useRef<string>(code)
+  const pausedRef = useRef<boolean>(false)
   if (view) {
     phaseRef.current = view.phase
     codeRef.current = view.code
+    pausedRef.current = view.paused
   }
+
+  /** Space and N both mean "on you go"; the lobby's version of that is start. */
+  const step = () => {
+    const next = nextStep(phaseRef.current)
+    if (next) send({ t: next.cmd })
+  }
+  const togglePause = () => send({ t: pausedRef.current ? 'resume' : 'pause' })
 
   /**
    * The dashboard is a broadcast, not an admin panel, so the facilitator
-   * controls are keys rather than buttons: space starts and advances, Q puts
-   * the join code up for a latecomer, F opens the script in its own window.
+   * controls are keys as well as the two buttons that fade in and out of the
+   * corner: space or N starts and advances, P stops the clock and starts it
+   * again, Q puts the join code up for a latecomer, F opens the script in its
+   * own window.
    *
    * One command per press, never two. Sending `start` and `advance` together
    * meant the very first press walked the room straight through the briefing
@@ -142,9 +154,14 @@ function DashboardSurface({ code }: { code: string }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return
-      if (e.code === 'Space') {
+      if (e.code === 'Space' || e.key.toLowerCase() === 'n' || e.key === 'ArrowRight') {
         e.preventDefault()
-        send({ t: phaseRef.current === 'lobby' ? 'start' : 'advance' })
+        step()
+        return
+      }
+      if (e.key.toLowerCase() === 'p') {
+        e.preventDefault()
+        togglePause()
         return
       }
       if (e.key === 'Escape') {
@@ -179,6 +196,16 @@ function DashboardSurface({ code }: { code: string }) {
         endgame={dash!.endgame as Endgame | null}
         onShowQr={() => setOverlay('qr')}
         onOpenScript={() => openScript(view.code, () => setOverlay('script'))}
+      />
+      {/* Outside `Dashboard` on purpose: it returns early for the attract, the
+          briefing and both endings, and the whole point of these two is that
+          they are on every screen without exception. */}
+      {view.paused ? <PausedBanner /> : null}
+      <FacilitatorControls
+        phase={view.phase}
+        paused={view.paused}
+        onPause={togglePause}
+        onNext={step}
       />
       {overlay === 'qr' ? (
         <JoinOverlay code={view.code} onClose={() => setOverlay('none')} />

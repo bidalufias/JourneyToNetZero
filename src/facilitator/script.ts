@@ -265,12 +265,20 @@ export const TROUBLE: Trouble[] = [
   },
   {
     problem: 'A latecomer arrives after the start.',
-    fix: 'Press Q on the big screen for the join code at full size. An empty seat can be taken at any point in the session.',
+    fix: 'Press P to stop the clock, then Q for the join code at full size. An empty seat can be taken at any point in the session, and pausing means the round they are joining is still there when they sit down.',
+  },
+  {
+    problem: 'Something in the room needs you — a question, a fire alarm, an argument worth having.',
+    fix: 'P stops the clock wherever the session has got to, on any screen, and P again gives back exactly the seconds that were left. Nobody at the table can lock or promise while it is stopped, so the round cannot resolve behind your back.',
   },
 ]
 
 export const CONTROLS: { key: string; what: string }[] = [
-  { key: 'Space', what: 'Start the session, then advance to the next phase.' },
+  { key: 'Space  ·  N', what: 'Start the session, then go straight to the next step.' },
+  {
+    key: 'P',
+    what: 'Stop the clock, anywhere in the session — and start it again with the seconds it had left. Nobody at the table can lock, promise or spend while it is stopped.',
+  },
   { key: 'Q', what: 'Show or hide the join QR code, full screen.' },
   { key: 'F', what: 'Open this script in its own window.' },
   { key: 'Esc', what: 'Close whatever is open over the broadcast.' },

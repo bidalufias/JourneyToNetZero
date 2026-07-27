@@ -2,10 +2,10 @@
  * The big screen's half of the facilitator link.
  *
  * Publishes where the session has got to, answers a script window that has
- * just opened, and forwards the two commands that window is allowed to send.
- * Those are the same two the spacebar sends — `start` and `advance` — and the
- * room refuses anything else from a dashboard client anyway, so the channel
- * cannot become a back door into the game state.
+ * just opened, and forwards the commands that window is allowed to send. Those
+ * are exactly the ones the big screen's own keys send — `start`, `advance`,
+ * `pause` and `resume` — and the room refuses anything else from a dashboard
+ * client anyway, so the channel cannot become a back door into the game state.
  *
  * State is only posted when something a facilitator would notice changes. The
  * local transport pushes a snapshot several times a second, and a message per
@@ -26,6 +26,7 @@ export function useFacilitatorLink(view: DashboardView | null, send: (cmd: Comma
             phase: view.phase,
             round: view.round,
             phaseEndsAt: view.phaseEndsAt,
+            paused: view.paused,
             seats: view.seats.map((s) => ({
               role: s.role,
               name: s.name,
@@ -43,6 +44,7 @@ export function useFacilitatorLink(view: DashboardView | null, send: (cmd: Comma
         state.phase,
         state.round,
         state.phaseEndsAt,
+        state.paused,
         state.seats.map((s) => `${s.role}:${s.name ?? ''}:${s.connected}:${s.locked}`).join(','),
       ].join('|')
     : ''

@@ -22,8 +22,13 @@ export interface FacilitatorState {
   phase: Phase
   round: number
   phaseEndsAt: number | null
+  /** The clock is stopped, so the script window can offer the way back out. */
+  paused: boolean
   seats: { role: Role; name: string | null; connected: boolean; locked: boolean }[]
 }
+
+/** The four the room accepts from a dashboard client, and no more. */
+export type FacilitatorCommand = 'start' | 'advance' | 'pause' | 'resume'
 
 export type FacilitatorMessage =
   /** The broadcast tab, saying where it is. */
@@ -31,7 +36,7 @@ export type FacilitatorMessage =
   /** A script window that has just opened, asking to be told. */
   | { t: 'hello' }
   /** The facilitator, pressing a button in the script window. */
-  | { t: 'cmd'; cmd: 'start' | 'advance' }
+  | { t: 'cmd'; cmd: FacilitatorCommand }
   /** The broadcast tab going away. */
   | { t: 'gone' }
 

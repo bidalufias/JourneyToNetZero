@@ -33,7 +33,7 @@ export interface PhoneProps {
 }
 
 export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) {
-  const remaining = useCountdown(view.phaseEndsAt)
+  const remaining = useCountdown(view.phaseEndsAt, view.pausedAt)
   const [tipOpen, setTipOpen] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
   /** Which earlier screen of this round is being read, or null for "now". */
@@ -90,6 +90,15 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
 
   return (
     <div className="phone" data-role={view.role} data-skin={skin}>
+      {/* Above the header, and on every screen the phone has. A frozen clock
+          with no explanation is indistinguishable from a phone that has lost
+          the room — and the answer to those two is not the same. */}
+      {view.paused ? (
+        <div className="paused" role="status">
+          <span className="paused__mark">❙❙</span>
+          <span>PAUSED — look up. Nothing you tap counts until the room restarts.</span>
+        </div>
+      ) : null}
       {!bare ? (
         <PhoneHeader
           view={view}

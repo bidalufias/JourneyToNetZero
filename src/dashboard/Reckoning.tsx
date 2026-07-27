@@ -17,20 +17,29 @@ import { COALITION_HOLD_MS, PHASE_MS, PROMISE_STING_MS, RECKONING_CARD_GAP_MS, R
 import { RoleGlyph } from '../ui/primitives'
 import { CoalitionBonus } from './screens'
 
-/** Milliseconds since the Reckoning began, from the server's own deadline. */
-function useElapsed(endsAt: number | null, total: number): number {
+/**
+ * Milliseconds since the Reckoning began, from the server's own deadline.
+ *
+ * A pause holds the sequence where it is — cards already flipped stay flipped,
+ * the ones still to come wait. Freezing this is what lets a facilitator stop on
+ * the third card and talk about it, which is the single most useful place in
+ * the session to be able to stop.
+ */
+function useElapsed(endsAt: number | null, total: number, pausedAt: number | null): number {
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
+    if (pausedAt !== null) return
+    setNow(Date.now())
     const id = setInterval(() => setNow(Date.now()), 100)
     return () => clearInterval(id)
-  }, [])
+  }, [pausedAt])
   if (endsAt === null) return total
-  return Math.max(0, total - (endsAt - now))
+  return Math.max(0, total - (endsAt - (pausedAt ?? now)))
 }
 
 export function Reckoning({ view }: { view: DashboardView }) {
   const log = view.lastRound!
-  const elapsed = useElapsed(view.phaseEndsAt, PHASE_MS.reckoning)
+  const elapsed = useElapsed(view.phaseEndsAt, PHASE_MS.reckoning, view.pausedAt)
 
   const revealedCount = Math.max(
     0,
