@@ -29,6 +29,19 @@ const content = loadContent(
 let clock = 1_700_000_000_000
 const run = (room: Room, cmd: Command) => apply(room, cmd, content, clock)
 
+/**
+ * Choosing and committing are two acts now, and almost every test wants both.
+ * Anything testing the gap between them does it by hand.
+ */
+const lockIn = (room: Room, role: Role, optionId: string) => {
+  run(room, { t: 'choose', role, optionId })
+  run(room, { t: 'lock', role })
+}
+
+/** The first option this role may actually take. */
+const firstAvailable = (room: Room, role: Role) =>
+  phoneView(room, content, role).options.find((o) => o.available)!.id
+
 function seated(seed = 12345): Room {
   clock = 1_700_000_000_000
   const room = createRoom(content, seed, clock)
@@ -93,7 +106,7 @@ describe('room lifecycle', () => {
     expire(room) // table -> choice
 
     expect(room.phase).toBe('choice')
-    run(room, { t: 'choose', role: 'government', optionId: phoneView(room, content, 'government').options[0].id })
+    lockIn(room, 'government', firstAvailable(room, 'government'))
     expect(room.players.business.choiceId).toBeNull()
 
     expire(room) // choice deadline passes
@@ -112,12 +125,116 @@ describe('room lifecycle', () => {
     expire(room)
     expect(room.phase).toBe('choice')
 
-    for (const role of ROLES) {
-      const view = phoneView(room, content, role)
-      run(room, { t: 'choose', role, optionId: view.options.find((o) => o.available)!.id })
-    }
+    for (const role of ROLES) lockIn(room, role, firstAvailable(room, role))
     expect(room.phase).toBe('reckoning')
     expect(room.lastRound).not.toBeNull()
+  })
+
+  it('does not wait on a chair nobody is sitting in', () => {
+    const room = seated()
+    run(room, { t: 'leave', role: 'activist' })
+    run(room, { t: 'start' })
+    expire(room)
+    expire(room)
+    expire(room)
+    expect(room.phase).toBe('choice')
+
+    for (const role of ROLES.filter((r) => r !== 'activist')) {
+      lockIn(room, role, firstAvailable(room, role))
+    }
+    // Three players are the whole table, so the round resolves rather than
+    // burning the deadline waiting for somebody who is not in the room.
+    expect(room.phase).toBe('reckoning')
+  })
+})
+
+describe('choosing is not committing', () => {
+  const atChoice = () => {
+    const room = seated()
+    run(room, { t: 'start' })
+    expire(room)
+    expire(room)
+    expire(room)
+    return room
+  }
+
+  it('lets a player change their mind until they lock', () => {
+    const room = atChoice()
+    const opts = phoneView(room, content, 'government').options.filter((o) => o.available)
+    expect(opts.length).toBeGreaterThan(1)
+
+    run(room, { t: 'choose', role: 'government', optionId: opts[0].id })
+    expect(phoneView(room, content, 'government').locked).toBe(false)
+    run(room, { t: 'choose', role: 'government', optionId: opts[1].id })
+    expect(phoneView(room, content, 'government').choiceId).toBe(opts[1].id)
+
+    run(room, { t: 'lock', role: 'government' })
+    expect(phoneView(room, content, 'government').locked).toBe(true)
+
+    // And not after.
+    run(room, { t: 'choose', role: 'government', optionId: opts[0].id })
+    expect(phoneView(room, content, 'government').choiceId).toBe(opts[1].id)
+  })
+
+  it('refuses to lock nothing', () => {
+    const room = atChoice()
+    run(room, { t: 'lock', role: 'government' })
+    expect(room.players.government.locked).toBe(false)
+    expect(room.phase).toBe('choice')
+  })
+
+  it('keeps the card you selected when the clock runs out', () => {
+    const room = atChoice()
+    const opts = phoneView(room, content, 'government').options.filter((o) => o.available)
+    const wanted = opts[1] ?? opts[0]
+    run(room, { t: 'choose', role: 'government', optionId: wanted.id })
+
+    expire(room) // the deadline commits it for them
+
+    const gov = room.players.government
+    expect(gov.choiceId).toBe(wanted.id)
+    expect(gov.autoLocked).toBe(true)
+    // The clock locked it, but it did not pick it — and the summary must not
+    // claim the player chose something they never selected.
+    expect(gov.defaulted).toBe(false)
+    expect(room.players.business.defaulted).toBe(true)
+
+    expire(room) // reckoning, where the round summary is written
+    expect(phoneView(room, content, 'government').roundResult?.didWhat).toContain('clock locked it in')
+    expect(phoneView(room, content, 'business').roundResult?.didWhat).toContain('ran out of time')
+  })
+})
+
+describe('a seat can be given up', () => {
+  it('empties the chair so somebody else can take it', () => {
+    const room = seated()
+    expect(room.players.business.name).toBe('Marcus')
+
+    run(room, { t: 'leave', role: 'business' })
+    expect(room.players.business.name).toBe('')
+    expect(room.players.business.goalId).toBeNull()
+    expect(dashboardView(room, content).seats.find((s) => s.role === 'business')!.name).toBeNull()
+
+    // The chair is genuinely free, not merely dimmed.
+    run(room, { t: 'join', role: 'business', name: 'Nadia' })
+    expect(room.players.business.name).toBe('Nadia')
+  })
+
+  it('offers a goal to whoever takes a vacated seat mid-session', () => {
+    const room = seated()
+    run(room, { t: 'start' })
+    expire(room) // briefing -> crisis
+
+    run(room, { t: 'leave', role: 'business' })
+    run(room, { t: 'join', role: 'business', name: 'Nadia' })
+
+    // Sealing a goal is gated on having none, never on the lobby: a latecomer
+    // with no goal would otherwise play the whole game with nothing to win.
+    const view = phoneView(room, content, 'business')
+    expect(view.goalId).toBeNull()
+    expect(view.goalChoices).not.toBeNull()
+    run(room, { t: 'pickGoal', role: 'business', goalId: view.goalChoices![0].id })
+    expect(phoneView(room, content, 'business').goalTitle).toBe(view.goalChoices![0].title)
   })
 })
 
@@ -194,10 +311,9 @@ describe('negotiation', () => {
 
     expire(room) // -> choice
     // The player is free to break it. Nothing stops them.
-    run(room, { t: 'choose', role: 'government', optionId: actual.id })
+    lockIn(room, 'government', actual.id)
     for (const role of ROLES.filter((r) => r !== 'government')) {
-      const v = phoneView(room, content, role)
-      run(room, { t: 'choose', role, optionId: v.options.find((o) => o.available)!.id })
+      lockIn(room, role, firstAvailable(room, role))
     }
 
     const resolved = room.promises[0]
@@ -282,9 +398,8 @@ describe('negotiation', () => {
     // Resolve the round: the engine now actually spends it.
     expire(room)
     for (const role of ROLES) {
-      const v = phoneView(room, content, role)
-      const opt = v.options.find((o) => o.available)
-      if (opt) run(room, { t: 'choose', role, optionId: opt.id })
+      const opt = phoneView(room, content, role).options.find((o) => o.available)
+      if (opt) lockIn(room, role, opt.id)
     }
     expect(room.game.vetoes).toBe(1)
     expect(room.game.vetoesUsed).toBe(1)

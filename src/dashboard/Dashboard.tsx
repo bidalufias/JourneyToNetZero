@@ -22,7 +22,7 @@ import {
 } from './meters'
 import { Reckoning } from './Reckoning'
 import { TheTable } from './TheTable'
-import { Attract, Endgame as EndgameScreen, RoundSummary } from './screens'
+import { Attract, Briefing, Endgame as EndgameScreen, RoundSummary } from './screens'
 import './dashboard.css'
 import './screens.css'
 
@@ -51,9 +51,11 @@ export function Dashboard({ view, endgame }: { view: DashboardView; endgame: End
   const remaining = useCountdown(view.phaseEndsAt)
   const clock = formatClock(remaining)
 
-  if (view.phase === 'lobby' || view.phase === 'briefing') {
-    return <Attract view={view} />
-  }
+  // The briefing is a screen of its own now that a single spacebar no longer
+  // skips straight past it. Showing the attract screen for both meant the one
+  // phase written to explain the game never appeared.
+  if (view.phase === 'lobby') return <Attract view={view} />
+  if (view.phase === 'briefing') return <Briefing view={view} clock={clock} />
   if ((view.phase === 'results' || view.phase === 'ended') && endgame) {
     return <EndgameScreen view={view} endgame={endgame} />
   }

@@ -46,10 +46,17 @@ export interface Player {
   connected: boolean
   /** Set once during setup, never revealed until the endgame. */
   goalId: string | null
-  /** Locked choice for the current round, or null while still thinking. */
+  /**
+   * The card the player has tapped, or null while still thinking. Selecting is
+   * not committing: a selection can be changed right up until `locked`.
+   */
   choiceId: string | null
-  /** True when the timer locked it rather than the player. */
+  /** Committed. Nothing changes a choice after this. */
+  locked: boolean
+  /** True when the timer committed the choice rather than the player. */
   autoLocked: boolean
+  /** True when the timer also had to *pick* it, because nothing was selected. */
+  defaulted: boolean
   /** Order in which players locked, for the "last one" callout. */
   lockedAt: number | null
 }
@@ -190,14 +197,23 @@ export interface PhoneView {
   /** The one line written for this role, not the shared news copy. */
   privateLine: string | null
   options: PhoneOption[]
+  /** The card tapped but not yet committed. Changeable until `locked`. */
   choiceId: string | null
+  /** Committed. The choice screen goes read-only and the phone steps back. */
   locked: boolean
   /** Your own resource, and only yours. */
   resource: { kind: 'fiscal' | 'capital' | 'trust-awards' | 'spotlights'; value: number; label: string }
   trust: Record<TrustRole, number>
   vetoesRemaining: number
   spotlightsRemaining: number
+  /** Declared this round — the Activist's only confirmation that it landed. */
+  spotlightCalled: boolean
+  /** The Government has agreed to co-fund the Business's partnership option. */
+  coFund: boolean
   goalId: string | null
+  /** Your own sealed goal, so the phone can remind you what you are chasing. */
+  goalTitle: string | null
+  goalDesc: string | null
   goalChoices: { id: string; title: string; desc: string }[] | null
   tip: InsiderTip | null
   promises: Promise_[]

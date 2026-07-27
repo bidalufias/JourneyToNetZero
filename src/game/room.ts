@@ -29,6 +29,7 @@ import { asPledgeObject, BOARD_NAME, DEMAND_PHRASES, privateLine } from './copy'
 import { draw, pick, roomCode, shuffle } from './rng'
 import {
   PHASE_MS,
+  ROLE_LABEL,
   ROLE_RESOURCE,
   type DashboardView,
   type InsiderTip,
@@ -57,7 +58,17 @@ export function createRoom(content: Content, seed: number, now: number): Room {
   const players = Object.fromEntries(
     ROLES.map((role): [Role, Player] => [
       role,
-      { role, name: '', connected: false, goalId: null, choiceId: null, autoLocked: false, lockedAt: null },
+      {
+        role,
+        name: '',
+        connected: false,
+        goalId: null,
+        choiceId: null,
+        locked: false,
+        autoLocked: false,
+        defaulted: false,
+        lockedAt: null,
+      },
     ]),
   ) as Record<Role, Player>
 
@@ -115,8 +126,17 @@ function setPhase(room: Room, phase: Phase, now: number): void {
   room.phaseEndsAt = ms > 0 ? now + ms : null
 }
 
+/**
+ * Every *occupied* seat has committed.
+ *
+ * Empty seats are not waited on: a seat nobody holds would otherwise stall the
+ * round until the deadline, which is exactly what a facilitator running three
+ * players does not need. The clock still defaults them at resolution.
+ */
 function everyoneLocked(room: Room): boolean {
-  return ROLES.every((r) => room.players[r].choiceId !== null)
+  const held = ROLES.filter((r) => room.players[r].name)
+  if (!held.length) return false
+  return held.every((r) => room.players[r].locked)
 }
 
 /**
@@ -129,6 +149,21 @@ function everyoneLocked(room: Room): boolean {
  */
 function vetoesRemaining(room: Room): number {
   return Math.max(0, room.game.vetoes - (room.vetoTarget ? 1 : 0))
+}
+
+/**
+ * The same courtesy for Spotlights, which the engine also only spends at
+ * resolution. A counter that does not move when you spend it reads as a
+ * broken button, and the Activist has no other confirmation that it landed.
+ */
+function spotlightsRemaining(room: Room): number {
+  return Math.max(0, room.game.spotlights - (room.spotlightCalled ? 1 : 0))
+}
+
+/** Seats that can hold a transferable resource at all. */
+function canReceive(role: Role): boolean {
+  const kind = ROLE_RESOURCE[role].kind
+  return kind === 'fiscal' || kind === 'capital'
 }
 
 /**
@@ -162,11 +197,48 @@ export type Command =
   | { t: 'choose'; role: Role; optionId: string }
   | { t: 'lock'; role: Role }
 
+/**
+ * Commands a seat is allowed to issue, with the role rewritten to the one the
+ * caller actually holds.
+ *
+ * Every command names a role and a client could name somebody else's, so the
+ * seat is never read from the wire. This lives here rather than in a transport
+ * because both the edge function and the local host have to enforce exactly the
+ * same rule — two copies would be two chances for them to drift apart.
+ */
+export function authorise(seat: Role | 'dashboard', cmd: Command): Command | null {
+  if (seat === 'dashboard') {
+    // The facilitator's screen may start and advance the session. It may not
+    // choose, pledge or spend anybody's resources.
+    return cmd.t === 'start' || cmd.t === 'advance' ? cmd : null
+  }
+  switch (cmd.t) {
+    case 'join':
+    case 'reconnect':
+    case 'leave':
+    case 'pickGoal':
+    case 'promise':
+    case 'demand':
+    case 'respondOffer':
+    case 'spotlight':
+    case 'veto':
+    case 'coFund':
+    case 'publishTip':
+    case 'choose':
+    case 'lock':
+      return { ...cmd, role: seat } as Command
+    case 'offer':
+      return { ...cmd, from: seat } as Command
+    default:
+      return null
+  }
+}
+
 export function apply(room: Room, cmd: Command, content: Content, now: number): Room {
   switch (cmd.t) {
     case 'join': {
       const p = room.players[cmd.role]
-      if (p.connected && p.name && p.name !== cmd.name) return room // seat taken
+      if (p.name && p.name !== cmd.name) return room // seat taken
       p.name = cmd.name
       p.connected = true
       return room
@@ -176,12 +248,31 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
       room.players[cmd.role].connected = true
       return room
 
-    case 'leave':
-      room.players[cmd.role].connected = false
+    /**
+     * Leaving empties the chair rather than dimming it.
+     *
+     * A seat that stays named for the rest of the workshop is unrecoverable
+     * without a new room, so the one thing `leave` must do is make the seat
+     * takeable again — by somebody else, or by the same person on a new phone.
+     * A sealed goal belongs to the person, not the chair, so it goes with them.
+     */
+    case 'leave': {
+      const p = room.players[cmd.role]
+      p.name = ''
+      p.connected = false
+      p.goalId = null
+      p.choiceId = null
+      p.locked = false
+      p.autoLocked = false
+      p.defaulted = false
+      p.lockedAt = null
       return room
+    }
 
     case 'pickGoal': {
-      // Sealed. Chosen once, revealed only in the endgame.
+      // Sealed. Chosen once, revealed only in the endgame. Deliberately not
+      // gated on the lobby: somebody who joins late, or takes a seat that was
+      // vacated mid-session, still needs a goal to be playing the same game.
       if (room.players[cmd.role].goalId) return room
       room.players[cmd.role].goalId = cmd.goalId
       return room
@@ -229,7 +320,7 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
         round: roundNumber(room),
         from: cmd.role,
         kind: 'demand',
-        text: `${BOARD_NAME[cmd.role]} demands ${phrase.text(cmd.target)}.`,
+        text: `${BOARD_NAME[cmd.role]} demands ${phrase.text(ROLE_LABEL[cmd.target])}.`,
         optionId: null,
         outcome: 'unresolved',
       })
@@ -238,6 +329,10 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
 
     case 'offer': {
       if (room.phase !== 'table') return room
+      // Only two seats hold a transferable resource. An offer to either of the
+      // others moves nothing on acceptance, so letting one be sent would put a
+      // transfer on the big screen that never happens.
+      if (!canReceive(cmd.from) || !canReceive(cmd.to) || cmd.from === cmd.to) return room
       const held = cmd.resource === 'fiscal' ? room.game.fiscal : room.game.capital
       if (cmd.amount < 1 || cmd.amount > held) return room
       room.offers.push({
@@ -289,11 +384,13 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
       if (room.phase !== 'table' || cmd.role !== 'community') return room
       if (room.game.vetoes <= 0 || room.vetoTarget) return room
       room.vetoTarget = cmd.target
-      // Anyone whose locked choice the veto just removed has to choose again.
+      // Anyone whose choice the veto just removed has to choose again, even if
+      // they had already committed to it.
       const removed = choosableOptions(room, content, cmd.target).map((o) => o.id)
       const p = room.players[cmd.target]
       if (p.choiceId && !removed.includes(p.choiceId)) {
         p.choiceId = null
+        p.locked = false
         p.lockedAt = null
       }
       return room
@@ -312,21 +409,38 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
       return room
     }
 
+    /**
+     * Selecting a card. Not committing to it.
+     *
+     * Tapping to read a card more closely must never be the same act as
+     * spending the round on it, so this only moves the selection — `lock` is
+     * the irreversible half, and until it lands a player may change their mind
+     * as often as they like.
+     */
     case 'choose': {
       if (room.phase !== 'choice' && room.phase !== 'table') return room
+      const p = room.players[cmd.role]
+      if (p.locked) return room
       const allowed = choosableOptions(room, content, cmd.role)
       if (!allowed.some((o) => o.id === cmd.optionId)) return room
-      room.players[cmd.role].choiceId = cmd.optionId
-      room.players[cmd.role].autoLocked = false
-      room.players[cmd.role].lockedAt = now
-      if (room.phase === 'choice' && everyoneLocked(room)) {
-        return resolveRound(room, content, now)
-      }
+      p.choiceId = cmd.optionId
       return room
     }
 
-    case 'lock':
+    /** Committing. From here the choice screen is a record, not a decision. */
+    case 'lock': {
+      if (room.phase !== 'choice') return room
+      const p = room.players[cmd.role]
+      if (p.locked || p.choiceId === null) return room
+      const allowed = choosableOptions(room, content, cmd.role)
+      if (!allowed.some((o) => o.id === p.choiceId)) return room
+      p.locked = true
+      p.autoLocked = false
+      p.defaulted = false
+      p.lockedAt = now
+      if (everyoneLocked(room)) return resolveRound(room, content, now)
       return room
+    }
 
     default:
       return room
@@ -359,17 +473,6 @@ function advance(room: Room, content: Content, now: number): Room {
       return room
 
     case 'choice':
-      // The session must never stall: anyone who did not choose gets a default.
-      for (const role of ROLES) {
-        if (room.players[role].choiceId === null) {
-          const opts = choosableOptions(room, content, role)
-          if (opts.length) {
-            room.players[role].choiceId = opts[0].id
-            room.players[role].autoLocked = true
-            room.players[role].lockedAt = now
-          }
-        }
-      }
       return resolveRound(room, content, now)
 
     case 'reckoning':
@@ -399,7 +502,9 @@ function openRound(room: Room, content: Content, now: number): Room {
   room.spotlightCalled = false
   for (const role of ROLES) {
     room.players[role].choiceId = null
+    room.players[role].locked = false
     room.players[role].autoLocked = false
+    room.players[role].defaulted = false
     room.players[role].lockedAt = null
   }
   dealTip(room, content)
@@ -408,6 +513,32 @@ function openRound(room: Room, content: Content, now: number): Room {
 }
 
 function resolveRound(room: Room, content: Content, now: number): Room {
+  /**
+   * Nobody reaches the engine without a choice.
+   *
+   * A round resolves either because everyone at the table committed or because
+   * the deadline passed, and both paths can arrive here with an empty chair or
+   * a player who never selected anything. Filling the gaps here rather than at
+   * the deadline means there is exactly one place that can leave a role
+   * unanswered, and it cannot.
+   *
+   * The three ways a choice can arrive are recorded separately, because the
+   * round summary must never tell somebody they chose a card the clock picked.
+   */
+  for (const role of ROLES) {
+    const p = room.players[role]
+    if (p.locked) continue
+    if (p.choiceId === null) {
+      const opts = choosableOptions(room, content, role)
+      if (!opts.length) continue
+      p.choiceId = opts[0].id
+      p.defaulted = true
+    }
+    p.locked = true
+    p.autoLocked = true
+    p.lockedAt = now
+  }
+
   const choices = Object.fromEntries(
     ROLES.map((r) => [r, room.players[r].choiceId as string]),
   ) as Record<Role, string>
@@ -642,8 +773,9 @@ function buildTip(
 
 export function dashboardView(room: Room, content: Content): DashboardView {
   const scenario = currentScenario(room, content)
-  const lockOrder = ROLES.map((r) => room.players[r].lockedAt).filter((t): t is number => t !== null)
-  const lastLock = lockOrder.length === 3 ? ROLES.find((r) => room.players[r].choiceId === null) : null
+  const held = ROLES.filter((r) => room.players[r].name)
+  const waiting = held.filter((r) => !room.players[r].locked)
+  const lastLock = held.length > 1 && waiting.length === 1 ? waiting[0] : null
 
   const tip = room.tips.find((t) => t.round === displayRound(room))
   const published =
@@ -681,7 +813,7 @@ export function dashboardView(room: Room, content: Content): DashboardView {
       role,
       name: room.players[role].name || null,
       connected: room.players[role].connected,
-      locked: room.players[role].choiceId !== null,
+      locked: room.players[role].locked,
       lastToLock: lastLock === role,
     })),
     promises: room.promises.filter((p) => p.round === displayRound(room)),
@@ -694,7 +826,7 @@ export function dashboardView(room: Room, content: Content): DashboardView {
           // Whoever takes the dirtiest option this round wears it. Nobody
           // knows who that is until the choices lock, so do not pretend to.
           target: room.lastRound?.spotlightTarget ?? null,
-          remaining: room.game.spotlights,
+          remaining: spotlightsRemaining(room),
         }
       : null,
     veto,
@@ -774,6 +906,17 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
       ? content.privateGoals[role].map((g) => ({ id: g.id, title: g.title, desc: g.desc }))
       : null
 
+  // Your own sealed goal, so the phone can answer "what am I chasing again?"
+  // without waiting until 2050. Still only ever yours — no other seat's goal is
+  // built into any view.
+  const ownGoal = player.goalId
+    ? (content.privateGoals[role].find((g) => g.id === player.goalId) ?? null)
+    : null
+
+  // From the Reckoning onward `currentScenario` already names the *next*
+  // round's crisis, so handing it to a phone would leak the coming round.
+  const narrating = room.phase === 'reckoning' || room.phase === 'summary'
+
   return {
     code: room.code,
     role,
@@ -781,18 +924,23 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
     phase: room.phase,
     phaseEndsAt: room.phaseEndsAt,
     round: displayRound(room),
-    scenario: scenario
-      ? { id: scenario.id, title: scenario.title, situation: scenario.situation, type: scenario.type }
-      : null,
-    privateLine: scenario ? privateLine(scenario.type, role) : null,
+    scenario:
+      scenario && !narrating
+        ? { id: scenario.id, title: scenario.title, situation: scenario.situation, type: scenario.type }
+        : null,
+    privateLine: scenario && !narrating ? privateLine(scenario.type, role) : null,
     options,
     choiceId: player.choiceId,
-    locked: player.choiceId !== null,
+    locked: player.locked,
     resource: { kind: resourceKind, value: resourceValue, label: ROLE_RESOURCE[role].label },
     trust: { ...room.game.trust },
     vetoesRemaining: vetoesRemaining(room),
-    spotlightsRemaining: room.game.spotlights,
+    spotlightsRemaining: spotlightsRemaining(room),
+    spotlightCalled: room.spotlightCalled,
+    coFund: room.coFund,
     goalId: player.goalId,
+    goalTitle: ownGoal?.title ?? null,
+    goalDesc: ownGoal?.desc ?? null,
     goalChoices,
     // Only ever your own tip, and only while it is yours to act on.
     tip: room.tips.find((t) => t.to === role && t.round === displayRound(room)) ?? null,
@@ -803,10 +951,10 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
       role: r,
       name: room.players[r].name || null,
       connected: room.players[r].connected,
-      locked: room.players[r].choiceId !== null,
+      locked: room.players[r].locked,
     })),
     roundResult: roundResultCopy(room, role),
-    waitingOn: ROLES.filter((r) => room.players[r].choiceId === null).length,
+    waitingOn: ROLES.filter((r) => room.players[r].name && !room.players[r].locked).length,
   }
 }
 
@@ -824,7 +972,16 @@ function roundResultCopy(room: Room, role: Role): PhoneView['roundResult'] {
   // Quoted rather than folded into the sentence: option titles are imperative
   // ("Demand a Fresh Election"), so "you chose demand a fresh election" reads
   // as a typo. The quotation is always grammatical whatever the pack says.
-  const didWhat = `You chose “${mine.title}”.`
+  //
+  // The room knows whether the player decided this or the clock did, and
+  // telling somebody they "chose" a card the deadline picked for them is the
+  // one sentence in the app that can be flatly untrue.
+  const player = room.players[role]
+  const didWhat = player.defaulted
+    ? `You ran out of time. The clock picked “${mine.title}”.`
+    : player.autoLocked
+      ? `You had “${mine.title}” selected, and the clock locked it in.`
+      : `You chose “${mine.title}”.`
 
   const costBits: string[] = []
   if (mine.partnerUnfunded) costBits.push('Nobody co-funded it, so it landed at half strength.')

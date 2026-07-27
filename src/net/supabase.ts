@@ -20,7 +20,9 @@ import type { Command } from '../game/room'
 import type {
   ConnectionState,
   DashboardSnapshot,
+  DeniedSnapshot,
   PhoneSnapshot,
+  RosterSeat,
   Snapshot,
   Transport,
   TransportOptions,
@@ -44,7 +46,27 @@ interface FnResult {
   code?: string
   token?: string
   error?: string
+  seats?: RosterSeat[]
 }
+
+/**
+ * A refusal the player can act on, as opposed to a network failure they can
+ * only wait out. The two need different screens, so they get different types.
+ */
+class Refused extends Error {
+  constructor(
+    readonly reason: DeniedSnapshot['reason'],
+    readonly seats: RosterSeat[],
+  ) {
+    super(reason)
+  }
+}
+
+/**
+ * The token no longer names a seat: the player left, or the room was reset.
+ * Distinct from a network failure, which must never cost anybody their chair.
+ */
+class StaleToken extends Error {}
 
 async function callFunction(body: Record<string, unknown>): Promise<FnResult> {
   const res = await fetch(`${URL_}/functions/v1/room`, {
@@ -57,6 +79,10 @@ async function callFunction(body: Record<string, unknown>): Promise<FnResult> {
     body: JSON.stringify(body),
   })
   const data = (await res.json()) as FnResult
+  if (res.status === 403) throw new StaleToken(data.error ?? 'not your seat')
+  if (res.status === 409) throw new Refused('seat-taken', data.seats ?? [])
+  if (res.status === 404) throw new Refused('no-room', [])
+  if (res.status === 400 && data.error === 'unknown seat') throw new Refused('bad-seat', [])
   if (!res.ok) throw new Error(data.error ?? `room function returned ${res.status}`)
   return data
 }
@@ -99,9 +125,9 @@ class SupabaseTransport implements Transport {
         this.code = created.code!
         this.token = created.token!
         this.emit(created)
-      } else if (stored) {
-        this.token = stored
-        await this.refresh()
+      } else if (stored && (await this.resume(stored))) {
+        // Reload, lost signal, phone locked — the token proves the seat is
+        // still ours and nothing else needs to happen.
       } else if (opts.kind === 'phone') {
         const claimed = await callFunction({ action: 'claim', code: this.code, role: opts.role })
         this.token = claimed.token!
@@ -128,6 +154,21 @@ class SupabaseTransport implements Transport {
         this.ticker = setInterval(() => void this.tick(), 500)
       }
     } catch (err) {
+      // A refused seat is an answer, not an outage. Retrying it forever would
+      // leave the player on a spinner while the room waits for them.
+      if (err instanceof Refused) {
+        this.token = null
+        try {
+          if (this.code) localStorage.removeItem(tokenKey(this.code, this.seat))
+        } catch {
+          // Clearing a stale token is a courtesy, never a requirement.
+        }
+        this.setState('live')
+        this.snapshotSubs.forEach((f) =>
+          f({ kind: 'denied', reason: err.reason, code: this.code, seats: err.seats }),
+        )
+        return
+      }
       // Never having reached the server is a different problem from losing it:
       // it means the edge function is not deployed or the key is wrong, and no
       // amount of waiting fixes either.
@@ -136,6 +177,29 @@ class SupabaseTransport implements Transport {
       this.attempts += 1
       const backoff = Math.min(30_000, 2000 * 2 ** Math.min(this.attempts - 1, 4))
       setTimeout(() => !this.closed && void this.start(opts), backoff)
+    }
+  }
+
+  /**
+   * Try a stored token. A token that no longer names a seat — because the
+   * player left, or a facilitator reset the room — must not strand them on a
+   * reconnect spinner, so a failure here falls back to claiming the seat afresh.
+   */
+  private async resume(stored: string): Promise<boolean> {
+    try {
+      this.emit(await callFunction({ action: 'view', code: this.code, token: stored }))
+      this.token = stored
+      return true
+    } catch (err) {
+      // Anything else — a dropped request, a slow network — is not evidence
+      // that the seat is gone, so it propagates and the caller retries.
+      if (!(err instanceof StaleToken)) throw err
+      try {
+        localStorage.removeItem(tokenKey(this.code, this.seat))
+      } catch {
+        // Best effort; the claim below is what actually matters.
+      }
+      return false
     }
   }
 
@@ -236,6 +300,17 @@ class SupabaseTransport implements Transport {
     void callFunction({ action: 'cmd', code: this.code, token: this.token, cmd })
       .then((r) => this.emit(r))
       .catch(() => this.setState('reconnecting'))
+  }
+
+  release(): void {
+    const token = this.token
+    this.token = null
+    try {
+      localStorage.removeItem(tokenKey(this.code, this.seat))
+    } catch {
+      // The server-side release below is what actually frees the chair.
+    }
+    if (token) void callFunction({ action: 'release', code: this.code, token }).catch(() => {})
   }
 
   close(): void {
