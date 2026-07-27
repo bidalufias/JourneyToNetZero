@@ -6,9 +6,25 @@ import type { DashboardView } from '../game/session'
 import { ROLE_LABEL } from '../game/session'
 import type { Endgame } from '../game/room'
 import { RoleGlyph } from '../ui/primitives'
+import { JoinPanel } from './Join'
 
-/** D-01 — the code has to be readable from the back of the room. */
-export function Attract({ view }: { view: DashboardView }) {
+/**
+ * D-01 — the code has to be readable from the back of the room.
+ *
+ * The lobby is the one screen where the facilitator is allowed visible
+ * controls: nothing has started, nobody is in character, and the alternative
+ * is a room of four people watching someone hunt for a keyboard shortcut. The
+ * moment the session starts they are gone, and the keys take over.
+ */
+export function Attract({
+  view,
+  onShowQr,
+  onOpenScript,
+}: {
+  view: DashboardView
+  onShowQr?: () => void
+  onOpenScript?: () => void
+}) {
   const s = view.state
   return (
     <div className="dash">
@@ -23,6 +39,22 @@ export function Attract({ view }: { view: DashboardView }) {
           <p className="attract__cue">JOIN ON YOUR PHONE</p>
           <p className="attract__code">{view.code}</p>
           <p className="attract__tagline">Four seats. Six crises. Thirty minutes.</p>
+          <JoinPanel code={view.code} />
+          {onShowQr || onOpenScript ? (
+            <div className="attract__controls">
+              {onShowQr ? (
+                <button className="dashbtn" onClick={onShowQr}>
+                  SHOW THE QR CODE BIG <span className="dashbtn__key">Q</span>
+                </button>
+              ) : null}
+              {onOpenScript ? (
+                <button className="dashbtn" onClick={onOpenScript}>
+                  FACILITATOR SCRIPT <span className="dashbtn__key">F</span>
+                </button>
+              ) : null}
+              <span className="attract__hint">SPACE STARTS THE SESSION</span>
+            </div>
+          ) : null}
         </div>
 
         <div className="attract__seats">

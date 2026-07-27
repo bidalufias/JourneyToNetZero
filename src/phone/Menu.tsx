@@ -9,6 +9,7 @@
  */
 import { useState } from 'react'
 import type { PhoneView } from '../game/session'
+import { HOW_TO_PLAY_URL } from '../ui/links'
 import { HowToPlay } from './guide'
 
 export function MenuSheet({
@@ -34,6 +35,16 @@ export function MenuSheet({
         </div>
         <div className="sheet__body">
           <HowToPlay view={view} />
+
+          {/* The written guide is the long version — characters, every goal,
+              every word explained. It opens in a tab of its own so a player
+              who wanders into it mid-round has not left the game. */}
+          <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
+            THE LONG VERSION
+          </span>
+          <a className="btn btn--ghost" href={HOW_TO_PLAY_URL} target="_blank" rel="noreferrer">
+            THE FULL WRITTEN GUIDE
+          </a>
 
           <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
             LEAVING
