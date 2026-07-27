@@ -110,6 +110,20 @@ td b{font-family:ui-sans-serif,sans-serif}
 dl dt{font:700 16px/1.4 ui-sans-serif,sans-serif;margin-top:14px}
 dl dd{margin:2px 0 0;color:#443F3A}
 
+/* Shown only when the guide was opened from a scanned code, so the reader has
+   a way back to the seat they came from. */
+.resume{background:var(--ink);color:var(--paper);border-radius:14px;
+  padding:18px 20px;margin:0 0 34px;display:flex;flex-wrap:wrap;
+  align-items:center;gap:12px 18px;justify-content:space-between}
+.resume p{margin:0;font:500 15px/1.4 ui-sans-serif,sans-serif;color:#DED6C9}
+.resume b{color:#fff;letter-spacing:.08em}
+.resume a{background:var(--paper);color:var(--ink);text-decoration:none;
+  font:700 14px/1 ui-sans-serif,sans-serif;letter-spacing:.08em;
+  text-transform:uppercase;padding:13px 18px;border-radius:9px;white-space:nowrap}
+.resume a:hover{background:#fff}
+.resume--end{margin:34px 0 0}
+@media print{.resume{display:none}}
+
 footer{border-top:1px solid var(--line);padding-top:24px;color:var(--soft);font-size:15px}
 @media print{.hero{background:#fff;color:#000}nav{display:none}.char header{-webkit-print-color-adjust:exact}}
 </style>
@@ -123,6 +137,11 @@ footer{border-top:1px solid var(--line);padding-top:24px;color:var(--soft);font-
 </div></div>
 
 <div class="wrap">
+
+<div class="resume" data-resume hidden>
+  <p>You are joining room <b data-resume-code></b>. Read as much as you want.</p>
+  <a data-resume-link href="/">Skip to the game</a>
+</div>
 
 <nav>
   <p>What's in here</p>
@@ -498,6 +517,11 @@ footer{border-top:1px solid var(--line);padding-top:24px;color:var(--soft);font-
 </dl>
 </section>
 
+<div class="resume resume--end" data-resume hidden>
+  <p>That's all of it. Room <b data-resume-code></b> is waiting.</p>
+  <a data-resume-link href="/">Proceed to the game</a>
+</div>
+
 <footer>
   <p><a href="/" style="color:var(--sys)">← Back to the game</a>. Join a session with the four-letter code on the big screen.</p>
   <p><strong>Journey to Net Zero</strong> is a training simulation set in the fictional Republic of Semenanjara. Any resemblance to countries you know is entirely deliberate.</p>
@@ -505,5 +529,27 @@ footer{border-top:1px solid var(--line);padding-top:24px;color:var(--soft);font-
 </footer>
 
 </div>
+
+<script>
+// The guide is a static page and knows nothing about the session. A player who
+// scanned a code and chose to read first arrives with the room in the query
+// string; these two blocks are their way back to a seat. Everyone else, who
+// opened the guide on its own, never sees them.
+(function () {
+  var raw = new URLSearchParams(window.location.search).get('room') || '';
+  var room = raw.toUpperCase();
+  // Validated rather than trusted: the value is about to become a link, and
+  // room codes are always exactly four letters.
+  if (!/^[A-Z]{4}$/.test(room)) return;
+  var href = '/play?room=' + room + '&ready=1';
+  var blocks = document.querySelectorAll('[data-resume]');
+  for (var i = 0; i < blocks.length; i++) {
+    blocks[i].querySelector('[data-resume-link]').setAttribute('href', href);
+    blocks[i].querySelector('[data-resume-code]').textContent = room;
+    blocks[i].hidden = false;
+  }
+})();
+</script>
+
 </body>
 </html>
