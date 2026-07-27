@@ -282,7 +282,7 @@ function PhoneSurface({
           <span className="plabel">{c.org.toUpperCase()}</span>
           <h1 className="pheading">Take a seat</h1>
           <p className="ptext">
-            You are the <strong>{ROLE_LABEL[role]}</strong>, the {c.title}.
+            You are the <strong>{c.title}</strong>.
           </p>
           <span className="plabel">YOUR NAME</span>
           <input

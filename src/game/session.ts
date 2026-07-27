@@ -269,13 +269,13 @@ export const ROLE_LABEL: Record<Role, string> = {
  * whoever sat down.
  *
  * `title` omits its article, because the places it appears want different ones:
- * a sentence needs "the Climate Minister" and a seat list wants none at all.
+ * a sentence needs "the Honourable Minister" and a seat list wants none at all.
  *
  * Nothing here is gendered. The archetype is played by whoever takes it.
  */
 export const ROLE_CHARACTER: Record<Role, { title: string; org: string; blurb: string }> = {
   government: {
-    title: 'Climate Minister',
+    title: 'Honourable Minister',
     org: 'Ministry of Energy, Environment and Climate',
     blurb: 'Holds the budget and the law. Moves faster than anyone. Can also be voted out in an afternoon.',
   },
@@ -285,12 +285,12 @@ export const ROLE_CHARACTER: Record<Role, { title: string; org: string; blurb: s
     blurb: 'Owns the emissions. Also owns the jobs, exports and tax base.',
   },
   community: {
-    title: 'Community Leader',
+    title: 'Community Elder',
     org: "Kampung Baru Jernih residents' association",
     blurb: '34 million people who want clean air, a job, and petrol under two Ringga a litre.',
   },
   activist: {
-    title: 'Climate Campaigner',
+    title: 'Youth Activist',
     org: 'Bangkit Iklim',
     blurb: 'Can make ignoring them more expensive than listening. Three times, and only three.',
   },
