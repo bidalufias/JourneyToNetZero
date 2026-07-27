@@ -1,46 +1,60 @@
 ======================================================================================================================
-BALANCE REPORT v1.0 (as designed)
+BALANCE REPORT v2.0  --  rebased: 100 Mt net start, net zero target
 ======================================================================================================================
 
---- policy archetypes ---
-ALL SELFISH                        n=2000   WIN   0.0%   miss: carbon 100.0% growth 99.3% happy 100.0%   E  278.7  G 4.31  H 4.92  green 26.5%
-ALL COOPERATOR                     n=2000   WIN  83.9%   miss: carbon  0.0% growth 16.1% happy  0.0%   E  149.6  G 5.17  H 8.82  green 59.3%
-ALL BALANCED                       n=2000   WIN  97.1%   miss: carbon  0.0% growth  2.9% happy  0.0%   E  162.9  G 5.33  H 8.56  green 56.7%
-ALL POPULIST                       n=2000   WIN   8.9%   miss: carbon 70.4% growth 66.6% happy  0.3%   E  206.8  G 4.90  H 8.00  green 46.3%
-ALL IDEOLOGUE                      n=2000   WIN   0.1%   miss: carbon  0.0% growth 99.9% happy  2.8%   E  138.6  G 4.31  H 7.93  green 60.1%
-ALL RANDOM                         n=2000   WIN   0.7%   miss: carbon 35.3% growth 98.7% happy 63.5%   E  194.3  G 4.18  H 6.80  green 46.9%
-3 COOP + 1 SELFISH(biz)            n=2000   WIN  23.8%   miss: carbon  8.5% growth 50.6% happy 52.0%   E  190.3  G 5.01  H 6.99  green 48.4%
-3 COOP + 1 SELFISH(gov)            n=2000   WIN  14.2%   miss: carbon 16.6% growth 85.4% happy  8.6%   E  192.5  G 4.85  H 7.56  green 47.8%
-REALISTIC (bal/self/pop/ideo)      n=2000   WIN   1.3%   miss: carbon 57.2% growth 96.5% happy 21.3%   E  203.1  G 4.46  H 7.14  green 46.1%
+The country emits ~300 Mt gross and absorbs ~200 through forest and peatland,
+so it starts at 100 net and has to reach zero. The cut required is the same
+100 Mt it always was; what changed is that the run now crosses the whole
+abatement curve instead of stopping in its cheap half.
 
-MIXED TABLE (random policies)      n=6000   WIN  22.0%   miss: carbon 24.0% growth 73.8% happy 23.0%   E  184.5  G 4.74  H 7.60  green 50.1%
+--- policy archetypes ---   (v1.0 figures, on the 300->200 game, in brackets)
+ALL SELFISH                     n=2000   WIN   0.0% [ 0.0]   miss: carbon 100.0% growth 100.0% happy 100.0%   E   36.9  G 4.04  H 5.46  green 29.1%
+ALL COOPERATOR                  n=2000   WIN  85.8% [83.9]   miss: carbon   0.0% growth  14.2% happy   0.0%   E  -61.0  G 5.18  H 8.83  green 59.3%
+ALL BALANCED                    n=2000   WIN  96.7% [97.1]   miss: carbon   0.0% growth   3.4% happy   0.0%   E  -44.0  G 5.33  H 8.58  green 56.8%
+ALL POPULIST                    n=2000   WIN   9.0% [ 8.9]   miss: carbon  60.6% growth  82.3% happy   0.0%   E    0.6  G 4.81  H 8.11  green 47.1%
+ALL IDEOLOGUE                   n=2000   WIN   0.5% [ 0.1]   miss: carbon   0.0% growth  99.5% happy   1.5%   E  -71.4  G 4.32  H 7.95  green 60.2%
+ALL RANDOM                      n=2000   WIN   0.4% [ 0.7]   miss: carbon  37.6% growth  98.8% happy  63.9%   E   -6.0  G 4.18  H 6.81  green 46.9%
+3 COOP + 1 SELFISH(biz)         n=2000   WIN  22.8% [23.8]   miss: carbon   7.3% growth  54.4% happy  50.0%   E  -11.4  G 4.97  H 7.00  green 48.5%
+3 COOP + 1 SELFISH(gov)         n=2000   WIN  10.7% [14.2]   miss: carbon   7.8% growth  89.0% happy   7.3%   E  -10.4  G 4.83  H 7.58  green 48.2%
+REALISTIC (bal/self/pop/ideo)   n=2000   WIN   0.5% [ 1.3]   miss: carbon  59.9% growth  99.3% happy  34.2%   E    4.2  G 4.30  H 7.04  green 45.2%
 
---- private goal achievement (mixed tables) ---
-  government   G-a  41.5%   G-b  47.4%   G-c  28.7%
-  business     B-a  39.4%   B-b  40.9%   B-c  33.8%
-  community    C-a  38.0%   C-b  35.8%   C-c  47.0%
-  activist     A-a  40.9%   A-b  44.0%   A-c  22.1%
+MIXED TABLE (random policies)   n=6000   WIN  20.8% [22.0]   miss: carbon  24.9% growth  76.6% happy  22.2%   E  -19.2  G 4.70  H 7.63  green 50.2%
+
+Growth is still the binding target by a wide margin, as it was before. 75.1% of
+mixed tables end net negative, which is the same population that used to clear
+200 Mt: the carbon pass rate is unchanged, the number it is measured against is not.
+
+--- private goal achievement (mixed tables) ---   [v1.0 in brackets]
+  government  G-a  41.4% [41.5]   G-b  44.2% [47.4]   G-c  28.9% [28.7]
+  business    B-a  39.1% [39.4]   B-b  41.4% [40.9]   B-c  33.8% [33.8]
+  community   C-a  37.4% [38.0]   C-b  35.0% [35.8]   C-c  46.5% [47.0]
+  activist    A-a  42.0% [40.9]   A-b  43.9% [44.0]   A-c  23.8% [22.1]
+
+  Note: no option in the pack sets COMPROMISED, so the "never collaborate" half
+  of A-a has never had any effect and the bar is the carbon figure alone.
 
 --- option usage (dead / dominant options in mixed tables) ---
-  dead options (<5% share within its role): 3
-     R4C-B3  4.8%
-     R1B-G2  4.9%
-     R5B-C2  5.0%
-  dominant options (>85% share): 5
-     R5B-C3  89.2%
-     R5A-C3  88.2%
-     R6B-C3  86.9%
-     R5C-C3  85.7%
-     R1C-C3  85.2%
+  dead options (<5% share within its role): 3      [v1.0: 3]
+     R1C-G2   4.4%
+     R4C-C2   4.9%
+     R3C-C1   4.9%
+  dominant options (>85% share): 5              [v1.0: 5]
+     R5A-C3   89.6%
+     R5B-C3   89.1%
+     R5C-C3   88.0%
+     R6B-C3   86.9%
+     R1C-C3   85.4%
 
 --- scenario variant fairness (win rate when that variant appears) ---
-   R1A  24.3%  R1B  27.2%  R1C  14.6%
-   R2A  18.2%  R2B  19.7%  R2C  28.2%
-   R3A  19.8%  R3B  19.5%  R3C  26.8%
-   R4A  23.5%  R4B  25.4%  R4C  17.3%
-   R5A  17.8%  R5B  27.1%  R5C  21.3%
-   R6A  22.5%  R6B  21.0%  R6C  22.6%
+  R1A  22.5%  R1B  24.9%  R1C  14.9%
+  R2A  17.2%  R2B  19.6%  R2C  25.7%
+  R3A  20.5%  R3B  17.5%  R3C  24.3%
+  R4A  22.4%  R4B  24.0%  R4C  16.0%
+  R5A  17.6%  R5B  25.6%  R5C  19.4%
+  R6A  22.2%  R6B  20.3%  R6C  19.9%
 
---- resources --- ended with 0 fiscal: 12.1%   0 capital: 20.5%
+--- resources ---
+    ended with 0 fiscal: 12.3%   0 capital: 20.1%
     green share reached 100%: 0.0%
     growth hit the 9% ceiling: 0.0%
+    ended net negative: 75.1%

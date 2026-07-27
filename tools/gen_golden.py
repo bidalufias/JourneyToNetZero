@@ -53,18 +53,13 @@ def snapshot(gm):
 
 def veto_decision(gm, rnd):
     """
-    Recompute the reference's veto choice.
+    The reference's veto choice, asked of the reference rather than restated.
 
-    The condition reads only pre-round state: vetoes, last_dirty, the round
-    number, the Community policy's cooperativeness and emissions, none of which
-    the treasury or shock steps touch, so evaluating it here matches what
-    `play_round` will decide a moment later.
+    It used to be a copy of the condition in `play_round`, which is how the two
+    came to disagree: the copy still tested emissions against 300 after the
+    country was rebased to 100, so fixtures recorded a veto that never happened.
     """
-    if (gm.vetoes > 0 and gm.last_dirty and rnd >= 2
-            and gm.pol["community"].coop > 0.35
-            and gm.e > 300 - (300 - 200) * (rnd - 1) / 6.0):
-        return sorted(gm.last_dirty)[0]
-    return None
+    return gm.veto_choice(rnd)
 
 
 def main():

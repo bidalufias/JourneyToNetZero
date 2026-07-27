@@ -90,108 +90,146 @@ lock.
 
 ---
 
-## 2. The emissions rebase: full specification
+## 2. The emissions rebase: SHIPPED
 
-The cut required is unchanged at 100 Mt, and the option effect values are raw
-absolute deltas, so **the 216 option cards need no change**. What must change is
-everything that references an emissions *level* rather than a *delta*.
+Done, validated and merged. This section records what was actually required,
+which differed from what this plan first predicted in three places. The
+measured outcome is in `reference/jtnz-balance-report.txt` (v2.0).
 
-### 2.1 Config changes
+### 2.1 Config changes as shipped
 
-| Constant | Now | New | Why |
+| Constant | Was | Now | Why |
 |---|---|---|---|
-| `start.e` | 300 | **100** | The rebase. |
-| `tgt_e` | 200 | **0** | Net zero. |
+| `start.e` | 300 | **100** | The rebase. 300 gross less a ~200 land sink. |
+| `tgt_e` | 200 | **0** | Net zero, and emissions are never clamped, so a table can finish net negative. |
 | `mac_ref` | 150 | **50** | Midpoint of the new state space. |
 | `mac_range` | 150 | **50** | Preserves the curve's shape. |
-| `driftTable` k | 2.4 / 1.9 / 1.5 / ... | **divide by 3** | See 2.3. This is the highest risk item. |
+| `mac_lo` | 0.45 | **0.60** | Not predicted. See 2.2. |
+| `mac_span` | 0.70 | **0.55** | Holds the ceiling at 1.15 while the floor rises. |
+| `driftTable` k | 2.4 / 1.9 / 1.5 / 1.1 | **0.80 / 0.63 / 0.50 / 0.37** | Divided by three, as predicted. |
 | `r6_high_e` | 260 | **87** | "Still high in Round 6", proportionally. |
+| Goal B-b | −40 Mt | **−33 Mt** | Re-measured to 41.4%, against a published 40.9%. |
+| Goal A-a | ≤ 175 Mt | **≤ −25 Mt** | Re-measured to 42.0%, against a published 40.9%. |
 
-### 2.2 The marginal abatement curve, and a decision worth taking deliberately
+The 216 option cards were **not** changed, which this plan predicted, though the
+reasoning given for it was wrong and the alternative was tested rather than
+assumed. Sizing the cards down to match the smaller country was tried across
+four scale factors and made the game worse at every one of them: only the very
+strongest tables could still reach zero and every weaker cohort collapsed to
+nothing. The cards stay as authored.
 
-`mac(e) = clamp(0.45, 0.45 + 0.7 × (e − ref) / range, 1.15)`
+### 2.2 The abatement floor had to rise, and this plan said it should not
 
-Cuts are most effective when emissions are high and least effective when they
-are low, which is correct: the cheap abatement goes first.
+The prediction was that the harsher endgame should be kept and the win rate
+restored through drift alone. That was wrong, and the simulation said so.
 
-Today the required 100 Mt of cutting happens between 300 and 200, where the
-multiplier runs 1.15 down to 0.68. Most of the game is spent in the *easy* part
-of the curve.
+The old game ran 300 to 200 and never touched the flat part of the curve, so its
+whole life was spent in the multiplier's cheap half. The rebased game crosses the
+entire curve. Leaving the floor at 0.45 while making that traverse mandatory did
+not produce a hard endgame, it produced a broken one: three cooperators against a
+single defecting Business fell from 23.8% to 0.6%, which is the exact failure the
+original playtest identified as fault #5 and deliberately fixed.
 
-After the rebase, the same 100 Mt of cutting happens between 100 and 0, where the
-multiplier runs 1.15 down to the 0.45 floor and then stays there. **Most of the
-game is now spent in the hard part of the curve, and the endgame is brutal.**
+Raising the floor to 0.60 and holding the ceiling at 1.15 keeps the lesson,
+because the last tonnes are still worth only just over half what the first ones
+were, while leaving the game playable.
 
-That is not a bug to be tuned away. It is the truest thing the rebase buys you:
+**The lesson survives. It is a shallower curve than this plan wanted, and a
+real one.**
 
-> The last 20 Mt costs more than the first 60.
+### 2.3 Drift was the real risk, and dividing by three was right
 
-That is what net zero actually means, it is why every real net zero plan has a
-residual-emissions problem, and no other game in this space teaches it.
+`drift = growth x k`. At 4.5% growth and k = 2.4 that is 10.8 Mt a round: 3.6% of
+a 300 Mt country and 10.8% of a 100 Mt one. Left alone, six rounds of drift would
+have added two thirds of the national budget back and nothing could have won.
+Dividing the coefficients by three restored the proportional pressure exactly,
+and this was the one prediction in the original spec that needed no adjustment.
 
-**Recommendation: keep the harsher curve. Do not raise `mac_lo` to compensate.**
-Restore the win rate by softening drift and, if still needed, a modest uplift on
-green-share-dependent options, which rewards building the clean economy early
-and therefore reinforces the same lesson.
+### 2.4 Validation: measured, not assumed
 
-### 2.3 Drift is the real risk
+Every figure below is a fresh run against `reference/engine.py`, 2,000 games per
+archetype and 6,000 mixed, compared with the published v1.0 report.
 
-`drift = growth × k`, added to emissions every round.
-
-At 4.5% growth and k = 2.4, that is 10.8 Mt added per round. Against a 300 Mt
-base that is 3.6%. Against a 100 Mt base it is **10.8%**. Unadjusted, six rounds
-of drift alone would add roughly 65 Mt to a 100 Mt country, and the game becomes
-unwinnable.
-
-Dividing the k values by 3 restores the proportional pressure exactly. This is
-the one change that must be verified by simulation before anything else ships.
-
-### 2.4 Private goals denominated in Mt
-
-| Goal | Now | Action |
+| Table | v1.0 | v2.0 |
 |---|---|---|
-| Business, Green Champion | deliver 40+ Mt of cuts | Re-measure. Not a simple divide by three, because delivered cuts shrink under the harsher MAC. Expect roughly 25 to 30. |
-| Activist, No Compromise | never collaborate and finish ≤ 175 Mt | Restate as **"Never collaborate, and still get the country to net zero."** The difficulty now comes from the constraint, not from a threshold that has to be re-derived. |
+| Everyone selfish | 0.0% | **0.0%** |
+| Everyone cooperates | 83.9% | **85.8%** |
+| All balanced | 97.1% | **96.7%** |
+| Everyone populist | 8.9% | **9.0%** |
+| All ideologue | 0.1% | **0.5%** |
+| All random | 0.7% | **0.4%** |
+| Three cooperate, Business defects | 23.8% | **22.8%** |
+| Three cooperate, Government defects | 14.2% | **10.7%** |
+| Four different agendas | 1.3% | **0.5%** |
+| **Mixed tables** | **22.0%** | **20.8%** |
 
-The two green-share goals (The Legacy at 55%, The Long Game at 52%) are
-unaffected.
+Miss rates on mixed tables: carbon 24.9% against 24.0%, growth 76.6% against
+73.8%, happiness 22.2% against 23.0%. Growth remains the binding target by a
+factor of three, exactly as before.
 
-### 2.5 Hardcoded values in the interface
+All twelve private goals land within 3.2 points of their published rates. Dead
+options 3, unchanged. Dominant options 5, unchanged. Variant fairness within 11
+points, against 13 before. Resource exhaustion 12.3% and 20.1%, against 12.1%
+and 20.5%.
 
-| File | Line | Now | New |
-|---|---|---|---|
-| `src/dashboard/meters.ts` | 17 | `START_EMISSIONS = 300` | `100` |
-| `src/dashboard/meters.ts` | 109 | "Emissions can no longer reach 200." | "Net zero is no longer reachable." |
-| `src/dashboard/Reckoning.tsx` | 184 | `(300 - emissions) / 100` | `(100 - emissions) / 100` |
-| `src/dashboard/screens.tsx` | 133 | "DOWN TO 200 Mt" | "DOWN TO NET ZERO" |
-| `src/dashboard/screens.tsx` | 274 | "Emissions can no longer reach 200." | as above |
-| `src/dashboard/screens.tsx` | 286 | `reachable()`: `<= 45 * roundsLeft` | `<= 15 * roundsLeft` |
-| `src/dashboard/Dashboard.tsx` | 156 | sparkline trail seeded `[300, ...]` | `[100, ...]` |
+75.1% of mixed tables now finish net negative. That is not overshoot: it is the
+same population that used to clear 200 Mt. The carbon pass rate did not move,
+only the number it is measured against.
 
-### 2.6 Below zero
+`npm test`: 68 passed. Parity with the reference holds bit-exact on 96.7% of
+1,440 recorded rounds, worst deviation 3.65e-16.
 
-Net zero is a floor players can cross. Removals are real and the engine should
-let emissions go negative rather than clamping at zero, because "we went net
-negative" is a genuine and earned ending. Check every `Math.max(0, ...)` on the
-emissions path. The MAC floor already makes the last tonnes expensive, so this
-does not become a runaway.
+### 2.5 Two bugs found by doing this
 
-### 2.7 Validation gate
+Both were pre-existing, both were invisible until the numbers moved, and both are
+fixed.
 
-Nothing in this section ships on assumption. `reference/engine.py` and
-`tools/gen_golden.py` already exist, so the re-fit is mechanical:
+**The Community's veto never fired.** `Game.play_round` gated the Public Mandate
+on `self.e > 300 - (300 - 200) * (rnd - 1) / 6`, with both figures hardcoded.
+Against a 100 Mt country that is never true, so the agent never spent a veto. The
+design credits this single mechanic with moving a defecting Business from 0.0% to
+23.8%, so its silent removal was most of the collapse described above. The
+condition now reads the schedule, and lives in one place: it was duplicated in
+`tools/gen_golden.py`, which is how the two drifted apart, and the generator now
+asks the engine instead of restating it.
 
-1. Apply the config changes.
-2. Re-run the full policy sweep, 2,000 games per archetype.
-3. Land the win rates back on the published targets: all-selfish 0.0%, mixed
-   tables about 22%, all-cooperator about 84%, all-balanced about 97%, three
-   cooperators plus a defecting Business about 24%.
-4. Re-check dead and dominant option counts, currently 3 and 5.
-5. Re-measure all twelve private goals back to roughly 40%.
-6. Regenerate golden fixtures and run `npm test` for parity.
+**The agents' idea of "behind schedule" was a straight line.** Fine while the
+multiplier was flat, wrong once the run crosses the curve: a table sitting exactly
+on the line in Round 4 is already behind, because its remaining cuts are worth a
+third less than the ones it has spent. Both engines now solve for a MAC-weighted
+schedule (`pace_schedule` / `paceSchedule`). The dashboard's ON TRACK / OFF TRACK
+indicator used the same straight line and would have told a room it was fine when
+it was not, so it now reads the same schedule.
 
-**Do not ship the rebase without step 3 passing.** If the win rate lands low,
-the lever is drift and the green-share dividend, not the MAC floor.
+### 2.6 A third defect, recorded and not fixed
+
+`COMPROMISED` appears exactly once in the entire content pack: inside the text of
+the goal that tests for it. No option sets it. The "never collaborate" half of the
+Activist's No Compromise goal **has never done anything**, in any version, and the
+goal has always been a carbon threshold alone. Left as it is deliberately, because
+making the flag real changes what the goal measures and its threshold would have
+to be found again against the fixed version. Logged in `DESIGN-REVIEW.md`.
+
+### 2.7 Interface constants, as shipped
+
+| File | Change |
+|---|---|
+| `src/dashboard/meters.ts` | `START_EMISSIONS` deleted; the start now comes from the content pack, and the pace comes from `paceSchedule` |
+| `src/dashboard/meters.ts` | "Emissions can no longer reach 200." becomes "Net zero is no longer reachable." |
+| `src/dashboard/meters.ts` | The unreachable cutoff stays at roughly 50 Mt a round, re-measured as the 99th percentile of 18,000 simulated rounds. It is absolute, so the rebase left it where it was. |
+| `src/dashboard/Reckoning.tsx` | Meter fill rebased from `(300 - e) / 100` to `(100 - e) / 100` |
+| `src/dashboard/screens.tsx` | "DOWN TO 200 Mt" becomes "DOWN TO NET ZERO"; `reachable()` matched to the meters |
+| `src/dashboard/Dashboard.tsx` | Sparkline seeded from the content pack rather than a literal 300 |
+| `src/phone/guide.tsx` | Targets and the Mt entry restated as gross, sink and net |
+| `src/facilitator/script.ts` | The briefing lines say 300 out, 200 absorbed, 100 net, down to nothing |
+| `public/how-to-play.html` | Mission meter, the No Compromise goal and the "net zero" glossary entry, which used to say the game "doesn't ask you to reach it" |
+| `JOURNEY-TO-NET-ZERO-design.md` | Starting position and the mission table |
+
+### 2.8 Below zero, as decided
+
+Emissions are never clamped in either engine, so this needed no code: a table
+that keeps cutting past zero simply goes net negative, and 75.1% of mixed tables
+now do. That is the same population that used to clear 200 Mt.
 
 ---
 
@@ -512,18 +550,16 @@ the shared screen.
 
 Sequenced so each stage ships something playable and makes the next cheaper.
 
-### Stage 0: the rebase (1 week, must go first)
+### Stage 0: the rebase - DONE
 
-Everything downstream references the new numbers, so doing this later means
-rewriting copy twice.
-
-| | |
-|---|---|
-| 0.1 | Config rescale per section 2.1 |
-| 0.2 | Simulation re-fit and win-rate validation gate, section 2.7 |
-| 0.3 | Private goal re-measurement |
-| 0.4 | Hardcoded interface values, section 2.5 |
-| 0.5 | Golden fixtures regenerated, `npm test` green |
+| | | |
+|---|---|---|
+| 0.1 | Config rescale | done, section 2.1 |
+| 0.2 | Simulation re-fit and validation | done, section 2.4 |
+| 0.3 | Private goal re-measurement | done, all twelve within 3.2 points |
+| 0.4 | Interface constants | done, section 2.7 |
+| 0.5 | Golden fixtures and `npm test` | done, 68 passed, parity holds |
+| 0.6 | Balance report regenerated | `reference/jtnz-balance-report.txt` v2.0 |
 
 ### Stage 1: comprehension (1 week, no engine changes)
 
@@ -585,11 +621,12 @@ Run it after Stage 2. Decide Stages 3 and 4 by what the room actually asks for.
 
 ## 13. Open decisions
 
-1. **34 million people, or fewer?** The gross-minus-sink framing in section 0
-    makes 100 Mt net honest at the current population. If that framing is
-    rejected, the population has to come down to about 12 million instead.
-2. **Does the game allow net negative?** Recommended yes, section 2.6. It is a
-    real and earnable ending.
+1. **34 million people, or fewer?** Shipped on the gross-minus-sink framing in
+    section 0, which makes 100 Mt net honest at the current population. If that
+    framing is ever rejected, the population has to come down to about 12
+    million instead.
+2. **Should the COMPROMISED flag be made real?** Section 2.6. Fixing it means
+    re-measuring the Activist's No Compromise goal against the fixed version.
 3. **What is the published session length?** Recommended 35 minutes with a
     29-minute returning-table path. Publishing 30 and running 37 is worse.
 4. **Who is the primary audience?** A corporate workshop, a university class and

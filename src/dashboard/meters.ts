@@ -2,10 +2,11 @@
  * Turning engine state into the three numbers the room reads from four metres.
  *
  * The status words are computed, not decorative. "Off track" means measured
- * against the pace the country actually has to hold to land at 200 Mt by
- * Round 6, so the word changes the moment the arithmetic does.
+ * against the pace the country actually has to hold to reach net zero by Round
+ * 6, so the word changes the moment the arithmetic does.
  */
-import type { PublicState } from '../engine/types'
+import { paceSchedule } from '../engine/engine'
+import type { Content, PublicState } from '../engine/types'
 import type { MeterSpec } from '../ui/primitives'
 
 export interface Targets {
@@ -14,19 +15,26 @@ export interface Targets {
   happiness: number
 }
 
-const START_EMISSIONS = 300
 const START_HAPPINESS = 6.0
 /** Below 4% growth the country is failing badly; the bar starts there. */
 const GROWTH_FLOOR = 4.0
 
-/** Where emissions need to be by the end of `round` to still land on target. */
-export function emissionsPace(round: number, target: number): number {
-  const done = Math.max(0, Math.min(6, round)) / 6
-  return START_EMISSIONS - (START_EMISSIONS - target) * done
+/**
+ * Where emissions need to be by the end of `round` to still land on target.
+ *
+ * Reads the engine's schedule rather than drawing a straight line between the
+ * start and the target. The line was close enough while the country only had to
+ * fall from 300 to 200; running all the way to zero crosses the whole abatement
+ * curve, and a line would call a table on track in Round 4 when its remaining
+ * cuts are worth a third less than the ones it has already spent.
+ */
+export function emissionsPace(round: number, content: Content): number {
+  return paceSchedule(content)[Math.max(0, Math.min(6, round))]
 }
 
-export function emissionsMeter(state: PublicState, targets: Targets): MeterSpec {
-  const pace = emissionsPace(state.round, targets.emissions)
+export function emissionsMeter(state: PublicState, targets: Targets, content: Content): MeterSpec {
+  const start = content.config.start.e
+  const pace = emissionsPace(state.round, content)
   const met = state.emissions <= targets.emissions
   const onTrack = state.emissions <= pace
   return {
@@ -34,7 +42,7 @@ export function emissionsMeter(state: PublicState, targets: Targets): MeterSpec 
     value: state.emissions,
     display: state.emissions.toFixed(0),
     unit: 'Mt',
-    from: START_EMISSIONS,
+    from: start,
     target: targets.emissions,
     inverted: true,
     ink: 'var(--jtnz-meter-emissions)',
@@ -43,7 +51,7 @@ export function emissionsMeter(state: PublicState, targets: Targets): MeterSpec 
       : onTrack
         ? { text: 'ON TRACK', tone: 'good' }
         : { text: 'OFF TRACK', tone: 'bad' },
-    footLeft: `from ${START_EMISSIONS}`,
+    footLeft: `from ${start} net`,
   }
 }
 
@@ -104,9 +112,12 @@ export function projectionNote(
   }
   // Once no remaining round can close the gap, say so plainly. The tone of
   // the rest of the session should change.
-  const bestCase = 45 * roundsLeft
+  // The most a single round has ever been measured to cut, at the 99th
+  // percentile of 18,000 simulated rounds. Absolute, not proportional, so the
+  // rebase to a 100 Mt country left it where it was.
+  const bestCase = 50 * roundsLeft
   if (roundsLeft > 0 && over > bestCase) {
-    return { text: 'Emissions can no longer reach 200.', onTrack: false, dead: true }
+    return { text: 'Net zero is no longer reachable.', onTrack: false, dead: true }
   }
   if (roundsLeft === 0) {
     return { text: `${over.toFixed(0)} Mt over, and no rounds left.`, onTrack: false, dead: true }

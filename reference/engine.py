@@ -11,21 +11,82 @@ CFG = dict(
     green_scale=0.60, green_decay=0.97, green_power=1.5,
     green_dividend=95.0,          # growth bonus = (greenShare-10)/this
     h_b0=6.15, h_b_green=1.5, h_b_growth=0.25, h_persist=0.72, h_scale=0.65,
-    drift=[(20, 2.4), (40, 1.9), (60, 1.5), (100, 1.1)],
-    mac_lo=0.45, mac_span=0.70, mac_ref=150.0, mac_range=150.0,
+    # Growth carbon, per point of growth, by green share band. A third of the
+    # values this pack was fitted with, because the same tonnes land against a
+    # country a third the size. Unscaled, six rounds of drift alone would add
+    # two thirds of the national budget back and nothing could win.
+    drift=[(20, 0.80), (40, 0.63), (60, 0.50), (100, 0.37)],
+    # The abatement multiplier: cheap cuts first, expensive ones last. Reference
+    # and range follow the state space down. The floor is 0.60 rather than 0.45
+    # because the old game stopped at 200 and never reached the flat part of the
+    # curve, while this one runs all the way to zero and spends its endgame
+    # there. The ceiling is unchanged at mac_lo + mac_span = 1.15, so the last
+    # tonnes still cost nearly twice what the first ones did.
+    mac_lo=0.60, mac_span=0.55, mac_ref=50.0, mac_range=50.0,
     self_org_mult=1.5, partner_unfunded=0.5,
     spotlight_backdown=0.50, accountability_bonus=0.22, vetoes=2, regulation_bite=0.55, public_pressure=0.50,      # spotlit dirty option keeps only this share
     evidence_green=1.0,           # green share per round per EVIDENCE flag
     fiscal_income=2, fiscal_bonus_at=5.5, capital_income_at=5.0,
     fiscal_cap=8, capital_cap=12,
-    tgt_e=200.0, tgt_g=5.0, tgt_h=7.0,
-    start=dict(e=300.0, g=4.5, h=6.0, gr=10, fiscal=4, capital=5, spot=3),
+    # 300 Mt gross, about 200 absorbed by forest and peatland, so 100 net, and
+    # net zero is the actual target rather than a third of the way to it.
+    # Emissions are deliberately never clamped: a table that goes net negative
+    # has earned it.
+    tgt_e=0.0, tgt_g=5.0, tgt_h=7.0,
+    start=dict(e=100.0, g=4.5, h=6.0, gr=10, fiscal=4, capital=5, spot=3),
     e_green=1.15, e_dirty=0.95, h_scale2=0.62,
     role_e={"government":0.80,"business":1.00,"community":1.40,"activist":1.30},
     regulate_abate=6.0, credibility_decay=0.92, volunteer_fatigue=0.94,
     coalition={2:(1.0,0.05,0.5), 3:(7.0,0.20,3.0), 4:(9.5,0.36,4.5)}, coal_scale=1.0,   # aligned picks -> (E cut, happiness, green)
-    r6_flag_reduce=0.25, r6_flag_cap=0.60, r6_high_e=260, r6_high_mult=2.0,
+    r6_flag_reduce=0.25, r6_flag_cap=0.60, r6_high_e=87, r6_high_mult=2.0,
 )
+
+
+_PACE_CACHE = {}
+
+
+def pace_schedule(cfg):
+    """Where a table should be at the start of each round to be on track.
+
+    A straight line from the start to the target assumes every round can cut
+    the same amount, which is only true while the abatement multiplier is flat.
+    Over 300 to 200 it very nearly is, so the old linear schedule was fair. Over
+    100 to zero it is not: the multiplier crosses its whole range and the last
+    rounds are worth a third less than the first. A table sitting exactly on a
+    straight line at round four is already behind and cannot tell.
+
+    So the schedule cuts each round in proportion to what that round is actually
+    worth, found by solving for the constant effort that lands on the target.
+    """
+    key = (cfg["start"]["e"], cfg["tgt_e"], cfg["mac_lo"], cfg["mac_span"],
+           cfg["mac_ref"], cfg["mac_range"])
+    if key in _PACE_CACHE:
+        return _PACE_CACHE[key]
+    e0, et = cfg["start"]["e"], cfg["tgt_e"]
+    lo, span, ref, rng = cfg["mac_lo"], cfg["mac_span"], cfg["mac_ref"], cfg["mac_range"]
+
+    def m(e):
+        return max(lo, min(lo + span, lo + span * (e - ref) / rng))
+
+    def land(rate):
+        e = e0
+        for _ in range(6):
+            e -= rate * m(e)
+        return e
+
+    los, his = 0.0, max(e0 - et, 1.0) * 2
+    for _ in range(80):
+        mid = (los + his) / 2
+        if land(mid) > et:
+            los = mid
+        else:
+            his = mid
+    rate, e, out = (los + his) / 2, e0, [e0]
+    for _ in range(6):
+        e -= rate * m(e)
+        out.append(e)
+    _PACE_CACHE[key] = out
+    return out
 
 
 def K(gr, cfg):
@@ -80,6 +141,27 @@ class Game:
         return out or sc["options"][role][:1]
 
     # ---------- one round ----------
+    def veto_choice(self, rnd):
+        """Whose dirty options the Community strikes this round, or None.
+
+        The Community spends a Mandate when the country is behind schedule and
+        somebody went dirty last round. "Behind" reads the schedule rather than
+        the two numbers this pack happened to ship with: against a 100 Mt
+        country a test for emissions above 300 never fires, which silently
+        removes the one mechanic the design credits with making a defecting
+        Business survivable at all.
+
+        It lives here because the fixture generator needs the same answer, and a
+        second copy of the condition is how the two drift apart. It reads only
+        pre-round state, so calling it before the treasury and shock steps gives
+        what `play_round` decides a moment later.
+        """
+        if (self.vetoes > 0 and self.last_dirty and rnd >= 2
+                and self.pol["community"].coop > 0.35
+                and self.e > pace_schedule(self.cfg)[rnd - 1]):
+            return sorted(self.last_dirty)[0]
+        return None
+
     def mac(self):
         c = self.cfg
         return max(c["mac_lo"], min(c["mac_lo"] + c["mac_span"],
@@ -124,10 +206,8 @@ class Game:
 
         # ---- choices ----
         veto_on = None
-        if (self.vetoes > 0 and self.last_dirty and rnd >= 2
-                and self.pol["community"].coop > 0.35
-                and self.e > 300 - (300 - 200) * (rnd - 1) / 6.0):
-            veto_on = sorted(self.last_dirty)[0]
+        veto_on = self.veto_choice(rnd)
+        if veto_on:
             self.vetoes -= 1
             self.veto_used += 1
 
@@ -310,12 +390,17 @@ def goal_met(gid, res):
         "G-b": min(res["g_hist"]) >= 4.0,
         "G-c": gr >= 55,
         "B-a": res["capital"] >= 6,
-        "B-b": res["role_e"]["business"] <= -40,
+        "B-b": res["role_e"]["business"] <= -33,
         "B-c": t["business"] >= 2 and res["capital"] >= 4,
         "C-a": h >= 8.0,
         "C-b": min(res["h_hist"]) >= 6.3,
         "C-c": res["self_org_ok"] >= 4,
-        "A-a": "COMPROMISED" not in f and e <= 175,
+        # No option in the pack has ever set COMPROMISED, so the "never
+        # collaborate" half of this goal has never done anything and the bar is
+        # the carbon figure alone. Left as it is here rather than fixed, because
+        # making the flag real changes what this goal measures and the threshold
+        # would have to be found again against the fixed version.
+        "A-a": "COMPROMISED" not in f and e <= -25,
         "A-b": gr >= 52,
         "A-c": h >= 7.0 and res["spot_hits"] >= 1,
     }[gid]
@@ -344,16 +429,21 @@ class Policy:
             s0 = gm.cfg["volunteer_fatigue"] ** gm.selforg
         else:
             s0 = 1.0
-        pace = 300 - (300 - 200) * (rnd - 1) / 6.0
-        off_pace = max(0.0, (gm.e - pace) / 30.0)
+        # Pace, and how far off it, both read the configured start and target
+        # rather than the numbers the game happened to ship with. An agent that
+        # thinks the country starts at 300 and lands at 200 scores every option
+        # wrongly once those move, which would quietly invalidate a rebalance.
+        e0, et = gm.cfg["start"]["e"], gm.cfg["tgt_e"]
+        pace = pace_schedule(gm.cfg)[rnd - 1]
+        off_pace = max(0.0, (gm.e - pace) / (abs(e0 - et) * 0.1))
         if o["arch"] in ("ESCALATE", "REGULATE"):
             s += w.get("gap", 0.3) * off_pace * 8
             if gm.last_dirty - {role}:
                 s += 4.0 * (1 + w.get("e", 0.2))     # someone defected: apply pressure
         if w.get("gap"):
-            need_e = max(0.0, (gm.e - 200) / 100.0)
-            need_g = max(0.0, (5.0 - (sum(gm.g_hist) / max(len(gm.g_hist), 1) if gm.g_hist else gm.g)))
-            need_h = max(0.0, 7.0 - gm.h)
+            need_e = max(0.0, (gm.e - et) / (e0 - et))
+            need_g = max(0.0, (gm.cfg["tgt_g"] - (sum(gm.g_hist) / max(len(gm.g_hist), 1) if gm.g_hist else gm.g)))
+            need_h = max(0.0, gm.cfg["tgt_h"] - gm.h)
             s += w["gap"] * (need_e * (-o["e"]) * 1.2 + need_g * o["g"] * 12 + need_h * o["h"] * 12)
         if o["arch"] == "COLLABORATE":
             s -= w.get("gr", 0.2) * 6 * (6 - rnd) * 0.25     # spent credibility costs later rounds

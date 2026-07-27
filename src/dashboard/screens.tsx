@@ -130,7 +130,7 @@ export function Briefing({ view, clock }: { view: DashboardView; clock: string |
 
         <div className="brief__targets">
           {[
-            { label: 'EMISSIONS', from: `${s.emissions.toFixed(0)} Mt today`, target: 'DOWN TO 200 Mt' },
+            { label: 'EMISSIONS', from: `${s.emissions.toFixed(0)} Mt net today`, target: 'DOWN TO NET ZERO' },
             { label: 'GROWTH', from: `${s.growth.toFixed(1)}% today`, target: 'AVERAGING 5%' },
             { label: 'HAPPINESS', from: `${s.happiness.toFixed(1)} today`, target: 'UP TO 7.0' },
           ].map((t) => (
@@ -271,7 +271,7 @@ export function RoundSummary({ view }: { view: DashboardView }) {
             ? 'Six rounds gone. This is the country you built.'
             : reachable(view)
               ? `${roundsLeft} round${roundsLeft === 1 ? '' : 's'}. Three targets. All still reachable.`
-              : 'Emissions can no longer reach 200.'}
+              : 'Net zero is no longer reachable.'}
         </p>
       </div>
     </div>
@@ -282,7 +282,7 @@ export function RoundSummary({ view }: { view: DashboardView }) {
 function reachable(view: DashboardView): boolean {
   const roundsLeft = 6 - view.state.round
   if (roundsLeft <= 0) return view.state.emissions <= view.targets.emissions
-  return view.state.emissions - view.targets.emissions <= 45 * roundsLeft
+  return view.state.emissions - view.targets.emissions <= 50 * roundsLeft
 }
 
 function roundSentence(view: DashboardView, round: number): string {

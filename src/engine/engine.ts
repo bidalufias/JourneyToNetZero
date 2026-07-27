@@ -73,6 +73,57 @@ export function mac(emissions: number, content: Content): number {
   )
 }
 
+const PACE_CACHE = new Map<string, number[]>()
+
+/**
+ * Where emissions have to be at the end of each round to still land on target.
+ *
+ * Index 0 is the start and index 6 is the target, so `paceSchedule(c)[round]`
+ * is the bar for a country that has played `round` rounds.
+ *
+ * Not a straight line. A straight line assumes every round can cut the same
+ * amount, which holds only while the abatement multiplier is flat: over 300 to
+ * 200 it nearly was, so a line was honest, but this country runs to zero and
+ * crosses the whole curve, where the closing rounds are worth a third less than
+ * the opening ones. A table sitting exactly on a straight line in Round 4 is
+ * already behind and the dashboard would be telling it otherwise.
+ *
+ * So each round is scheduled to cut in proportion to what that round is
+ * actually worth, by solving for the constant effort that lands on the target.
+ * Mirrors `pace_schedule` in `reference/engine.py`.
+ */
+export function paceSchedule(content: Content): number[] {
+  const c = content.config
+  const key = `${c.start.e}|${c.tgt_e}|${c.mac_lo}|${c.mac_span}|${c.mac_ref}|${c.mac_range}`
+  const hit = PACE_CACHE.get(key)
+  if (hit) return hit
+
+  const m = (e: number) =>
+    Math.max(c.mac_lo, Math.min(c.mac_lo + c.mac_span, c.mac_lo + (c.mac_span * (e - c.mac_ref)) / c.mac_range))
+  const land = (rate: number) => {
+    let e = c.start.e
+    for (let i = 0; i < 6; i++) e -= rate * m(e)
+    return e
+  }
+
+  let lo = 0
+  let hi = Math.max(c.start.e - c.tgt_e, 1) * 2
+  for (let i = 0; i < 80; i++) {
+    const mid = (lo + hi) / 2
+    if (land(mid) > c.tgt_e) lo = mid
+    else hi = mid
+  }
+  const rate = (lo + hi) / 2
+  let e = c.start.e
+  const out = [e]
+  for (let i = 0; i < 6; i++) {
+    e -= rate * m(e)
+    out.push(e)
+  }
+  PACE_CACHE.set(key, out)
+  return out
+}
+
 export function createGame(path: string[], content: Content): GameState {
   const s = content.config.start
   return {
@@ -533,7 +584,7 @@ export function goalMet(goalId: string, res: GameResult): boolean {
     case 'B-a':
       return res.capital >= 6
     case 'B-b':
-      return res.roleEmissions.business <= -40
+      return res.roleEmissions.business <= -33
     case 'B-c':
       return res.trust.business >= 2 && res.capital >= 4
     case 'C-a':
@@ -543,7 +594,10 @@ export function goalMet(goalId: string, res: GameResult): boolean {
     case 'C-c':
       return res.selfOrganiseSucceeded >= 4
     case 'A-a':
-      return !res.flags.has('COMPROMISED') && res.e <= 175
+      // No option in the pack sets COMPROMISED, so this bar is the carbon
+      // figure alone. Recorded in DESIGN-REVIEW.md rather than fixed here,
+      // because making the flag real changes what the goal measures.
+      return !res.flags.has('COMPROMISED') && res.e <= -25
     case 'A-b':
       return res.gr >= 52
     case 'A-c':

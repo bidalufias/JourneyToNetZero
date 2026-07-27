@@ -445,7 +445,7 @@ function goalMet(goalId, res) {
     case "B-a":
       return res.capital >= 6;
     case "B-b":
-      return res.roleEmissions.business <= -40;
+      return res.roleEmissions.business <= -33;
     case "B-c":
       return res.trust.business >= 2 && res.capital >= 4;
     case "C-a":
@@ -455,7 +455,7 @@ function goalMet(goalId, res) {
     case "C-c":
       return res.selfOrganiseSucceeded >= 4;
     case "A-a":
-      return !res.flags.has("COMPROMISED") && res.e <= 175;
+      return !res.flags.has("COMPROMISED") && res.e <= -25;
     case "A-b":
       return res.gr >= 52;
     case "A-c":

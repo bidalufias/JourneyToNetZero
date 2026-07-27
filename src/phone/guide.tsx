@@ -42,11 +42,11 @@ const RESOURCE_NOTE: Record<Role, Entry> = {
 const SHARED: Entry[] = [
   {
     term: 'The three targets',
-    what: 'By 2050 the country needs emissions down to 200 Mt, growth averaging 5%, and happiness at 7. Miss even one and nobody wins, however well you personally did.',
+    what: 'By 2050 the country needs net emissions down to zero, growth averaging 5%, and happiness at 7. Miss even one and nobody wins, however well you personally did.',
   },
   {
     term: 'Mt',
-    what: 'Megatonnes of carbon a year. The country starts at 300 and the big screen tracks it.',
+    what: 'Megatonnes of carbon a year. The country puts out 300 and its forests absorb 200, so it starts at 100 net. The big screen tracks it.',
   },
   { term: 'RG', what: 'Ringga, the money in the news stories. Flavour, not a resource you hold.' },
   {

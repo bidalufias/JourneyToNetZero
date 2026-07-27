@@ -518,6 +518,9 @@ take the redesign.
 | 6 | Three surfaces | The Spotlight rule is stated three different ways, and the "only fires if you also escalate" condition is prominent in only one. |
 | 7 | All phone screens | The three national numbers appear on no phone at any point. |
 | 8 | `hints.ts:128` | Fallback hint "A judgement call. Make it." can ship on a real card if an archetype is missing. It says nothing. |
+| 9 | content pack | `COMPROMISED` appears once in the whole pack, inside the text of the goal that tests for it. No option sets it, so the "never collaborate" half of the Activist's No Compromise goal has never done anything in any version. Found during the rebase; recorded rather than fixed, because making the flag real changes what the goal measures. |
+| 10 | `engine.py`, `gen_golden.py` | **Fixed.** The Community's veto trigger hardcoded 300 and 200 and was duplicated in the fixture generator, so the two drifted. Invisible until the country was rebased, at which point the veto stopped firing entirely. |
+| 11 | `engine.py`, `meters.ts` | **Fixed.** "Behind schedule" was a straight line from start to target in the agents and on the dashboard. Honest while the abatement multiplier was flat; wrong once a run crosses the curve, where it calls a table on track that is not. |
 
 ---
 
