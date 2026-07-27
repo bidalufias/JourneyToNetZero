@@ -12,7 +12,7 @@ This is the single source of truth. It replaces all earlier drafts. Every rule a
 | `jtnz-content-pack-v2.json` | Machine-readable content — all 18 scenarios, 216 options, config, goals. The build reads this. |
 | `jtnz-insider-tips.json` | Insider Tip card library and runtime templates. |
 | `engine.py` / `content.py` | Working reference implementation. Port the resolution order from `play_round()`. |
-| `how-to-play.html` | The player-facing guide. Tone reference. |
+| `how-to-play.html` | The player-facing guide. Tone reference, and shipped as-is — it lives in `public/` and the app links to it at `/how-to-play.html`. |
 | `jtnz-balance-report.txt` | Raw playtest output. |
 
 ---

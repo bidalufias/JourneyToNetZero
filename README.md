@@ -19,11 +19,20 @@ npm run dev
 Open `/dashboard` on the big screen and `/play?room=CODE&seat=government` on a
 phone, or just open `/` and pick a surface.
 
+| Route | What it is |
+|---|---|
+| `/` | Pick a surface, or join with a four-letter code |
+| `/dashboard` | The broadcast — TV or projector |
+| `/play?room=CODE` | The join page with the code filled in (where the QR points) |
+| `/play?room=CODE&seat=ROLE` | A phone in that chair |
+| `/facilitator?room=CODE` | The run of show, live with the big screen |
+| `/how-to-play.html` | The written player guide — static, no app around it |
+
 | Script | What it does |
 |---|---|
 | `npm run dev` | Vite dev server |
 | `npm run build` | Production build into `dist/` (what Netlify publishes) |
-| `npm test` | Engine parity + session tests |
+| `npm test` | Engine parity, session, and QR encoder tests |
 | `npm run fixtures` | Regenerate golden fixtures from the reference engine |
 | `npm run build:function` | Bundle the Supabase edge function |
 | `npm run deploy:function` | Bundle and deploy it (needs `SUPABASE_ACCESS_TOKEN`) |
@@ -38,6 +47,9 @@ src/game/    the room: phases, timers, negotiation, insider tips, views
 src/net/     transports — local (one browser) and Supabase (real sessions)
 src/dashboard/ the broadcast surface
 src/phone/   the player surface
+src/facilitator/ the run of show, and its link to the big screen
+src/ui/      shared primitives, and the QR encoder
+public/      the static player guide, fonts, manifest
 supabase/    schema and the edge function that runs the room server-side
 ```
 
@@ -160,10 +172,29 @@ uses `Date.now()`, and nothing advances before its own deadline.
 ## Running a session
 
 30-minute version: 3 setup, 24 play, 3 results. The facilitator advances with
-the space bar on the dashboard; there are no other controls, because a dashboard
-that looks like a control room kills the session.
+the space bar on the dashboard. The lobby carries two buttons and every screen
+after it carries none, because a dashboard that looks like a control room kills
+the session — from the first crisis on, the controls are keys:
 
-Four moments worth catching:
+| Key | What it does |
+|---|---|
+| `Space` | Start the session, then advance to the next phase |
+| `Q` | The join code and its QR, full screen, for a latecomer |
+| `F` | The facilitator's script, in a window of its own |
+| `Esc` | Close whatever is over the broadcast |
+
+Players join by typing the four letters or by scanning the QR beside them,
+which lands on the same join page with the code already in the box.
+
+`F` opens `/facilitator` as a separate window — meant for the laptop screen
+rather than the projector. It carries the whole run of show, marks the phase
+the room is actually in, and can start and advance the session itself, so the
+person talking never has to reach across to the machine driving the projector.
+It talks to the big screen over a `BroadcastChannel`, so that half works when
+both are the same browser; opened anywhere else it is still the script, minus
+the live marker. Pop-up blocked, it falls back to an overlay on the dashboard.
+
+Four moments worth catching, all of them in the script:
 
 1. **After Round 1** — "Did anyone make a promise? Did anyone keep it?"
 2. **After the health crisis** — in R3A emissions fall 8 Mt for free while
@@ -187,8 +218,9 @@ Four moments worth catching:
 
 ## Not built yet
 
-- The facilitator console — pause, resume, custom shocks, timer control. Every
-  real workshop wants this within three sessions.
+- The rest of the facilitator console — pause, resume, custom shocks, timer
+  control. The script window covers reading and advancing; it cannot yet take
+  the clock off the rails.
 - Session analytics: which options get picked, which promises break, win rates
   by cohort.
 - Bahasa Malaysia localisation, and the 45-minute workshop variant.

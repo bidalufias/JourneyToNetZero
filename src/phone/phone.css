@@ -176,6 +176,16 @@
   transition: background var(--jtnz-press-ms) var(--jtnz-ease);
 }
 
+/* Two of these are links, not buttons: the written guide and the facilitator's
+   script are pages of their own rather than app state. An anchor has to be
+   given the box a button gets for nothing. */
+a.btn {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
 .btn:active { background: color-mix(in srgb, currentColor 14%, transparent); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 

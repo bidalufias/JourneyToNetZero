@@ -2,8 +2,12 @@
  * The dashboard — a broadcast on a TV or projector, seen by everyone.
  *
  * Semenanjara Tonight, anchored by Aida Rahman. If this ends up looking like a
- * control room, the session dies, so there are no controls on it: the only
- * facilitator affordance is a keyboard shortcut, deliberately invisible.
+ * control room, the session dies, so nothing from the first crisis onward
+ * carries a control: the facilitator's affordances are keys, and what they
+ * open — the join code, the script — covers the broadcast only for as long as
+ * it is wanted. The lobby is the one exception, because nothing has started
+ * there and the alternative is four people watching somebody hunt for a
+ * shortcut they were never told about.
  */
 import { useEffect, useMemo, useState } from 'react'
 import type { Role } from '../engine/types'
@@ -47,14 +51,27 @@ export function useCountdown(endsAt: number | null): number | null {
   return endsAt === null ? null : Math.max(0, endsAt - now)
 }
 
-export function Dashboard({ view, endgame }: { view: DashboardView; endgame: Endgame | null }) {
+export function Dashboard({
+  view,
+  endgame,
+  onShowQr,
+  onOpenScript,
+}: {
+  view: DashboardView
+  endgame: Endgame | null
+  /** The lobby's two buttons; the keys do the same thing everywhere else. */
+  onShowQr?: () => void
+  onOpenScript?: () => void
+}) {
   const remaining = useCountdown(view.phaseEndsAt)
   const clock = formatClock(remaining)
 
   // The briefing is a screen of its own now that a single spacebar no longer
   // skips straight past it. Showing the attract screen for both meant the one
   // phase written to explain the game never appeared.
-  if (view.phase === 'lobby') return <Attract view={view} />
+  if (view.phase === 'lobby') {
+    return <Attract view={view} onShowQr={onShowQr} onOpenScript={onOpenScript} />
+  }
   if (view.phase === 'briefing') return <Briefing view={view} clock={clock} />
   if ((view.phase === 'results' || view.phase === 'ended') && endgame) {
     return <EndgameScreen view={view} endgame={endgame} />
