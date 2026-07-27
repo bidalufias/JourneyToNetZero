@@ -151,11 +151,25 @@ export function Facilitator({
                 {isLive ? <span className="fac__beat-live">ON SCREEN NOW</span> : null}
               </div>
               <p className="fac__beat-screen">{beat.onScreen}</p>
+              <p className="fac__label">SAY</p>
               <ul className="fac__say">
                 {beat.say.map((line) => (
                   <li key={line}>{line}</li>
                 ))}
               </ul>
+              {/* The rules a table needs once. Hidden from round two on, so
+                  the live script stops offering an explanation the room has
+                  already had — but always here when reading it cold. */}
+              {beat.firstTime && (!live || round <= 1) ? (
+                <>
+                  <p className="fac__label fac__label--aside">FIRST ROUND ONLY</p>
+                  <ul className="fac__say fac__say--aside">
+                    {beat.firstTime.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
               {beat.watch ? <p className="fac__watch">{beat.watch}</p> : null}
               <p className="fac__beat-next">
                 <strong>Next:</strong> {beat.next}

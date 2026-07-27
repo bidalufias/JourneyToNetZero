@@ -25,7 +25,7 @@ phone, or just open `/` and pick a surface.
 | `/dashboard` | The broadcast — TV or projector |
 | `/play?room=CODE` | The join page with the code filled in (where the QR points) |
 | `/play?room=CODE&seat=ROLE` | A phone in that chair |
-| `/facilitator?room=CODE` | The run of show, live with the big screen |
+| `/facilitator?room=CODE` | The run of show, live with the big screen — reached from the big screen only, never from the join page |
 | `/how-to-play.html` | The written player guide — static, no app around it |
 
 | Script | What it does |
@@ -193,6 +193,15 @@ person talking never has to reach across to the machine driving the projector.
 It talks to the big screen over a `BroadcastChannel`, so that half works when
 both are the same browser; opened anywhere else it is still the script, minus
 the live marker. Pop-up blocked, it falls back to an overlay on the dashboard.
+
+The big screen is the only way in. Nothing on the join page links to it: that
+page is what four players see, and handing them the host's lines spoils a game
+that works because nobody has read it first.
+
+The script is written to be **said**, not skimmed — full sentences in the voice
+of somebody hosting a broadcast, because that is what the dashboard already is.
+Lines a table only needs explained once are marked `FIRST ROUND ONLY` and drop
+out of the live script from round two.
 
 Four moments worth catching, all of them in the script:
 
