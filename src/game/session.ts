@@ -284,6 +284,8 @@ export interface RoleCharacter {
   whoYouAre: string
   believe: string
   afraidOf: string
+  /** What the seat actually does with the one resource it holds. */
+  resourcePower: string
   howToPlay: string
   /** Three things this character would actually say at the table. */
   says: string[]
@@ -308,6 +310,8 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
     believe:
       'The transition has to happen and you are the only person in this room who can actually fund it. You also believe that a government that loses an election achieves nothing at all, so staying in power is not vanity. It is the job.',
     afraidOf: 'Being remembered as the minister who made petrol expensive.',
+    resourcePower:
+      'Fiscal Points are public money, and you are the only seat that can pass a law. From Round 2 they grow by +2 each round, and +1 more when the economy is strong. The big moves cost 2 or 3, so some rounds you save to afford the one that matters. You can also hand a point to another player to help them act.',
     howToPlay:
       'You move faster than anyone else here. You can spend, and you can make law. But everything you do is paid for by someone who votes. Never give something away without asking what you get back.',
     says: [
@@ -323,10 +327,12 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
     post: '58 · Group CEO, Sawit Prima: palm, property, power',
     blurb: 'Owns the emissions. Also owns the jobs, exports and tax base.',
     whoYouAre:
-      'Third generation. You took over at 41, the week your father died. Forty thousand employees. You have read every major climate report of the last decade and can quote them, which surprises people who assume you have not.',
+      'Third generation, and you took over the family firm at 41. Forty thousand employees. You have read every major climate report of the last decade and can quote them, which surprises people who assume you have not.',
     believe:
       'You will go green the moment it is cheaper than not going green, or the moment somebody makes staying dirty more expensive. You do not think that makes you a villain. You think it makes you honest, and you are quietly irritated by people who pretend otherwise.',
     afraidOf: 'Being the chief executive who bet the company early and got it wrong.',
+    resourcePower:
+      'Capital is your company money. It grows by +1 each round, and +1 more when the economy is booming. Real change costs you 3, a serious bite; a partnership costs only 1, but it lands at half strength unless the Government co-funds it.',
     howToPlay:
       'You own the emissions. You also own the jobs, the exports and most of the tax base. That gives you leverage. Use it. Never volunteer to pay for something alone if you can get it co-funded.',
     says: [
@@ -346,6 +352,8 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
     believe:
       'Clean air and affordable petrol are both perfectly reasonable things to want, and you are tired of being told to pick one. You have heard a lot of promises. You remember all of them.',
     afraidOf: "Being asked to sacrifice again by people who won't have to.",
+    resourcePower:
+      "You hold no money and no law, but something better. Every round you award 2 Trust tokens, one to whoever looked after people best, one to whoever did most for the future; Trust is what lets the Government be brave and the Business keep operating. Twice in the whole game you can also spend a Public Mandate to take somebody's worst option off the table for a round.",
     howToPlay:
       'Make them earn it out loud. Ask what things cost. Remind people what they promised last round. You are the only player who can say no and make it stick.',
     says: [
@@ -365,6 +373,8 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
     believe:
       "The science isn't negotiable and the timeline isn't a preference. Everyone in this room will personally be fine whatever happens, and that is precisely the problem.",
     afraidOf: 'Becoming the person who sat in a nice room, signed something, and changed nothing.',
+    resourcePower:
+      "You can't build or fund anything. A Spotlight names one player in public before choices lock; if they then take their dirtiest option it only half works, they lose Trust, and the country feels better for the accountability. Three for the whole game, and each only fires if you escalate with your own card that round.",
     howToPlay:
       'You have three real choices every round: escalate, which is loud, costly and effective against bad actors; collaborate, which buys real influence and spends a little of your soul; or build evidence, where nothing happens now and something big happens later. Pick deliberately.',
     says: [

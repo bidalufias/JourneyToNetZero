@@ -46,6 +46,7 @@ export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => vo
         <strong>{view.resource.label}</strong>: {view.resource.value} to start. It stays in the
         corner of your screen all game. The big screen tracks everything else.
       </p>
+      <p className="ptext">{c.resourcePower}</p>
 
       <span className="plabel">HOW TO PLAY IT</span>
       <p className="ptext">{c.howToPlay}</p>
@@ -66,9 +67,7 @@ export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => vo
         <p className="bubble__text">“{c.neverSay}”</p>
       </div>
 
-      <p className="pmono">TAP ⋯ AT ANY POINT FOR WHAT THE WORDS MEAN.</p>
-
-      <button className="btn btn--primary" style={{ marginTop: 'auto' }} onClick={onNext}>
+      <button className="btn btn--primary" style={{ marginTop: 'var(--space-4)' }} onClick={onNext}>
         ACCEPT THE ROLE
       </button>
     </div>
