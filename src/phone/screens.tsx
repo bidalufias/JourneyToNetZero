@@ -29,17 +29,46 @@ export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => vo
           typed when they took the chair, so the room addresses a real person
           holding an office rather than a stranger they have to remember. */}
       {view.name ? <h2 className="pheading">{view.name}</h2> : null}
+      <p className="pmono">{c.post.toUpperCase()}</p>
       <p className="ptext">{c.blurb}</p>
+
+      <span className="plabel">WHO YOU ARE</span>
+      <p className="ptext">{c.whoYouAre}</p>
+
+      <span className="plabel">WHAT YOU BELIEVE</span>
+      <p className="ptext">{c.believe}</p>
+
+      <span className="plabel">WHAT YOU ARE AFRAID OF</span>
+      <p className="ptext">{c.afraidOf}</p>
 
       <span className="plabel">YOUR RESOURCE</span>
       <p className="ptext">
         <strong>{view.resource.label}</strong>: {view.resource.value} to start. It stays in the
         corner of your screen all game. The big screen tracks everything else.
       </p>
-      <p className="pmono">TAP ⋯ AT ANY POINT FOR WHAT THE WORDS MEAN.</p>
+      <p className="ptext">{c.resourcePower}</p>
 
-      <button className="btn btn--primary" style={{ marginTop: 'auto' }} onClick={onNext}>
-        ACCEPT THE PORTFOLIO
+      <span className="plabel">HOW TO PLAY IT</span>
+      <p className="ptext">{c.howToPlay}</p>
+
+      {/* The three lines are the useful half of a character brief. A player who
+          reads nothing else can still open their mouth in round one with one of
+          these, which is the whole difference between a table that argues and a
+          table that takes turns reading their cards out. */}
+      <span className="plabel">THINGS YOU MIGHT SAY</span>
+      {c.says.map((line) => (
+        <div key={line} className="bubble">
+          <p className="bubble__text">“{line}”</p>
+        </div>
+      ))}
+
+      <span className="plabel">YOU WOULD NEVER SAY</span>
+      <div className="bubble bubble--them">
+        <p className="bubble__text">“{c.neverSay}”</p>
+      </div>
+
+      <button className="btn btn--primary" style={{ marginTop: 'var(--space-4)' }} onClick={onNext}>
+        ACCEPT THE ROLE
       </button>
     </div>
   )
