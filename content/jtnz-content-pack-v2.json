@@ -2,14 +2,14 @@
  "_meta": {
   "game": "Journey to Net Zero",
   "version": "2.1",
-  "note": "Balance values verified over ~200,000 simulated games. Effects are in Mt CO2e (e), growth points (g), happiness points (h), green share points (gr).",
+  "note": "Balance values verified over ~200,000 simulated games, then re-fitted for the 100 Mt net start and net zero target; see reference/jtnz-balance-report.txt v2.0. Effects are in Mt CO2e (e), growth points (g), happiness points (h), green share points (gr).",
   "measuredWinRates": {
    "allSelfish": 0.0,
-   "allPopulist": 0.089,
-   "realisticMix": 0.013,
-   "threeCooperatorsOneDefector": 0.238,
-   "allCooperator": 0.839,
-   "mixedTable": 0.22
+   "allPopulist": 0.09,
+   "realisticMix": 0.005,
+   "threeCooperatorsOneDefector": 0.228,
+   "allCooperator": 0.858,
+   "mixedTable": 0.208
   }
  },
  "insiderTips": {
@@ -121,10 +121,10 @@
   "h_b_growth": 0.25,
   "h_persist": 0.72,
   "h_scale": 0.65,
-  "mac_lo": 0.45,
-  "mac_span": 0.7,
-  "mac_ref": 150.0,
-  "mac_range": 150.0,
+  "mac_lo": 0.6,
+  "mac_span": 0.55,
+  "mac_ref": 50.0,
+  "mac_range": 50.0,
   "self_org_mult": 1.5,
   "partner_unfunded": 0.5,
   "spotlight_backdown": 0.5,
@@ -138,11 +138,11 @@
   "capital_income_at": 5.0,
   "fiscal_cap": 8,
   "capital_cap": 12,
-  "tgt_e": 200.0,
+  "tgt_e": 0.0,
   "tgt_g": 5.0,
   "tgt_h": 7.0,
   "start": {
-   "e": 300.0,
+   "e": 100.0,
    "g": 4.5,
    "h": 6.0,
    "gr": 10,
@@ -182,24 +182,24 @@
   "coal_scale": 1.0,
   "r6_flag_reduce": 0.25,
   "r6_flag_cap": 0.6,
-  "r6_high_e": 260,
+  "r6_high_e": 87,
   "r6_high_mult": 2.0,
   "driftTable": [
    {
     "greenShareMax": 20,
-    "k": 2.4
+    "k": 0.8
    },
    {
     "greenShareMax": 40,
-    "k": 1.9
+    "k": 0.63
    },
    {
     "greenShareMax": 60,
-    "k": 1.5
+    "k": 0.5
    },
    {
     "greenShareMax": 100,
-    "k": 1.1
+    "k": 0.37
    }
   ]
  },
@@ -232,21 +232,21 @@
     "title": "Landslide",
     "desc": "End the game holding 6 or more Trust tokens.",
     "check": "trust.government >= 6",
-    "measured": 0.415
+    "measured": 0.414
    },
    {
     "id": "G-b",
     "title": "Steady Hand",
     "desc": "Growth never falls below 4.0% in any round.",
     "check": "min(gdpHistory) >= 4.0",
-    "measured": 0.474
+    "measured": 0.442
    },
    {
     "id": "G-c",
     "title": "The Legacy",
     "desc": "Green Economy Share reaches 55% or more.",
     "check": "greenShare >= 55",
-    "measured": 0.287
+    "measured": 0.289
    }
   ],
   "business": [
@@ -255,14 +255,14 @@
     "title": "Market Dominance",
     "desc": "End with 6 or more Capital.",
     "check": "capital >= 6",
-    "measured": 0.394
+    "measured": 0.391
    },
    {
     "id": "B-b",
     "title": "Green Champion",
-    "desc": "Personally deliver 40 Mt or more of cuts.",
-    "check": "playerEmissions.business <= -40",
-    "measured": 0.409
+    "desc": "Personally deliver 33 Mt or more of cuts.",
+    "check": "playerEmissions.business <= -33",
+    "measured": 0.414
    },
    {
     "id": "B-c",
@@ -278,44 +278,44 @@
     "title": "A Happy Nation",
     "desc": "Happiness ends at 8.0 or above.",
     "check": "happiness >= 8.0",
-    "measured": 0.38
+    "measured": 0.374
    },
    {
     "id": "C-b",
     "title": "Nobody Left Behind",
     "desc": "Happiness never drops below 6.3 in any round.",
     "check": "min(happinessHistory) >= 6.3",
-    "measured": 0.358
+    "measured": 0.35
    },
    {
     "id": "C-c",
     "title": "Our Own Two Hands",
     "desc": "Land 4 or more successful community-led actions.",
     "check": "selfOrganiseSucceeded >= 4",
-    "measured": 0.47
+    "measured": 0.465
    }
   ],
   "activist": [
    {
     "id": "A-a",
     "title": "No Compromise",
-    "desc": "Never collaborate, and still finish at 175 Mt or below.",
-    "check": "!flags.COMPROMISED && emissions <= 175",
-    "measured": 0.409
+    "desc": "Never collaborate, and still take the country 25 Mt past net zero.",
+    "check": "!flags.COMPROMISED && emissions <= -25",
+    "measured": 0.42
    },
    {
     "id": "A-b",
     "title": "The Long Game",
     "desc": "Green Economy Share reaches 52% or more.",
     "check": "greenShare >= 52",
-    "measured": 0.44
+    "measured": 0.439
    },
    {
     "id": "A-c",
     "title": "Justice First",
     "desc": "Happiness 7.0+ and at least one Spotlight lands.",
     "check": "happiness >= 7.0 && spotlightHits >= 1",
-    "measured": 0.221
+    "measured": 0.238
    }
   ]
  },

@@ -181,7 +181,7 @@ export function Reckoning({ view }: { view: DashboardView }) {
         <TravelBar
           label="EMISSIONS"
           ink="var(--jtnz-meter-emissions)"
-          fill={Math.max(0, Math.min(1, (300 - log.state.emissions) / 100))}
+          fill={Math.max(0, Math.min(1, (100 - log.state.emissions) / 100))}
           delay={0}
           active={revealedCount >= 1}
         />

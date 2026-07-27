@@ -73,7 +73,7 @@ export const BEATS: Beat[] = [
     onScreen: 'The three national targets, and where the country stands today.',
     say: [
       'Right. Here is the mission, and it is not a small one. It is 2025. You have got until 2050, and three numbers to hit.',
-      'Emissions: three hundred million tonnes today, and you need them down to two hundred. Growth: averaging five percent, because a country that stops growing puts people out of work. Happiness: six out of ten today, and it needs to be seven.',
+      'Emissions: this country puts out three hundred million tonnes a year, and its forests soak up two hundred of them, so it is sitting at a hundred net. You need that hundred down to nothing. Growth: averaging five percent, because a country that stops growing puts people out of work. Happiness: six out of ten today, and it needs to be seven.',
       'All three. Not two out of three. Miss one and this country has failed, and so have all of you, however brilliantly you personally did.',
       'Six crises stand between you and 2050. Every one of them goes the same way: you talk, you each pick a card in secret, and then all four flip at once in front of the entire nation.',
       'And here is my favourite rule, so listen to this one. Nothing you promise at that table is binding. Nothing. You can look somebody in the eye, shake their hand, and do the exact opposite, and this screen will tell everybody you did it. Good luck.',

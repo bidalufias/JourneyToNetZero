@@ -50,7 +50,7 @@ A middle-income tropical nation of 34 million. Monsoon-fed rivers, palm and rubb
 | **National energy company** | NuriTenaga |
 | **Largest conglomerate** | Sawit Prima Group — palm, property, power |
 | **The news** | *The Damai Herald*; Semenanjara Tonight, anchored by Aida Rahman |
-| **Starting position** | 300 Mt CO₂e · 4.5% growth · Happiness 6.0 · Green Economy 10% |
+| **Starting position** | 100 Mt CO₂e net (300 gross, ~200 absorbed) · 4.5% growth · Happiness 6.0 · Green Economy 10% |
 
 Fictional, but recognisable to anyone from the region. That recognition is what makes people argue like it's real.
 
@@ -83,7 +83,7 @@ By the end of Round 6, Semenanjara must hit **all three**:
 
 | Target | Start | Goal |
 |---|---|---|
-| 🌍 Emissions | 300 Mt CO₂e | **≤ 200 Mt** |
+| 🌍 Emissions | 100 Mt CO₂e net | **net zero (≤ 0)** |
 | 📈 Economy | 4.5% growth | **≥ 5.0% average across the six rounds** |
 | 😊 Happiness | 6.0 | **≥ 7.0** |
 
@@ -1160,4 +1160,4 @@ Honest list of what is not fully solved:
 
 ---
 
-*The most important number in this game is not 200 Mt. It's the number of times someone at that table says "okay — what if we both did it?" Build for that sentence, and the rest works.*
+*The most important number in this game is not zero. It's the number of times someone at that table says "okay — what if we both did it?" Build for that sentence, and the rest works.*

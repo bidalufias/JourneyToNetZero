@@ -153,14 +153,14 @@ function TheNation({ view }: { view: DashboardView }) {
   const k = driftK(s.greenShare, localContent)
   const projection = projectionNote(s.projection2050, view.targets.emissions, s.round)
   const trail = useMemo(
-    () => [300, ...view.history.map((h) => h.state.emissions)],
+    () => [localContent.config.start.e, ...view.history.map((h) => h.state.emissions)],
     [view.history],
   )
 
   return (
     <>
       <div className="meters">
-        <Meter spec={emissionsMeter(s, view.targets)} />
+        <Meter spec={emissionsMeter(s, view.targets, localContent)} />
         <Meter spec={growthMeter(s, view.targets)} />
         <Meter spec={happinessMeter(s, view.targets)} />
       </div>
