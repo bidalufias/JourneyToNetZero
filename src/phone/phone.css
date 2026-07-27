@@ -32,20 +32,33 @@
   z-index: 5;
   background: var(--skin-base);
   color: #fff;
-  padding: var(--space-3) var(--space-4);
+  /* `viewport-fit=cover` puts this under the status bar and the notch, so the
+     inset is the difference between a header and a header you cannot read. */
+  padding: calc(var(--space-3) + env(safe-area-inset-top)) var(--space-4) var(--space-3);
   display: flex;
   align-items: center;
   gap: var(--space-3);
   border-bottom: var(--rule) solid var(--skin-deep);
 }
 
+/*
+ * White, not the role's accent ink.
+ *
+ * The accent marks were between 1.6:1 and 3.8:1 against their own header — the
+ * Activist's red on green was effectively unreadable — and this line names the
+ * organisation you are playing, on nearly every screen in the game. White
+ * clears 4.5:1 on three of the four; the Community's warmer base sits just
+ * under, so only that header drops to the role's own deep tone.
+ */
 .phead__org {
   font: 800 11px/1.2 var(--font-heading);
   letter-spacing: 0.14em;
-  color: var(--skin-mark);
+  color: #fff;
   flex: 1;
   min-width: 0;
 }
+
+.phone[data-role='community'] .phead { background: var(--skin-deep); }
 
 .phead__title { font: 800 17px/1.15 var(--font-heading); letter-spacing: -0.01em; }
 
@@ -57,11 +70,81 @@
 
 .phead__clock--urgent { color: var(--jtnz-com-warm); animation: jtnz-pulse 1s steps(2, end) infinite; }
 
+/*
+ * Back and the ⋯ menu. Both are 44px because they sit either side of a running
+ * clock and get tapped in a hurry.
+ */
+.phead__btn {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  background: transparent;
+  border: var(--rule) solid var(--skin-mark);
+  color: #fff;
+  font: 400 22px/1 var(--font-heading);
+  cursor: pointer;
+}
+
+.phead__btn:active { background: var(--skin-deep); }
+
+/*
+ * The number the onboarding screen calls "the only number you have to track",
+ * finally kept where it can be tracked. Tabular figures so it does not jitter
+ * as it changes.
+ */
+.phead__res {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: none;
+  color: #fff;
+  line-height: 1;
+}
+
+.phead__res-unit { font: 800 9px/1 var(--font-heading); letter-spacing: 0.12em; opacity: 0.75; }
+
+.phead__res-value {
+  font: 800 22px/1 var(--font-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Reading back through the round. Unmistakably not the live screen. */
+.review {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-4);
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+.review__label { font: 800 11px/1 var(--font-heading); letter-spacing: 0.14em; flex: 1; }
+
+.review__now {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  font: 800 11px/1 var(--font-heading);
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
 /* A progress rule rather than a ring: it reads at a glance and costs nothing. */
 .phead__bar { height: 4px; background: var(--skin-deep); }
 .phead__bar-fill { height: 100%; background: var(--color-accent); transition: width 250ms linear; }
 
-.pbody { flex: 1; padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+.pbody {
+  flex: 1;
+  /* The bottom inset keeps the primary action clear of the home indicator,
+     which otherwise sits on top of the button every round. */
+  padding: var(--space-4);
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
 
 .plabel {
   font: 800 11px/1 var(--font-heading);
@@ -163,6 +246,10 @@
 
 .ocard__check { position: absolute; right: var(--space-4); bottom: var(--space-4); font-size: 18px; }
 
+/* Not the card you locked. Still legible — once the round is committed this
+   screen stops being a decision and becomes a record of one. */
+.ocard--muted { opacity: 0.5; }
+
 /* Three disabled states, three different edges — "I can't", "she stopped me"
    and "I did this to myself" are three different feelings. */
 .ocard--afford {
@@ -247,7 +334,13 @@
   cursor: pointer;
 }
 
-.sheet__body { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+.sheet__body {
+  padding: var(--space-4);
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
 
 /* ── Insider tip — the only dark screen on any phone ────────────────── */
 
@@ -266,6 +359,16 @@
 
 .tip__label { font: 800 11px/1 var(--font-heading); letter-spacing: 0.16em; color: var(--jtnz-com-warm); }
 .tip__eyes { font: 400 11px/1 var(--font-mono); color: var(--jtnz-glare); margin-top: var(--space-1); }
+
+/* This overlay covers the header, so it has to bring the countdown with it. */
+.tip__clock {
+  position: absolute;
+  top: calc(var(--space-6) + env(safe-area-inset-top));
+  right: var(--space-4);
+  font: 800 24px/1 var(--font-heading);
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
 
 .tip__chip {
   display: inline-block;
@@ -398,3 +501,32 @@
 
 .nudge__lead { font: 800 20px/1.15 var(--font-heading); }
 .nudge__sub { margin-top: var(--space-2); font: 700 12px/1.3 var(--font-mono); }
+
+/* ── Short screens ──────────────────────────────────────────────────── */
+
+/*
+ * THE CHOICE has to fit, and on a 640px-tall Android it did not: three cards
+ * plus the commit button ran about 70px past the fold, so the one button the
+ * round depends on sat off-screen with the clock running and nothing to
+ * suggest the page scrolled. Tighten the card anatomy rather than drop
+ * anything from it — every line on the card is load-bearing.
+ */
+@media (max-height: 730px) {
+  .pbody { gap: var(--space-2); padding: var(--space-3); }
+  .ocard { min-height: 0; padding: var(--space-3); }
+  .ocard__title { font-size: 17px; }
+  .ocard__desc { margin-top: var(--space-1); font-size: 13px; }
+  .ocard__hint { padding-top: var(--space-2); font-size: 11px; }
+  .pheading { font-size: 22px; }
+  .btn { min-height: 44px; }
+}
+
+/* The smallest phones still in the room — an iPhone SE is 568px tall. */
+@media (max-height: 620px) {
+  .pbody { gap: 6px; padding: var(--space-2); padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom)); }
+  .ocard__desc { display: none; }
+  .ocard__title { font-size: 16px; }
+  .pheading { font-size: 19px; }
+  /* The trade-off hint outranks the description here: it is the line that
+     tells you what the card costs you, and only one of them fits. */
+}

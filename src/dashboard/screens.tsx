@@ -57,6 +57,72 @@ export function Attract({ view }: { view: DashboardView }) {
 }
 
 /**
+ * D-02 — the twenty seconds before the first crisis.
+ *
+ * Four people who have never played are about to be asked to make a decision
+ * with consequences they cannot see. This is the only moment in the session
+ * where the room can be told, together, what it is doing and what it takes to
+ * win — and until the facilitator's spacebar stopped skipping the phase, it was
+ * never on screen at all.
+ */
+export function Briefing({ view, clock }: { view: DashboardView; clock: string | null }) {
+  const s = view.state
+  return (
+    <div className="dash">
+      <header className="dash__masthead">
+        <span className="dash__live">LIVE</span>
+        <span className="dash__channel">SEMENANJARA TONIGHT</span>
+        <div className="dash__masthead-right">
+          <span>THE BRIEFING</span>
+          {clock ? <span className="dash__clock">{clock}</span> : null}
+        </div>
+      </header>
+
+      <div className="brief">
+        <div className="brief__lead">
+          <p className="attract__cue">THE NATIONAL MISSION · 2050</p>
+          <h1 className="brief__title">
+            Three targets.
+            <br />
+            All three, or nobody wins.
+          </h1>
+          <p className="brief__body">
+            Six crises, four minutes each. Every round you talk, then each of you picks one card in
+            secret, then all four flip at once. Nothing anybody promises is binding.
+          </p>
+          <p className="brief__body">
+            You each hold a sealed goal of your own. Hitting it counts for nothing unless the
+            country hits all three of these.
+          </p>
+        </div>
+
+        <div className="brief__targets">
+          {[
+            { label: 'EMISSIONS', from: `${s.emissions.toFixed(0)} Mt today`, target: 'DOWN TO 200 Mt' },
+            { label: 'GROWTH', from: `${s.growth.toFixed(1)}% today`, target: 'AVERAGING 5%' },
+            { label: 'HAPPINESS', from: `${s.happiness.toFixed(1)} today`, target: 'UP TO 7.0' },
+          ].map((t) => (
+            <div key={t.label} className="brief__target">
+              <span className="brief__target-label">{t.label}</span>
+              <span className="brief__target-value">{t.target}</span>
+              <span className="brief__target-from">{t.from}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="briefing-strip">
+        <span className="briefing-strip__label">ON YOUR PHONE</span>
+        <span className="briefing-strip__text">
+          Your resource is in the top corner. Tap ⋯ at any time for what the words mean. Tap ‹ to
+          re-read anything this round.
+        </span>
+      </div>
+    </div>
+  )
+}
+
+/**
  * D-06 — the only celebratory screen in the game before the ending.
  *
  * Fires after the meters have settled, so it reads as consequence rather than

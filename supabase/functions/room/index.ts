@@ -666,6 +666,12 @@ var PHASE_MS = {
   // advances on facilitator input
   ended: 0
 };
+var ROLE_LABEL = {
+  government: "Government",
+  business: "Business",
+  community: "Community",
+  activist: "Activist"
+};
 var ROLE_RESOURCE = {
   government: { kind: "fiscal", label: "Your Fiscal Points" },
   business: { kind: "capital", label: "Your Capital" },
@@ -685,7 +691,17 @@ function createRoom(content2, seed, now) {
   const players = Object.fromEntries(
     ROLES.map((role) => [
       role,
-      { role, name: "", connected: false, goalId: null, choiceId: null, autoLocked: false, lockedAt: null }
+      {
+        role,
+        name: "",
+        connected: false,
+        goalId: null,
+        choiceId: null,
+        locked: false,
+        autoLocked: false,
+        defaulted: false,
+        lockedAt: null
+      }
     ])
   );
   return {
@@ -727,10 +743,19 @@ function setPhase(room, phase, now) {
   room.phaseEndsAt = ms > 0 ? now + ms : null;
 }
 function everyoneLocked(room) {
-  return ROLES.every((r) => room.players[r].choiceId !== null);
+  const held = ROLES.filter((r) => room.players[r].name);
+  if (!held.length) return false;
+  return held.every((r) => room.players[r].locked);
 }
 function vetoesRemaining(room) {
   return Math.max(0, room.game.vetoes - (room.vetoTarget ? 1 : 0));
+}
+function spotlightsRemaining(room) {
+  return Math.max(0, room.game.spotlights - (room.spotlightCalled ? 1 : 0));
+}
+function canReceive(role) {
+  const kind = ROLE_RESOURCE[role].kind;
+  return kind === "fiscal" || kind === "capital";
 }
 function choosableOptions(room, content2, role) {
   const scenario = currentScenario(room, content2);
@@ -738,11 +763,36 @@ function choosableOptions(room, content2, role) {
   const opts = availableOptions(room.game, scenario, role, content2);
   return role === room.vetoTarget ? applyVeto(opts) : opts;
 }
+function authorise(seat, cmd) {
+  if (seat === "dashboard") {
+    return cmd.t === "start" || cmd.t === "advance" ? cmd : null;
+  }
+  switch (cmd.t) {
+    case "join":
+    case "reconnect":
+    case "leave":
+    case "pickGoal":
+    case "promise":
+    case "demand":
+    case "respondOffer":
+    case "spotlight":
+    case "veto":
+    case "coFund":
+    case "publishTip":
+    case "choose":
+    case "lock":
+      return { ...cmd, role: seat };
+    case "offer":
+      return { ...cmd, from: seat };
+    default:
+      return null;
+  }
+}
 function apply(room, cmd, content2, now) {
   switch (cmd.t) {
     case "join": {
       const p = room.players[cmd.role];
-      if (p.connected && p.name && p.name !== cmd.name) return room;
+      if (p.name && p.name !== cmd.name) return room;
       p.name = cmd.name;
       p.connected = true;
       return room;
@@ -750,9 +800,26 @@ function apply(room, cmd, content2, now) {
     case "reconnect":
       room.players[cmd.role].connected = true;
       return room;
-    case "leave":
-      room.players[cmd.role].connected = false;
+    /**
+     * Leaving empties the chair rather than dimming it.
+     *
+     * A seat that stays named for the rest of the workshop is unrecoverable
+     * without a new room, so the one thing `leave` must do is make the seat
+     * takeable again — by somebody else, or by the same person on a new phone.
+     * A sealed goal belongs to the person, not the chair, so it goes with them.
+     */
+    case "leave": {
+      const p = room.players[cmd.role];
+      p.name = "";
+      p.connected = false;
+      p.goalId = null;
+      p.choiceId = null;
+      p.locked = false;
+      p.autoLocked = false;
+      p.defaulted = false;
+      p.lockedAt = null;
       return room;
+    }
     case "pickGoal": {
       if (room.players[cmd.role].goalId) return room;
       room.players[cmd.role].goalId = cmd.goalId;
@@ -796,7 +863,7 @@ function apply(room, cmd, content2, now) {
         round: roundNumber(room),
         from: cmd.role,
         kind: "demand",
-        text: `${BOARD_NAME[cmd.role]} demands ${phrase.text(cmd.target)}.`,
+        text: `${BOARD_NAME[cmd.role]} demands ${phrase.text(ROLE_LABEL[cmd.target])}.`,
         optionId: null,
         outcome: "unresolved"
       });
@@ -804,6 +871,7 @@ function apply(room, cmd, content2, now) {
     }
     case "offer": {
       if (room.phase !== "table") return room;
+      if (!canReceive(cmd.from) || !canReceive(cmd.to) || cmd.from === cmd.to) return room;
       const held = cmd.resource === "fiscal" ? room.game.fiscal : room.game.capital;
       if (cmd.amount < 1 || cmd.amount > held) return room;
       room.offers.push({
@@ -852,6 +920,7 @@ function apply(room, cmd, content2, now) {
       const p = room.players[cmd.target];
       if (p.choiceId && !removed.includes(p.choiceId)) {
         p.choiceId = null;
+        p.locked = false;
         p.lockedAt = null;
       }
       return room;
@@ -867,20 +936,37 @@ function apply(room, cmd, content2, now) {
       tip.published = true;
       return room;
     }
+    /**
+     * Selecting a card. Not committing to it.
+     *
+     * Tapping to read a card more closely must never be the same act as
+     * spending the round on it, so this only moves the selection — `lock` is
+     * the irreversible half, and until it lands a player may change their mind
+     * as often as they like.
+     */
     case "choose": {
       if (room.phase !== "choice" && room.phase !== "table") return room;
+      const p = room.players[cmd.role];
+      if (p.locked) return room;
       const allowed = choosableOptions(room, content2, cmd.role);
       if (!allowed.some((o) => o.id === cmd.optionId)) return room;
-      room.players[cmd.role].choiceId = cmd.optionId;
-      room.players[cmd.role].autoLocked = false;
-      room.players[cmd.role].lockedAt = now;
-      if (room.phase === "choice" && everyoneLocked(room)) {
-        return resolveRound(room, content2, now);
-      }
+      p.choiceId = cmd.optionId;
       return room;
     }
-    case "lock":
+    /** Committing. From here the choice screen is a record, not a decision. */
+    case "lock": {
+      if (room.phase !== "choice") return room;
+      const p = room.players[cmd.role];
+      if (p.locked || p.choiceId === null) return room;
+      const allowed = choosableOptions(room, content2, cmd.role);
+      if (!allowed.some((o) => o.id === p.choiceId)) return room;
+      p.locked = true;
+      p.autoLocked = false;
+      p.defaulted = false;
+      p.lockedAt = now;
+      if (everyoneLocked(room)) return resolveRound(room, content2, now);
       return room;
+    }
     default:
       return room;
   }
@@ -903,16 +989,6 @@ function advance(room, content2, now) {
       setPhase(room, "choice", now);
       return room;
     case "choice":
-      for (const role of ROLES) {
-        if (room.players[role].choiceId === null) {
-          const opts = choosableOptions(room, content2, role);
-          if (opts.length) {
-            room.players[role].choiceId = opts[0].id;
-            room.players[role].autoLocked = true;
-            room.players[role].lockedAt = now;
-          }
-        }
-      }
       return resolveRound(room, content2, now);
     case "reckoning":
       setPhase(room, "summary", now);
@@ -936,7 +1012,9 @@ function openRound(room, content2, now) {
   room.spotlightCalled = false;
   for (const role of ROLES) {
     room.players[role].choiceId = null;
+    room.players[role].locked = false;
     room.players[role].autoLocked = false;
+    room.players[role].defaulted = false;
     room.players[role].lockedAt = null;
   }
   dealTip(room, content2);
@@ -944,6 +1022,19 @@ function openRound(room, content2, now) {
   return room;
 }
 function resolveRound(room, content2, now) {
+  for (const role of ROLES) {
+    const p = room.players[role];
+    if (p.locked) continue;
+    if (p.choiceId === null) {
+      const opts = choosableOptions(room, content2, role);
+      if (!opts.length) continue;
+      p.choiceId = opts[0].id;
+      p.defaulted = true;
+    }
+    p.locked = true;
+    p.autoLocked = true;
+    p.lockedAt = now;
+  }
   const choices = Object.fromEntries(
     ROLES.map((r) => [r, room.players[r].choiceId])
   );
@@ -1113,8 +1204,9 @@ function buildTip(room, content2, to, round, cursorIn) {
 }
 function dashboardView(room, content2) {
   const scenario = currentScenario(room, content2);
-  const lockOrder = ROLES.map((r) => room.players[r].lockedAt).filter((t) => t !== null);
-  const lastLock = lockOrder.length === 3 ? ROLES.find((r) => room.players[r].choiceId === null) : null;
+  const held = ROLES.filter((r) => room.players[r].name);
+  const waiting = held.filter((r) => !room.players[r].locked);
+  const lastLock = held.length > 1 && waiting.length === 1 ? waiting[0] : null;
   const tip = room.tips.find((t) => t.round === displayRound(room));
   const published = tip?.published && tip ? {
     from: tip.to,
@@ -1138,7 +1230,7 @@ function dashboardView(room, content2) {
       role,
       name: room.players[role].name || null,
       connected: room.players[role].connected,
-      locked: room.players[role].choiceId !== null,
+      locked: room.players[role].locked,
       lastToLock: lastLock === role
     })),
     promises: room.promises.filter((p) => p.round === displayRound(room)),
@@ -1150,7 +1242,7 @@ function dashboardView(room, content2) {
       // Whoever takes the dirtiest option this round wears it. Nobody
       // knows who that is until the choices lock, so do not pretend to.
       target: room.lastRound?.spotlightTarget ?? null,
-      remaining: room.game.spotlights
+      remaining: spotlightsRemaining(room)
     } : null,
     veto,
     lastRound: room.lastRound,
@@ -1208,6 +1300,8 @@ function phoneView(room, content2, role) {
   const resourceKind = ROLE_RESOURCE[role].kind;
   const resourceValue = resourceKind === "fiscal" ? room.game.fiscal : resourceKind === "capital" ? room.game.capital : resourceKind === "spotlights" ? room.game.spotlights : vetoesRemaining(room);
   const goalChoices = player.goalId === null ? content2.privateGoals[role].map((g) => ({ id: g.id, title: g.title, desc: g.desc })) : null;
+  const ownGoal = player.goalId ? content2.privateGoals[role].find((g) => g.id === player.goalId) ?? null : null;
+  const narrating = room.phase === "reckoning" || room.phase === "summary";
   return {
     code: room.code,
     role,
@@ -1215,16 +1309,20 @@ function phoneView(room, content2, role) {
     phase: room.phase,
     phaseEndsAt: room.phaseEndsAt,
     round: displayRound(room),
-    scenario: scenario ? { id: scenario.id, title: scenario.title, situation: scenario.situation, type: scenario.type } : null,
-    privateLine: scenario ? privateLine(scenario.type, role) : null,
+    scenario: scenario && !narrating ? { id: scenario.id, title: scenario.title, situation: scenario.situation, type: scenario.type } : null,
+    privateLine: scenario && !narrating ? privateLine(scenario.type, role) : null,
     options,
     choiceId: player.choiceId,
-    locked: player.choiceId !== null,
+    locked: player.locked,
     resource: { kind: resourceKind, value: resourceValue, label: ROLE_RESOURCE[role].label },
     trust: { ...room.game.trust },
     vetoesRemaining: vetoesRemaining(room),
-    spotlightsRemaining: room.game.spotlights,
+    spotlightsRemaining: spotlightsRemaining(room),
+    spotlightCalled: room.spotlightCalled,
+    coFund: room.coFund,
     goalId: player.goalId,
+    goalTitle: ownGoal?.title ?? null,
+    goalDesc: ownGoal?.desc ?? null,
     goalChoices,
     // Only ever your own tip, and only while it is yours to act on.
     tip: room.tips.find((t) => t.to === role && t.round === displayRound(room)) ?? null,
@@ -1235,10 +1333,10 @@ function phoneView(room, content2, role) {
       role: r,
       name: room.players[r].name || null,
       connected: room.players[r].connected,
-      locked: room.players[r].choiceId !== null
+      locked: room.players[r].locked
     })),
     roundResult: roundResultCopy(room, role),
-    waitingOn: ROLES.filter((r) => room.players[r].choiceId === null).length
+    waitingOn: ROLES.filter((r) => room.players[r].name && !room.players[r].locked).length
   };
 }
 function roundResultCopy(room, role) {
@@ -1246,7 +1344,8 @@ function roundResultCopy(room, role) {
   if (!log || room.phase !== "reckoning" && room.phase !== "summary") return null;
   const mine = log.reveals.find((r) => r.role === role);
   if (!mine) return null;
-  const didWhat = `You chose \u201C${mine.title}\u201D.`;
+  const player = room.players[role];
+  const didWhat = player.defaulted ? `You ran out of time. The clock picked \u201C${mine.title}\u201D.` : player.autoLocked ? `You had \u201C${mine.title}\u201D selected, and the clock locked it in.` : `You chose \u201C${mine.title}\u201D.`;
   const costBits = [];
   if (mine.partnerUnfunded) costBits.push("Nobody co-funded it, so it landed at half strength.");
   if (mine.spotlit) costBits.push("You were named publicly, and it cost you.");
@@ -1335,11 +1434,24 @@ async function readRoom(code) {
 }
 async function writeRoom(room, revision) {
   const next = revision + 1;
-  await rest(`rooms?code=eq.${room.code}`, {
+  const res = await rest(`rooms?code=eq.${room.code}&revision=eq.${revision}`, {
     method: "PATCH",
+    headers: { Prefer: "return=representation" },
     body: JSON.stringify({ state: serialise(room), revision: next, updated_at: (/* @__PURE__ */ new Date()).toISOString() })
   });
-  return next;
+  if (!res.ok) return null;
+  const rows = await res.json();
+  return rows.length ? next : null;
+}
+async function withRoom(code, mutate) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const loaded = await readRoom(code);
+    if (!loaded) return null;
+    const next = mutate(loaded.room);
+    const revision = await writeRoom(next, loaded.revision);
+    if (revision !== null) return { room: next, revision };
+  }
+  return null;
 }
 async function broadcastRevision(code, revision) {
   await fetch(`${SUPABASE_URL}/realtime/v1/api/broadcast`, {
@@ -1362,30 +1474,12 @@ function viewFor(room, seat) {
   const end = finished ? endgame(room, content) : null;
   return seat === "dashboard" ? { kind: "dashboard", view: dashboardView(room, content), endgame: end } : { kind: "phone", view: phoneView(room, content, seat), endgame: end };
 }
-function authorise(seat, cmd) {
-  if (seat === "dashboard") {
-    return cmd.t === "start" || cmd.t === "advance" ? cmd : null;
-  }
-  switch (cmd.t) {
-    case "join":
-    case "reconnect":
-    case "leave":
-    case "pickGoal":
-    case "promise":
-    case "demand":
-    case "respondOffer":
-    case "spotlight":
-    case "veto":
-    case "coFund":
-    case "publishTip":
-    case "choose":
-    case "lock":
-      return { ...cmd, role: seat };
-    case "offer":
-      return { ...cmd, from: seat };
-    default:
-      return null;
-  }
+function roster(room) {
+  return ROLES.map((role) => ({
+    role,
+    name: room.players[role].name || null,
+    taken: Boolean(room.players[role].name)
+  }));
 }
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -1430,6 +1524,9 @@ Deno.serve(async (req) => {
     const held = await rest(`room_seats?code=eq.${code}&role=eq.${role}&select=token`);
     const heldRows = await held.json();
     if (heldRows.length) {
+      if (existing.room.players[role].name) {
+        return json({ error: "seat taken", seats: roster(existing.room) }, 409);
+      }
       return json({ token: heldRows[0].token, ...viewFor(existing.room, role), revision: existing.revision });
     }
     const res = await rest("room_seats", {
@@ -1451,23 +1548,29 @@ Deno.serve(async (req) => {
     return json({ ...viewFor(room, seat), revision });
   }
   if (action === "tick") {
-    const before = room.phase;
-    const beforeEnds = room.phaseEndsAt;
-    room = tick(room, content, Date.now());
-    if (room.phase !== before || room.phaseEndsAt !== beforeEnds) {
-      revision = await writeRoom(room, revision);
-      await broadcastRevision(code, revision);
+    if (room.phaseEndsAt === null || Date.now() < room.phaseEndsAt) {
+      return json({ ...viewFor(room, seat), revision });
     }
-    return json({ ...viewFor(room, seat), revision });
+    const written = await withRoom(code, (r) => tick(r, content, Date.now()));
+    if (!written) return json({ ...viewFor(room, seat), revision });
+    await broadcastRevision(code, written.revision);
+    return json({ ...viewFor(written.room, seat), revision: written.revision });
+  }
+  if (action === "release") {
+    if (seat === "dashboard") return json({ error: "the big screen holds no seat" }, 403);
+    const written = await withRoom(code, (r) => apply(r, { t: "leave", role: seat }, content, Date.now()));
+    await rest(`room_seats?code=eq.${code}&token=eq.${token}`, { method: "DELETE" });
+    if (written) await broadcastRevision(code, written.revision);
+    return json({ ok: true, revision: written?.revision ?? revision });
   }
   if (action === "cmd") {
     const requested = body.cmd;
     const allowed = requested ? authorise(seat, requested) : null;
     if (!allowed) return json({ error: "not allowed from this seat" }, 403);
-    room = apply(room, allowed, content, Date.now());
-    revision = await writeRoom(room, revision);
-    await broadcastRevision(code, revision);
-    return json({ ...viewFor(room, seat), revision });
+    const written = await withRoom(code, (r) => apply(r, allowed, content, Date.now()));
+    if (!written) return json({ error: "the room is busy \u2014 try again" }, 503);
+    await broadcastRevision(code, written.revision);
+    return json({ ...viewFor(written.room, seat), revision: written.revision });
   }
   return json({ error: "unknown action" }, 400);
 });

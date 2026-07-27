@@ -2,14 +2,22 @@
  * Phone screens: onboarding, the crisis brief, the insider tip, the locked
  * screen, and the round result.
  */
+import { useState } from 'react'
 import type { Role } from '../engine/types'
 import type { Command } from '../game/room'
 import type { InsiderTip, PhoneView } from '../game/session'
 import { ROLE_CHARACTER, ROLE_LABEL } from '../game/session'
-import { RoleGlyph } from '../ui/primitives'
+import { RoleGlyph, formatClock } from '../ui/primitives'
 
-/** P-03 — the role reveal. The skin applies here and never changes again. */
-export function RoleReveal({ view, send }: { view: PhoneView; send: (c: Command) => void }) {
+/**
+ * P-03 — the role reveal. The skin applies here and never changes again.
+ *
+ * This now comes *before* the sealed goal rather than after it. The goals are
+ * written in units — Capital, Trust, Mt — that mean nothing until you have been
+ * told what you hold, and asking somebody to commit to a win condition before
+ * then is asking them to guess.
+ */
+export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => void }) {
   const c = ROLE_CHARACTER[view.role]
   return (
     <div className="pbody">
@@ -22,15 +30,12 @@ export function RoleReveal({ view, send }: { view: PhoneView; send: (c: Command)
 
       <span className="plabel">YOUR RESOURCE</span>
       <p className="ptext">
-        <strong>{view.resource.label}</strong> — {view.resource.value} to start. It is the only
-        number you have to track. The big screen tracks everything else.
+        <strong>{view.resource.label}</strong> — {view.resource.value} to start. It stays in the
+        corner of your screen all game. The big screen tracks everything else.
       </p>
+      <p className="pmono">TAP ⋯ AT ANY POINT FOR WHAT THE WORDS MEAN.</p>
 
-      <button
-        className="btn btn--primary"
-        style={{ marginTop: 'auto' }}
-        onClick={() => send({ t: 'join', role: view.role, name: view.name })}
-      >
+      <button className="btn btn--primary" style={{ marginTop: 'auto' }} onClick={onNext}>
         ACCEPT THE PORTFOLIO
       </button>
     </div>
@@ -40,19 +45,48 @@ export function RoleReveal({ view, send }: { view: PhoneView; send: (c: Command)
 /** P-04 — three sealed cards. Lying about which you took is legal and expected. */
 export function GoalPicker({ view, send }: { view: PhoneView; send: (c: Command) => void }) {
   const choices = view.goalChoices ?? []
+  const [picked, setPicked] = useState<string | null>(null)
+  const chosen = choices.find((g) => g.id === picked)
+
+  // Sealing is permanent and used to happen on a single tap, with no statement
+  // of what had been sealed. Two taps, and the second one says it back to you.
+  if (chosen) {
+    return (
+      <div className="pbody">
+        <span className="plabel">SEALED · NOBODY ELSE SEES THIS</span>
+        <h1 className="pheading">Take this one?</h1>
+        <div className="bubble">
+          <div className="bubble__lead">{chosen.title}</div>
+          <p className="bubble__text">{chosen.desc}</p>
+        </div>
+        <p className="ptext">
+          It cannot be swapped later, and it only pays off if the country hits all three targets
+          too. You can re-read it any time under ⋯.
+        </p>
+        <button
+          className="btn btn--primary"
+          style={{ marginTop: 'auto' }}
+          onClick={() => send({ t: 'pickGoal', role: view.role, goalId: chosen.id })}
+        >
+          SEAL IT
+        </button>
+        <button className="btn btn--ghost" onClick={() => setPicked(null)}>
+          LOOK AGAIN
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="pbody">
       <span className="plabel">SEALED · NOBODY ELSE SEES THIS</span>
       <h1 className="pheading">What you want.</h1>
       <p className="ptext">
-        Everyone can see the full list of twelve. What stays hidden is which one you took.
+        Three of the twelve in this game are yours to pick from. What stays hidden is which one you
+        took — and everyone else is choosing in secret too.
       </p>
       {choices.map((g) => (
-        <button
-          key={g.id}
-          className="goal"
-          onClick={() => send({ t: 'pickGoal', role: view.role, goalId: g.id })}
-        >
+        <button key={g.id} className="goal" onClick={() => setPicked(g.id)}>
           <div className="goal__title">{g.title}</div>
           <div className="goal__desc">{g.desc}</div>
         </button>
@@ -125,21 +159,28 @@ export function Crisis({ view }: { view: PhoneView }) {
 export function TipCard({
   tip,
   role,
+  remaining,
   send,
   onClose,
 }: {
   tip: InsiderTip
   role: Role
+  remaining: number | null
   send: (c: Command) => void
   onClose: () => void
 }) {
   const unverified = tip.reliability === 'UNVERIFIED'
   const stake = role === 'community' ? 'a Public Mandate veto' : 'a Trust token'
+  const clock = formatClock(remaining)
 
   return (
     <div className="tip" role="dialog" aria-label="Insider tip">
       <span className="tip__label">INSIDER TIP</span>
       <span className="tip__eyes">FOR YOUR EYES ONLY</span>
+      {/* This is the only overlay that covers the whole phone, so it has to
+          carry the clock it is hiding — otherwise it is a timed decision with
+          the timer behind it. */}
+      {clock ? <span className="tip__clock">{clock}</span> : null}
 
       <span className={`tip__chip tip__chip--${unverified ? 'unverified' : 'confirmed'}`}>
         {unverified ? '◇ UNVERIFIED · TRUE 1 IN 2' : 'CONFIRMED'}
@@ -160,13 +201,15 @@ export function TipCard({
         </button>
         <p className="tip__reminder">
           {unverified
-            ? `A gamble. You stake ${stake} on it being true.`
-            : `Safe to publish. It is true, and you gain ${stake}.`}
+            ? `A gamble. If it turns out true you gain ${stake}; if not, you lose ${stake}. You find out when the round resolves.`
+            : `Safe to publish. It is true, and you gain ${stake} when the round resolves.`}
         </p>
         <button className="btn" onClick={onClose} style={{ color: '#fff' }}>
           KEEP IT QUIET
         </button>
-        <p className="tip__reminder">Nobody knows you received this.</p>
+        <p className="tip__reminder">
+          Nobody knows you received this, and keeping it costs you nothing.
+        </p>
       </div>
     </div>
   )

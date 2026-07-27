@@ -28,6 +28,7 @@ import { loadContent } from '../../../src/engine/content'
 import { ROLES, type Content, type Role } from '../../../src/engine/types'
 import {
   apply,
+  authorise,
   createRoom,
   dashboardView,
   endgame,
@@ -95,13 +96,46 @@ async function readRoom(code: string): Promise<{ room: Room; revision: number } 
   return { room: deserialise(rows[0].state), revision: rows[0].revision }
 }
 
-async function writeRoom(room: Room, revision: number): Promise<number> {
+/**
+ * Compare-and-set on the revision.
+ *
+ * Four phones negotiating for ninety seconds means concurrent commands are
+ * normal, not exceptional. A blind PATCH lets two of them read the same state
+ * and write in turn, so the second silently erases the first — an accepted
+ * offer or a declared veto simply never happened. Matching on the revision the
+ * caller read makes the loser detectable, and `withRoom` retries it.
+ *
+ * Returns the new revision, or null when somebody else got there first.
+ */
+async function writeRoom(room: Room, revision: number): Promise<number | null> {
   const next = revision + 1
-  await rest(`rooms?code=eq.${room.code}`, {
+  const res = await rest(`rooms?code=eq.${room.code}&revision=eq.${revision}`, {
     method: 'PATCH',
+    headers: { Prefer: 'return=representation' },
     body: JSON.stringify({ state: serialise(room), revision: next, updated_at: new Date().toISOString() }),
   })
-  return next
+  if (!res.ok) return null
+  const rows = (await res.json()) as unknown[]
+  return rows.length ? next : null
+}
+
+/**
+ * Read, mutate, write — retrying from a fresh read whenever another request
+ * beat us to it. The mutation runs again rather than being replayed onto stale
+ * state, so the reducer always sees the room as it actually is.
+ */
+async function withRoom(
+  code: string,
+  mutate: (room: Room) => Room,
+): Promise<{ room: Room; revision: number } | null> {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const loaded = await readRoom(code)
+    if (!loaded) return null
+    const next = mutate(loaded.room)
+    const revision = await writeRoom(next, loaded.revision)
+    if (revision !== null) return { room: next, revision }
+  }
+  return null
 }
 
 /**
@@ -143,38 +177,16 @@ function viewFor(room: Room, seat: Role | 'dashboard') {
 }
 
 /**
- * Commands a seat is allowed to issue.
- *
- * Every command names a role, and a client could name somebody else's. The
- * seat its token proves is the only one that counts, so the role is rewritten
- * here rather than trusted from the wire.
+ * Who is in which chair. Already public — it is on the projector — so it is
+ * safe to hand to somebody who has just been refused a seat, and it is the
+ * only thing that makes the refusal actionable.
  */
-function authorise(seat: Role | 'dashboard', cmd: Command): Command | null {
-  if (seat === 'dashboard') {
-    // The facilitator's screen may start and advance the session. It may not
-    // choose, pledge or spend anybody's resources.
-    return cmd.t === 'start' || cmd.t === 'advance' ? cmd : null
-  }
-  switch (cmd.t) {
-    case 'join':
-    case 'reconnect':
-    case 'leave':
-    case 'pickGoal':
-    case 'promise':
-    case 'demand':
-    case 'respondOffer':
-    case 'spotlight':
-    case 'veto':
-    case 'coFund':
-    case 'publishTip':
-    case 'choose':
-    case 'lock':
-      return { ...cmd, role: seat } as Command
-    case 'offer':
-      return { ...cmd, from: seat } as Command
-    default:
-      return null
-  }
+function roster(room: Room) {
+  return ROLES.map((role) => ({
+    role,
+    name: room.players[role].name || null,
+    taken: Boolean(room.players[role].name),
+  }))
 }
 
 // ── Handler ────────────────────────────────────────────────────────────────
@@ -230,11 +242,24 @@ Deno.serve(async (req: Request) => {
     const existing = await readRoom(code)
     if (!existing) return json({ error: 'no such room' }, 404)
 
-    // A seat already claimed keeps its token, so a player who reloads or
-    // loses signal rejoins the same seat rather than being locked out.
+    /**
+     * A claimed seat is not handed out again.
+     *
+     * Returning the incumbent's token to whoever asks would let anybody who
+     * types the room code sit down in an occupied chair, act as that player,
+     * and read the insider tip written for them alone. A player who reloads or
+     * loses signal still recovers, because their own device kept the token and
+     * resumes with it before ever reaching this path.
+     *
+     * A row with no name on it is a claim that never became a player — someone
+     * who opened the link and closed it. That chair is still free.
+     */
     const held = await rest(`room_seats?code=eq.${code}&role=eq.${role}&select=token`)
     const heldRows = (await held.json()) as { token: string }[]
     if (heldRows.length) {
+      if (existing.room.players[role].name) {
+        return json({ error: 'seat taken', seats: roster(existing.room) }, 409)
+      }
       return json({ token: heldRows[0].token, ...viewFor(existing.room, role), revision: existing.revision })
     }
 
@@ -263,14 +288,28 @@ Deno.serve(async (req: Request) => {
   if (action === 'tick') {
     // The caller asks the server to look at the clock; it does not get to say
     // what time it is. Nothing advances before its own deadline.
-    const before = room.phase
-    const beforeEnds = room.phaseEndsAt
-    room = tick(room, content, Date.now())
-    if (room.phase !== before || room.phaseEndsAt !== beforeEnds) {
-      revision = await writeRoom(room, revision)
-      await broadcastRevision(code, revision)
+    if (room.phaseEndsAt === null || Date.now() < room.phaseEndsAt) {
+      return json({ ...viewFor(room, seat), revision })
     }
-    return json({ ...viewFor(room, seat), revision })
+    const written = await withRoom(code, (r) => tick(r, content, Date.now()))
+    if (!written) return json({ ...viewFor(room, seat), revision })
+    await broadcastRevision(code, written.revision)
+    return json({ ...viewFor(written.room, seat), revision: written.revision })
+  }
+
+  /**
+   * Give the chair back.
+   *
+   * Deleting the row is the half that matters: without it the seat keeps its
+   * token for the rest of the workshop and nobody can ever sit there again,
+   * which is the state a player who tapped the wrong seat used to be stuck in.
+   */
+  if (action === 'release') {
+    if (seat === 'dashboard') return json({ error: 'the big screen holds no seat' }, 403)
+    const written = await withRoom(code, (r) => apply(r, { t: 'leave', role: seat }, content, Date.now()))
+    await rest(`room_seats?code=eq.${code}&token=eq.${token}`, { method: 'DELETE' })
+    if (written) await broadcastRevision(code, written.revision)
+    return json({ ok: true, revision: written?.revision ?? revision })
   }
 
   if (action === 'cmd') {
@@ -278,10 +317,12 @@ Deno.serve(async (req: Request) => {
     const allowed = requested ? authorise(seat, requested) : null
     if (!allowed) return json({ error: 'not allowed from this seat' }, 403)
 
-    room = apply(room, allowed, content, Date.now())
-    revision = await writeRoom(room, revision)
-    await broadcastRevision(code, revision)
-    return json({ ...viewFor(room, seat), revision })
+    const written = await withRoom(code, (r) => apply(r, allowed, content, Date.now()))
+    // 503, not 409: a busy room is a retry, whereas 409 tells a phone its seat
+    // was refused and sends the player to pick a different chair.
+    if (!written) return json({ error: 'the room is busy — try again' }, 503)
+    await broadcastRevision(code, written.revision)
+    return json({ ...viewFor(written.room, seat), revision: written.revision })
   }
 
   return json({ error: 'unknown action' }, 400)
