@@ -709,6 +709,7 @@ function createRoom(content2, seed, now) {
     createdAt: now,
     phase: "lobby",
     phaseEndsAt: null,
+    pausedAt: null,
     players,
     game: createGame(path, content2),
     promises: [],
@@ -742,6 +743,12 @@ function setPhase(room, phase, now) {
   const ms = PHASE_MS[phase];
   room.phaseEndsAt = ms > 0 ? now + ms : null;
 }
+function isPaused(room) {
+  return room.pausedAt != null;
+}
+function clockNow(room, now) {
+  return room.pausedAt ?? now;
+}
 function everyoneLocked(room) {
   const held = ROLES.filter((r) => room.players[r].name);
   if (!held.length) return false;
@@ -765,7 +772,7 @@ function choosableOptions(room, content2, role) {
 }
 function authorise(seat, cmd) {
   if (seat === "dashboard") {
-    return cmd.t === "start" || cmd.t === "advance" ? cmd : null;
+    return cmd.t === "start" || cmd.t === "advance" || cmd.t === "pause" || cmd.t === "resume" ? cmd : null;
   }
   switch (cmd.t) {
     case "join":
@@ -788,7 +795,21 @@ function authorise(seat, cmd) {
       return null;
   }
 }
+var FROZEN_WHILE_PAUSED = /* @__PURE__ */ new Set([
+  "promise",
+  "demand",
+  "offer",
+  "respondOffer",
+  "spotlight",
+  "veto",
+  "coFund",
+  "publishTip",
+  "choose",
+  "lock"
+]);
 function apply(room, cmd, content2, now) {
+  if (isPaused(room) && FROZEN_WHILE_PAUSED.has(cmd.t)) return room;
+  const at = clockNow(room, now);
   switch (cmd.t) {
     case "join": {
       const p = room.players[cmd.role];
@@ -827,11 +848,37 @@ function apply(room, cmd, content2, now) {
     }
     case "start": {
       if (room.phase !== "lobby") return room;
-      setPhase(room, "briefing", now);
+      setPhase(room, "briefing", at);
       return room;
     }
     case "advance":
-      return advance(room, content2, now);
+      return advance(room, content2, at);
+    /**
+     * Stop the clock, wherever the room has got to.
+     *
+     * The one control a facilitator asks for by the second session: a fire
+     * alarm, a latecomer, a question worth answering properly, or a table that
+     * has just started arguing well and should not be cut off by a countdown.
+     */
+    case "pause": {
+      if (isPaused(room)) return room;
+      room.pausedAt = now;
+      return room;
+    }
+    /**
+     * Start it again, giving back exactly what was left.
+     *
+     * The deadline moves forward by the length of the pause rather than being
+     * recomputed, so a table stopped with nine seconds of THE CHOICE remaining
+     * restarts with nine seconds — not with a fresh forty-five, and not with
+     * the phase already over.
+     */
+    case "resume": {
+      if (!isPaused(room)) return room;
+      if (room.phaseEndsAt !== null) room.phaseEndsAt += now - room.pausedAt;
+      room.pausedAt = null;
+      return room;
+    }
     case "promise": {
       if (room.phase !== "table") return room;
       const scenario = currentScenario(room, content2);
@@ -963,8 +1010,8 @@ function apply(room, cmd, content2, now) {
       p.locked = true;
       p.autoLocked = false;
       p.defaulted = false;
-      p.lockedAt = now;
-      if (everyoneLocked(room)) return resolveRound(room, content2, now);
+      p.lockedAt = at;
+      if (everyoneLocked(room)) return resolveRound(room, content2, at);
       return room;
     }
     default:
@@ -972,6 +1019,7 @@ function apply(room, cmd, content2, now) {
   }
 }
 function tick(room, content2, now) {
+  if (isPaused(room)) return room;
   if (room.phaseEndsAt === null || now < room.phaseEndsAt) return room;
   return advance(room, content2, now);
 }
@@ -1223,6 +1271,8 @@ function dashboardView(room, content2) {
     code: room.code,
     phase: room.phase,
     phaseEndsAt: room.phaseEndsAt,
+    paused: isPaused(room),
+    pausedAt: room.pausedAt ?? null,
     round: displayRound(room),
     scenario: scenario ? { id: scenario.id, title: scenario.title, type: scenario.type, situation: scenario.situation } : null,
     state: publicState(room.game, content2),
@@ -1308,6 +1358,8 @@ function phoneView(room, content2, role) {
     name: player.name,
     phase: room.phase,
     phaseEndsAt: room.phaseEndsAt,
+    paused: isPaused(room),
+    pausedAt: room.pausedAt ?? null,
     round: displayRound(room),
     scenario: scenario && !narrating ? { id: scenario.id, title: scenario.title, situation: scenario.situation, type: scenario.type } : null,
     privateLine: scenario && !narrating ? privateLine(scenario.type, role) : null,
@@ -1548,7 +1600,7 @@ Deno.serve(async (req) => {
     return json({ ...viewFor(room, seat), revision });
   }
   if (action === "tick") {
-    if (room.phaseEndsAt === null || Date.now() < room.phaseEndsAt) {
+    if (room.pausedAt != null || room.phaseEndsAt === null || Date.now() < room.phaseEndsAt) {
       return json({ ...viewFor(room, seat), revision });
     }
     const written = await withRoom(code, (r) => tick(r, content, Date.now()));

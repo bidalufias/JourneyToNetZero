@@ -1092,7 +1092,7 @@ Replay `engine.py` against a set of fixed seeds and assert the ported engine pro
 - Does anyone say "wait, can we do that?" *Good. That's a working negotiation game.*
 
 ### Expansion hooks
-- **Facilitator console** — pause, resume, custom shocks, timer control. Every real workshop needs this within three sessions.
+- **Facilitator console** — custom shocks and timer control. Pause, resume and step-to-next are built: `P` and `N` on the big screen, or the two buttons that fade in and out of its bottom corner, on every screen. What is left is the ability to reach into a round rather than only to stop it.
 - **Session analytics** — which options get picked, which promises break, win rates by cohort. For a training business this is the second act: it lets you tell a client *"here is what your leadership team actually did."*
 - **The Fifth Seat** — a Youth or Media player for larger groups
 - **Corporate mode** — Board / Operations / Employees / Investors

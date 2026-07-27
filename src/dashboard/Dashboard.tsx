@@ -40,15 +40,25 @@ const PHASE_LABEL: Record<string, string> = {
   results: 'THE NATIONAL MISSION',
 }
 
-/** Ticks locally between server snapshots so the countdown stays smooth. */
-export function useCountdown(endsAt: number | null): number | null {
+/**
+ * Ticks locally between server snapshots so the countdown stays smooth.
+ *
+ * While the room is paused the clock reads from the server's own `pausedAt`
+ * instead of from this machine's, which does two things: it holds still, and it
+ * holds still at the same number on every surface, because both ends of the
+ * subtraction now come from the same clock.
+ */
+export function useCountdown(endsAt: number | null, pausedAt: number | null = null): number | null {
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
-    if (endsAt === null) return
+    if (endsAt === null || pausedAt !== null) return
+    // Resuming must not leave the display a quarter-second behind the room.
+    setNow(Date.now())
     const id = setInterval(() => setNow(Date.now()), 250)
     return () => clearInterval(id)
-  }, [endsAt])
-  return endsAt === null ? null : Math.max(0, endsAt - now)
+  }, [endsAt, pausedAt])
+  if (endsAt === null) return null
+  return Math.max(0, endsAt - (pausedAt ?? now))
 }
 
 export function Dashboard({
@@ -63,7 +73,7 @@ export function Dashboard({
   onShowQr?: () => void
   onOpenScript?: () => void
 }) {
-  const remaining = useCountdown(view.phaseEndsAt)
+  const remaining = useCountdown(view.phaseEndsAt, view.pausedAt)
   const clock = formatClock(remaining)
 
   // The briefing is a screen of its own now that a single spacebar no longer
@@ -79,7 +89,7 @@ export function Dashboard({
 
   return (
     <div className="dash">
-      <Masthead view={view} clock={clock} urgent={(remaining ?? 1e9) < 10_000} />
+      <Masthead view={view} clock={clock} urgent={!view.paused && (remaining ?? 1e9) < 10_000} />
       <div className="dash__body">
         <TheNation view={view} />
         {view.phase === 'table' || view.phase === 'choice' ? <TheTable view={view} /> : null}
@@ -115,7 +125,13 @@ function Masthead({
         </span>
         <span>{PHASE_LABEL[view.phase] ?? ''}</span>
         {clock ? (
-          <span className={`dash__clock${urgent ? ' dash__clock--urgent' : ''}`}>{clock}</span>
+          <span
+            className={`dash__clock${urgent ? ' dash__clock--urgent' : ''}${
+              view.paused ? ' dash__clock--held' : ''
+            }`}
+          >
+            {clock}
+          </span>
         ) : null}
       </div>
     </header>

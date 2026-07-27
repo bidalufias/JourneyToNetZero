@@ -58,7 +58,10 @@ export function PhoneHeader({
 }) {
   const character = ROLE_CHARACTER[view.role]
   const clock = formatClock(remaining)
-  const urgent = (remaining ?? 1e9) < 10_000
+  // A stopped clock never nags. The pause banner above the header is already
+  // saying what is happening; a flashing red countdown under it would say the
+  // opposite.
+  const urgent = !view.paused && (remaining ?? 1e9) < 10_000
   const pct = view.phaseEndsAt && remaining !== null ? Math.max(0, Math.min(100, (remaining / 90_000) * 100)) : 0
 
   return (

@@ -425,3 +425,145 @@
   font: 800 clamp(38px, 4.6cqw, 88px) / 1 var(--font-heading);
   font-variant-numeric: tabular-nums;
 }
+
+/* ── The facilitator's controls ─────────────────────────────────────── */
+
+/*
+ * These sit outside `.dash` — they are drawn over every screen the broadcast
+ * has, including the ones that return early — so none of the container units
+ * the rest of this file uses apply. Fixed sizes, deliberately: this is the one
+ * thing on the projector that is meant to be read from the laptop rather than
+ * from the back of the room.
+ */
+
+.dash__clock--held {
+  color: var(--jtnz-glare);
+  animation: none;
+}
+
+/*
+ * Bottom left, not bottom right. Every screen that carries a countdown of its
+ * own puts it bottom right — the crisis sting has nothing else down there — and
+ * covering the clock, even for the four seconds the bar is up, is the one thing
+ * these buttons must not do.
+ */
+.faccon {
+  position: fixed;
+  left: var(--space-6);
+  bottom: var(--space-6);
+  z-index: 70;
+  display: flex;
+  gap: var(--space-2);
+  /* One dark panel rather than two floating buttons. Something is behind this
+     corner on every screen — the ticker, the lock row, the anchor card — and a
+     control that half-dissolves into whatever it lands on is a control the
+     facilitator has to look twice at. */
+  padding: var(--space-2);
+  background: rgb(0 0 0 / 0.72);
+  border: 2px solid var(--jtnz-broadcast-line);
+  backdrop-filter: blur(3px);
+  /* Out of the way and out of the pointer's reach until it is wanted: a hidden
+     bar that still swallowed clicks would eat a stray one at the worst moment. */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition:
+    opacity 220ms var(--jtnz-ease),
+    transform 220ms var(--jtnz-ease);
+}
+
+.faccon--in {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+.faccon__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 52px;
+  padding: var(--space-3) var(--space-4);
+  background: none;
+  color: #fff;
+  border: 2px solid var(--jtnz-glare);
+  font: 800 15px/1 var(--font-heading);
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: background var(--jtnz-press-ms) var(--jtnz-ease);
+}
+
+.faccon__btn:hover { background: var(--jtnz-broadcast-raise); }
+
+.faccon__btn--next {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.faccon__btn--next:hover { background: var(--color-accent-600); border-color: var(--color-accent-600); }
+
+/* Resume is the loud one while the room is stopped: it is the way out, and
+   Next steps back to a ghost so the two are not competing for the same hand. */
+.faccon__btn--resume {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.faccon[data-paused='true'] .faccon__btn--next {
+  background: none;
+  border-color: var(--jtnz-glare);
+}
+
+.faccon__key {
+  border: 2px solid currentColor;
+  padding: 2px 5px;
+  font-size: 0.8em;
+  opacity: 0.75;
+}
+
+/*
+ * What the room sees while it is stopped.
+ *
+ * A broadcast that freezes without saying why reads as a crash, and four people
+ * will start asking whether the game has broken instead of listening to
+ * whoever stopped it. Top of the screen rather than over the middle: the
+ * numbers under discussion are usually the reason for the pause.
+ *
+ * Black rather than accent, which is the opposite of every other alert in this
+ * file. The crisis sting fills the whole screen with accent, and a red bar on
+ * red is exactly the screen a facilitator is most likely to want to stop on.
+ * The accent goes into the rule and the pause mark instead, where it still
+ * signals across the room without ever landing on its own colour.
+ */
+.pausedbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 65;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+  background: #000;
+  color: #fff;
+  border-bottom: 8px solid var(--color-accent);
+}
+
+.pausedbar__mark {
+  font: 800 26px/1 var(--font-heading);
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+}
+
+.pausedbar__text {
+  font: 800 30px/1 var(--font-heading);
+  letter-spacing: 0.18em;
+}
+
+.pausedbar__note {
+  font: 700 16px/1 var(--font-mono);
+  letter-spacing: 0.06em;
+  opacity: 0.9;
+}

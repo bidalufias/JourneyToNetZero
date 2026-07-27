@@ -171,17 +171,32 @@ uses `Date.now()`, and nothing advances before its own deadline.
 
 ## Running a session
 
-30-minute version: 3 setup, 24 play, 3 results. The facilitator advances with
-the space bar on the dashboard. The lobby carries two buttons and every screen
-after it carries none, because a dashboard that looks like a control room kills
-the session — from the first crisis on, the controls are keys:
+30-minute version: 3 setup, 24 play, 3 results. The facilitator drives it from
+the dashboard, which carries exactly two buttons — PAUSE and NEXT — in the
+bottom corner of every screen. They behave like a video player's: a few seconds
+of no mouse movement and they fade out, and the first twitch brings them back,
+so four people at four metres never see a control room and the one person with
+a hand on the trackpad always has one. They stay put in the lobby, where
+nothing has started, and while the room is paused, which is the way back out.
+Everything they do is also a key:
 
 | Key | What it does |
 |---|---|
-| `Space` | Start the session, then advance to the next phase |
+| `Space` · `N` | Start the session, then go straight to the next step |
+| `P` | Stop the clock anywhere in the session, and start it again |
 | `Q` | The join code and its QR, full screen, for a latecomer |
 | `F` | The facilitator's script, in a window of its own |
 | `Esc` | Close whatever is over the broadcast |
+
+Pausing is a fact about the room, not about the big screen: the server stops
+expiring the phase, every phone freezes its countdown and says why, and nothing
+that moves the round — locking, promising, spending a veto — is accepted until
+it restarts. The deadline is kept rather than recomputed and pushed forward by
+however long the pause lasted, so a table stopped with nine seconds of THE
+CHOICE left restarts with nine seconds. Taking a seat and sealing a goal still
+work while it is stopped, because a latecomer arriving is one of the two
+reasons anybody presses it. Stepping on with NEXT works too, and the phase you
+land in gets its full length when the clock starts again.
 
 Players join by typing the four letters or by scanning the QR beside them,
 which lands on the same join page with the code already in the box.

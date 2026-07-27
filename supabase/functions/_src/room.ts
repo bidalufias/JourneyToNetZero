@@ -287,8 +287,11 @@ Deno.serve(async (req: Request) => {
 
   if (action === 'tick') {
     // The caller asks the server to look at the clock; it does not get to say
-    // what time it is. Nothing advances before its own deadline.
-    if (room.phaseEndsAt === null || Date.now() < room.phaseEndsAt) {
+    // what time it is. Nothing advances before its own deadline, and a paused
+    // room has no deadline it is heading for — `tick` would refuse anyway, but
+    // checking here keeps a stopped session from writing the room twice a
+    // second and bumping a revision every client would then go and re-fetch.
+    if (room.pausedAt != null || room.phaseEndsAt === null || Date.now() < room.phaseEndsAt) {
       return json({ ...viewFor(room, seat), revision })
     }
     const written = await withRoom(code, (r) => tick(r, content, Date.now()))

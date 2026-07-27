@@ -117,6 +117,17 @@ export interface Room {
   phase: Phase
   /** Server clock deadline for the current phase, or null if it does not tick. */
   phaseEndsAt: number | null
+  /**
+   * When the facilitator stopped the clock, or null while it runs.
+   *
+   * A paused room is frozen rather than rewound: the deadline it was heading
+   * for is kept as it was and pushed forward by however long the pause lasted,
+   * so a table that stops for two minutes gets back exactly the seconds it had
+   * left. It is also the room's clock while it is set — every phase change made
+   * during a pause is timed from this instant, so stepping through phases with
+   * the Next button hands each one its full length once the room restarts.
+   */
+  pausedAt: number | null
 
   players: Record<Role, Player>
   game: GameState
@@ -149,6 +160,15 @@ export interface DashboardView {
   code: string
   phase: Phase
   phaseEndsAt: number | null
+  /** The facilitator has stopped the clock. Nothing moves until they restart it. */
+  paused: boolean
+  /**
+   * The instant it stopped, on the server's clock, or null while it runs.
+   *
+   * Countdowns read this rather than `Date.now()` while it is set, which is
+   * what makes a paused clock hold still on every surface at once.
+   */
+  pausedAt: number | null
   round: number
   scenario: {
     id: string
@@ -192,6 +212,13 @@ export interface PhoneView {
   name: string
   phase: Phase
   phaseEndsAt: number | null
+  /**
+   * The facilitator has stopped the clock. The phone freezes its countdown and
+   * says so, because a timer draining during a pause is the one thing that
+   * would make a player choose in a hurry for no reason.
+   */
+  paused: boolean
+  pausedAt: number | null
   round: number
   scenario: { id: string; title: string; situation: string; type: string } | null
   /** The one line written for this role, not the shared news copy. */
