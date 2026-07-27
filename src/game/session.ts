@@ -273,26 +273,106 @@ export const ROLE_LABEL: Record<Role, string> = {
  *
  * Nothing here is gendered. The archetype is played by whoever takes it.
  */
-export const ROLE_CHARACTER: Record<Role, { title: string; org: string; blurb: string }> = {
+export interface RoleCharacter {
+  /** The archetype, without its article. */
+  title: string
+  org: string
+  /** The formal post, as it would read on a business card. */
+  post: string
+  /** One line, for the places that only have room for one. */
+  blurb: string
+  whoYouAre: string
+  believe: string
+  afraidOf: string
+  howToPlay: string
+  /** Three things this character would actually say at the table. */
+  says: string[]
+  /** And the one they never would. */
+  neverSay: string
+}
+
+/**
+ * The profile is the same text as the written guide's character cards, because
+ * a player who read the guide and a player who did not have to end up playing
+ * the same person. Most tables never open the guide, which is why the whole
+ * thing has to be reachable from the phone that is already in their hand.
+ */
+export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
   government: {
     title: 'Honourable Minister',
     org: 'Ministry of Energy, Environment and Climate',
+    post: '52 · Minister for Energy, Environment and Climate',
     blurb: 'Holds the budget and the law. Moves faster than anyone. Can also be voted out in an afternoon.',
+    whoYouAre:
+      'Twenty-four years in the civil service before you went into politics. You represent Kuala Jernih, a semi-rural seat where half your voters work in plantations and the other half commute into the city. People call you competent and slightly boring. You take that as a compliment.',
+    believe:
+      'The transition has to happen and you are the only person in this room who can actually fund it. You also believe that a government that loses an election achieves nothing at all, so staying in power is not vanity. It is the job.',
+    afraidOf: 'Being remembered as the minister who made petrol expensive.',
+    howToPlay:
+      'You move faster than anyone else here. You can spend, and you can make law. But everything you do is paid for by someone who votes. Never give something away without asking what you get back.',
+    says: [
+      'I can fund that. What do I tell the people in Perindu?',
+      "Give me a public reason to spend this and I'll spend it.",
+      'If I do that I lose the seat, and then none of this happens.',
+    ],
+    neverSay: "Money's no object.",
   },
   business: {
     title: 'Business Tycoon',
     org: 'Sawit Prima Group',
+    post: '58 · Group CEO, Sawit Prima: palm, property, power',
     blurb: 'Owns the emissions. Also owns the jobs, exports and tax base.',
+    whoYouAre:
+      'Third generation. You took over at 41, the week your father died. Forty thousand employees. You have read every major climate report of the last decade and can quote them, which surprises people who assume you have not.',
+    believe:
+      'You will go green the moment it is cheaper than not going green, or the moment somebody makes staying dirty more expensive. You do not think that makes you a villain. You think it makes you honest, and you are quietly irritated by people who pretend otherwise.',
+    afraidOf: 'Being the chief executive who bet the company early and got it wrong.',
+    howToPlay:
+      'You own the emissions. You also own the jobs, the exports and most of the tax base. That gives you leverage. Use it. Never volunteer to pay for something alone if you can get it co-funded.',
+    says: [
+      "I'll do it, if the Government shares the cost.",
+      "That's a ten-year investment and I'm judged every quarter.",
+      'You want me to cut thirty percent? Fine. Who pays for the retraining?',
+    ],
+    neverSay: "Profit doesn't matter here.",
   },
   community: {
     title: 'Community Elder',
     org: "Kampung Baru Jernih residents' association",
+    post: "47 · Food stall owner, chair of the residents' association",
     blurb: '34 million people who want clean air, a job, and petrol under two Ringga a litre.',
+    whoYouAre:
+      "You run a stall in Kampung Baru Jernih and you chair the residents' association, which means you speak for thirty-four million people who never elected you but definitely agree with you. Your stall has flooded three times in eight years. Your child has asthma. Your electricity bill doubled last year.",
+    believe:
+      'Clean air and affordable petrol are both perfectly reasonable things to want, and you are tired of being told to pick one. You have heard a lot of promises. You remember all of them.',
+    afraidOf: "Being asked to sacrifice again by people who won't have to.",
+    howToPlay:
+      'Make them earn it out loud. Ask what things cost. Remind people what they promised last round. You are the only player who can say no and make it stick.',
+    says: [
+      'Explain that to me like I have to pay for it, because I do.',
+      'You promised us this last time. What happened?',
+      "We'll accept it. But you go first.",
+    ],
+    neverSay: 'Whatever you think is best.',
   },
   activist: {
     title: 'Youth Activist',
     org: 'Bangkit Iklim',
+    post: '26 · Founder, Bangkit Iklim (Climate Rise)',
     blurb: 'Can make ignoring them more expensive than listening. Three times, and only three.',
+    whoYouAre:
+      'Law degree, no job in law. You organised the first climate strike in Kota Damai when you were nineteen, and four hundred people came. Last year ninety thousand came. You have no budget, no staff worth the name, and the largest following in the country.',
+    believe:
+      "The science isn't negotiable and the timeline isn't a preference. Everyone in this room will personally be fine whatever happens, and that is precisely the problem.",
+    afraidOf: 'Becoming the person who sat in a nice room, signed something, and changed nothing.',
+    howToPlay:
+      'You have three real choices every round: escalate, which is loud, costly and effective against bad actors; collaborate, which buys real influence and spends a little of your soul; or build evidence, where nothing happens now and something big happens later. Pick deliberately.',
+    says: [
+      "That's not a plan, that's a press release.",
+      "I'll back you publicly if you commit to it publicly.",
+      "Everyone in this room will be fine. That's the problem.",
+    ],
+    neverSay: "Let's revisit this next year.",
   },
 }
 
