@@ -35,6 +35,50 @@ export function nextStep(phase: Phase): { cmd: 'start' | 'advance'; label: strin
  * screen all wake it; `keydown` too, because a facilitator driving with the
  * spacebar should still be shown what else is available.
  */
+/**
+ * Everything the broadcast has already put along the bottom of the screen.
+ *
+ * Every screen ends in a strip — the ticker on the dashboard, the briefing line
+ * on the attract, the briefing and both endings — and the playing screens stack
+ * the four seats above it. Both are type-scaled, so they are one height on a
+ * laptop and another on a projector, and a number guessed at design time put
+ * the bar half on the strip and half off it: the one arrangement that reads as
+ * broken rather than as floating.
+ *
+ * The lock row is in here as well as the strip, and it is the one that matters.
+ * During THE CHOICE those four cards are the most-watched thing on the screen —
+ * they name the seat everybody is waiting on — and a control panel parked on
+ * top of the Government's card is worse than no control panel at all.
+ *
+ * Re-measured when the phase changes, because that is when this furniture is
+ * swapped for different furniture, and on resize, because that is when it
+ * changes height. Nothing else moves it.
+ */
+const BOTTOM_FURNITURE = '.dash .ticker, .dash .briefing-strip, .dash .locks'
+
+function useBottomInset(phase: Phase): number {
+  const [inset, setInset] = useState(0)
+  useEffect(() => {
+    const measure = () => {
+      let top = window.innerHeight
+      for (const el of document.querySelectorAll(BOTTOM_FURNITURE)) {
+        const box = el.getBoundingClientRect()
+        if (box.height > 0) top = Math.min(top, box.top)
+      }
+      setInset(Math.max(0, Math.round(window.innerHeight - top)))
+    }
+    // After paint: on a phase change the new furniture is not on screen yet,
+    // and measuring the old puts the bar in the wrong place for a frame.
+    const frame = requestAnimationFrame(measure)
+    window.addEventListener('resize', measure)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('resize', measure)
+    }
+  }, [phase])
+  return inset
+}
+
 function useIdleReveal(ms = 4000): boolean {
   const [visible, setVisible] = useState(true)
   useEffect(() => {
@@ -70,13 +114,18 @@ export function FacilitatorControls({
   onNext: () => void
 }) {
   const revealed = useIdleReveal()
+  const inset = useBottomInset(phase)
   const next = nextStep(phase)
   // Nothing has started in the lobby, and a paused room has to be able to find
   // its way back. Everywhere else the bar earns its place by disappearing.
   const held = paused || phase === 'lobby'
 
   return (
-    <div className={`faccon${revealed || held ? ' faccon--in' : ''}`} data-paused={paused}>
+    <div
+      className={`faccon${revealed || held ? ' faccon--in' : ''}`}
+      data-paused={paused}
+      style={{ bottom: `calc(${inset}px + var(--space-4))` }}
+    >
       <button
         className={`faccon__btn${paused ? ' faccon__btn--resume' : ''}`}
         onClick={onPause}
