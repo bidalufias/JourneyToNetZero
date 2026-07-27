@@ -1,5 +1,12 @@
 # Journey to Net Zero: Design Review
 
+> **Superseded as a plan by `REDESIGN-PLAN.md`**, which merges this review with a
+> second independent review and applies the client's two decisions: rebasing
+> emissions to 100 Mt net with net zero as the actual target, and a staged
+> onboarding in place of a simplified first game. This document is retained as
+> the evidence log behind that plan: the defect list, the code references and the
+> balance findings live here and are not repeated there.
+
 A review of the shipped build against two goals: world class as a strategy
 simulation, and self explanatory enough that any four people can pick it up and
 play. Written after reading the engine, the content pack, both play surfaces,
