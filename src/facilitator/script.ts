@@ -8,6 +8,19 @@
  * to say over it, what to watch for, and what the next press of the spacebar
  * does.
  *
+ * It is written in the voice of a host, out loud, ready to be read verbatim by
+ * somebody who has never run this before — because that is who usually is.
+ * The game itself is already a broadcast: the screen says LIVE, the crises
+ * arrive as breaking news, there is an anchor with a name. A facilitator
+ * narrating it in the flat register of a workshop brief is fighting their own
+ * set. Warmth and pace are not decoration here; four strangers will not
+ * negotiate hard in front of each other until somebody in the room has given
+ * them permission to enjoy themselves.
+ *
+ * The lines are complete sentences rather than bullet prompts for the same
+ * reason. Anyone can improvise by round three; nobody can improvise the
+ * welcome, and the welcome is what decides whether the table plays.
+ *
  * The four moments and the debrief questions come from PART 9 of
  * `JOURNEY-TO-NET-ZERO-design.md`. The timings are read from `PHASE_MS` rather
  * than retyped, so a phase that is retuned cannot leave this page lying.
@@ -23,9 +36,15 @@ export interface Beat {
   length: string
   /** What the room is looking at. */
   onScreen: string
-  /** Lines to say over it — paraphrase freely, they are cues not a script. */
+  /** Lines to say out loud. Written to be read as they are. */
   say: string[]
-  /** What to watch in the room while it runs. */
+  /**
+   * Lines for round one only — the rules a table needs explaining once and
+   * then resents hearing again. Six rounds of the same explanation is how a
+   * thirty-minute game starts feeling like a training course.
+   */
+  firstTime?: string[]
+  /** What to watch in the room while it runs. Direction, not dialogue. */
   watch?: string
   /** What the next advance does. */
   next: string
@@ -38,12 +57,13 @@ export const BEATS: Beat[] = [
     length: 'until you start it',
     onScreen: 'The four-letter room code, and the four seats filling up.',
     say: [
-      'Four of you are going to run a country for the next half hour. None of you can do it alone — that is not a hint, that is the whole design.',
-      'Join on your phone: scan the code on the screen, or type the four letters at this address.',
-      'Take whichever seat you like. Read your character properly — you are going to be them for thirty minutes.',
+      'Good evening, and welcome to the Republic of Semenanjara! Thirty-four million people, one very warm peninsula, and — as of tonight — four of you in charge of the whole thing.',
+      'Phones out. Point your camera at the code on that screen, or type those four letters in. Then take a seat: Government, Business, Community, Activist. First come, first served.',
+      'While the rest of them are joining — read your character. Name, job, what they want, what they are frightened of. You are going to be that person for the next half hour, and I promise you it is a great deal more fun if you commit to it.',
+      'And one warning before we begin. Not one of you can do this alone. That is not a hint. That is the entire design of the game.',
     ],
     watch:
-      'All four seats named before you start. A seat still empty at the crisis is a phone that will be handed round all session.',
+      'Names on all four seats before you start. A seat still empty at the crisis is a phone that gets handed round all session — and one player carrying two roles argues with themselves, which is the one thing this game cannot do for you.',
     next: 'Starts the session and opens the briefing.',
   },
   {
@@ -52,11 +72,14 @@ export const BEATS: Beat[] = [
     length: seconds('briefing'),
     onScreen: 'The three national targets, and where the country stands today.',
     say: [
-      'Three targets. Emissions down to 200, growth averaging 5%, happiness up to 7. All three, or nobody wins — including anyone who hits their own sealed goal.',
-      'Six crises. Each one: you talk, then you each pick a card in secret, then all four flip at once.',
-      'Nothing anybody promises at this table is binding. That is deliberate.',
+      'Right — here is the mission, and it is not a small one. It is 2025. You have got until 2050, and three numbers to hit.',
+      'Emissions: three hundred million tonnes today, and you need them down to two hundred. Growth: averaging five percent, because a country that stops growing puts people out of work. Happiness: six out of ten today, and it needs to be seven.',
+      'All three. Not two out of three. Miss one and this country has failed — and so have all of you, however brilliantly you personally did.',
+      'Six crises stand between you and 2050. Every one of them goes the same way: you talk, you each pick a card in secret, and then all four flip at once in front of the entire nation.',
+      'And here is my favourite rule, so listen to this one. Nothing you promise at that table is binding. Nothing. You can look somebody in the eye, shake their hand, and do the exact opposite — and this screen will tell everybody you did it. Good luck.',
     ],
-    watch: 'Phones down and eyes up for these twenty seconds. It is the only time the game explains itself to everyone at once.',
+    watch:
+      'Phones face down and eyes up for these twenty seconds. It is the only moment in the session where the game explains itself to all four of them at once; everything after this they learn by being hit with it.',
     next: 'Opens the first crisis.',
   },
   {
@@ -65,10 +88,12 @@ export const BEATS: Beat[] = [
     length: seconds('crisis'),
     onScreen: 'The breaking-news sting: what has just happened to the country.',
     say: [
-      'Read it. Your phone has the same story plus one line written for you alone — nobody else can see it.',
-      'Do not start solving it yet. You get ninety seconds to talk in a moment.',
+      'And here we go — breaking news. [Read the headline off the screen, and mean it.]',
+      'Look at your phone. You have got the same story, plus one line written for you and nobody else in this room. Nobody knows what anybody else just read.',
+      'Do not start fixing it yet. Take it in. The table opens in a moment and then you can shout at each other.',
     ],
-    watch: 'One player will get an insider tip this round. Nobody is told who. Let them decide what to do with it.',
+    watch:
+      'One player gets an insider tip this round and nobody is told who. If somebody suddenly goes quiet or suddenly gets loud, that is probably why. Let it play.',
     next: 'Opens the table. The clock starts on its own if you leave it.',
   },
   {
@@ -77,12 +102,15 @@ export const BEATS: Beat[] = [
     length: seconds('table'),
     onScreen: 'Who is at the table, the promises made, and the countdown.',
     say: [
-      'Ninety seconds. Talk to each other, not to your phones.',
-      'You can offer resources, make a public promise, or make a public demand. The Activist has three Spotlights for the whole game; the Community has two Public Mandates.',
-      'The most valuable sentence in this game is "what if we both did it?".',
+      'The table is open! Ninety seconds. Talk to each other — not to your phones.',
+      'Best sentence in this game is four words long: "what if we both did it?" Somebody use it.',
+    ],
+    firstTime: [
+      'Everything you need is on your phone. You can offer somebody your money. You can make a promise, out loud and on the big screen. You can make a public demand — name your price.',
+      'Activist, you have three Spotlights for the entire game: name somebody publicly and their dirty option only half works. Community, you have two Public Mandates: take somebody’s worst card off the table altogether. Three and two. That is your lot, so spend them where it hurts.',
     ],
     watch:
-      'If the room goes quiet, name the tension out loud: "Business, what would it take?" — do not fill the silence with your own answer.',
+      'If the room goes quiet, put the tension into somebody’s mouth — "Business, what would it take?" — and then stop talking. Do not answer your own question; the silence after it is where the deal gets made.',
     next: 'Closes the talking and deals the three cards.',
   },
   {
@@ -91,10 +119,14 @@ export const BEATS: Beat[] = [
     length: seconds('choice'),
     onScreen: 'Four seats, locking one at a time. The last one to lock is named.',
     say: [
-      'Three cards each, in secret. You do not have to do what you just promised.',
-      'Lock in. If you run out of time the clock locks whatever you have selected.',
+      'Time! Phones up. Three cards each, forty-five seconds, and nobody sees what you pick.',
+      'And remember — you do not have to do what you just promised.',
     ],
-    watch: 'Say nothing here. The visible pressure of being the last unlocked seat is doing the work.',
+    firstTime: [
+      'Tap a card to choose it, then LOCK IT IN. You can change your mind right up until you lock. If the clock beats you, it locks whatever you were holding — so pick something early.',
+    ],
+    watch:
+      'Say nothing else. The screen is naming the last seat that has not locked, and four people looking at one person does more than you can.',
     next: 'Resolves the round — this happens on its own when all four lock.',
   },
   {
@@ -102,9 +134,11 @@ export const BEATS: Beat[] = [
     label: 'THE RECKONING',
     length: seconds('reckoning'),
     onScreen: 'The four cards flip one at a time, meters moving between each.',
-    say: ['Look up. All four cards, one at a time.'],
+    say: [
+      'Locked. Eyes up — let us see what this table actually did.',
+    ],
     watch:
-      'This is the loudest moment of every round. Do not talk over it — a broken promise on screen is worth more than anything you could say about trust.',
+      'Then be quiet. This is the loudest ninety seconds of the round and it belongs to them. If a promise breaks on screen, the room will do the reacting; a broken promise landing in silence teaches more about trust than anything you could say over the top of it.',
     next: 'Shows the story so far.',
   },
   {
@@ -113,8 +147,8 @@ export const BEATS: Beat[] = [
     length: seconds('summary'),
     onScreen: 'One line per round, and how far the three targets still are.',
     say: [
-      'That is where you are. Rounds left, targets left.',
-      'Notice the green economy share. Every point of it makes the next round of growth cost less carbon.',
+      'And that is the story of this country so far. Here is where it leaves you — what you have made, and what you still owe.',
+      'Watch that green economy number. Every point you put on it makes your next round of growth cost less carbon. The tables that work that out early are the tables that get there.',
     ],
     next: 'Opens the next crisis — or the results, after round six.',
   },
@@ -124,10 +158,12 @@ export const BEATS: Beat[] = [
     length: 'until you advance it',
     onScreen: 'The three targets judged, then the sealed goals and the titles.',
     say: [
-      'Five seconds of silence before you say anything. Let it land.',
-      'Then: the country either made all three or it did not. Everything else is a footnote to that.',
+      'Ladies and gentlemen — it is 2050. Let us see what became of Semenanjara.',
+      '[Five seconds of silence. Count them.]',
+      'Three targets. All three, or none of it counts — that was the deal you took thirty minutes ago.',
     ],
-    watch: 'If somebody hit their private goal in a session that failed, they get Hollow Victory. That card is the lesson — do not soften it.',
+    watch:
+      'If somebody hit their private goal in a session where the country missed, they get Hollow Victory. Read it out and let it sit. That card does more teaching than an hour of slides, and softening it throws the session away at the last moment.',
     next: 'Ends the session and holds on the final screen.',
   },
   {
@@ -135,7 +171,10 @@ export const BEATS: Beat[] = [
     label: 'AFTER',
     length: 'as long as you want',
     onScreen: 'The final standing, held.',
-    say: ['Ten minutes of debrief is worth more than the thirty minutes of game. The five questions are below.'],
+    say: [
+      'Give yourselves a hand — you just ran a country for half an hour, which is longer than most people manage.',
+      'Now the part that is actually worth your time. Five questions, ten minutes, and nobody is allowed to be in character any more.',
+    ],
     next: 'Nothing further — reload the big screen for a new session.',
   },
 ]
@@ -147,48 +186,55 @@ export interface Moment {
   text: string
 }
 
-/** PART 9 of the design doc: the four places a facilitator earns their fee. */
+/**
+ * PART 9 of the design doc: the four places a facilitator earns their fee.
+ *
+ * Each carries the line to say and then why it works, in that order, because
+ * in the ten seconds where the moment is live nobody is reading the second half.
+ */
 export const MOMENTS: Moment[] = [
   {
     round: 1,
     phase: 'reckoning',
     title: 'After the first reveal',
-    text: 'Ask it straight: "Did anyone make a promise? Did anyone keep it?" Round 1 is where the table learns whether words are worth anything here.',
+    text: '“Hold on. Did anybody make a promise just then? … And did anybody keep it?” Round one is where this table finds out whether words are worth anything here, and they will play the other five rounds according to the answer.',
   },
   {
     round: 3,
     phase: 'summary',
     title: 'After the health crisis',
-    text: 'If emissions fell while everything else collapsed, ask "is that success?". It is the cheapest and clearest lesson in the game and it only works if you ask before anybody has rationalised it.',
+    text: '“Look at that. Emissions just fell — for free. Is that success?” If the pandemic cut the carbon while everything else collapsed, this is the cheapest and clearest lesson in the game, and it only lands if you ask before anybody has had time to rationalise it.',
   },
   {
     round: 4,
     phase: 'table',
     title: 'Before the round 4 choices',
-    text: 'Read the Government\'s Trust total aloud, then say: "this number was decided three rounds ago." Path dependency, in one sentence, with evidence on screen.',
+    text: 'Read the Government’s Trust total off the screen, then: “that number was decided three rounds ago.” Path dependency, in one sentence, with the evidence sitting behind you.',
   },
   {
     round: 6,
     phase: 'results',
     title: 'After the final reveal',
-    text: 'Five seconds of silence. Count them. Then start the debrief.',
+    text: 'Nothing. Five full seconds of it — count them in your head. Then: “right. Let us talk about what just happened.”',
   },
 ]
 
+/** Ten minutes, in this order, in plain English rather than in character. */
 export const DEBRIEF: string[] = [
-  'Who did you need most, and did you tell them?',
-  "What's the one thing you gave up?",
-  'Which promise mattered more — the one kept or the one broken?',
-  'Round 6 was easier or harder because of something you did in Round 2. What was it?',
-  'In your real job, which of these four are you? And who do you never talk to?',
+  'Who did you need most in there — and did you ever actually tell them?',
+  'What is the one thing you gave up?',
+  'Which promise mattered more: the one that was kept, or the one that was broken?',
+  'Round six was easier or harder because of something one of you did in round two. What was it?',
+  'In your real job — which of these four are you? And who is the one you never talk to?',
 ]
 
 export const SETUP: string[] = [
-  'Big screen open on /dashboard, at the lobby with a room code showing.',
-  'Four phones, four seats, four names on the screen before you start.',
-  'Phones face down during THE TABLE. Say it once, early, and it holds all session.',
-  'Send anyone who wants the full rules to the written guide — it is a QR code away and nobody has to read it to play.',
-  'Thirty minutes end to end. Budget ten more for the debrief if you have them.',
+  'Big screen open on /dashboard, sitting on the lobby with a room code showing.',
+  'Four phones, four seats, four names on that screen before you start. Do not start on three.',
+  '“Phones face down while we talk.” Say it once, early, in the welcome. It holds all session.',
+  'Anybody who wants the full rules can have the written guide — but nobody needs to read a word of it to play, so do not hand it out and wait.',
+  'Thirty minutes end to end. Another ten for the debrief, which is where the value is.',
+  'Read the lobby and briefing lines below out loud once before the room fills. They are the only two you cannot improvise.',
 ]
 
 export interface Trouble {

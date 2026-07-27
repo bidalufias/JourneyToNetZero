@@ -453,6 +453,11 @@ function Home({ go, initialCode = '' }: { go: (url: string) => void; initialCode
     </>
   )
 
+  // No route to the facilitator's script from here. This page is what four
+  // players see — three of whom scanned a code off a wall — and a button
+  // offering them the host's lines is an invitation to read the crib sheet for
+  // a game that works because nobody has seen it before. The script belongs to
+  // the big screen, which is the one surface only the facilitator ever opens.
   const running = (
     <>
       <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
@@ -464,9 +469,6 @@ function Home({ go, initialCode = '' }: { go: (url: string) => void; initialCode
       >
         OPEN THE BIG SCREEN
       </button>
-      <a className="btn btn--ghost" href="/facilitator" target="_blank" rel="noreferrer">
-        FACILITATOR SCRIPT
-      </a>
     </>
   )
 
