@@ -11,6 +11,10 @@ import type { Impact } from './impact'
 export type Phase =
   | 'lobby'
   | 'briefing'
+  | 'practiceTalk'
+  | 'practiceChoice'
+  | 'power'
+  | 'goal'
   | 'crisis'
   | 'table'
   | 'choice'
@@ -25,9 +29,27 @@ export type Phase =
  * It used to be advertised as thirty and run closer to thirty-seven, and a
  * workshop that overruns by seven minutes is a workshop that gets cut short.
  */
+/**
+ * The onboarding, then the round.
+ *
+ * Every step teaches exactly one verb and then makes the table use it. A player
+ * used to meet the room code, a role, a resource, a sealed goal and the three
+ * national targets before making a single decision, which is roughly 850 words
+ * inside a three minute setup. Now they say something, pick something, and see
+ * it resolve, before any of it counts.
+ *
+ * The practice talk comes before the practice choice because that is the order
+ * a real round runs in. The plan had them the other way round, on the reasoning
+ * that picking is the simpler verb; teaching the sequence backwards to save one
+ * step of difficulty is a poor trade.
+ */
 export const PHASE_MS: Record<Phase, number> = {
   lobby: 0, // ends when the facilitator starts
-  briefing: 20_000,
+  briefing: 45_000,
+  practiceTalk: 75_000,
+  practiceChoice: 60_000,
+  power: 30_000,
+  goal: 45_000,
   crisis: 30_000,
   table: 90_000,
   choice: 45_000,

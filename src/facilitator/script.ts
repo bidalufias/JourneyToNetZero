@@ -75,12 +75,68 @@ export const BEATS: Beat[] = [
       'Right. Here is the mission, and it is not a small one. It is 2025. You have got until 2050, and three numbers to hit.',
       'Emissions: this country puts out three hundred million tonnes a year, and its forests soak up two hundred of them, so it is sitting at a hundred net. You need that hundred down to nothing. Growth: averaging five percent, because a country that stops growing puts people out of work. Happiness: six out of ten today, and it needs to be seven.',
       'All three. Not two out of three. Miss one and this country has failed, and so have all of you, however brilliantly you personally did.',
-      'Six crises stand between you and 2050. Every one of them goes the same way: you talk, you each pick a card in secret, and then all four flip at once in front of the entire nation.',
+      'Six crises stand between you and 2050. Every one of them goes the same way: you talk, you each pick a card in secret, and then all four turn over at once in front of the entire nation.',
+      'We are going to practise that once before any of it counts.',
       'And here is my favourite rule, so listen to this one. Nothing you promise at that table is binding. Nothing. You can look somebody in the eye, shake their hand, and do the exact opposite, and this screen will tell everybody you did it. Good luck.',
     ],
     watch:
       'Phones face down and eyes up for these twenty seconds. It is the only moment in the session where the game explains itself to all four of them at once; everything after this they learn by being hit with it.',
     next: 'Opens the first crisis.',
+  },
+  {
+    phase: 'practiceTalk',
+    label: 'PRACTICE: TALKING',
+    length: seconds('practiceTalk'),
+    onScreen: 'The promise board, empty, waiting for somebody to say something.',
+    say: [
+      'Before any of it counts, we are going to practise. Two minutes, and nothing here goes on your record.',
+      'This is the part of the round where you talk. On your phone you can promise to do something, or ask somebody else to. Everybody do one now, whatever you like.',
+      'And watch this screen while you do it, because everything you say lands up here where the whole room can see it.',
+    ],
+    watch:
+      'Wait until all four have appeared on the board. This is the only moment in the session where you can make somebody use a button without it costing them anything, and a player who has pressed it once will press it again in Round 2.',
+    next: 'Moves on to practising the choice.',
+  },
+  {
+    phase: 'practiceChoice',
+    label: 'PRACTICE: CHOOSING',
+    length: seconds('practiceChoice'),
+    onScreen: 'One instruction, and how many have locked in.',
+    say: [
+      'Now the other half. Two cards each on your phone. Tap one to pick it, then press LOCK IT IN.',
+      'Look at the four arrows on each card. They tell you which way it pushes the country: carbon, the economy, quality of life, and the clean economy. Green is the direction we want.',
+      'You can change your mind right up until you lock. After that you cannot. Still practice, still counts for nothing.',
+    ],
+    watch:
+      'Four locks on the screen before you move on. If somebody has not, say their seat out loud once; that is the whole lesson about the clock and it is cheaper to learn here.',
+    next: 'Introduces each seat to its own special move.',
+  },
+  {
+    phase: 'power',
+    label: 'WHAT EACH OF YOU CAN DO',
+    length: seconds('power'),
+    onScreen: 'One line saying that each seat holds something the others do not.',
+    say: [
+      'One more thing, and this one is different for each of you. Read your own phone, because nobody else has what you are looking at.',
+      'Activist, you have three Spotlights. Community, you have two vetoes. Minister and Company Boss, you have money, and you are the only two who do.',
+    ],
+    watch:
+      'Thirty seconds, heads down, then move. Teaching all four powers to all four players is four times the words and three times the irrelevance, which is why each phone only shows its own.',
+    next: 'Asks everybody for their secret win.',
+  },
+  {
+    phase: 'goal',
+    label: 'YOUR SECRET WIN',
+    length: seconds('goal'),
+    onScreen: 'The instruction, and the line to say over it.',
+    say: [
+      'Last thing before it starts counting. You have all now seen how this country works, so decide what you personally want out of it.',
+      'Three goals on your phone. Pick one. Nobody sees which one you took, everybody is choosing at the same time, and you are allowed to lie about it for the rest of the game.',
+      'And the sting: your goal only pays if the country hits all three targets as well. You cannot win alone here. Not even a little.',
+    ],
+    watch:
+      'They are choosing now rather than at the start on purpose. The goals are written in carbon and Public Trust and clean economy, and asking somebody to commit to one before they have watched any of those move is asking them to pick the nicest title.',
+    next: 'Opens the first real crisis.',
   },
   {
     phase: 'crisis',

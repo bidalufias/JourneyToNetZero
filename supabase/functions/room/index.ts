@@ -34,13 +34,23 @@ function loadContent(raw) {
     roundVariants,
     resilienceFlags: new Set(pack.resilienceFlags),
     privateGoals: pack.privateGoals,
-    insiderTips: pack.insiderTips
+    insiderTips: pack.insiderTips,
+    tutorial: pack.tutorial
   };
 }
 function validate(pack, scenarios, roundVariants) {
   const problems = [];
   for (let r = 1; r <= 6; r++) {
     if (!roundVariants[r]?.length) problems.push(`round ${r} has no scenarios`);
+  }
+  if (!pack.tutorial?.options) {
+    problems.push("pack has no tutorial block");
+  } else {
+    for (const role of ROLES) {
+      if (!pack.tutorial.options[role]?.length) {
+        problems.push(`tutorial: role ${role} has no practice cards`);
+      }
+    }
   }
   for (const s of Object.values(scenarios)) {
     for (const role of ROLES) {
@@ -603,7 +613,11 @@ function roomCode(seed) {
 var PHASE_MS = {
   lobby: 0,
   // ends when the facilitator starts
-  briefing: 2e4,
+  briefing: 45e3,
+  practiceTalk: 75e3,
+  practiceChoice: 6e4,
+  power: 3e4,
+  goal: 45e3,
   crisis: 3e4,
   table: 9e4,
   choice: 45e3,
@@ -975,7 +989,25 @@ function advance(room, content2, now) {
     case "lobby":
       setPhase(room, "briefing", now);
       return room;
+    // The onboarding, one verb at a time. None of it touches the engine.
     case "briefing":
+      setPhase(room, "practiceTalk", now);
+      return room;
+    case "practiceTalk":
+      setPhase(room, "practiceChoice", now);
+      return room;
+    case "practiceChoice":
+      for (const role of ROLES) {
+        room.players[role].choiceId = null;
+        room.players[role].locked = false;
+      }
+      room.promises = room.promises.filter((p) => p.round !== 0);
+      setPhase(room, "power", now);
+      return room;
+    case "power":
+      setPhase(room, "goal", now);
+      return room;
+    case "goal":
       return openRound(room, content2, now);
     case "crisis":
       setPhase(room, "table", now);
@@ -1256,8 +1288,21 @@ function phoneView(room, content2, role) {
   const scenario = currentScenario(room, content2);
   const player = room.players[role];
   const showOptions = room.phase === "table" || room.phase === "choice";
+  const practising = room.phase === "practiceTalk" || room.phase === "practiceChoice";
   let options = [];
-  if (scenario && showOptions) {
+  if (practising) {
+    options = content2.tutorial.options[role].map((o) => ({
+      id: o.id,
+      title: o.title,
+      desc: o.desc,
+      cost: costLabel(o),
+      impact: optionImpact(o),
+      condition: optionCondition(o),
+      available: true,
+      disabled: null,
+      disabledNote: null
+    }));
+  } else if (scenario && showOptions) {
     const affordableAndOpen = availableOptions(room.game, scenario, role, content2);
     const afterVeto = role === room.vetoTarget ? applyVeto(affordableAndOpen) : affordableAndOpen;
     options = scenario.options[role].map((o) => {
@@ -1297,7 +1342,8 @@ function phoneView(room, content2, role) {
   }
   const resourceKind = ROLE_RESOURCE[role].kind;
   const resourceValue = resourceKind === "fiscal" ? room.game.fiscal : resourceKind === "capital" ? room.game.capital : resourceKind === "spotlights" ? room.game.spotlights : vetoesRemaining(room);
-  const goalChoices = player.goalId === null ? content2.privateGoals[role].map((g) => ({ id: g.id, title: g.title, desc: g.desc })) : null;
+  const beforeGoals = room.phase === "lobby" || room.phase === "briefing" || room.phase === "practiceTalk" || room.phase === "practiceChoice" || room.phase === "power";
+  const goalChoices = player.goalId === null && !beforeGoals ? content2.privateGoals[role].map((g) => ({ id: g.id, title: g.title, desc: g.desc })) : null;
   const ownGoal = player.goalId ? content2.privateGoals[role].find((g) => g.id === player.goalId) ?? null : null;
   const narrating = room.phase === "reckoning" || room.phase === "summary";
   const nation = publicState(room.game, content2);

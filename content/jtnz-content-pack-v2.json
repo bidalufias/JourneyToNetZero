@@ -4038,5 +4038,131 @@
     ]
    }
   }
- ]
+ ],
+ "tutorial": {
+  "title": "A Practice Round",
+  "situation": "Nothing has happened yet. This one is for practice, and none of it counts. Pick a card so you know how it works when it does.",
+  "options": {
+   "government": [
+    {
+     "id": "T-G1",
+     "arch": "SPEND_STEER",
+     "title": "Fund the Bus Network",
+     "desc": "Cleaner buses, and more of them.",
+     "cost": {
+      "fiscal": 2
+     },
+     "e": -9,
+     "g": 0.3,
+     "h": 0.4,
+     "gr": 8,
+     "flags": [],
+     "headline": ""
+    },
+    {
+     "id": "T-G2",
+     "arch": "DEREGULATE",
+     "title": "Do Nothing This Year",
+     "desc": "Save the money. See what happens.",
+     "cost": {
+      "fiscal": -1
+     },
+     "e": 2,
+     "g": 0.2,
+     "h": -0.2,
+     "gr": -2,
+     "flags": [],
+     "headline": ""
+    }
+   ],
+   "business": [
+    {
+     "id": "T-B1",
+     "arch": "TRANSITION",
+     "title": "Switch the Factory to Solar",
+     "desc": "Costly now. Cheaper every year after.",
+     "cost": {
+      "capital": 3
+     },
+     "e": -10,
+     "g": 0.2,
+     "h": 0.3,
+     "gr": 9,
+     "flags": [],
+     "headline": ""
+    },
+    {
+     "id": "T-B2",
+     "arch": "EXPAND",
+     "title": "Run the Old Plant Harder",
+     "desc": "More output. More smoke.",
+     "cost": {
+      "capital": -2
+     },
+     "e": 6,
+     "g": 0.7,
+     "h": -0.4,
+     "gr": -2,
+     "flags": [],
+     "headline": ""
+    }
+   ],
+   "community": [
+    {
+     "id": "T-C1",
+     "arch": "SELF_ORGANISE",
+     "title": "Start a Car Pool",
+     "desc": "Cheap, small, and it adds up.",
+     "cost": {},
+     "e": -4,
+     "g": 0.1,
+     "h": 0.4,
+     "gr": 4,
+     "flags": [],
+     "headline": ""
+    },
+    {
+     "id": "T-C2",
+     "arch": "DEMAND_RELIEF",
+     "title": "Demand Cheaper Fuel",
+     "desc": "Popular today. Someone else pays.",
+     "cost": {},
+     "e": 2,
+     "g": 0.2,
+     "h": 0.6,
+     "gr": -1,
+     "flags": [],
+     "headline": ""
+    }
+   ],
+   "activist": [
+    {
+     "id": "T-A1",
+     "arch": "ESCALATE",
+     "title": "March on the Ministry",
+     "desc": "Loud. It makes enemies and it works.",
+     "cost": {},
+     "e": -3,
+     "g": -0.4,
+     "h": -0.2,
+     "gr": 3,
+     "flags": [],
+     "headline": ""
+    },
+    {
+     "id": "T-A2",
+     "arch": "EDUCATE",
+     "title": "Publish the Numbers",
+     "desc": "Nothing today. Something later.",
+     "cost": {},
+     "e": -1,
+     "g": 0.0,
+     "h": 0.2,
+     "gr": 3,
+     "flags": [],
+     "headline": ""
+    }
+   ]
+  }
+ }
 }

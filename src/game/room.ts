@@ -552,7 +552,32 @@ function advance(room: Room, content: Content, now: number): Room {
       setPhase(room, 'briefing', now)
       return room
 
+    // The onboarding, one verb at a time. None of it touches the engine.
     case 'briefing':
+      setPhase(room, 'practiceTalk', now)
+      return room
+
+    case 'practiceTalk':
+      setPhase(room, 'practiceChoice', now)
+      return room
+
+    case 'practiceChoice':
+      // Practice is thrown away here rather than carried into Round 1. It was
+      // never scored, and a card left selected would otherwise arrive in the
+      // first real round already ticked.
+      for (const role of ROLES) {
+        room.players[role].choiceId = null
+        room.players[role].locked = false
+      }
+      room.promises = room.promises.filter((p) => p.round !== 0)
+      setPhase(room, 'power', now)
+      return room
+
+    case 'power':
+      setPhase(room, 'goal', now)
+      return room
+
+    case 'goal':
       return openRound(room, content, now)
 
     case 'crisis':
@@ -938,9 +963,25 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
   const scenario = currentScenario(room, content)
   const player = room.players[role]
   const showOptions = room.phase === 'table' || room.phase === 'choice'
+  const practising = room.phase === 'practiceTalk' || room.phase === 'practiceChoice'
 
   let options: PhoneOption[] = []
-  if (scenario && showOptions) {
+  if (practising) {
+    // The practice cards, straight through. No affordability, no veto, no gate:
+    // this round cannot be lost and the point is that a player finds out what a
+    // card looks like before one matters.
+    options = content.tutorial.options[role].map((o) => ({
+      id: o.id,
+      title: o.title,
+      desc: o.desc,
+      cost: costLabel(o),
+      impact: optionImpact(o),
+      condition: optionCondition(o),
+      available: true,
+      disabled: null,
+      disabledNote: null,
+    }))
+  } else if (scenario && showOptions) {
     const affordableAndOpen = availableOptions(room.game, scenario, role, content)
     const afterVeto = role === room.vetoTarget ? applyVeto(affordableAndOpen) : affordableAndOpen
 
@@ -995,8 +1036,26 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
           ? room.game.spotlights
           : vetoesRemaining(room)
 
+  // Offered in the goal phase, which is after the practice round rather than
+  // before the game. The goals are written in Mt and Public Trust and clean
+  // economy share, and asking somebody to commit to one before they have seen
+  // any of those move is asking them to pick the nicest title.
+  // Offered from the goal phase onward, which is after the practice round
+  // rather than before the game. The goals are written in carbon, Public Trust
+  // and clean economy share, and asking somebody to commit to one before they
+  // have seen any of those move is asking them to pick the nicest title.
+  //
+  // "Onward" and not "during", because a player who takes a vacated seat in
+  // Round 4 has still never chosen one, and a seat with nothing to win is a
+  // player with nothing to argue for.
+  const beforeGoals =
+    room.phase === 'lobby' ||
+    room.phase === 'briefing' ||
+    room.phase === 'practiceTalk' ||
+    room.phase === 'practiceChoice' ||
+    room.phase === 'power'
   const goalChoices =
-    player.goalId === null
+    player.goalId === null && !beforeGoals
       ? content.privateGoals[role].map((g) => ({ id: g.id, title: g.title, desc: g.desc }))
       : null
 

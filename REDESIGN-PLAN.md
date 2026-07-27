@@ -585,15 +585,16 @@ Sequenced so each stage ships something playable and makes the next cheaper.
 | 1.5 | National numbers on the phone |
 | 1.6 | The eight defects in `DESIGN-REVIEW.md` section 13 |
 
-### Stage 2: the onboarding (1.5 weeks)
+### Stage 2: the onboarding - DONE
 
-| | |
-|---|---|
-| 2.1 | Steps 0 to 8 as a phase sequence |
-| 2.2 | Practice round, step 4 |
-| 2.3 | Per-seat power tutorial, step 6 |
-| 2.4 | Goal pick relocated to step 7 |
-| 2.5 | Round 1 coach strip |
+| | | |
+|---|---|---|
+| 2.1 | Steps as a phase sequence | done, four new phases |
+| 2.2 | Practice round | done, in the content pack so a variant can localise it |
+| 2.3 | Per-seat power tutorial | done |
+| 2.4 | Goal pick relocated | done, and still offered to a latecomer |
+| 2.5 | Round 1 coach strip | done |
+| 2.6 | COMPROMISED made real | done, re-measured to 40.1% |
 
 ### Stage 3: structure (1 week)
 

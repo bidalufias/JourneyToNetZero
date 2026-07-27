@@ -41,7 +41,7 @@ phone, or just open `/` and pick a surface.
 ## How it is put together
 
 ```
-content/     the game, as data — 18 scenarios, 216 options, config, goals
+content/     the game, as data - 18 scenarios, 216 options, config, goals, practice round
 reference/   engine.py and content.py, the balance-tested implementation
 src/engine/  the engine, ported from reference/engine.py
 src/game/    the room: phases, timers, negotiation, insider tips, views
@@ -69,6 +69,11 @@ and asserts none of the round's numbers appear anywhere in it.
 **The session never stalls.** Every timed phase has a server deadline. If a
 player stops choosing, the clock locks a default and the round resolves. A test
 drives all six rounds with nobody ever touching a phone.
+
+**The two content packs cannot drift.** The pack exists twice, as JSON for the
+game and as Python for the reference engine. `test/content.test.ts` compares
+them field for field across all 216 options; it found six places they had
+already diverged the first time it ran.
 
 ## The engine
 
@@ -186,6 +191,15 @@ at zero, and everything behaves as it did before — so redeploy it after
 pulling, or the countdown keeps whatever error the projector's clock has.
 
 ## Running a session
+
+**There is always a facilitator.** The board's job is to tell them what happens
+next without making them look away from the table, so every onboarding step
+carries the line to say. `/facilitator` is the full run of show for preparation.
+
+The session opens with about four minutes of onboarding before anything counts:
+the briefing, a practice talk, a practice choice, each seat's own special move,
+and then the secret win. Every step teaches one verb and makes the table use it.
+Nothing from the practice reaches the engine.
 
 35 minutes end to end. The facilitator drives it from
 the dashboard, which carries exactly two buttons — PAUSE and NEXT — in the

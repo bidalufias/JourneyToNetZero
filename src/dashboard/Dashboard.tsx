@@ -27,12 +27,16 @@ import {
 } from './meters'
 import { Reckoning } from './Reckoning'
 import { TheTable } from './TheTable'
-import { Attract, Briefing, Endgame as EndgameScreen, RoundSummary } from './screens'
+import { Attract, Briefing, Endgame as EndgameScreen, Onboarding, RoundSummary } from './screens'
 import './dashboard.css'
 import './screens.css'
 
 const PHASE_LABEL: Record<string, string> = {
   briefing: 'THE BRIEFING',
+  practiceTalk: 'PRACTICE · TALKING',
+  practiceChoice: 'PRACTICE · CHOOSING',
+  power: 'WHAT EACH OF YOU CAN DO',
+  goal: 'YOUR SECRET WIN',
   crisis: 'THE CRISIS',
   table: 'THE TALK',
   choice: 'THE CHOICE',
@@ -97,7 +101,12 @@ export function Dashboard({
       <Masthead view={view} clock={clock} urgent={!view.paused && (remaining ?? 1e9) < 10_000} />
       <div className="dash__body">
         <TheNation view={view} />
-        {view.phase === 'table' || view.phase === 'choice' ? <TheTable view={view} /> : null}
+        {view.phase === 'table' || view.phase === 'choice' || view.phase === 'practiceTalk' ? (
+          <TheTable view={view} />
+        ) : null}
+        {view.phase === 'practiceChoice' || view.phase === 'power' || view.phase === 'goal' ? (
+          <Onboarding view={view} />
+        ) : null}
         {view.phase === 'summary' ? <RoundSummary view={view} /> : null}
         <LockRow view={view} />
       </div>

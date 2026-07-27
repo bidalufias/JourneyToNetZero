@@ -155,6 +155,55 @@ export function Briefing({ view, clock }: { view: DashboardView; clock: string |
 }
 
 /**
+ * The onboarding, on the shared screen.
+ *
+ * Every step is a single instruction, sized for the back of the room, plus one
+ * line of direction for the person running it. There is always a facilitator,
+ * and the board's job is to tell them what happens next without making them
+ * look away from the table.
+ */
+export function Onboarding({ view }: { view: DashboardView }) {
+  const steps: Record<string, { step: string; heading: string; body: string; cue: string }> = {
+    practiceChoice: {
+      step: 'PRACTICE · CHOOSING',
+      heading: 'Pick a card.',
+      body: 'Tap one, then lock it in. The arrows say which way it pushes the country. None of this counts.',
+      cue: 'Say: this one is practice. Tap a card, lock it in, then look up here.',
+    },
+    power: {
+      step: 'WHAT EACH OF YOU CAN DO',
+      heading: 'One of you can do something the others cannot.',
+      body: 'Read your own phone. Nobody else has the move you are looking at.',
+      cue: 'Say: the Activist can name people in public. The Community can say no. Read your own screen.',
+    },
+    goal: {
+      step: 'YOUR SECRET WIN',
+      heading: 'Now decide what you want.',
+      body: 'Three private goals on your phone. Pick one. Nobody sees which. It only counts if the country hits all three targets.',
+      cue: 'Say: you have seen how this country works. Now choose what you personally want out of it.',
+    },
+  }
+  const s = steps[view.phase]
+  if (!s) return null
+
+  const locked = view.seats.filter((x) => x.locked).length
+  const ready = view.phase === 'practiceChoice' ? `${locked} of 4 locked in` : null
+
+  return (
+    <div className="onboard">
+      <p className="onboard__step">{s.step}</p>
+      <h1 className="onboard__heading">{s.heading}</h1>
+      <p className="onboard__body">{s.body}</p>
+      {ready ? <p className="onboard__ready">{ready}</p> : null}
+      <p className="onboard__cue">
+        <span className="onboard__cue-label">SAY THIS</span>
+        {s.cue}
+      </p>
+    </div>
+  )
+}
+
+/**
  * D-06: the only celebratory screen in the game before the ending.
  *
  * Fires after the meters have settled, so it reads as consequence rather than
