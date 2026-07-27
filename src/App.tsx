@@ -539,7 +539,7 @@ function Home({
           to Net Zero
         </h1>
         <div style={{ height: 6, background: 'var(--color-accent)', width: 96 }} />
-        <p className="ptext">Six crises. Thirty minutes. Four of you, and none of you can do it alone.</p>
+        <p className="ptext">Six crises. Thirty-five minutes. Four of you, and none of you can do it alone.</p>
 
         {scanned ? joining : running}
         {scanned ? running : joining}
@@ -582,7 +582,7 @@ function ScanChoice({ code, onProceed }: { code: string; onProceed: () => void }
         </h1>
         <div style={{ height: 6, background: 'var(--color-accent)', width: 96 }} />
         <p className="ptext">
-          Six crises. Thirty minutes. Four of you, and none of you can do it alone.
+          Six crises. Thirty-five minutes. Four of you, and none of you can do it alone.
         </p>
 
         <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
@@ -591,7 +591,7 @@ function ScanChoice({ code, onProceed }: { code: string; onProceed: () => void }
         <a className="btn btn--ghost" href={howToPlayUrl(code)}>
           HOW TO PLAY
         </a>
-        <p className="pmono">THE FULL RULES. YOU CAN COME STRAIGHT BACK HERE AFTERWARDS.</p>
+        <p className="pnote">The full rules. You can come straight back here afterwards.</p>
 
         <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
           READY

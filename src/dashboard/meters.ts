@@ -38,7 +38,7 @@ export function emissionsMeter(state: PublicState, targets: Targets, content: Co
   const met = state.emissions <= targets.emissions
   const onTrack = state.emissions <= pace
   return {
-    label: 'EMISSIONS',
+    label: 'CARBON',
     value: state.emissions,
     display: state.emissions.toFixed(0),
     unit: 'Mt',
@@ -78,7 +78,7 @@ export function growthMeter(state: PublicState, targets: Targets): MeterSpec {
 export function happinessMeter(state: PublicState, targets: Targets): MeterSpec {
   const met = state.happiness >= targets.happiness
   return {
-    label: 'HAPPINESS',
+    label: 'QUALITY OF LIFE',
     value: state.happiness,
     display: state.happiness.toFixed(1),
     unit: '/10',
@@ -108,7 +108,7 @@ export function projectionNote(
   const roundsLeft = 6 - round
   const over = projection - target
   if (projection <= target) {
-    return { text: `On this path the country lands inside its budget.`, onTrack: true, dead: false }
+    return { text: 'On this path the country reaches net zero.', onTrack: true, dead: false }
   }
   // Once no remaining round can close the gap, say so plainly. The tone of
   // the rest of the session should change.
@@ -120,10 +120,10 @@ export function projectionNote(
     return { text: 'Net zero is no longer reachable.', onTrack: false, dead: true }
   }
   if (roundsLeft === 0) {
-    return { text: `${over.toFixed(0)} Mt over, and no rounds left.`, onTrack: false, dead: true }
+    return { text: `${over.toFixed(0)} Mt short, and no rounds left.`, onTrack: false, dead: true }
   }
   return {
-    text: `${over.toFixed(0)} Mt above target with ${roundsLeft} round${roundsLeft === 1 ? '' : 's'} left.`,
+    text: `${over.toFixed(0)} Mt to go, with ${roundsLeft} round${roundsLeft === 1 ? '' : 's'} left.`,
     onTrack: false,
     dead: false,
   }

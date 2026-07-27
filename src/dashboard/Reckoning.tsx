@@ -105,9 +105,9 @@ export function Reckoning({ view }: { view: DashboardView }) {
     <div className="reckoning">
       <header className="reckoning__bar">
         <span className="dash__live">LIVE</span>
-        <span className="dash__channel">THE RECKONING · ROUND {log.round}</span>
+        <span className="dash__channel">THE REVEAL \u00B7 ROUND {log.round}</span>
         <span className="reckoning__emissions">
-          <span className="reckoning__emissions-label">EMISSIONS</span>
+          <span className="reckoning__emissions-label">CARBON</span>
           <span className="reckoning__emissions-value">{log.state.emissions.toFixed(0)}</span>
           <span
             className="reckoning__arrow"
@@ -143,14 +143,14 @@ export function Reckoning({ view }: { view: DashboardView }) {
                       <div
                         className={`rcard__promise rcard__promise--${promise.outcome}`}
                       >
-                        {promise.outcome === 'kept' ? 'KEPT THE PROMISE ✓' : 'BROKE THE PROMISE ✕'}
+                        {promise.outcome === 'kept' ? 'KEPT THE PROMISE \u2713' : 'BROKE THE PROMISE \u2715'}
                       </div>
                     ) : reveal.spotlit ? (
                       <div className="rcard__promise rcard__promise--broken">SPOTLIT ✕</div>
                     ) : reveal.selfOrganiseSupported ? (
                       <div className="rcard__promise rcard__promise--kept">BACKED · DOUBLED</div>
                     ) : reveal.partnerUnfunded ? (
-                      <div className="rcard__promise rcard__promise--broken">NOBODY CO-FUNDED IT</div>
+                      <div className="rcard__promise rcard__promise--broken">NOBODY PAID HALF</div>
                     ) : (
                       <div className="rcard__promise rcard__promise--none">ON THE RECORD</div>
                     )}
@@ -179,21 +179,21 @@ export function Reckoning({ view }: { view: DashboardView }) {
           never move as one block. */}
       <div className="reckoning__meters" data-live={allRevealed}>
         <TravelBar
-          label="EMISSIONS"
+          label="CARBON"
           ink="var(--jtnz-meter-emissions)"
           fill={Math.max(0, Math.min(1, (100 - log.state.emissions) / 100))}
           delay={0}
           active={revealedCount >= 1}
         />
         <TravelBar
-          label="GREEN ECONOMY"
+          label="CLEAN ECONOMY"
           ink="var(--jtnz-meter-green)"
           fill={log.state.greenShare / 100}
           delay={1000}
           active={revealedCount >= 2}
         />
         <TravelBar
-          label="HAPPINESS"
+          label="QUALITY OF LIFE"
           ink="var(--jtnz-meter-happiness)"
           fill={Math.max(0, Math.min(1, (log.state.happiness - 6) / 1))}
           delay={2000}

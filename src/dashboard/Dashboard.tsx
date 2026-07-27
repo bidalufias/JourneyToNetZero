@@ -34,9 +34,9 @@ import './screens.css'
 const PHASE_LABEL: Record<string, string> = {
   briefing: 'THE BRIEFING',
   crisis: 'THE CRISIS',
-  table: 'THE TABLE',
+  table: 'THE TALK',
   choice: 'THE CHOICE',
-  reckoning: 'THE RECKONING',
+  reckoning: 'THE REVEAL',
   summary: 'THE STORY SO FAR',
   results: 'THE NATIONAL MISSION',
 }
@@ -168,7 +168,7 @@ function TheNation({ view }: { view: DashboardView }) {
       <div className="dash__lower">
         <div className="green">
           <div className="green__head">
-            <span className="green__label">GREEN ECONOMY SHARE</span>
+            <span className="green__label">CLEAN ECONOMY</span>
             <span className="green__value">
               {s.greenShare.toFixed(0)}
               <span className="green__pct">%</span>
@@ -247,7 +247,7 @@ function LockRow({ view }: { view: DashboardView }) {
 function Ticker({ headlines }: { headlines: string[] }) {
   const items = headlines.length
     ? headlines
-    : ['Semenanjara begins its journey to net zero', 'Four seats. Six crises. Thirty minutes.']
+    : ['Semenanjara begins its journey to net zero', 'Four seats. Six crises. Thirty-five minutes.']
   // Doubled so the loop is seamless.
   const rail = [...items, ...items]
   return (

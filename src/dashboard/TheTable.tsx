@@ -1,5 +1,5 @@
 /**
- * THE TABLE: the dashboard becomes the record of what was said out loud.
+ * THE TALK: the dashboard becomes the record of what was said out loud.
  *
  * The phones go quiet during this phase and this screen does the remembering,
  * which is what lets the promise-broken moment land later. An offer in flight
@@ -77,7 +77,7 @@ export function TheTable({ view }: { view: DashboardView }) {
               )}
             </p>
             <p className="spotlight-panel__rule">
-              It lands on whoever takes the dirtiest option. For them, it only half works.
+              It hits whoever takes the dirtiest card. For them, it only half works.
             </p>
             <div className="spotlight-panel__pips">
               {[0, 1, 2].map((i) => (
@@ -89,7 +89,7 @@ export function TheTable({ view }: { view: DashboardView }) {
 
         {view.veto ? (
           <div className="veto-panel">
-            <h3 className="veto-panel__title">PUBLIC MANDATE USED</h3>
+            <h3 className="veto-panel__title">THE PUBLIC SAID NO</h3>
             <p className="veto-panel__body">
               The Community has removed{' '}
               {view.veto.removed.length === 0 ? (
@@ -105,14 +105,14 @@ export function TheTable({ view }: { view: DashboardView }) {
               from the {ROLE_LABEL[view.veto.target]}'s choices.
             </p>
             <p className="veto-panel__count">
-              {view.veto.remaining} VETO{view.veto.remaining === 1 ? '' : 'ES'} REMAIN
+              {view.veto.remaining} VETO{view.veto.remaining === 1 ? '' : 'ES'} LEFT
             </p>
           </div>
         ) : null}
 
         {view.publishedTip ? (
           <div className="tip-panel">
-            <h3 className="tip-panel__title">PUBLISHED TO THE NATION</h3>
+            <h3 className="tip-panel__title">TOLD THE ROOM</h3>
             <p className="tip-panel__from">{ROLE_LABEL[view.publishedTip.from]} · {view.publishedTip.source}</p>
             <p className="tip-panel__body">{view.publishedTip.text}</p>
             {view.publishedTip.verdict ? (
@@ -125,7 +125,7 @@ export function TheTable({ view }: { view: DashboardView }) {
 
         {view.tipDealtThisRound ? (
           <p className="table__tipline">
-            A tip was delivered this round. Nobody is told to whom.
+            Someone got a tip off this round. Nobody is told who.
           </p>
         ) : null}
       </aside>

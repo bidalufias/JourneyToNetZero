@@ -1,7 +1,7 @@
 /**
  * The facilitator's script, the thing that used to live in whoever ran it last.
  *
- * A session is thirty minutes long and the person running it has four people
+ * A session is thirty-five minutes long and the person running it has four people
  * looking at them, a projector behind them, and no second chance at the twenty
  * seconds where the game explains itself. Everything here is written to be read
  * off a laptop while that is happening: what is on the screen right now, what
@@ -41,7 +41,7 @@ export interface Beat {
   /**
    * Lines for round one only: the rules a table needs explaining once and
    * then resents hearing again. Six rounds of the same explanation is how a
-   * thirty-minute game starts feeling like a training course.
+   * thirty-five-minute game starts feeling like a training course.
    */
   firstTime?: string[]
   /** What to watch in the room while it runs. Direction, not dialogue. */
@@ -98,16 +98,16 @@ export const BEATS: Beat[] = [
   },
   {
     phase: 'table',
-    label: 'THE TABLE',
+    label: 'THE TALK',
     length: seconds('table'),
     onScreen: 'Who is at the table, the promises made, and the countdown.',
     say: [
-      'The table is open! Ninety seconds. Talk to each other, not to your phones.',
+      'Talking time! Ninety seconds. Talk to each other, not to your phones.',
       'The best sentence in this game is six words long: “what if we both did it?” Somebody use it.',
     ],
     firstTime: [
-      'Everything you need is on your phone. You can offer somebody your money. You can make a promise, out loud and on the big screen. You can make a public demand and name your price.',
-      "Activist, you have three Spotlights for the entire game: name somebody publicly and their dirty option only half works. Community, you have two Public Mandates: take somebody's worst card off the table altogether. Three and two. That is your lot, so spend them where it hurts.",
+      'Everything you need is on your phone. You can send somebody money. You can promise something, out loud and on the big screen. You can ask somebody for something and name your price.',
+      'Activist, you have three Spotlights for the whole game. Name somebody in public and their dirty card only half works. Community, you have two vetoes. Take somebody\u2019s worst card off the table completely. Three and two. That is all you get, so spend them where it hurts.',
     ],
     watch:
       "If the room goes quiet, put the tension into somebody's mouth (“Business, what would it take?”) and then stop talking. Do not answer your own question; the silence after it is where the deal gets made.",
@@ -119,7 +119,7 @@ export const BEATS: Beat[] = [
     length: seconds('choice'),
     onScreen: 'Four seats, locking one at a time. The last one to lock is named.',
     say: [
-      'Time! Phones up. Three cards each, forty-five seconds, and nobody sees what you pick.',
+      'Time! Phones up. Three cards each, forty seconds, and nobody sees what you pick.',
       'And remember, you do not have to do what you just promised.',
     ],
     firstTime: [
@@ -131,7 +131,7 @@ export const BEATS: Beat[] = [
   },
   {
     phase: 'reckoning',
-    label: 'THE RECKONING',
+    label: 'THE REVEAL',
     length: seconds('reckoning'),
     onScreen: 'The four cards flip one at a time, meters moving between each.',
     say: [
@@ -147,8 +147,8 @@ export const BEATS: Beat[] = [
     length: seconds('summary'),
     onScreen: 'One line per round, and how far the three targets still are.',
     say: [
-      'And that is the story of this country so far. Here is where it leaves you: what you have made, and what you still owe.',
-      'Watch that green economy number. Every point you put on it makes your next round of growth cost less carbon. The tables that work that out early are the tables that get there.',
+      'And that is the story of this country so far. Here is where it leaves you: what you have built, and what you still owe.',
+      'Watch that clean economy number. Every point you put on it makes your next round of growth cost less carbon. The tables that work that out early are the tables that get there.',
     ],
     next: 'Opens the next crisis, or the results after round six.',
   },
@@ -156,11 +156,11 @@ export const BEATS: Beat[] = [
     phase: 'results',
     label: 'THE NATIONAL MISSION',
     length: 'until you advance it',
-    onScreen: 'The three targets judged, then the sealed goals and the titles.',
+    onScreen: 'The three targets judged, then the secret wins and the titles.',
     say: [
       'Ladies and gentlemen, it is 2050. Let us see what became of Semenanjara.',
       '[Five seconds of silence. Count them.]',
-      'Three targets. All three, or none of it counts. That was the deal you took thirty minutes ago.',
+      'Three targets. All three, or none of it counts. That was the deal you took half an hour ago.',
     ],
     watch:
       'If somebody hit their private goal in a session where the country missed, they get Hollow Victory. Read it out and let it sit. That card does more teaching than an hour of slides, and softening it throws the session away at the last moment.',
@@ -203,13 +203,13 @@ export const MOMENTS: Moment[] = [
     round: 3,
     phase: 'summary',
     title: 'After the health crisis',
-    text: '“Look at that. Emissions just fell, for free. Is that success?” If the pandemic cut the carbon while everything else collapsed, this is the cheapest and clearest lesson in the game, and it only lands if you ask before anybody has had time to rationalise it.',
+    text: '“Look at that. Carbon just fell, for free. Is that success?” If the pandemic cut the carbon while everything else collapsed, this is the cheapest and clearest lesson in the game, and it only lands if you ask before anybody has had time to rationalise it.',
   },
   {
     round: 4,
     phase: 'table',
     title: 'Before the round 4 choices',
-    text: "Read the Government's Trust total off the screen, then: “that number was decided three rounds ago.” Path dependency, in one sentence, with the evidence sitting behind you.",
+    text: "Read the Government's Public Trust total off the screen, then: “that number was decided three rounds ago.” Path dependency, in one sentence, with the evidence sitting behind you.",
   },
   {
     round: 6,
@@ -233,7 +233,7 @@ export const SETUP: string[] = [
   'Four phones, four seats, four names on that screen before you start. Do not start on three.',
   '“Phones face down while we talk.” Say it once, early, in the welcome. It holds all session.',
   'Anybody who wants the full rules can have the written guide, but nobody needs to read a word of it to play, so do not hand it out and wait.',
-  'Thirty minutes end to end. Another ten for the debrief, which is where the value is.',
+  'Thirty-five minutes end to end. Another ten for the debrief, which is where the value is.',
   'Read the lobby and briefing lines below out loud once before the room fills. They are the only two you cannot improvise.',
 ]
 

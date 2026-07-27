@@ -12,69 +12,82 @@ import { RoleGlyph, formatClock } from '../ui/primitives'
 /**
  * P-03: the role reveal. The skin applies here and never changes again.
  *
- * This now comes *before* the sealed goal rather than after it. The goals are
- * written in units, Capital, Trust and Mt, that mean nothing until you have been
- * told what you hold, and asking somebody to commit to a win condition before
- * then is asking them to guess.
+ * Three lines, then the seat's resource, then three sentences this character
+ * would actually say. That is the whole brief. It used to be nine labelled
+ * sections and about 450 words, handed to somebody who had never seen the game
+ * and had ninety seconds, so most of it went unread and the useful part went
+ * unread with it. The rest is one tap away and nobody needs it to play.
  */
 export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => void }) {
   const c = ROLE_CHARACTER[view.role]
+  const [full, setFull] = useState(false)
+
   return (
     <div className="pbody">
       <span className="plabel">{c.org.toUpperCase()}</span>
-      <p className="ptext">You are the</p>
       <h1 className="pbig">{c.title}</h1>
       <div style={{ height: 4, background: 'var(--skin-mark)', width: 120 }} />
-      {/* The seat has a job, not a name. The name below it is the player's own,
-          typed when they took the chair, so the room addresses a real person
-          holding an office rather than a stranger they have to remember. */}
       {view.name ? <h2 className="pheading">{view.name}</h2> : null}
-      <p className="pmono">{c.post.toUpperCase()}</p>
-      <p className="ptext">{c.blurb}</p>
 
-      <span className="plabel">WHO YOU ARE</span>
-      <p className="ptext">{c.whoYouAre}</p>
+      <span className="plabel">YOU ARE</span>
+      <p className="ptext">{c.youAre}</p>
 
-      <span className="plabel">WHAT YOU BELIEVE</span>
-      <p className="ptext">{c.believe}</p>
+      <span className="plabel">YOU WANT</span>
+      <p className="ptext">{c.youWant}</p>
 
-      <span className="plabel">WHAT YOU ARE AFRAID OF</span>
-      <p className="ptext">{c.afraidOf}</p>
+      <span className="plabel">YOUR MOVE</span>
+      <p className="ptext">{c.yourMove}</p>
 
-      <span className="plabel">YOUR RESOURCE</span>
+      <span className="plabel">YOU HOLD</span>
       <p className="ptext">
-        <strong>{view.resource.label}</strong>: {view.resource.value} to start. It stays in the
-        corner of your screen all game. The big screen tracks everything else.
+        <strong>
+          {view.resource.value} {view.resource.label.replace(/^Your /, '')}
+        </strong>
+        . It stays in the corner of your screen. The big screen tracks everything else.
       </p>
-      <p className="ptext">{c.resourcePower}</p>
 
-      <span className="plabel">HOW TO PLAY IT</span>
-      <p className="ptext">{c.howToPlay}</p>
-
-      {/* The three lines are the useful half of a character brief. A player who
-          reads nothing else can still open their mouth in round one with one of
-          these, which is the whole difference between a table that argues and a
-          table that takes turns reading their cards out. */}
+      {/* Three lines a player can open their mouth with in Round 1. The single
+          most useful thing on this screen, so it survives the cut. */}
       <span className="plabel">THINGS YOU MIGHT SAY</span>
       {c.says.map((line) => (
         <div key={line} className="bubble">
-          <p className="bubble__text">“{line}”</p>
+          <p className="bubble__text">\u201C{line}\u201D</p>
         </div>
       ))}
 
-      <span className="plabel">YOU WOULD NEVER SAY</span>
-      <div className="bubble bubble--them">
-        <p className="bubble__text">“{c.neverSay}”</p>
-      </div>
+      {full ? (
+        <>
+          <span className="plabel">WHO YOU ARE</span>
+          <p className="ptext">{c.whoYouAre}</p>
+
+          <span className="plabel">WHAT YOU BELIEVE</span>
+          <p className="ptext">{c.believe}</p>
+
+          <span className="plabel">WHAT YOU FEAR</span>
+          <p className="ptext">{c.afraidOf}</p>
+
+          <span className="plabel">HOW YOUR RESOURCE WORKS</span>
+          <p className="ptext">{c.resourcePower}</p>
+
+          <span className="plabel">YOU WOULD NEVER SAY</span>
+          <div className="bubble bubble--them">
+            <p className="bubble__text">\u201C{c.neverSay}\u201D</p>
+          </div>
+        </>
+      ) : (
+        <button className="btn btn--ghost" onClick={() => setFull(true)}>
+          MORE ABOUT ME
+        </button>
+      )}
 
       <button className="btn btn--primary" style={{ marginTop: 'var(--space-4)' }} onClick={onNext}>
-        ACCEPT THE ROLE
+        I AM READY
       </button>
     </div>
   )
 }
 
-/** P-04: three sealed cards. Lying about which you took is legal and expected. */
+/** P-04: three secret cards. Lying about which you took is legal and expected. */
 export function GoalPicker({ view, send }: { view: PhoneView; send: (c: Command) => void }) {
   const choices = view.goalChoices ?? []
   const [picked, setPicked] = useState<string | null>(null)
@@ -85,15 +98,15 @@ export function GoalPicker({ view, send }: { view: PhoneView; send: (c: Command)
   if (chosen) {
     return (
       <div className="pbody">
-        <span className="plabel">SEALED · NOBODY ELSE SEES THIS</span>
+        <span className="plabel">SECRET · NOBODY ELSE SEES THIS</span>
         <h1 className="pheading">Take this one?</h1>
         <div className="bubble">
           <div className="bubble__lead">{chosen.title}</div>
           <p className="bubble__text">{chosen.desc}</p>
         </div>
         <p className="ptext">
-          It cannot be swapped later, and it only pays off if the country hits all three targets
-          too. You can re-read it any time under ⋯.
+          You cannot change this later. It only counts if the country hits all 3 targets. Read it
+          again any time under \u22EF.
         </p>
         <button
           className="btn btn--primary"
@@ -111,11 +124,11 @@ export function GoalPicker({ view, send }: { view: PhoneView; send: (c: Command)
 
   return (
     <div className="pbody">
-      <span className="plabel">SEALED · NOBODY ELSE SEES THIS</span>
-      <h1 className="pheading">What you want.</h1>
+      <span className="plabel">SECRET · NOBODY ELSE SEES THIS</span>
+      <h1 className="pheading">Your secret win.</h1>
       <p className="ptext">
-        Three of the twelve in this game are yours to pick from. What stays hidden is which one you
-        took, and everyone else is choosing in secret too.
+        Pick one of these three. Nobody sees which one you took. The other three are choosing in
+        secret too, and you may lie about yours.
       </p>
       {choices.map((g) => (
         <button key={g.id} className="goal" onClick={() => setPicked(g.id)}>
@@ -171,11 +184,11 @@ export function Crisis({ view }: { view: PhoneView }) {
   if (!s) return null
   return (
     <div className="pbody">
-      <span className="plabel">SEMENANJARA TONIGHT · BREAKING</span>
+      <span className="plabel">BREAKING NEWS</span>
       <h1 className="pheading">{s.title}</h1>
       <p className="ptext">{s.situation}</p>
       <div style={{ height: 2, background: 'var(--skin-base)', margin: 'var(--space-2) 0' }} />
-      <span className="plabel">FOR YOUR EYES ONLY</span>
+      <span className="plabel">ONLY YOU CAN SEE THIS</span>
       <p className="ptext" style={{ fontWeight: 600 }}>
         {view.privateLine}
       </p>
@@ -202,20 +215,20 @@ export function TipCard({
   onClose: () => void
 }) {
   const unverified = tip.reliability === 'UNVERIFIED'
-  const stake = role === 'community' ? 'a Public Mandate veto' : 'a Trust token'
+  const stake = role === 'community' ? 'a veto' : 'Public Trust'
   const clock = formatClock(remaining)
 
   return (
     <div className="tip" role="dialog" aria-label="Insider tip">
-      <span className="tip__label">INSIDER TIP</span>
-      <span className="tip__eyes">FOR YOUR EYES ONLY</span>
+      <span className="tip__label">A TIP OFF</span>
+      <span className="tip__eyes">ONLY YOU CAN SEE THIS</span>
       {/* This is the only overlay that covers the whole phone, so it has to
           carry the clock it is hiding, because otherwise it is a timed decision with
           the timer behind it. */}
       {clock ? <span className="tip__clock">{clock}</span> : null}
 
       <span className={`tip__chip tip__chip--${unverified ? 'unverified' : 'confirmed'}`}>
-        {unverified ? '◇ UNVERIFIED · TRUE 1 IN 2' : 'CONFIRMED'}
+        {unverified ? '\u25C7 NOT CHECKED \u00B7 TRUE HALF THE TIME' : 'CHECKED \u00B7 TRUE'}
       </span>
 
       <p className="tip__source">{tip.source}</p>
@@ -229,19 +242,17 @@ export function TipCard({
             onClose()
           }}
         >
-          PUBLISH TO THE NATION
+          TELL THE ROOM
         </button>
         <p className="tip__reminder">
           {unverified
-            ? `A gamble. If it turns out true you gain ${stake}; if not, you lose ${stake}. You find out when the round resolves.`
-            : `Safe to publish. It is true, and you gain ${stake} when the round resolves.`}
+            ? `A gamble. If it turns out true you gain ${stake}. If not, you lose ${stake}. You find out at the end of the round.`
+            : `Safe to share. It is true, and you gain ${stake} at the end of the round.`}
         </p>
         <button className="btn" onClick={onClose} style={{ color: '#fff' }}>
-          KEEP IT QUIET
+          SAY NOTHING
         </button>
-        <p className="tip__reminder">
-          Nobody knows you received this, and keeping it costs you nothing.
-        </p>
+        <p className="tip__reminder">Nobody knows you got this. Keeping it costs you nothing.</p>
       </div>
     </div>
   )
@@ -251,7 +262,7 @@ export function TipCard({
 export function LookUp({ view, reckoning = false }: { view: PhoneView; reckoning?: boolean }) {
   return (
     <div className="lookup" data-role={view.role}>
-      <span className="lookup__label">{reckoning ? 'THE RECKONING' : 'LOCKED IN'}</span>
+      <span className="lookup__label">{reckoning ? 'THE REVEAL' : 'LOCKED IN'}</span>
       <h1 className="lookup__big">
         Look
         <br />
@@ -260,19 +271,19 @@ export function LookUp({ view, reckoning = false }: { view: PhoneView; reckoning
       <div className="lookup__rule" />
       <p className="lookup__note">
         {reckoning
-          ? 'The cards are flipping on the big screen.'
-          : 'The cards flip on the big screen. This one has nothing more for you.'}
+          ? 'The cards are turning over on the big screen.'
+          : 'The cards turn over on the big screen. Nothing more to do here.'}
       </p>
       {!reckoning && view.waitingOn > 0 ? (
         <p className="lookup__note" style={{ opacity: 0.7 }}>
-          WAITING · {4 - view.waitingOn} OF 4 IN
+          {4 - view.waitingOn} OF 4 LOCKED IN
         </p>
       ) : null}
     </div>
   )
 }
 
-/** P-11: the round result. Three sentences, no numbers. */
+/** P-11: the round result. Three short sentences. */
 export function RoundResult({ view }: { view: PhoneView }) {
   const r = view.roundResult
   if (!r) return <LookUp view={view} reckoning />
@@ -306,10 +317,10 @@ export function RoundResult({ view }: { view: PhoneView }) {
 
       {view.role === 'community' ? (
         <>
-          <span className="plabel">YOUR TWO TRUST TOKENS</span>
+          <span className="plabel">PUBLIC TRUST THIS ROUND</span>
           <p className="ptext">
-            One goes to whoever looked after people best, one to whoever did most for the future.
-            The big screen shows where they landed.
+            Two go out every round. One to whoever looked after people best, one to whoever did most
+            for the future. The big screen shows where they landed.
           </p>
         </>
       ) : null}

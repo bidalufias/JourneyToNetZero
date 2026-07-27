@@ -1,16 +1,14 @@
 /**
- * THE CHOICE: three cards, forty-five seconds, secret until the Reckoning.
+ * THE CHOICE: three cards, forty seconds, secret until the Reveal.
  *
  * Three cards plus the header fit above the fold with the lock button in the
  * bottom third, so nobody scrolls to find the thing they must do.
  *
  * Selecting and committing are two separate acts, and the gap between them is
- * the point. Tapping a card to read it more closely used to spend the round on
- * it. If you were the last player still deciding, that tap also ended the
- * round for everybody. Now a tap only moves the tick; LOCK IT IN is the door
- * that shuts, and it says so before you touch it.
+ * the point. A tap only moves the tick; LOCK IT IN is the door that shuts.
  */
 import type { Command } from '../game/room'
+import { arrows } from '../game/impact'
 import type { PhoneOption, PhoneView } from '../game/session'
 
 export function TheChoice({
@@ -25,29 +23,25 @@ export function TheChoice({
   readOnly?: boolean
 }) {
   const selected = view.choiceId
-  const urgent = !readOnly && !view.locked && (remaining ?? 1e9) < 8_000
   const committed = view.locked || readOnly
+  const seconds = Math.max(0, Math.ceil((remaining ?? 0) / 1000))
+  // The phone states the fact and stops. It used to say "Everyone is waiting
+  // for you", which tells a player how to feel and, in a room of colleagues,
+  // reads as being told off. The clock is already doing that job.
+  const urgent = !readOnly && !view.locked && (remaining ?? 1e9) < 10_000
 
   return (
     <div className="pbody">
+      <span className="plabel">
+        ROUND {view.round} · {committed ? 'LOCKED IN' : 'YOUR CHOICE'}
+      </span>
+      <h1 className="pheading">{committed ? 'Locked in.' : 'Pick one card.'}</h1>
       {urgent ? (
-        // The one place the app is allowed to be rude: the phone half of the
-        // dashboard's blinking cell. The social pressure is on both surfaces.
-        <div className="nudge">
-          <div className="nudge__lead">Everyone is waiting for you.</div>
-          <div className="nudge__sub">
-            {Math.ceil((remaining ?? 0) / 1000)}s ·{' '}
-            {selected ? 'THEN WHAT YOU PICKED IS LOCKED' : 'THEN THE CLOCK PICKS FOR YOU'}
-          </div>
-        </div>
-      ) : (
-        <>
-          <span className="plabel">
-            ROUND {view.round} · {committed ? 'WHAT YOU LOCKED IN' : 'THE CHOICE'}
-          </span>
-          <h1 className="pheading">{committed ? 'Locked in.' : 'Pick one. Now.'}</h1>
-        </>
-      )}
+        <p className="pnote pnote--urgent">
+          {seconds} seconds left.{' '}
+          {selected ? 'Your card locks by itself.' : 'The clock will pick for you.'}
+        </p>
+      ) : null}
 
       {view.options.map((o) => (
         <OptionCard
@@ -60,10 +54,10 @@ export function TheChoice({
       ))}
 
       {committed ? (
-        <p className="pmono">
+        <p className="pnote">
           {readOnly && !view.locked
-            ? 'STILL YOURS TO CHANGE. GO BACK TO NOW TO PICK.'
-            : 'THIS IS FINAL. THE CARDS FLIP ON THE BIG SCREEN.'}
+            ? 'You can still change this. Tap BACK TO NOW.'
+            : 'This is final. The cards turn over on the big screen.'}
         </p>
       ) : (
         <>
@@ -74,8 +68,8 @@ export function TheChoice({
           >
             {selected ? 'LOCK IT IN' : 'TAP A CARD FIRST'}
           </button>
-          <p className="pmono">
-            {selected ? 'YOU CAN STILL CHANGE YOUR MIND.' : 'TAPPING A CARD ONLY SELECTS IT.'}
+          <p className="pnote">
+            {selected ? 'You can still change your mind.' : 'Tapping a card only selects it.'}
           </p>
         </>
       )}
@@ -83,6 +77,11 @@ export function TheChoice({
   )
 }
 
+/**
+ * One card: what it is, what it costs, and which way it pushes each of the four
+ * meters. The arrows carry direction and rough size but never a value, so the
+ * cards can be compared without any of the maths crossing to the phone.
+ */
 export function OptionCard({
   option,
   selected,
@@ -105,11 +104,11 @@ export function OptionCard({
 
   const flag =
     option.disabled === 'afford'
-      ? "✕ CAN'T AFFORD"
+      ? 'YOU CANNOT AFFORD THIS'
       : option.disabled === 'veto'
-        ? '● PUBLIC MANDATE'
+        ? 'THE PUBLIC SAID NO'
         : option.disabled === 'gate'
-          ? '▬ LOCKED OUT'
+          ? 'LOCKED'
           : null
 
   return (
@@ -131,7 +130,20 @@ export function OptionCard({
           <span className="ocard__note">{option.disabledNote}</span>
         </>
       ) : (
-        <span className="ocard__hint">{option.hint}</span>
+        <>
+          <span className="impact">
+            {option.impact.map((i) => (
+              <span
+                key={i.meter}
+                className={`impact__cell impact__cell--${i.dir === 0 ? 'flat' : i.good ? 'good' : 'bad'}`}
+              >
+                <span className="impact__label">{i.label}</span>
+                <span className="impact__arrows">{arrows(i.dir)}</span>
+              </span>
+            ))}
+          </span>
+          {option.condition ? <span className="ocard__note">{option.condition}</span> : null}
+        </>
       )}
 
       {selected ? <span className="ocard__check">✓</span> : null}

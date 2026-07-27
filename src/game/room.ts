@@ -10,7 +10,7 @@
  * Two rules this file exists to enforce:
  *   1. A player can never inspect the numbers behind an option. `phoneView`
  *      builds option cards from title, description, cost chip and a derived
- *      hint. The effect values never cross the boundary.
+ *      set of direction-only chips. The effect values never cross the boundary.
  *   2. The session never stalls. Every timed phase has a deadline and `tick`
  *      resolves it, auto-locking a default choice if somebody stopped playing.
  */
@@ -24,7 +24,7 @@ import {
   goalMet,
 } from '../engine/engine'
 import { DIRTY, ROLES, type Content, type Option, type Role, type Scenario } from '../engine/types'
-import { costLabel, optionHint } from './hints'
+import { costLabel, optionCondition, optionImpact } from './impact'
 import { BOARD_NAME, DEMAND_PHRASES, privateLine } from './copy'
 import { draw, pick, roomCode, shuffle } from './rng'
 import {
@@ -976,7 +976,8 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
         title: o.title,
         desc: o.desc,
         cost: costLabel(o),
-        hint: optionHint(o),
+        impact: optionImpact(o),
+        condition: optionCondition(o),
         available: choosable,
         disabled,
         disabledNote: note,
@@ -1010,10 +1011,26 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
   // round's crisis, so handing it to a phone would leak the coming round.
   const narrating = room.phase === 'reckoning' || room.phase === 'summary'
 
+  // The three national numbers, on the phone, always. They used to live only on
+  // the projector, so any player who could not read it from where they sat was
+  // playing without a score.
+  const nation = publicState(room.game, content)
+
   return {
     code: room.code,
     role,
     name: player.name,
+    nation: {
+      carbon: nation.emissions,
+      economy: nation.averageGrowth,
+      life: nation.happiness,
+      clean: nation.greenShare,
+      targets: {
+        carbon: content.config.tgt_e,
+        economy: content.config.tgt_g,
+        life: content.config.tgt_h,
+      },
+    },
     phase: room.phase,
     phaseEndsAt: room.phaseEndsAt,
     paused: isPaused(room),

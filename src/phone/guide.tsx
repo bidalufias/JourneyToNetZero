@@ -22,58 +22,65 @@ interface Entry {
 /** The one resource this seat actually spends, in the words its cards use. */
 const RESOURCE_NOTE: Record<Role, Entry> = {
   government: {
-    term: 'Fiscal Points (FP)',
-    what: 'Public money. Option cards priced “2 FP” cost you two; “+1 FP” gives you one back. You cannot pick a card you cannot afford. It greys out and says so.',
+    term: 'Budget',
+    what: 'Public money. A card priced \u201C2 Budget\u201D costs you two. A card priced \u201C+1 Budget\u201D gives you one back. You cannot pick a card you cannot afford; it greys out and says so.',
   },
   business: {
-    term: 'Capital (C)',
-    what: 'Your company\'s money. Cards priced “3 C” cost you three; “+2 C” earns you two. You cannot pick a card you cannot afford. It greys out and says so.',
+    term: 'Company Money',
+    what: 'Your company\u2019s money. A card priced \u201C3 Company Money\u201D costs you three. A card priced \u201C+2\u201D earns you two. You cannot pick a card you cannot afford; it greys out and says so.',
   },
   community: {
-    term: 'Public Mandate',
-    what: 'Two for the whole game. Spending one takes the dirtiest options away from one other player, for that round only, and everyone is told it was you.',
+    term: 'Vetoes',
+    what: 'Two for the whole game. One veto takes the dirtiest cards away from one other player, for that round only. Everyone is told it was you.',
   },
   activist: {
     term: 'Spotlights',
-    what: 'Three for the whole game. A Spotlight lands on whoever takes the dirtiest option this round, but only if you also escalate with your own card that round.',
+    what: 'Three for the whole game. A Spotlight hits whoever takes the dirtiest card this round, but only if you also escalate with your own card that round.',
   },
 }
 
 const SHARED: Entry[] = [
   {
     term: 'The three targets',
-    what: 'By 2050 the country needs net emissions down to zero, growth averaging 5%, and happiness at 7. Miss even one and nobody wins, however well you personally did.',
+    what: 'By 2050 the country needs carbon at net zero, growth averaging 5%, and quality of life at 7. Miss one and nobody wins, however well you did.',
   },
   {
-    term: 'Mt',
-    what: 'Megatonnes of carbon a year. The country puts out 300 and its forests absorb 200, so it starts at 100 net. The big screen tracks it.',
-  },
-  { term: 'RG', what: 'Ringga, the money in the news stories. Flavour, not a resource you hold.' },
-  {
-    term: 'Trust',
-    what: 'How much the country backs you. The Community hands two out every round, and some option cards will not unlock without enough of it.',
+    term: 'Carbon',
+    what: 'The country puts out 300 Mt a year. Its forests absorb 200. So it starts at 100 net, and that 100 has to reach zero.',
   },
   {
-    term: 'Co-fund',
-    what: 'The Government paying half of a Business partnership card. Without it that card lands at half strength.',
+    term: 'Clean Economy',
+    what: 'How much of the economy runs on clean things. The higher it is, the less carbon each bit of growth adds. It is the most useful number on the screen.',
+  },
+  {
+    term: 'Public Trust',
+    what: 'How much the country backs you. Two go out every round, one for whoever looked after people best and one for whoever did most for the future. Some cards need it before they unlock.',
+  },
+  {
+    term: 'The four arrows on a card',
+    what: 'Which way that card pushes carbon, the economy, quality of life and the clean economy. More arrows means a bigger push. Green is good for the country, orange is not.',
+  },
+  {
+    term: 'Paying half',
+    what: 'The Government paying half of a Business partnership card. Without it, that card only half works.',
   },
   {
     term: 'Moving together',
-    what: 'If three or four of you pick options that pull the same way, the round does more than your four choices could separately.',
+    what: 'If three or four of you pick cards that pull the same way, the round does more than your four choices could separately.',
   },
 ]
 
 const PHASES: Entry[] = [
   { term: 'THE CRISIS', what: 'The news, plus one line written for you alone. Nothing to tap.' },
   {
-    term: 'THE TABLE',
-    what: 'Ninety seconds to talk. Promise things, demand things, send resources. Nothing said here is binding, and that is the point.',
+    term: 'THE TALK',
+    what: 'Ninety seconds to talk. Promise things, ask for things, send money. Nothing said here is binding, and that is the point.',
   },
   {
     term: 'THE CHOICE',
-    what: 'Three cards, forty-five seconds. Tap one to select it, then LOCK IT IN to commit. You can change your mind until you lock.',
+    what: 'Three cards, forty seconds. Tap one to select it, then LOCK IT IN. You can change your mind until you lock.',
   },
-  { term: 'THE RECKONING', what: 'All four cards flip on the big screen. Look up.' },
+  { term: 'THE REVEAL', what: 'All four cards turn over on the big screen. Look up.' },
 ]
 
 export function HowToPlay({ view }: { view: PhoneView }) {
@@ -96,12 +103,12 @@ export function HowToPlay({ view }: { view: PhoneView }) {
 
       {view.goalTitle ? (
         <>
-          <span className="plabel">YOUR SEALED GOAL · NOBODY ELSE SEES THIS</span>
+          <span className="plabel">YOUR SECRET WIN \u00B7 NOBODY ELSE SEES THIS</span>
           <div className="bubble">
             <div className="bubble__lead">{view.goalTitle}</div>
             <p className="bubble__text">{view.goalDesc}</p>
             <p className="bubble__text">
-              Hitting it only counts for something if the country hits all three targets too.
+              This only counts if the country hits all 3 targets too.
             </p>
           </div>
         </>
@@ -117,8 +124,7 @@ export function HowToPlay({ view }: { view: PhoneView }) {
       <span className="plabel">IF YOU RUN OUT OF TIME</span>
       <p className="ptext">
         The round never waits. If you selected a card but did not lock it, that card is used. If you
-        selected nothing, the clock picks one for you, so select something early, even if you change
-        it later.
+        selected nothing, the clock picks for you. So select something early, even if you change it.
       </p>
 
       <span className="plabel">WORDS ON YOUR SCREEN</span>

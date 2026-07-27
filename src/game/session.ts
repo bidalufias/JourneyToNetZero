@@ -6,6 +6,7 @@
  * by the server; clients render whatever view they are handed and nothing else.
  */
 import type { GameState, PublicState, Role, RoundLog, TrustRole } from '../engine/types'
+import type { Impact } from './impact'
 
 export type Phase =
   | 'lobby'
@@ -19,8 +20,10 @@ export type Phase =
   | 'ended'
 
 /**
- * Phase lengths in milliseconds, for the 30-minute session from the design doc:
- * 3 setup, 24 play across six 4-minute rounds, 3 results.
+ * Phase lengths in milliseconds. The published session is thirty-five minutes:
+ * setup and onboarding, six rounds of play, then the results and the debrief.
+ * It used to be advertised as thirty and run closer to thirty-seven, and a
+ * workshop that overruns by seven minutes is a workshop that gets cut short.
  */
 export const PHASE_MS: Record<Phase, number> = {
   lobby: 0, // ends when the facilitator starts
@@ -229,7 +232,7 @@ export interface PhoneView {
   /** Committed. The choice screen goes read-only and the phone steps back. */
   locked: boolean
   /** Your own resource, and only yours. */
-  resource: { kind: 'fiscal' | 'capital' | 'trust-awards' | 'spotlights'; value: number; label: string }
+  resource: { kind: 'fiscal' | 'capital' | 'vetoes' | 'spotlights'; value: number; label: string }
   trust: Record<TrustRole, number>
   vetoesRemaining: number
   spotlightsRemaining: number
@@ -247,6 +250,14 @@ export interface PhoneView {
   incomingOffers: Offer[]
   sentOffers: Offer[]
   seats: { role: Role; name: string | null; connected: boolean; locked: boolean }[]
+  /** The three national targets and where the country stands, for the header. */
+  nation: {
+    carbon: number
+    economy: number
+    life: number
+    clean: number
+    targets: { carbon: number; economy: number; life: number }
+  }
   /** Written in plain language, no numbers: the phone's only interpretation. */
   roundResult: { didWhat: string; cost: string; others: string } | null
   waitingOn: number
@@ -277,131 +288,143 @@ export interface RoleCharacter {
   /** The archetype, without its article. */
   title: string
   org: string
-  /** The formal post, as it would read on a business card. */
   post: string
   /** One line, for the places that only have room for one. */
   blurb: string
+
+  /* The three lines. Everything a player needs to open their mouth in Round 1. */
+  youAre: string
+  youWant: string
+  yourMove: string
+
+  /* The full profile, behind a tap. Nobody has to read this to play. */
   whoYouAre: string
   believe: string
   afraidOf: string
-  /** What the seat actually does with the one resource it holds. */
+  /** What this seat actually does with the one thing it holds. */
   resourcePower: string
-  howToPlay: string
-  /** Three things this character would actually say at the table. */
+  /** Three things this character would say at the table. */
   says: string[]
   /** And the one they never would. */
   neverSay: string
 }
 
 /**
- * The profile is the same text as the written guide's character cards, because
- * a player who read the guide and a player who did not have to end up playing
- * the same person. Most tables never open the guide, which is why the whole
- * thing has to be reachable from the phone that is already in their hand.
+ * The role screen used to stack nine labelled sections and about 450 words, in
+ * front of a player who had ninety seconds and had never seen the game. Now the
+ * first three lines are the whole brief and the rest is optional.
+ *
+ * Nothing here is gendered. The archetype is played by whoever takes it.
  */
 export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
   government: {
-    title: 'Honourable Minister',
-    org: 'Ministry of Energy, Environment and Climate',
-    post: '52 · Minister for Energy, Environment and Climate',
-    blurb: 'Holds the budget and the law. Moves faster than anyone. Can also be voted out in an afternoon.',
+    title: 'Minister',
+    org: 'Ministry of Energy and Climate',
+    post: 'Minister for Energy and Climate',
+    blurb: 'You hold the country\u2019s money and the power to make law.',
+    youAre: 'The Minister. You hold the national Budget and the power to make law.',
+    youWant: 'Growth, and to still be in office in 2050.',
+    yourMove: 'Spend Budget to change the country. Or give Budget away so someone else can act.',
     whoYouAre:
-      'Twenty-four years in the civil service before you went into politics. You represent Kuala Jernih, a semi-rural seat where half your voters work in plantations and the other half commute into the city. People call you competent and slightly boring. You take that as a compliment.',
+      'Twenty-four years in the civil service, then politics. Half your voters work on plantations. The other half commute into the city.',
     believe:
-      'The transition has to happen and you are the only person in this room who can actually fund it. You also believe that a government that loses an election achieves nothing at all, so staying in power is not vanity. It is the job.',
-    afraidOf: 'Being remembered as the minister who made petrol expensive.',
+      'The change has to happen, and you are the only one who can pay for it. But a government that loses an election changes nothing.',
+    afraidOf: 'Being the minister who made petrol expensive.',
     resourcePower:
-      "Fiscal Points are your budget: the public money you spend to make things happen, and you are the only player who can also turn a decision into law. They build by +2 at the start of every round from Round 2, plus +1 more when the economy is strong, saved up to a ceiling of 8. Most of your real moves, like a green stimulus or a clean-energy push, cost 2 or 3, so it often pays to sit a round out, let the points gather, then spend big on the choice that counts. You can also hand a point to another player so they can afford a move you need from them, or spend 1 to co-fund the Business's partnership so it lands at full strength instead of half. Every point spent well cuts the country's emissions and grows the clean economy; spend nothing and nothing moves.",
-    howToPlay:
-      'You move faster than anyone else here. You can spend, and you can make law. But everything you do is paid for by someone who votes. Never give something away without asking what you get back.',
+      'You start with 4 Budget. From Round 2 you get 2 more each round, and 1 extra when the economy is strong, up to 8. Big moves cost 2 or 3, so it often pays to save a round and then spend properly. You can also give Budget to another player, or pay half of a Business partnership so it works at full strength instead of half.',
     says: [
-      'I can fund that. What do I tell the people in Perindu?',
-      "Give me a public reason to spend this and I'll spend it.",
+      'I can fund that. What do I tell the people who voted for me?',
+      'Give me a public reason to spend this and I will spend it.',
       'If I do that I lose the seat, and then none of this happens.',
     ],
-    neverSay: "Money's no object.",
+    neverSay: 'Money is no object.',
   },
   business: {
-    title: 'Business Tycoon',
+    title: 'Company Boss',
     org: 'Sawit Prima Group',
-    post: '58 · Group CEO, Sawit Prima: palm, property, power',
-    blurb: 'Owns the emissions. Also owns the jobs, exports and tax base.',
+    post: 'Group CEO, Sawit Prima',
+    blurb: 'You own most of the pollution. You also own most of the jobs.',
+    youAre: 'The Company Boss. You own most of the country\u2019s pollution, and most of its jobs.',
+    youWant: 'Profit, and not to bet the company on the wrong decade.',
+    yourMove: 'Spend Company Money to go clean. Or get someone else to pay half.',
     whoYouAre:
-      'Third generation, and you took over the family firm at 41. Forty thousand employees. You have read every major climate report of the last decade and can quote them, which surprises people who assume you have not.',
+      'Third generation. You took over at 41. Forty thousand staff. You have read every big climate report and can quote them.',
     believe:
-      'You will go green the moment it is cheaper than not going green, or the moment somebody makes staying dirty more expensive. You do not think that makes you a villain. You think it makes you honest, and you are quietly irritated by people who pretend otherwise.',
-    afraidOf: 'Being the chief executive who bet the company early and got it wrong.',
+      'You will go clean when it is cheaper than staying dirty, or when someone makes staying dirty expensive. You think that is honest, not villainous.',
+    afraidOf: 'Being the boss who moved early and got it wrong.',
     resourcePower:
-      "Capital is your company's money, and because you own most of the country's pollution, your choices move the emissions meter more than anyone else's. It builds by +1 each round, plus +1 more when the economy is booming, up to a ceiling of 12. A real transition, like retooling a plant or going clean, costs 3 and takes a serious bite, but it delivers the single biggest cut on the table and earns you public Trust. Partnership options cost only 1, but they pay off only if the Government agrees to co-fund them, so line that up at the table before you choose. Sitting on your Capital keeps you rich and safe, and is also how the whole country misses its target.",
-    howToPlay:
-      'You own the emissions. You also own the jobs, the exports and most of the tax base. That gives you leverage. Use it. Never volunteer to pay for something alone if you can get it co-funded.',
+      'You start with 5 Company Money and gain 1 each round, 2 when the economy is booming, up to 12. Going clean costs 3 and hurts, but it is the biggest single cut on the table and it earns you Public Trust. Partnerships cost only 1, but they work only if the Government pays too, so agree that during the talk. Sitting on your money keeps you safe, and is also how the country misses.',
     says: [
-      "I'll do it, if the Government shares the cost.",
-      "That's a ten-year investment and I'm judged every quarter.",
+      'I will do it, if the Government shares the cost.',
+      'That is a ten-year investment and I am judged every quarter.',
       'You want me to cut thirty percent? Fine. Who pays for the retraining?',
     ],
-    neverSay: "Profit doesn't matter here.",
+    neverSay: 'Profit does not matter here.',
   },
   community: {
-    title: 'Community Elder',
-    org: "Kampung Baru Jernih residents' association",
-    post: "47 · Food stall owner, chair of the residents' association",
-    blurb: '34 million people who want clean air, a job, and petrol under two Ringga a litre.',
+    title: 'Community Leader',
+    org: 'Kampung Baru Jernih residents',
+    post: 'Food stall owner, head of the residents\u2019 association',
+    blurb: '34 million people who want clean air, a job, and petrol they can afford.',
+    youAre: 'The Community Leader. You speak for 34 million people.',
+    youWant: 'Clean air and prices people can afford. You are tired of being told to pick one.',
+    yourMove: 'Make them earn your support out loud. Twice a game you can say no and mean it.',
     whoYouAre:
-      "You run a stall in Kampung Baru Jernih and you chair the residents' association, which means you speak for thirty-four million people who never elected you but definitely agree with you. Your stall has flooded three times in eight years. Your child has asthma. Your electricity bill doubled last year.",
+      'You run a food stall and head the residents\u2019 association. Your stall has flooded three times in eight years. Your child has asthma.',
     believe:
-      'Clean air and affordable petrol are both perfectly reasonable things to want, and you are tired of being told to pick one. You have heard a lot of promises. You remember all of them.',
-    afraidOf: "Being asked to sacrifice again by people who won't have to.",
+      'Clean air and affordable petrol are both reasonable things to want. You have heard a lot of promises and you remember all of them.',
+    afraidOf: 'Being asked to sacrifice again by people who will not have to.',
     resourcePower:
-      "You hold no money and no law, but you hold what the powerful need. Two Trust tokens are handed out every round, one to whoever looked after people best and one to whoever did most for the future, and Trust is what the Government must have before it can pass its boldest laws and what keeps the Business allowed to operate. You do not hand Trust out yourself; it goes to whoever earned it that round, so your power is to make people earn it in front of you. What you do spend is the Public Mandate: two vetoes for the whole game, each one able to strike a named player's dirtiest option off their list for a single round: “the public will not accept this.” Save them for the moment somebody is about to wreck it for everyone, because two is all you get.",
-    howToPlay:
-      'Make them earn it out loud. Ask what things cost. Remind people what they promised last round. You are the only player who can say no and make it stick.',
+      'You hold no money and no laws. You hold two vetoes for the whole game. Each one takes a player\u2019s dirtiest cards away for a single round, and everyone is told it was you. Public Trust is handed out every round too, one for whoever looked after people best and one for whoever did most for the future. You do not choose who gets it. It goes to whoever earned it, so your job is to make them earn it in front of you.',
     says: [
       'Explain that to me like I have to pay for it, because I do.',
       'You promised us this last time. What happened?',
-      "We'll accept it. But you go first.",
+      'We will accept it. But you go first.',
     ],
     neverSay: 'Whatever you think is best.',
   },
   activist: {
     title: 'Youth Activist',
     org: 'Bangkit Iklim',
-    post: '26 · Founder, Bangkit Iklim (Climate Rise)',
-    blurb: 'Can make ignoring them more expensive than listening. Three times, and only three.',
+    post: 'Founder, Bangkit Iklim',
+    blurb: 'You can make ignoring you expensive. Three times, and only three.',
+    youAre: 'The Youth Activist. You have no money and the largest following in the country.',
+    youWant: 'Real change, fast. And not to become the person who signed something and changed nothing.',
+    yourMove: 'Name someone in public. Three times a game, and only if you push hard yourself.',
     whoYouAre:
-      'Law degree, no job in law. You organised the first climate strike in Kota Damai when you were nineteen, and four hundred people came. Last year ninety thousand came. You have no budget, no staff worth the name, and the largest following in the country.',
+      'Law degree, no job in law. You ran the first climate strike here at nineteen and four hundred people came. Last year ninety thousand came.',
     believe:
-      "The science isn't negotiable and the timeline isn't a preference. Everyone in this room will personally be fine whatever happens, and that is precisely the problem.",
-    afraidOf: 'Becoming the person who sat in a nice room, signed something, and changed nothing.',
+      'The science is not negotiable and the timeline is not a preference. Everyone in this room will be fine whatever happens. That is the problem.',
+    afraidOf: 'Sitting in a nice room, signing something, and changing nothing.',
     resourcePower:
-      "You cannot build or spend anything, so your power is to make ignoring you cost more than listening. A Spotlight calls out one player in public before everyone locks their choice; if that player then reaches for their dirtiest option, it only half works, they lose a Trust token, and the whole country feels better for the accountability, which nudges happiness up. It only fires if you back it with an escalation of your own that same round, and it lands on whoever actually goes dirtiest, so save it for a round when you expect the Government or the Business to cave. You get three for the entire game, and each time you sit down to collaborate instead, you lose a little of the credibility that makes the next one bite.",
-    howToPlay:
-      'You have three real choices every round: escalate, which is loud, costly and effective against bad actors; collaborate, which buys real influence and spends a little of your soul; or build evidence, where nothing happens now and something big happens later. Pick deliberately.',
+      'You cannot build or buy anything. You have three Spotlights for the whole game. A Spotlight names one player before everyone locks in. If that player then takes their dirtiest card, it only half works, they lose Public Trust, and the country feels better for the accountability. It only fires if you also escalate with your own card that round, so save it for a round when you expect someone to cave. Every time you sit down and compromise instead, the next one bites a little less.',
     says: [
-      "That's not a plan, that's a press release.",
-      "I'll back you publicly if you commit to it publicly.",
-      "Everyone in this room will be fine. That's the problem.",
+      'That is not a plan, that is a press release.',
+      'I will back you in public if you commit to it in public.',
+      'Everyone in this room will be fine. That is the problem.',
     ],
-    neverSay: "Let's revisit this next year.",
+    neverSay: 'Let us look at this again next year.',
   },
 }
 
 /** The resource each seat actually tracks. Every player watches exactly one number. */
 export const ROLE_RESOURCE: Record<Role, { kind: PhoneView['resource']['kind']; label: string }> = {
-  government: { kind: 'fiscal', label: 'Your Fiscal Points' },
-  business: { kind: 'capital', label: 'Your Capital' },
-  community: { kind: 'trust-awards', label: 'Public Mandate vetoes' },
-  activist: { kind: 'spotlights', label: 'Spotlights' },
+  government: { kind: 'fiscal', label: 'Your Budget' },
+  business: { kind: 'capital', label: 'Your Company Money' },
+  community: { kind: 'vetoes', label: 'Your vetoes' },
+  activist: { kind: 'spotlights', label: 'Your Spotlights' },
 }
 
 export interface PhoneOption {
   id: string
   title: string
   desc: string
-  /** "2 FP", "3 C" or "FREE": never a raw effect. */
+  /** "2 Budget", "3 Company Money" or "Free": never a raw effect. */
   cost: string
-  /** Plain-English trade-off, capped at 52 characters. */
-  hint: string
+  /** Four direction-only chips. Which way each meter moves, never how far. */
+  impact: Impact[]
+  /** Set only when the card's value depends on somebody else. Usually null. */
+  condition: string | null
   available: boolean
   /** Why it cannot be chosen. The three disabled states get three edges. */
   disabled: 'afford' | 'veto' | 'gate' | null

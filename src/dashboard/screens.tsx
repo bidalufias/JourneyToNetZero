@@ -38,7 +38,7 @@ export function Attract({
         <div className="attract__left">
           <p className="attract__cue">JOIN ON YOUR PHONE</p>
           <p className="attract__code">{view.code}</p>
-          <p className="attract__tagline">Four seats. Six crises. Thirty minutes.</p>
+          <p className="attract__tagline">Four seats. Six crises. Thirty-five minutes.</p>
           <JoinPanel code={view.code} />
           {onShowQr || onOpenScript ? (
             <div className="attract__controls">
@@ -80,8 +80,8 @@ export function Attract({
       <div className="briefing-strip">
         <span className="briefing-strip__label">BRIEFING</span>
         <span className="briefing-strip__text">
-          Emissions {s.emissions.toFixed(0)} Mt · Growth {s.growth.toFixed(1)}% · Happiness{' '}
-          {s.happiness.toFixed(1)} · Green economy {s.greenShare.toFixed(0)}%
+          Carbon {s.emissions.toFixed(0)} Mt net \u00B7 Economy {s.growth.toFixed(1)}% \u00B7 Quality of life{' '}
+          {s.happiness.toFixed(1)} \u00B7 Clean economy {s.greenShare.toFixed(0)}%
         </span>
       </div>
     </div>
@@ -119,20 +119,20 @@ export function Briefing({ view, clock }: { view: DashboardView; clock: string |
             All three, or nobody wins.
           </h1>
           <p className="brief__body">
-            Six crises, four minutes each. Every round you talk, then each of you picks one card in
-            secret, then all four flip at once. Nothing anybody promises is binding.
+            Six crises. Each one goes the same way. You talk, you each pick a card in secret, then
+            all four turn over at once. <strong>Nothing you promise is binding.</strong>
           </p>
           <p className="brief__body">
-            You each hold a sealed goal of your own. Hitting it counts for nothing unless the
-            country hits all three of these.
+            You each hold a secret win of your own. It counts for nothing unless the country hits
+            all three targets.
           </p>
         </div>
 
         <div className="brief__targets">
           {[
-            { label: 'EMISSIONS', from: `${s.emissions.toFixed(0)} Mt net today`, target: 'DOWN TO NET ZERO' },
-            { label: 'GROWTH', from: `${s.growth.toFixed(1)}% today`, target: 'AVERAGING 5%' },
-            { label: 'HAPPINESS', from: `${s.happiness.toFixed(1)} today`, target: 'UP TO 7.0' },
+            { label: 'CARBON', from: `${s.emissions.toFixed(0)} Mt net today`, target: 'DOWN TO NET ZERO' },
+            { label: 'ECONOMY', from: `${s.growth.toFixed(1)}% today`, target: 'AVERAGING 5%' },
+            { label: 'QUALITY OF LIFE', from: `${s.happiness.toFixed(1)} today`, target: 'UP TO 7.0' },
           ].map((t) => (
             <div key={t.label} className="brief__target">
               <span className="brief__target-label">{t.label}</span>
@@ -146,8 +146,8 @@ export function Briefing({ view, clock }: { view: DashboardView; clock: string |
       <div className="briefing-strip">
         <span className="briefing-strip__label">ON YOUR PHONE</span>
         <span className="briefing-strip__text">
-          Your resource is in the top corner. Tap ⋯ at any time for what the words mean. Tap ‹ to
-          re-read anything this round.
+          What you can spend is in the top corner. The country\u2019s three numbers sit under it. Tap
+          \u22EF for what any word means, or \u2039 to re-read this round.
         </span>
       </div>
     </div>
@@ -172,7 +172,7 @@ export function CoalitionBonus({ view }: { view: DashboardView }) {
 
   return (
     <div className="coalition">
-      <p className="coalition__label">COALITION BONUS</p>
+      <p className="coalition__label">MOVING TOGETHER</p>
       <h1 className="coalition__title">
         {aligned === 4 ? 'All four of you' : 'Three of you'}
         <br />
@@ -191,12 +191,13 @@ export function CoalitionBonus({ view }: { view: DashboardView }) {
         </div>
         <div>
           <p className="coalition__effect">
-            {bonus.emissions} Mt · +{bonus.green}% green · +{bonus.happiness} happiness
+            {bonus.emissions} Mt carbon \u00B7 +{bonus.green}% clean economy \u00B7 +{bonus.happiness} quality of
+            life
           </p>
           <p className="coalition__note">
             {aligned === 4
-              ? 'No single player can produce this.'
-              : 'No single player can produce this. All four would have been -9.5 Mt.'}
+              ? 'No single player can do this alone.'
+              : 'No single player can do this alone. All four would have been -9.5 Mt.'}
           </p>
         </div>
       </div>
@@ -209,21 +210,21 @@ export function RoundSummary({ view }: { view: DashboardView }) {
   const s = view.state
   const shortfalls = [
     {
-      label: 'EMISSIONS',
+      label: 'CARBON',
       value: s.emissions.toFixed(0),
       gap: s.emissions - view.targets.emissions,
       unit: 'over',
       decimals: 0,
     },
     {
-      label: 'GROWTH AVG',
+      label: 'ECONOMY AVG',
       value: s.averageGrowth.toFixed(1),
       gap: view.targets.growth - s.averageGrowth,
       unit: 'short',
       decimals: 1,
     },
     {
-      label: 'HAPPINESS',
+      label: 'QUALITY OF LIFE',
       value: s.happiness.toFixed(1),
       gap: view.targets.happiness - s.happiness,
       unit: 'short',
@@ -259,7 +260,7 @@ export function RoundSummary({ view }: { view: DashboardView }) {
         ))}
         <div className="standing">
           <span className="standing__label" style={{ color: 'var(--jtnz-meter-green)' }}>
-            GREEN ECONOMY
+            CLEAN ECONOMY
           </span>
           <span className="standing__value" style={{ color: 'var(--jtnz-meter-green)' }}>
             {s.greenShare.toFixed(0)}
@@ -270,7 +271,7 @@ export function RoundSummary({ view }: { view: DashboardView }) {
           {roundsLeft === 0
             ? 'Six rounds gone. This is the country you built.'
             : reachable(view)
-              ? `${roundsLeft} round${roundsLeft === 1 ? '' : 's'}. Three targets. All still reachable.`
+              ? `${roundsLeft} round${roundsLeft === 1 ? '' : 's'} left. All three targets still reachable.`
               : 'Net zero is no longer reachable.'}
         </p>
       </div>
@@ -305,9 +306,9 @@ export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endga
   const anyGoalMet = endgame.players.some((p) => p.goalMet)
   const heading = endgame.win ? 'NATION BUILDER' : anyGoalMet ? 'HOLLOW VICTORY' : 'THE COUNTRY MISSED'
   const labels: Record<string, { name: string; unit: string; fmt: (v: number) => string }> = {
-    emissions: { name: 'EMISSIONS', unit: 'Mt', fmt: (v) => v.toFixed(0) },
-    growth: { name: 'GROWTH AVERAGE', unit: '%', fmt: (v) => v.toFixed(1) },
-    happiness: { name: 'HAPPINESS', unit: '/10', fmt: (v) => v.toFixed(1) },
+    emissions: { name: 'CARBON', unit: 'Mt net', fmt: (v) => v.toFixed(0) },
+    growth: { name: 'ECONOMY AVERAGE', unit: '%', fmt: (v) => v.toFixed(1) },
+    happiness: { name: 'QUALITY OF LIFE', unit: '/10', fmt: (v) => v.toFixed(1) },
   }
 
   return (
@@ -356,7 +357,7 @@ export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endga
                 </div>
                 <div className="ending__player-name">{p.name}</div>
                 <div className="ending__player-goal">
-                  {p.goalTitle ?? 'No sealed goal'} {p.goalMet ? '✓' : '✕'}
+                  {p.goalTitle ?? 'No secret win'} {p.goalMet ? '\u2713' : '\u2715'}
                 </div>
                 <div className="ending__player-title">{p.title}</div>
               </div>
