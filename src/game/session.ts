@@ -311,7 +311,7 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
       'The transition has to happen and you are the only person in this room who can actually fund it. You also believe that a government that loses an election achieves nothing at all, so staying in power is not vanity. It is the job.',
     afraidOf: 'Being remembered as the minister who made petrol expensive.',
     resourcePower:
-      'Fiscal Points are public money, and you are the only seat that can pass a law. From Round 2 they grow by +2 each round, and +1 more when the economy is strong. The big moves cost 2 or 3, so some rounds you save to afford the one that matters. You can also hand a point to another player to help them act.',
+      "Fiscal Points are your budget: the public money you spend to make things happen, and you are the only player who can also turn a decision into law. They build by +2 at the start of every round from Round 2, plus +1 more when the economy is strong, saved up to a ceiling of 8. Most of your real moves — a green stimulus, a clean-energy push — cost 2 or 3, so it often pays to sit a round out, let the points gather, then spend big on the choice that counts. You can also hand a point to another player so they can afford a move you need from them, or spend 1 to co-fund the Business's partnership so it lands at full strength instead of half. Every point spent well cuts the country's emissions and grows the clean economy; spend nothing and nothing moves.",
     howToPlay:
       'You move faster than anyone else here. You can spend, and you can make law. But everything you do is paid for by someone who votes. Never give something away without asking what you get back.',
     says: [
@@ -332,7 +332,7 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
       'You will go green the moment it is cheaper than not going green, or the moment somebody makes staying dirty more expensive. You do not think that makes you a villain. You think it makes you honest, and you are quietly irritated by people who pretend otherwise.',
     afraidOf: 'Being the chief executive who bet the company early and got it wrong.',
     resourcePower:
-      'Capital is your company money. It grows by +1 each round, and +1 more when the economy is booming. Real change costs you 3, a serious bite; a partnership costs only 1, but it lands at half strength unless the Government co-funds it.',
+      "Capital is your company's money, and because you own most of the country's pollution, your choices move the emissions meter more than anyone else's. It builds by +1 each round, plus +1 more when the economy is booming, up to a ceiling of 12. A real transition — retooling a plant, going clean — costs 3 and takes a serious bite, but it delivers the single biggest cut on the table and earns you public Trust. Partnership options cost only 1, but they pay off only if the Government agrees to co-fund them, so line that up at the table before you choose. Sitting on your Capital keeps you rich and safe, and is also how the whole country misses its target.",
     howToPlay:
       'You own the emissions. You also own the jobs, the exports and most of the tax base. That gives you leverage. Use it. Never volunteer to pay for something alone if you can get it co-funded.',
     says: [
@@ -353,7 +353,7 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
       'Clean air and affordable petrol are both perfectly reasonable things to want, and you are tired of being told to pick one. You have heard a lot of promises. You remember all of them.',
     afraidOf: "Being asked to sacrifice again by people who won't have to.",
     resourcePower:
-      "You hold no money and no law, but something better. Every round you award 2 Trust tokens, one to whoever looked after people best, one to whoever did most for the future; Trust is what lets the Government be brave and the Business keep operating. Twice in the whole game you can also spend a Public Mandate to take somebody's worst option off the table for a round.",
+      "You hold no money and no law, but you hold what the powerful need. Two Trust tokens are handed out every round, one to whoever looked after people best and one to whoever did most for the future, and Trust is what the Government must have before it can pass its boldest laws and what keeps the Business allowed to operate. You do not hand Trust out yourself; it goes to whoever earned it that round, so your power is to make people earn it in front of you. What you do spend is the Public Mandate: two vetoes for the whole game, each one able to strike a named player's dirtiest option off their list for a single round — “the public will not accept this.” Save them for the moment somebody is about to wreck it for everyone, because two is all you get.",
     howToPlay:
       'Make them earn it out loud. Ask what things cost. Remind people what they promised last round. You are the only player who can say no and make it stick.',
     says: [
@@ -374,7 +374,7 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
       "The science isn't negotiable and the timeline isn't a preference. Everyone in this room will personally be fine whatever happens, and that is precisely the problem.",
     afraidOf: 'Becoming the person who sat in a nice room, signed something, and changed nothing.',
     resourcePower:
-      "You can't build or fund anything. A Spotlight names one player in public before choices lock; if they then take their dirtiest option it only half works, they lose Trust, and the country feels better for the accountability. Three for the whole game, and each only fires if you escalate with your own card that round.",
+      "You cannot build or spend anything, so your power is to make ignoring you cost more than listening. A Spotlight calls out one player in public before everyone locks their choice; if that player then reaches for their dirtiest option, it only half works, they lose a Trust token, and the whole country feels better for the accountability, which nudges happiness up. It only fires if you back it with an escalation of your own that same round, and it lands on whoever actually goes dirtiest, so save it for a round when you expect the Government or the Business to cave. You get three for the entire game, and each time you sit down to collaborate instead, you lose a little of the credibility that makes the next one bite.",
     howToPlay:
       'You have three real choices every round: escalate, which is loud, costly and effective against bad actors; collaborate, which buys real influence and spends a little of your soul; or build evidence, where nothing happens now and something big happens later. Pick deliberately.',
     says: [
