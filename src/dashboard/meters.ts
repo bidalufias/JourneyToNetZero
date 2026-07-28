@@ -55,9 +55,29 @@ export function emissionsMeter(state: PublicState, targets: Targets, content: Co
   }
 }
 
+/**
+ * The economy, and the meter the room should be frightened of.
+ *
+ * Mixed tables miss growth 74% of the time against 24% for carbon: it is the
+ * binding constraint by a factor of three, and no surface in the product said
+ * so. Every table walks in braced for the carbon number and loses on this one.
+ *
+ * The two things that make it the dangerous meter are both true and neither was
+ * visible. It is an *average over six rounds*, so a bad round is never
+ * recovered, only diluted, and by Round 5 the arithmetic is largely settled.
+ * And carbon comes down fastest through exactly the cards that cost growth.
+ */
 export function growthMeter(state: PublicState, targets: Targets): MeterSpec {
   const avg = state.averageGrowth
   const met = avg >= targets.growth
+  // What the remaining rounds would have to average to pull the six-round mean
+  // back to target. Above the best round anybody has ever run, it is gone.
+  const roundsLeft = Math.max(0, 6 - state.round)
+  const needed = roundsLeft
+    ? (targets.growth * 6 - avg * state.round) / roundsLeft
+    : 0
+  const unrecoverable = !met && roundsLeft > 0 && needed > 8
+
   return {
     label: 'ECONOMY',
     value: avg,
@@ -68,10 +88,20 @@ export function growthMeter(state: PublicState, targets: Targets): MeterSpec {
     ink: 'var(--jtnz-meter-growth)',
     status: met
       ? { text: 'ON TARGET', tone: 'good' }
-      : avg >= targets.growth - 0.3
-        ? { text: 'HOLDING', tone: 'warn' }
-        : { text: 'SHORT', tone: 'bad' },
-    footLeft: `6-round avg ${avg.toFixed(1)}`,
+      : unrecoverable
+        ? { text: 'GONE', tone: 'bad' }
+        : avg >= targets.growth - 0.3
+          ? { text: 'HOLDING', tone: 'warn' }
+          : { text: 'SHORT', tone: 'bad' },
+    // The foot said "6-round avg 4.7", which states the number without saying
+    // that the number is the target, or that it cannot be made up later.
+    footLeft: met
+      ? `averaging ${avg.toFixed(1)} over ${state.round || 1}`
+      : roundsLeft === 0
+        ? `finished ${(targets.growth - avg).toFixed(1)} short`
+        : unrecoverable
+          ? 'cannot be made up'
+          : `needs ${needed.toFixed(1)} a round from here`,
   }
 }
 

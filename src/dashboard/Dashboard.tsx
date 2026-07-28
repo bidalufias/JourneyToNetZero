@@ -27,7 +27,14 @@ import {
 } from './meters'
 import { Reckoning } from './Reckoning'
 import { TheTable } from './TheTable'
-import { Attract, Briefing, Endgame as EndgameScreen, Onboarding, RoundSummary } from './screens'
+import {
+  Attract,
+  Briefing,
+  Endgame as EndgameScreen,
+  Onboarding,
+  RoundSummary,
+  TrustAward,
+} from './screens'
 import './dashboard.css'
 import './screens.css'
 
@@ -41,6 +48,7 @@ const PHASE_LABEL: Record<string, string> = {
   table: 'THE TALK',
   choice: 'THE CHOICE',
   reckoning: 'THE REVEAL',
+  trust: 'PUBLIC TRUST',
   summary: 'THE STORY SO FAR',
   results: 'THE NATIONAL MISSION',
 }
@@ -98,6 +106,9 @@ export function Dashboard({
   if (view.phase === 'practiceChoice' || view.phase === 'power' || view.phase === 'goal') {
     return <Onboarding view={view} clock={clock} />
   }
+  // Two names, fifteen seconds, its own screen. Rendered beside the meters it
+  // would be a caption; the point is that the room looks up for it.
+  if (view.phase === 'trust' && view.trustAward) return <TrustAward view={view} clock={clock} />
   if ((view.phase === 'results' || view.phase === 'ended') && endgame) {
     return <EndgameScreen view={view} endgame={endgame} />
   }

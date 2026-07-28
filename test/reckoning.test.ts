@@ -53,8 +53,11 @@ describe('reading the deadline', () => {
   const now = 1_000_000
 
   it('measures the phase from the deadline when both clocks agree', () => {
-    // 60s left of a 75s phase: 15s in.
-    expect(deadlineElapsed(now + 60_000, now)).toBe(15_000)
+    // A third of the phase left: two thirds of the way in. Written against
+    // RECKONING_TOTAL_MS rather than the number it happens to be, because the
+    // phase was retuned once already and this test failed for saying 75.
+    const third = RECKONING_TOTAL_MS / 3
+    expect(deadlineElapsed(now + third, now)).toBe(RECKONING_TOTAL_MS - third)
   })
 
   it('treats a missing deadline as a finished sequence', () => {

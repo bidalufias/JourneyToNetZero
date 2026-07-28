@@ -1,21 +1,30 @@
 /**
  * THE TALK: ninety seconds. Argue, plead, threaten, trade.
  *
- * The phone's job here is to get out of the way. Five actions, each two taps,
- * each in a sheet that rises from the bottom and never covers the timer. An
- * incoming offer is the only thing allowed to interrupt, and it announces
+ * The phone's job here is to get out of the way. There used to be six buttons
+ * on this screen and four of them put a sentence on the same board: PROMISE,
+ * DEMAND, PAY HALF and, for two of the seats, a power. A player with ninety
+ * seconds and a stranger to persuade should be choosing what to say, not which
+ * of four verbs the app files it under.
+ *
+ * So there is one SAY IT button and one sheet behind it. The sheet asks a
+ * question, not a taxonomy: what do you want to put on the big screen? The
+ * shapes are sentences with a blank in them, composed by tapping, never typed,
+ * so every line the room reads out loud is short and grammatical.
+ *
+ * An incoming offer is the only thing allowed to interrupt, and it announces
  * itself on the dashboard at the same instant so the room hears the deal even
  * if the recipient is mid-sentence.
  */
 import { useState } from 'react'
 import { ROLES, type Role } from '../engine/types'
 import type { Command } from '../game/room'
-import type { PhoneView } from '../game/session'
+import type { PhoneView, SayShape } from '../game/session'
 import { ROLE_LABEL, ROLE_RESOURCE } from '../game/session'
-import { BOARD_NAME, DEMAND_PHRASES } from '../game/copy'
+import { BOARD_NAME, DEAL_CONDITIONS, DEMAND_PHRASES } from '../game/copy'
 import { RoleGlyph } from '../ui/primitives'
 
-type Sheet = 'offer' | 'promise' | 'demand' | 'spotlight' | 'veto' | null
+type Sheet = 'say' | 'offer' | 'spotlight' | 'veto' | null
 
 export function TableActions({
   view,
@@ -32,7 +41,7 @@ export function TableActions({
   /** Only two seats hold anything that can change hands. */
   const canSend = view.resource.kind === 'fiscal' || view.resource.kind === 'capital'
   const mySent = view.sentOffers
-  const spoke = view.promises.some((p) => p.from === view.role)
+  const spoke = view.promises.some((p) => p.from === view.role && p.kind !== 'cofund')
 
   return (
     <div className="pbody">
@@ -40,7 +49,7 @@ export function TableActions({
       <h1 className="pheading">Talk to each other.</h1>
       <p className="ptext">{view.privateLine}</p>
 
-      {/* An incoming offer is the only interrupt allowed during THE TABLE. */}
+      {/* An incoming offer is the only interrupt allowed during THE TALK. */}
       {view.incomingOffers.map((o) => (
         <div key={o.id} className="bubble bubble--them">
           <div className="bubble__label">INCOMING OFFER</div>
@@ -97,7 +106,7 @@ export function TableActions({
           <div key={p.id} className={`bubble${p.from === view.role ? '' : ' bubble--them'}`}>
             <div className="bubble__label">
               {p.from === view.role ? 'YOU · ' : ''}
-              {p.kind === 'promise' ? 'PLEDGED' : 'DEMAND'}
+              {SAID_LABEL[p.kind]}
             </div>
             <p className="bubble__text">{p.text}</p>
           </div>
@@ -112,23 +121,17 @@ export function TableActions({
           Spotlight called. It only lands if you also escalate with your own card this round.
         </p>
       ) : null}
-      {view.role === 'government' && view.coFund ? (
-        <p className="pnote">Paying half of the partnership. It costs you 1 Budget this round.</p>
-      ) : null}
 
       <div className="btn-row" style={{ marginTop: 'auto' }}>
+        <button className="btn btn--accent" disabled={readOnly} onClick={() => setSheet('say')}>
+          {spoke ? 'SAY SOMETHING ELSE' : 'SAY IT'}
+        </button>
         <button
           className="btn btn--ghost"
           disabled={readOnly || !canSend}
           onClick={() => setSheet('offer')}
         >
-          OFFER
-        </button>
-        <button className="btn btn--ghost" disabled={readOnly} onClick={() => setSheet('promise')}>
-          {spoke ? 'REPLACE' : 'PROMISE'}
-        </button>
-        <button className="btn btn--ghost" disabled={readOnly} onClick={() => setSheet('demand')}>
-          DEMAND
+          SEND MONEY
         </button>
         {view.role === 'activist' ? (
           <button
@@ -148,20 +151,19 @@ export function TableActions({
             SAY NO · {view.vetoesRemaining}
           </button>
         ) : null}
-        {view.role === 'government' ? (
-          <button
-            className="btn btn--ghost"
-            disabled={readOnly}
-            onClick={() => send({ t: 'coFund', role: 'government', agree: !view.coFund })}
-          >
-            {view.coFund ? 'STOP PAYING HALF' : 'PAY HALF'}
-          </button>
-        ) : null}
       </div>
 
       {sheet ? <ActionSheet kind={sheet} view={view} send={send} onClose={close} /> : null}
     </div>
   )
+}
+
+/** How each shape reads on the board. The deal is the one worth naming loudly. */
+const SAID_LABEL: Record<SayShape, string> = {
+  promise: 'PLEDGED',
+  demand: 'ASKED FOR',
+  deal: 'OFFERED A DEAL',
+  cofund: 'PAYING HALF',
 }
 
 function ActionSheet({
@@ -175,11 +177,9 @@ function ActionSheet({
   send: (c: Command) => void
   onClose: () => void
 }) {
-  const others = ROLES.filter((r) => r !== view.role)
   const titles: Record<Exclude<Sheet, null>, string> = {
-    offer: 'SEND AN OFFER',
-    promise: 'PROMISE SOMETHING',
-    demand: 'ASK FOR SOMETHING',
+    say: 'SAY IT',
+    offer: 'SEND MONEY',
     spotlight: 'CALL A SPOTLIGHT',
     veto: 'THE PUBLIC SAYS NO',
   }
@@ -195,51 +195,8 @@ function ActionSheet({
           </button>
         </div>
         <div className="sheet__body">
+          {kind === 'say' ? <SaySheet view={view} send={send} onClose={onClose} /> : null}
           {kind === 'offer' ? <OfferSheet view={view} send={send} onClose={onClose} /> : null}
-
-          {kind === 'promise' ? (
-            <>
-              <p className="pnote">The big screen will show it. Nothing makes you keep it.</p>
-              {view.options.map((o) => (
-                <button
-                  key={o.id}
-                  className="btn btn--ghost"
-                  onClick={() => {
-                    send({ t: 'promise', role: view.role, optionId: o.id })
-                    onClose()
-                  }}
-                >
-                  {BOARD_NAME[view.role]} promises to choose “{o.title}”.
-                </button>
-              ))}
-            </>
-          ) : null}
-
-          {kind === 'demand' ? (
-            <>
-              <p className="pnote">
-                This is pressure, not a rule. Nothing makes them do it, and everyone sees you ask.
-                One per round. A second one replaces it.
-              </p>
-              {others.map((target) => (
-                <div key={target}>
-                  <span className="plabel">{ROLE_LABEL[target].toUpperCase()}</span>
-                  {DEMAND_PHRASES.map((phrase) => (
-                    <button
-                      key={`${target}-${phrase.id}`}
-                      className="btn btn--ghost"
-                      onClick={() => {
-                        send({ t: 'demand', role: view.role, target, phraseId: phrase.id })
-                        onClose()
-                      }}
-                    >
-                      {phrase.text(ROLE_LABEL[target])}
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </>
-          ) : null}
 
           {kind === 'spotlight' ? (
             <>
@@ -272,6 +229,198 @@ function ActionSheet({
           {kind === 'veto' ? <VetoSheet view={view} send={send} onClose={onClose} /> : null}
         </div>
       </div>
+    </>
+  )
+}
+
+/**
+ * One sheet, three sentences, two taps each.
+ *
+ * The shapes are offered in the order a table actually uses them: state your
+ * position, then trade, then push. The deal is second rather than last because
+ * it is the sentence the whole game is built to provoke, and a player scrolling
+ * for it will not find it in ninety seconds.
+ */
+function SaySheet({
+  view,
+  send,
+  onClose,
+}: {
+  view: PhoneView
+  send: (c: Command) => void
+  onClose: () => void
+}) {
+  const [shape, setShape] = useState<SayShape | null>(null)
+  const others = ROLES.filter((r) => r !== view.role)
+
+  if (shape === null) {
+    return (
+      <>
+        <p className="pnote">
+          One thing at a time. The big screen shows it to everyone. Nothing makes you keep it.
+        </p>
+        <button className="btn btn--ghost say__shape" onClick={() => setShape('promise')}>
+          <span className="say__lead">I will choose…</span>
+          <span className="say__hint">Say what you are about to do.</span>
+        </button>
+        <button className="btn btn--ghost say__shape" onClick={() => setShape('deal')}>
+          <span className="say__lead">I will choose… if you…</span>
+          <span className="say__hint">A deal. You go if they go.</span>
+        </button>
+        <button className="btn btn--ghost say__shape" onClick={() => setShape('demand')}>
+          <span className="say__lead">I want someone to…</span>
+          <span className="say__hint">Ask for something, in public.</span>
+        </button>
+        {view.role === 'government' ? (
+          <button
+            className="btn btn--ghost say__shape"
+            onClick={() => {
+              send({ t: 'say', role: 'government', shape: 'cofund', on: !view.coFund })
+              onClose()
+            }}
+          >
+            <span className="say__lead">
+              {view.coFund ? 'Stop paying half.' : 'I will pay half of any partnership.'}
+            </span>
+            <span className="say__hint">
+              {view.coFund
+                ? 'You are paying half. It costs 1 Budget if the Business signs one.'
+                : 'A partnership only half works unless you do. Costs 1 Budget.'}
+            </span>
+          </button>
+        ) : null}
+      </>
+    )
+  }
+
+  if (shape === 'promise') {
+    return (
+      <>
+        <p className="pnote">Pick the card you are pledging to.</p>
+        {view.options.map((o) => (
+          <button
+            key={o.id}
+            className="btn btn--ghost"
+            onClick={() => {
+              send({ t: 'say', role: view.role, shape: 'promise', optionId: o.id })
+              onClose()
+            }}
+          >
+            {BOARD_NAME[view.role]} will choose “{o.title}”.
+          </button>
+        ))}
+        <button className="btn" onClick={() => setShape(null)}>
+          BACK
+        </button>
+      </>
+    )
+  }
+
+  if (shape === 'deal') return <DealSheet view={view} send={send} onClose={onClose} onBack={() => setShape(null)} />
+
+  return (
+    <>
+      <p className="pnote">
+        This is pressure, not a rule. Nothing makes them do it, and everyone sees you ask.
+      </p>
+      {others.map((target) => (
+        <div key={target}>
+          <span className="plabel">{ROLE_LABEL[target].toUpperCase()}</span>
+          {DEMAND_PHRASES.map((phrase) => (
+            <button
+              key={`${target}-${phrase.id}`}
+              className="btn btn--ghost"
+              onClick={() => {
+                send({ t: 'say', role: view.role, shape: 'demand', target, phraseId: phrase.id })
+                onClose()
+              }}
+            >
+              {phrase.text(ROLE_LABEL[target])}
+            </button>
+          ))}
+        </div>
+      ))}
+      <button className="btn" onClick={() => setShape(null)}>
+        BACK
+      </button>
+    </>
+  )
+}
+
+/**
+ * The deal, built in two taps: your card, then whose move it hangs on.
+ *
+ * The design document closes by saying the most important number in a session
+ * is the number of times somebody says "what if we both did it?", and until now
+ * there was no way to say it. It is one sentence with two blanks, and the room
+ * watches it resolve as kept, broken, or never called in.
+ */
+function DealSheet({
+  view,
+  send,
+  onClose,
+  onBack,
+}: {
+  view: PhoneView
+  send: (c: Command) => void
+  onClose: () => void
+  onBack: () => void
+}) {
+  const [optionId, setOptionId] = useState<string | null>(null)
+  const card = view.options.find((o) => o.id === optionId)
+
+  if (!card) {
+    return (
+      <>
+        <p className="pnote">First: what will you do, if they come with you?</p>
+        {view.options.map((o) => (
+          <button key={o.id} className="btn btn--ghost" onClick={() => setOptionId(o.id)}>
+            {o.title}
+          </button>
+        ))}
+        <button className="btn" onClick={onBack}>
+          BACK
+        </button>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <p className="ptext">
+        “{BOARD_NAME[view.role]} will choose <strong>{card.title}</strong> if…”
+      </p>
+      {ROLES.filter((r) => r !== view.role).map((target) => (
+        <div key={target}>
+          <span className="plabel">{ROLE_LABEL[target].toUpperCase()}</span>
+          {DEAL_CONDITIONS.map((c) => (
+            <button
+              key={`${target}-${c.id}`}
+              className="btn btn--ghost"
+              onClick={() => {
+                send({
+                  t: 'say',
+                  role: view.role,
+                  shape: 'deal',
+                  optionId: card.id,
+                  target,
+                  conditionId: c.id,
+                })
+                onClose()
+              }}
+            >
+              …{c.text(ROLE_LABEL[target])}.
+            </button>
+          ))}
+        </div>
+      ))}
+      <p className="pnote">
+        If they do their part and you do not, the big screen says you broke it. If they never do
+        theirs, nothing is held against you.
+      </p>
+      <button className="btn" onClick={() => setOptionId(null)}>
+        BACK
+      </button>
     </>
   )
 }

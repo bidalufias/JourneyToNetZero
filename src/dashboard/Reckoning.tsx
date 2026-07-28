@@ -98,8 +98,15 @@ export function Reckoning({ view }: { view: DashboardView }) {
     elapsed >= coalitionStart &&
     elapsed < coalitionStart + COALITION_HOLD_MS
 
+  /** The one sentence this seat put on the board, whatever shape it took. */
   const promiseFor = (role: Role) =>
-    view.promises.find((p) => p.from === role && p.round === log.round && p.kind === 'promise')
+    view.promises.find(
+      (p) =>
+        p.from === role &&
+        p.round === log.round &&
+        (p.kind === 'promise' || p.kind === 'deal') &&
+        p.outcome !== 'unresolved',
+    )
 
   return (
     <div className="reckoning">
@@ -140,10 +147,20 @@ export function Reckoning({ view }: { view: DashboardView }) {
 
                   <div className="rcard__foot">
                     {promise ? (
-                      <div
-                        className={`rcard__promise rcard__promise--${promise.outcome}`}
-                      >
-                        {promise.outcome === 'kept' ? 'KEPT THE PROMISE ✓' : 'BROKE THE PROMISE ✕'}
+                      <div className={`rcard__promise rcard__promise--${promise.outcome}`}>
+                        {/* A deal that was never called in is neither kept nor
+                            broken, and saying so is what makes the deal worth
+                            offering: the risk of proposing one is that nobody
+                            takes it, not that you get named a liar for it. */}
+                        {promise.outcome === 'void'
+                          ? 'THE DEAL WAS NOT TAKEN'
+                          : promise.outcome === 'kept'
+                            ? promise.kind === 'deal'
+                              ? 'BOTH KEPT THE DEAL ✓'
+                              : 'KEPT THE PROMISE ✓'
+                            : promise.kind === 'deal'
+                              ? 'BROKE THE DEAL ✕'
+                              : 'BROKE THE PROMISE ✕'}
                       </div>
                     ) : reveal.spotlit ? (
                       <div className="rcard__promise rcard__promise--broken">SPOTLIT ✕</div>

@@ -11,7 +11,7 @@
  * This is copy, not content: it is keyed by crisis *type* and role, so it
  * survives a content-pack swap without edits.
  */
-import type { Role } from '../engine/types'
+import { DIRTY, type Archetype, type Role } from '../engine/types'
 
 /** Keyed by scenario type, then role. */
 export const PRIVATE_LINE: Record<string, Record<Role, string>> = {
@@ -68,6 +68,45 @@ export const DEMAND_PHRASES: { id: string; text: (target: string) => string }[] 
   { id: 'co-fund', text: (t) => `the ${t} pays half of the partnership` },
   { id: 'protect-jobs', text: (t) => `the ${t} promises nobody loses a job over this` },
   { id: 'no-more-delay', text: (t) => `the ${t} stops asking everyone else to go first` },
+]
+
+/**
+ * The "if" half of a deal, and the only part of a pledge the room resolves
+ * against somebody else's card.
+ *
+ * Two conditions, not six, and both are settled by facts the reveal already
+ * carries: whether that seat counted toward Moving Together, and whether it
+ * took a card that breaks the coalition. Anything richer would need a phone to
+ * name a card from another seat's deck, which means either showing every player
+ * all sixteen cards, or letting them pledge against something they cannot see.
+ *
+ * Worded in the third person, because a pledge is composed on a phone and then
+ * read off a projector. "…if the Government moves with me" is what the speaker
+ * would say and is wrong the moment the board renders "The Business will choose
+ * X if the Government moves with me". One sentence has to work in both places,
+ * so it is the board's grammar that wins.
+ */
+export const DEAL_CONDITIONS: {
+  id: string
+  /** How the condition reads in the pledge. */
+  text: (target: string) => string
+  /** Settled from that seat's reveal. Nothing here consults the pledger. */
+  met: (them: { aligned: boolean; arch: Archetype }) => boolean
+}[] = [
+  {
+    id: 'moves-with-me',
+    text: (t) => `the ${t} moves too`,
+    met: (them) => them.aligned,
+  },
+  {
+    // Weaker than moving together, and deliberately so: a seat that spends the
+    // round asking somebody else to pay has not taken a cheap card, and it has
+    // not moved with you either. A table that learns the difference has learned
+    // most of what the coalition bonus is for.
+    id: 'no-cheap-card',
+    text: (t) => `the ${t} does not take the cheap card`,
+    met: (them) => !DIRTY.has(them.arch),
+  },
 ]
 
 /** Role names as they read on the promise board, in the third person. */

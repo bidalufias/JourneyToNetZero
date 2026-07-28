@@ -89,7 +89,10 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
     if (view.phase === 'table') return <TableActions view={view} send={send} />
     if (view.phase === 'choice') return <TheChoice view={view} send={send} remaining={remaining} />
     if (view.phase === 'reckoning') return <LookUp view={view} reckoning />
-    if (view.phase === 'summary') return <RoundResult view={view} />
+    // The reveal belongs to the big screen; from the Public Trust beat onward
+    // the phone answers the question the reveal just raised, which is what that
+    // card of mine actually did.
+    if (view.phase === 'trust' || view.phase === 'summary') return <RoundResult view={view} />
     if (view.phase === 'results' || view.phase === 'ended') {
       return <Endgame view={view} endgame={endgame} />
     }

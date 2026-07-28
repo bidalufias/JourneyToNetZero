@@ -7,6 +7,7 @@ import type { Role } from '../engine/types'
 import type { Command } from '../game/room'
 import type { InsiderTip, PhoneView } from '../game/session'
 import { ROLE_CHARACTER, ROLE_LABEL } from '../game/session'
+import { arrows } from '../game/impact'
 import { RoleGlyph, formatClock } from '../ui/primitives'
 
 /**
@@ -197,9 +198,13 @@ export function Crisis({ view }: { view: PhoneView }) {
 }
 
 /**
- * P-07: the insider tip. The only dark screen on any phone, and the only
- * place the app uses a large shadow: it should feel like the app has gone
- * quiet around you.
+ * P-07: A Tip Off. The only dark screen on any phone, and the only place the
+ * app uses a large shadow: it should feel like the app has gone quiet around
+ * you.
+ *
+ * One kind of tip and one decision. It is always true, so the question is not
+ * whether to believe it, it is whether an advantage is worth more than
+ * standing. Two buttons, and the reason for each under it.
  */
 export function TipCard({
   tip,
@@ -214,12 +219,11 @@ export function TipCard({
   send: (c: Command) => void
   onClose: () => void
 }) {
-  const unverified = tip.reliability === 'UNVERIFIED'
   const stake = role === 'community' ? 'a veto' : 'Public Trust'
   const clock = formatClock(remaining)
 
   return (
-    <div className="tip" role="dialog" aria-label="Insider tip">
+    <div className="tip" role="dialog" aria-label="A tip off">
       <span className="tip__label">A TIP OFF</span>
       <span className="tip__eyes">ONLY YOU CAN SEE THIS</span>
       {/* This is the only overlay that covers the whole phone, so it has to
@@ -227,9 +231,7 @@ export function TipCard({
           the timer behind it. */}
       {clock ? <span className="tip__clock">{clock}</span> : null}
 
-      <span className={`tip__chip tip__chip--${unverified ? 'unverified' : 'confirmed'}`}>
-        {unverified ? '◇ NOT CHECKED · TRUE HALF THE TIME' : 'CHECKED · TRUE'}
-      </span>
+      <span className="tip__chip tip__chip--confirmed">CHECKED · TRUE</span>
 
       <p className="tip__source">{tip.source}</p>
       <p className="tip__body">{tip.text}</p>
@@ -244,15 +246,11 @@ export function TipCard({
         >
           TELL THE ROOM
         </button>
-        <p className="tip__reminder">
-          {unverified
-            ? `A gamble. If it turns out true you gain ${stake}. If not, you lose ${stake}. You find out at the end of the round.`
-            : `Safe to share. It is true, and you gain ${stake} at the end of the round.`}
-        </p>
+        <p className="tip__reminder">You gain {stake}. Everyone else gets the warning too.</p>
         <button className="btn" onClick={onClose} style={{ color: '#fff' }}>
           SAY NOTHING
         </button>
-        <p className="tip__reminder">Nobody knows you got this. Keeping it costs you nothing.</p>
+        <p className="tip__reminder">Nobody knows you got this. You keep the head start.</p>
       </div>
     </div>
   )
@@ -283,7 +281,16 @@ export function LookUp({ view, reckoning = false }: { view: PhoneView; reckoning
   )
 }
 
-/** P-11: the round result. Three short sentences. */
+/**
+ * P-11: the round result, and the only place the app shows a player a number
+ * about their own card.
+ *
+ * The card promised four arrows. This says what those arrows turned into, with
+ * the carbon figure the engine actually delivered rather than the one printed
+ * on the option, because the gap between the two *is* the game: the same card
+ * cuts less when nobody co-funds it, less again under a Spotlight, and less
+ * every round as the cheap abatement runs out.
+ */
 export function RoundResult({ view }: { view: PhoneView }) {
   const r = view.roundResult
   if (!r) return <LookUp view={view} reckoning />
@@ -298,6 +305,32 @@ export function RoundResult({ view }: { view: PhoneView }) {
           <div className="pseat__name">Round {view.round}</div>
         </div>
         <span className="pseat__tag">R{view.round} ✓</span>
+      </div>
+
+      <span className="plabel">WHAT YOUR CARD DID</span>
+      <div className="outcome">
+        <div className="outcome__top">
+          <span className="outcome__title">{r.title}</span>
+          <span className="outcome__cost">{r.costLabel}</span>
+        </div>
+        {/* The same four chips the card carried, so a player can hold the
+            promise and the outcome in one glance. */}
+        <span className="impact">
+          {r.impact.map((i) => (
+            <span
+              key={i.meter}
+              className={`impact__cell impact__cell--${i.dir === 0 ? 'flat' : i.good ? 'good' : 'bad'}`}
+            >
+              <span className="impact__label">{i.label}</span>
+              <span className="impact__arrows">{arrows(i.dir)}</span>
+            </span>
+          ))}
+        </span>
+        <p className="outcome__delivered">
+          {r.carbon <= 0 ? '−' : '+'}
+          {Math.abs(r.carbon).toFixed(1)} Mt carbon, delivered
+        </p>
+        {r.note ? <p className="outcome__note">{r.note}</p> : null}
       </div>
 
       <div className="chat">
@@ -315,12 +348,12 @@ export function RoundResult({ view }: { view: PhoneView }) {
         </div>
       </div>
 
-      {view.role === 'community' ? (
+      {view.trustAward ? (
         <>
           <span className="plabel">PUBLIC TRUST THIS ROUND</span>
           <p className="ptext">
-            Two go out every round. One to whoever looked after people best, one to whoever did most
-            for the future. The big screen shows where they landed.
+            <strong>{ROLE_LABEL[view.trustAward.care]}</strong> looked after people best.{' '}
+            <strong>{ROLE_LABEL[view.trustAward.future]}</strong> did most for the future.
           </p>
         </>
       ) : null}

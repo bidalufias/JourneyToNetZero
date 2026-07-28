@@ -2,6 +2,7 @@
  * The dashboard's remaining moments: the attract screen, the Coalition Bonus,
  * the round summary, and both endings.
  */
+import type { Role } from '../engine/types'
 import type { DashboardView } from '../game/session'
 import { ROLE_LABEL } from '../game/session'
 import type { Endgame } from '../game/room'
@@ -267,6 +268,75 @@ export function CoalitionBonus({ view }: { view: DashboardView }) {
   )
 }
 
+/**
+ * The Public Trust beat: fifteen seconds saying where the two tokens went.
+ *
+ * The engine has awarded these every round since the first build and no screen
+ * in the product has ever mentioned it. The Community's brief says Public Trust
+ * "goes to whoever earned it, so your job is to make them earn it in front of
+ * you", which is a fine instruction to give somebody who can then watch it
+ * happen, and an empty one otherwise. It also gates three cards, so a table
+ * that cannot see the number cannot plan around the doors it opens.
+ */
+export function TrustAward({ view, clock }: { view: DashboardView; clock: string | null }) {
+  const award = view.trustAward
+  const log = view.lastRound
+  if (!award || !log) return null
+
+  const totals = log.state.trust
+  const rows: { label: string; role: Role; why: string }[] = [
+    { label: 'LOOKED AFTER PEOPLE', role: award.care, why: 'Most for quality of life this round.' },
+    { label: 'BUILT THE FUTURE', role: award.future, why: 'Most for the clean economy this round.' },
+  ]
+
+  return (
+    <div className="dash">
+      <header className="dash__masthead">
+        <span className="dash__live">LIVE</span>
+        <span className="dash__channel">SEMENANJARA TONIGHT</span>
+        <div className="dash__masthead-right">
+          <span>PUBLIC TRUST · ROUND {log.round}</span>
+          {clock ? <span className="dash__clock">{clock}</span> : null}
+        </div>
+      </header>
+
+      <div className="trust">
+        <div className="trust__lead">
+          <p className="attract__cue">WHO THE COUNTRY BACKED</p>
+          <h1 className="trust__title">
+            Two tokens.
+            <br />
+            Every round.
+          </h1>
+          <p className="trust__body">
+            Nobody hands these out. They go to whoever the country thinks earned them, and some
+            cards will not open without them.
+          </p>
+        </div>
+
+        <div className="trust__awards">
+          {rows.map((row) => (
+            <div key={row.label} className="trust__award" data-role={row.role}>
+              <span className="trust__award-label">{row.label}</span>
+              <span className="trust__award-who">
+                <RoleGlyph role={row.role} size={26} /> {ROLE_LABEL[row.role].toUpperCase()}
+              </span>
+              <span className="trust__award-why">{row.why}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="briefing-strip">
+        <span className="briefing-strip__label">PUBLIC TRUST HELD</span>
+        <span className="briefing-strip__text">
+          Government {totals.government} · Business {totals.business} · Activist {totals.activist}
+        </span>
+      </div>
+    </div>
+  )
+}
+
 /** D-07: one sentence per round, written from the actual choices. */
 export function RoundSummary({ view }: { view: DashboardView }) {
   const s = view.state
@@ -360,6 +430,31 @@ function roundSentence(view: DashboardView, round: number): string {
   return parts.join('. ') + '.'
 }
 
+/**
+ * How the country is graded, and it is graded in three, not two.
+ *
+ * A workshop group plays this once. Twenty-two percent of tables reach all
+ * three targets, so four in five rooms used to be told nothing except that they
+ * had failed, whether they missed growth by three tenths of a percent or never
+ * came near anything. "You needed five percent and you averaged four point
+ * seven" is a far better twenty minutes of debrief than "you failed", and it
+ * is also simply more true.
+ */
+const GRADE_BANNER: Record<Endgame['grade'], { title: string; note: string }> = {
+  REACHED: {
+    title: 'NET ZERO REACHED',
+    note: 'All three targets. This is the outcome the country needed.',
+  },
+  CLOSE: {
+    title: 'SO CLOSE',
+    note: 'Every target you missed, you missed narrowly. It was there to be had.',
+  },
+  MISSED: {
+    title: 'MISSED',
+    note: 'Not close on at least one. Here is exactly where it went.',
+  },
+}
+
 /** D-08/09: targets one at a time, then the titles. */
 export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endgame }) {
   // Hollow Victory names a specific cruelty: you got exactly what you wanted
@@ -367,6 +462,7 @@ export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endga
   // hollow to award, and pretending otherwise blunts the card that matters.
   const anyGoalMet = endgame.players.some((p) => p.goalMet)
   const heading = endgame.win ? 'NATION BUILDER' : anyGoalMet ? 'HOLLOW VICTORY' : 'THE COUNTRY MISSED'
+  const grade = GRADE_BANNER[endgame.grade]
   const labels: Record<string, { name: string; unit: string; fmt: (v: number) => string }> = {
     emissions: { name: 'CARBON', unit: 'Mt net', fmt: (v) => v.toFixed(0) },
     growth: { name: 'ECONOMY AVERAGE', unit: '%', fmt: (v) => v.toFixed(1) },
@@ -384,6 +480,11 @@ export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endga
       </header>
 
       <div className="results">
+        <div className={`grade grade--${endgame.grade.toLowerCase()}`}>
+          <span className="grade__title">{grade.title}</span>
+          <span className="grade__note">{grade.note}</span>
+        </div>
+
         <div className="results__targets">
           {endgame.targets.map((t) => {
             const l = labels[t.key]
@@ -395,6 +496,9 @@ export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endga
                   {l.unit} · target {t.target}
                 </span>
                 <span className="result-row__verdict">{t.met ? 'MET ✓' : 'MISSED ✕'}</span>
+                {/* The gap, in words, because "missed" is a fact and "you
+                    needed 5.0 and averaged 4.7" is a conversation. */}
+                <span className="result-row__gap">{t.verdict}</span>
               </div>
             )
           })}
