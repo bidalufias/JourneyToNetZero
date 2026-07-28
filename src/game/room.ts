@@ -194,7 +194,18 @@ function canReceive(role: Role): boolean {
  * Options a role may choose right now, with the veto applied.
  * Shared by the phone view and the lock validator so they cannot disagree.
  */
+/**
+ * The cards this seat may act on right now.
+ *
+ * During the practice round that is the tutorial's own deck, unfiltered. It has
+ * to be resolved here rather than only in the view, or every command carrying a
+ * practice card id would be rejected as an option that does not exist, and the
+ * practice round would look live and do nothing.
+ */
 function choosableOptions(room: Room, content: Content, role: Role): Option[] {
+  if (room.phase === 'practiceTalk' || room.phase === 'practiceChoice') {
+    return content.tutorial.options[role]
+  }
   const scenario = currentScenario(room, content)
   if (!scenario) return []
   const opts = availableOptions(room.game, scenario, role, content)
@@ -375,9 +386,8 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
     }
 
     case 'promise': {
-      if (room.phase !== 'table') return room
-      const scenario = currentScenario(room, content)
-      const option = scenario?.options[cmd.role].find((o) => o.id === cmd.optionId)
+      if (!canNegotiate(room)) return room
+      const option = choosableOptions(room, content, cmd.role).find((o) => o.id === cmd.optionId)
       if (!option) return room
       // One live pledge per player per round. A second replaces the first.
       room.promises = room.promises.filter(
@@ -396,7 +406,7 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
     }
 
     case 'demand': {
-      if (room.phase !== 'table') return room
+      if (!canNegotiate(room)) return room
       const phrase = DEMAND_PHRASES.find((p) => p.id === cmd.phraseId)
       if (!phrase) return room
       room.promises = room.promises.filter(
@@ -415,7 +425,7 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
     }
 
     case 'offer': {
-      if (room.phase !== 'table') return room
+      if (!canNegotiate(room)) return room
       // Only two seats hold a transferable resource. An offer to either of the
       // others moves nothing on acceptance, so letting one be sent would put a
       // transfer on the big screen that never happens.
@@ -461,14 +471,14 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
     }
 
     case 'spotlight': {
-      if (room.phase !== 'table' || cmd.role !== 'activist') return room
+      if (!canNegotiate(room) || cmd.role !== 'activist') return room
       if (room.game.spotlights <= 0) return room
       room.spotlightCalled = true
       return room
     }
 
     case 'veto': {
-      if (room.phase !== 'table' || cmd.role !== 'community') return room
+      if (!canNegotiate(room) || cmd.role !== 'community') return room
       if (room.game.vetoes <= 0 || room.vetoTarget) return room
       room.vetoTarget = cmd.target
       // Anyone whose choice the veto just removed has to choose again, even if
@@ -505,7 +515,7 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
      * as often as they like.
      */
     case 'choose': {
-      if (room.phase !== 'choice' && room.phase !== 'table') return room
+      if (!canChoose(room)) return room
       const p = room.players[cmd.role]
       if (p.locked) return room
       const allowed = choosableOptions(room, content, cmd.role)
@@ -516,7 +526,7 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
 
     /** Committing. From here the choice screen is a record, not a decision. */
     case 'lock': {
-      if (room.phase !== 'choice') return room
+      if (room.phase !== 'choice' && room.phase !== 'practiceChoice') return room
       const p = room.players[cmd.role]
       if (p.locked || p.choiceId === null) return room
       const allowed = choosableOptions(room, content, cmd.role)
@@ -525,6 +535,11 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
       p.autoLocked = false
       p.defaulted = false
       p.lockedAt = at
+      // The practice round never reaches the engine. Four practice cards handed
+      // to it are four ids from a deck the scenario has never heard of, and it
+      // throws rather than resolve them, which would end the session on the
+      // step that exists to teach somebody how to lock a card.
+      if (room.phase === 'practiceChoice') return room
       if (everyoneLocked(room)) return resolveRound(room, content, at)
       return room
     }
@@ -546,6 +561,22 @@ export function tick(room: Room, content: Content, now: number): Room {
   return advance(room, content, now)
 }
 
+/**
+ * Phases in which a player may talk: promise, demand, offer, spotlight, veto.
+ *
+ * The practice round is in here because its whole purpose is to make somebody
+ * press one of those buttons once, before it costs anything. Without it the
+ * step showed four live-looking buttons that silently did nothing.
+ */
+function canNegotiate(room: Room): boolean {
+  return room.phase === 'table' || room.phase === 'practiceTalk'
+}
+
+/** Phases in which a player may select or lock a card. */
+function canChoose(room: Room): boolean {
+  return room.phase === 'choice' || room.phase === 'table' || room.phase === 'practiceChoice'
+}
+
 function advance(room: Room, content: Content, now: number): Room {
   switch (room.phase) {
     case 'lobby':
@@ -562,16 +593,7 @@ function advance(room: Room, content: Content, now: number): Room {
       return room
 
     case 'practiceChoice':
-      // Practice is thrown away here rather than carried into Round 1. It was
-      // never scored, and a card left selected would otherwise arrive in the
-      // first real round already ticked.
-      for (const role of ROLES) {
-        room.players[role].choiceId = null
-        room.players[role].locked = false
-      }
-      room.promises = room.promises.filter((p) => p.round !== 0)
-      setPhase(room, 'power', now)
-      return room
+      return endPractice(room, content, now)
 
     case 'power':
       setPhase(room, 'goal', now)
@@ -609,6 +631,41 @@ function advance(room: Room, content: Content, now: number): Room {
     default:
       return room
   }
+}
+
+/**
+ * Wipes the practice round.
+ *
+ * Everything the table did here has to leave no trace, and "no trace" is wider
+ * than it looks. A card left selected would arrive in Round 1 already ticked. A
+ * promise would sit on the board as though it had been made about a real
+ * crisis. And an offer that was accepted moved money for real, because that is
+ * what accepting an offer does, so the Government could walk into the first
+ * round two Budget short of where the design starts it.
+ */
+function endPractice(room: Room, content: Content, now: number): Room {
+  for (const role of ROLES) {
+    const p = room.players[role]
+    p.choiceId = null
+    p.locked = false
+    p.autoLocked = false
+    p.defaulted = false
+    p.lockedAt = null
+  }
+  room.promises = []
+  room.offers = []
+  room.vetoTarget = null
+  room.coFund = false
+  room.spotlightCalled = false
+
+  const start = content.config.start
+  room.game.fiscal = start.fiscal
+  room.game.capital = start.capital
+  room.game.spotlights = start.spot
+  room.game.vetoes = content.config.vetoes
+
+  setPhase(room, 'power', now)
+  return room
 }
 
 /** Reveals the crisis, deals the round's single Insider Tip, opens the round. */

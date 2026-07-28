@@ -92,6 +92,12 @@ export function Dashboard({
     return <Attract view={view} onShowQr={onShowQr} onOpenScript={onOpenScript} />
   }
   if (view.phase === 'briefing') return <Briefing view={view} clock={clock} />
+  // The onboarding owns the whole screen, the way the briefing does. Rendered
+  // inside the meters column it overflowed, and put the one line the person
+  // running the room needs to read behind the pause and next buttons.
+  if (view.phase === 'practiceChoice' || view.phase === 'power' || view.phase === 'goal') {
+    return <Onboarding view={view} clock={clock} />
+  }
   if ((view.phase === 'results' || view.phase === 'ended') && endgame) {
     return <EndgameScreen view={view} endgame={endgame} />
   }
@@ -104,9 +110,7 @@ export function Dashboard({
         {view.phase === 'table' || view.phase === 'choice' || view.phase === 'practiceTalk' ? (
           <TheTable view={view} />
         ) : null}
-        {view.phase === 'practiceChoice' || view.phase === 'power' || view.phase === 'goal' ? (
-          <Onboarding view={view} />
-        ) : null}
+
         {view.phase === 'summary' ? <RoundSummary view={view} /> : null}
         <LockRow view={view} />
       </div>

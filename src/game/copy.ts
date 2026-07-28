@@ -25,7 +25,7 @@ export const PRIVATE_LINE: Record<string, Record<Role, string>> = {
     government: 'Fuel subsidies are now the biggest line in your budget. Everyone knows it.',
     business: 'Your energy costs just became your biggest risk, and your biggest opportunity.',
     community: 'The bill arrived this morning. People are talking about nothing else.',
-    activist: 'This round decides the country\u2019s power supply for thirty years.',
+    activist: 'This round decides the country’s power supply for thirty years.',
   },
   health: {
     government: 'Hospitals are calling your office directly. So are the employers.',

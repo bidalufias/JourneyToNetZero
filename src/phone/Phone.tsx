@@ -75,7 +75,7 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
     if (view.phase === 'practiceChoice') {
       return <PracticeChoice view={view} send={send} remaining={remaining} />
     }
-    if (view.phase === 'power') return <YourPower view={view} onNext={() => undefined} />
+    if (view.phase === 'power') return <YourPower view={view} />
     if (view.phase === 'goal') {
       // A latecomer who took a vacated seat still lands here, which is why the
       // goal screen is reachable after the phase has passed.

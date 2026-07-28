@@ -120,7 +120,9 @@ export function OptionCard({
     >
       <span className="ocard__top">
         <span className="ocard__title">{option.title}</span>
-        <span className="ocard__cost">{option.cost}</span>
+        <span className={`ocard__cost${option.cost.startsWith('+') ? ' ocard__cost--gain' : ''}`}>
+          {option.cost}
+        </span>
       </span>
       <span className="ocard__desc">{option.desc}</span>
 

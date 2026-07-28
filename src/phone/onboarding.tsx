@@ -72,7 +72,7 @@ export function PracticeChoice({
  * stay in the game from Round 1 without every player paying for them in rules:
  * the other three are not being asked to absorb anything while this is on screen.
  */
-export function YourPower({ view, onNext }: { view: PhoneView; onNext: () => void }) {
+export function YourPower({ view }: { view: PhoneView }) {
   const c = ROLE_CHARACTER[view.role]
   return (
     <div className="pbody">
@@ -84,9 +84,12 @@ export function YourPower({ view, onNext }: { view: PhoneView; onNext: () => voi
       <span className="plabel">HOW IT WORKS</span>
       <p className="ptext">{c.resourcePower}</p>
 
-      <button className="btn btn--primary" style={{ marginTop: 'auto' }} onClick={onNext}>
-        GOT IT
-      </button>
+      {/* No button. The room moves on together, on the facilitator's cue, and a
+          button that only dismissed this player's screen would have them
+          waiting on a blank one. */}
+      <p className="pnote" style={{ marginTop: 'auto' }}>
+        Read it. The room moves on together in a moment.
+      </p>
     </div>
   )
 }

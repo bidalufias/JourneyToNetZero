@@ -203,13 +203,57 @@ describe('the onboarding', () => {
     }
   })
 
+  it('actually accepts what it asks the table to do', () => {
+    // Every negotiation command used to test for the live phase by name, so
+    // during practice all four buttons were visible, tappable, and silent. The
+    // step that exists to make somebody press one did not let them.
+    const room = seated()
+    run(room, { t: 'start' })
+    advanceTo(room, 'practiceTalk')
+
+    const card = phoneView(room, content, 'government').options[0]
+    run(room, { t: 'promise', role: 'government', optionId: card.id })
+    expect(phoneView(room, content, 'government').promises).toHaveLength(1)
+    expect(dashboardView(room, content).promises[0].text).toContain(card.title)
+
+    run(room, { t: 'demand', role: 'activist', target: 'business', phraseId: 'pay-first' })
+    expect(dashboardView(room, content).promises).toHaveLength(2)
+
+    advanceTo(room, 'practiceChoice')
+    const pick = phoneView(room, content, 'business').options[1]
+    lockIn(room, 'business', pick.id)
+    const after = phoneView(room, content, 'business')
+    expect(after.choiceId).toBe(pick.id)
+    expect(after.locked).toBe(true)
+  })
+
   it('throws the practice away rather than carrying it into Round 1', () => {
     const room = seated()
     run(room, { t: 'start' })
-    advanceTo(room, 'practiceChoice')
+    advanceTo(room, 'practiceTalk')
+    run(room, {
+      t: 'promise',
+      role: 'government',
+      optionId: phoneView(room, content, 'government').options[0].id,
+    })
+    // Spend real money in practice, to prove it is handed back. Accepting an
+    // offer is a permanent transfer wherever it happens.
+    run(room, { t: 'offer', from: 'government', to: 'business', resource: 'fiscal', amount: 2 })
+    const offer = dashboardView(room, content).offersInFlight[0]
+    run(room, { t: 'respondOffer', role: 'business', offerId: offer.id, accept: true })
+    expect(room.game.fiscal).toBe(content.config.start.fiscal - 2)
 
+    advanceTo(room, 'practiceChoice')
     for (const role of ROLES) lockIn(room, role, phoneView(room, content, role).options[0].id)
-    run(room, { t: 'promise', role: 'government', optionId: phoneView(room, content, 'government').options[0].id })
+
+    // It has to have happened before it can be thrown away, or this asserts
+    // nothing at all. That is how the inert practice round passed this test.
+    expect(ROLES.every((r) => phoneView(room, content, r).locked)).toBe(true)
+    expect(dashboardView(room, content).promises).toHaveLength(1)
+    // Four locks must not resolve anything. The practice deck is not in any
+    // scenario, so handing it to the engine throws and ends the session.
+    expect(room.phase).toBe('practiceChoice')
+    expect(room.game.round).toBe(0)
 
     advanceTo(room, 'crisis')
     for (const role of ROLES) {
@@ -221,6 +265,9 @@ describe('the onboarding', () => {
     expect(dashboardView(room, content).promises).toHaveLength(0)
     // And no practice card reached the engine.
     expect(room.game.picks).toHaveLength(0)
+    // Money moved in practice is money the design did not mean them to have.
+    expect(room.game.fiscal).toBe(content.config.start.fiscal)
+    expect(room.game.capital).toBe(content.config.start.capital)
   })
 
   it('asks for the secret win after the practice, not before it', () => {

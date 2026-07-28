@@ -51,7 +51,7 @@ export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => vo
       <span className="plabel">THINGS YOU MIGHT SAY</span>
       {c.says.map((line) => (
         <div key={line} className="bubble">
-          <p className="bubble__text">\u201C{line}\u201D</p>
+          <p className="bubble__text">“{line}”</p>
         </div>
       ))}
 
@@ -71,7 +71,7 @@ export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => vo
 
           <span className="plabel">YOU WOULD NEVER SAY</span>
           <div className="bubble bubble--them">
-            <p className="bubble__text">\u201C{c.neverSay}\u201D</p>
+            <p className="bubble__text">“{c.neverSay}”</p>
           </div>
         </>
       ) : (
@@ -106,7 +106,7 @@ export function GoalPicker({ view, send }: { view: PhoneView; send: (c: Command)
         </div>
         <p className="ptext">
           You cannot change this later. It only counts if the country hits all 3 targets. Read it
-          again any time under \u22EF.
+          again any time under ⋯.
         </p>
         <button
           className="btn btn--primary"
@@ -228,7 +228,7 @@ export function TipCard({
       {clock ? <span className="tip__clock">{clock}</span> : null}
 
       <span className={`tip__chip tip__chip--${unverified ? 'unverified' : 'confirmed'}`}>
-        {unverified ? '\u25C7 NOT CHECKED \u00B7 TRUE HALF THE TIME' : 'CHECKED \u00B7 TRUE'}
+        {unverified ? '◇ NOT CHECKED · TRUE HALF THE TIME' : 'CHECKED · TRUE'}
       </span>
 
       <p className="tip__source">{tip.source}</p>

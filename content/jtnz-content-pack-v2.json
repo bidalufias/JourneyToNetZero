@@ -230,7 +230,7 @@
    {
     "id": "G-a",
     "title": "Landslide",
-    "desc": "End the game holding 6 or more Trust tokens.",
+    "desc": "End the game holding 6 or more Public Trust.",
     "check": "trust.government >= 6",
     "measured": 0.414
    },
@@ -244,7 +244,7 @@
    {
     "id": "G-c",
     "title": "The Legacy",
-    "desc": "Green Economy Share reaches 55% or more.",
+    "desc": "Clean Economy reaches 55% or more.",
     "check": "greenShare >= 55",
     "measured": 0.289
    }
@@ -253,7 +253,7 @@
    {
     "id": "B-a",
     "title": "Market Dominance",
-    "desc": "End with 6 or more Capital.",
+    "desc": "End with 6 or more Company Money.",
     "check": "capital >= 6",
     "measured": 0.391
    },
@@ -267,7 +267,7 @@
    {
     "id": "B-c",
     "title": "Licence to Operate",
-    "desc": "End with 2+ Trust and 4+ Capital.",
+    "desc": "End with 2+ Public Trust and 4+ Company Money.",
     "check": "trust.business >= 2 && capital >= 4",
     "measured": 0.338
    }
@@ -276,14 +276,14 @@
    {
     "id": "C-a",
     "title": "A Happy Nation",
-    "desc": "Happiness ends at 8.0 or above.",
+    "desc": "Quality of life ends at 8.0 or above.",
     "check": "happiness >= 8.0",
     "measured": 0.374
    },
    {
     "id": "C-b",
     "title": "Nobody Left Behind",
-    "desc": "Happiness never drops below 6.3 in any round.",
+    "desc": "Quality of life never drops below 6.3 in any round.",
     "check": "min(happinessHistory) >= 6.3",
     "measured": 0.35
    },
@@ -306,14 +306,14 @@
    {
     "id": "A-b",
     "title": "The Long Game",
-    "desc": "Green Economy Share reaches 52% or more.",
+    "desc": "Clean Economy reaches 52% or more.",
     "check": "greenShare >= 52",
     "measured": 0.439
    },
    {
     "id": "A-c",
     "title": "Justice First",
-    "desc": "Happiness 7.0+ and at least one Spotlight lands.",
+    "desc": "Quality of life 7.0+ and at least one Spotlight lands.",
     "check": "happiness >= 7.0 && spotlightHits >= 1",
     "measured": 0.238
    }

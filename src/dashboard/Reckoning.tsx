@@ -105,7 +105,7 @@ export function Reckoning({ view }: { view: DashboardView }) {
     <div className="reckoning">
       <header className="reckoning__bar">
         <span className="dash__live">LIVE</span>
-        <span className="dash__channel">THE REVEAL \u00B7 ROUND {log.round}</span>
+        <span className="dash__channel">THE REVEAL · ROUND {log.round}</span>
         <span className="reckoning__emissions">
           <span className="reckoning__emissions-label">CARBON</span>
           <span className="reckoning__emissions-value">{log.state.emissions.toFixed(0)}</span>
@@ -143,7 +143,7 @@ export function Reckoning({ view }: { view: DashboardView }) {
                       <div
                         className={`rcard__promise rcard__promise--${promise.outcome}`}
                       >
-                        {promise.outcome === 'kept' ? 'KEPT THE PROMISE \u2713' : 'BROKE THE PROMISE \u2715'}
+                        {promise.outcome === 'kept' ? 'KEPT THE PROMISE ✓' : 'BROKE THE PROMISE ✕'}
                       </div>
                     ) : reveal.spotlit ? (
                       <div className="rcard__promise rcard__promise--broken">SPOTLIT ✕</div>

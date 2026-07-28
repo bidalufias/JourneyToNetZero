@@ -163,7 +163,7 @@ export const BEATS: Beat[] = [
     ],
     firstTime: [
       'Everything you need is on your phone. You can send somebody money. You can promise something, out loud and on the big screen. You can ask somebody for something and name your price.',
-      'Activist, you have three Spotlights for the whole game. Name somebody in public and their dirty card only half works. Community, you have two vetoes. Take somebody\u2019s worst card off the table completely. Three and two. That is all you get, so spend them where it hurts.',
+      'Activist, you have three Spotlights for the whole game. Name somebody in public and their dirty card only half works. Community, you have two vetoes. Take somebody’s worst card off the table completely. Three and two. That is all you get, so spend them where it hurts.',
     ],
     watch:
       "If the room goes quiet, put the tension into somebody's mouth (“Business, what would it take?”) and then stop talking. Do not answer your own question; the silence after it is where the deal gets made.",
