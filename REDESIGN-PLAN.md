@@ -619,6 +619,50 @@ Sequenced so each stage ships something playable and makes the next cheaper.
 
 ---
 
+## 11b. Where this stands, and how to verify a stage
+
+**Merged and live:** Stage 0 (the rebase to net zero), Stage 1 (comprehension),
+Stage 2 (the onboarding). **Remaining:** Stage 3, Stage 4.
+
+Both open decisions are closed. Compromises are real, and the facilitator is
+permanent with the board carrying their line.
+
+### Drive the browser before calling a stage done
+
+Stages 1 and 2 both passed their tests and built cleanly, and driving one real
+session found **eleven defects**, three of which would have ended a workshop.
+The tests could not have caught any of them, and the worst was not cosmetic:
+every negotiation command tested for the live phase by name, so the practice
+round was entirely inert. The test covering it passed by asserting the practice
+was thrown away, which is trivially true when the practice never happened.
+
+So a stage is not finished when `npm test` is green. It is finished when a
+session has been driven end to end on both surfaces and the screenshots have
+been looked at.
+
+**How.** Chromium is pre-installed at `/opt/pw-browsers/chromium-1194/`, but
+Playwright is not a project dependency and the path is version-pinned, so it
+needs installing into a scratch directory first. The local transport shares
+state over `BroadcastChannel` and `localStorage`, which means the projector and
+all four phones have to live in **one browser context**. Drive the projector at
+1600x900 and the phones at 390x844, advance with the `n` key, and screenshot
+both surfaces at every phase.
+
+Worth capturing as a project skill via `/run-skill-generator` so this is a
+one-liner rather than fifteen minutes of setup each time.
+
+### Two silent failure modes now have tests
+
+Both were found by accident and would have recurred.
+
+- **`test/content.test.ts`** — the content pack exists twice, as JSON for the
+  game and as Python for the reference engine, and nothing held them together.
+  Six fields had already drifted.
+- **`test/tokens.test.ts`** — an undefined CSS custom property does not fall
+  back, it voids the whole declaration, silently. Three were live.
+
+---
+
 ## 12. The acceptance test
 
 One cheap, brutal experiment decides whether any of this worked:
