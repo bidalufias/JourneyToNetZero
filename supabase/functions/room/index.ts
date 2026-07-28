@@ -571,6 +571,22 @@ var DEMAND_PHRASES = [
   { id: "protect-jobs", text: (t) => `the ${t} promises nobody loses a job over this` },
   { id: "no-more-delay", text: (t) => `the ${t} stops asking everyone else to go first` }
 ];
+var DEAL_CONDITIONS = [
+  {
+    id: "moves-with-me",
+    text: (t) => `the ${t} moves too`,
+    met: (them) => them.aligned
+  },
+  {
+    // Weaker than moving together, and deliberately so: a seat that spends the
+    // round asking somebody else to pay has not taken a cheap card, and it has
+    // not moved with you either. A table that learns the difference has learned
+    // most of what the coalition bonus is for.
+    id: "no-cheap-card",
+    text: (t) => `the ${t} does not take the cheap card`,
+    met: (them) => !DIRTY.has(them.arch)
+  }
+];
 var BOARD_NAME = {
   government: "The Government",
   business: "The Business",
@@ -618,15 +634,24 @@ var PHASE_MS = {
   practiceChoice: 6e4,
   power: 3e4,
   goal: 45e3,
-  crisis: 3e4,
+  crisis: 25e3,
   table: 9e4,
-  choice: 45e3,
-  reckoning: 75e3,
+  choice: 4e4,
+  reckoning: 45e3,
+  trust: 15e3,
   summary: 8e3,
   results: 0,
   // advances on facilitator input
   ended: 0
 };
+var ROUND_ONE_MS = {
+  crisis: 35e3,
+  table: 12e4,
+  choice: 6e4
+};
+function phaseMs(phase, round) {
+  return (round <= 1 ? ROUND_ONE_MS[phase] : void 0) ?? PHASE_MS[phase];
+}
 var ROLE_LABEL = {
   government: "Government",
   business: "Business",
@@ -693,15 +718,14 @@ function currentScenario(room, content2) {
 function roundNumber(room) {
   return Math.min(room.game.round + 1, 6);
 }
+var NARRATING = /* @__PURE__ */ new Set(["reckoning", "trust", "summary"]);
 function displayRound(room) {
-  if ((room.phase === "reckoning" || room.phase === "summary") && room.lastRound) {
-    return room.lastRound.round;
-  }
+  if (NARRATING.has(room.phase) && room.lastRound) return room.lastRound.round;
   return roundNumber(room);
 }
 function setPhase(room, phase, now) {
   room.phase = phase;
-  const ms = PHASE_MS[phase];
+  const ms = phaseMs(phase, roundNumber(room));
   room.phaseEndsAt = ms > 0 ? now + ms : null;
 }
 function isPaused(room) {
@@ -743,12 +767,10 @@ function authorise(seat, cmd) {
     case "reconnect":
     case "leave":
     case "pickGoal":
-    case "promise":
-    case "demand":
+    case "say":
     case "respondOffer":
     case "spotlight":
     case "veto":
-    case "coFund":
     case "publishTip":
     case "choose":
     case "lock":
@@ -760,13 +782,11 @@ function authorise(seat, cmd) {
   }
 }
 var FROZEN_WHILE_PAUSED = /* @__PURE__ */ new Set([
-  "promise",
-  "demand",
+  "say",
   "offer",
   "respondOffer",
   "spotlight",
   "veto",
-  "coFund",
   "publishTip",
   "choose",
   "lock"
@@ -843,42 +863,16 @@ function apply(room, cmd, content2, now) {
       room.pausedAt = null;
       return room;
     }
-    case "promise": {
-      if (!canNegotiate(room)) return room;
-      const option = choosableOptions(room, content2, cmd.role).find((o) => o.id === cmd.optionId);
-      if (!option) return room;
-      room.promises = room.promises.filter(
-        (p) => !(p.round === roundNumber(room) && p.from === cmd.role && p.kind === "promise")
-      );
-      room.promises.push({
-        id: `${cmd.role}-${roundNumber(room)}-p`,
-        round: roundNumber(room),
-        from: cmd.role,
-        kind: "promise",
-        text: `${BOARD_NAME[cmd.role]} promises to choose \u201C${option.title}\u201D.`,
-        optionId: option.id,
-        outcome: "unresolved"
-      });
-      return room;
-    }
-    case "demand": {
-      if (!canNegotiate(room)) return room;
-      const phrase = DEMAND_PHRASES.find((p) => p.id === cmd.phraseId);
-      if (!phrase) return room;
-      room.promises = room.promises.filter(
-        (p) => !(p.round === roundNumber(room) && p.from === cmd.role && p.kind === "demand")
-      );
-      room.promises.push({
-        id: `${cmd.role}-${roundNumber(room)}-d`,
-        round: roundNumber(room),
-        from: cmd.role,
-        kind: "demand",
-        text: `${BOARD_NAME[cmd.role]} demands ${phrase.text(ROLE_LABEL[cmd.target])}.`,
-        optionId: null,
-        outcome: "unresolved"
-      });
-      return room;
-    }
+    /**
+     * SAY IT: one verb, four sentences, one board.
+     *
+     * Every shape composes its line here rather than on a phone, for the same
+     * reason players pick a sentence instead of typing one: the promise board
+     * is read out loud by a room, so every line on it has to be grammatical,
+     * short, and about somebody the room can name.
+     */
+    case "say":
+      return say(room, cmd, content2);
     case "offer": {
       if (!canNegotiate(room)) return room;
       if (!canReceive(cmd.from) || !canReceive(cmd.to) || cmd.from === cmd.to) return room;
@@ -935,11 +929,6 @@ function apply(room, cmd, content2, now) {
       }
       return room;
     }
-    case "coFund": {
-      if (cmd.role !== "government") return room;
-      room.coFund = cmd.agree;
-      return room;
-    }
     case "publishTip": {
       const tip = room.tips.find((t) => t.round === roundNumber(room) && t.to === cmd.role);
       if (!tip || tip.published) return room;
@@ -982,6 +971,81 @@ function apply(room, cmd, content2, now) {
       return room;
   }
 }
+function say(room, cmd, content2) {
+  if (!canNegotiate(room)) return room;
+  const round = roundNumber(room);
+  const me = BOARD_NAME[cmd.role];
+  if (cmd.shape === "cofund") {
+    if (cmd.role !== "government") return room;
+    room.coFund = cmd.on ?? false;
+    room.promises = room.promises.filter((p) => !(p.round === round && p.id === `government-${round}-c`));
+    if (room.coFund) {
+      room.promises.push({
+        id: `government-${round}-c`,
+        round,
+        from: "government",
+        kind: "cofund",
+        text: "The Government will pay half of any partnership the Business signs.",
+        optionId: null,
+        ifRole: null,
+        ifConditionId: null,
+        outcome: "unresolved"
+      });
+    }
+    return room;
+  }
+  const drop = (p) => !(p.round === round && p.from === cmd.role && p.kind !== "cofund");
+  if (cmd.shape === "promise") {
+    const option2 = choosableOptions(room, content2, cmd.role).find((o) => o.id === cmd.optionId);
+    if (!option2) return room;
+    room.promises = room.promises.filter(drop);
+    room.promises.push({
+      id: `${cmd.role}-${round}-s`,
+      round,
+      from: cmd.role,
+      kind: "promise",
+      text: `${me} will choose \u201C${option2.title}\u201D.`,
+      optionId: option2.id,
+      ifRole: null,
+      ifConditionId: null,
+      outcome: "unresolved"
+    });
+    return room;
+  }
+  if (cmd.shape === "demand") {
+    const phrase = DEMAND_PHRASES.find((p) => p.id === cmd.phraseId);
+    if (!phrase || !cmd.target || cmd.target === cmd.role) return room;
+    room.promises = room.promises.filter(drop);
+    room.promises.push({
+      id: `${cmd.role}-${round}-s`,
+      round,
+      from: cmd.role,
+      kind: "demand",
+      text: `${me} wants ${phrase.text(ROLE_LABEL[cmd.target])}.`,
+      optionId: null,
+      ifRole: cmd.target,
+      ifConditionId: null,
+      outcome: "unresolved"
+    });
+    return room;
+  }
+  const option = choosableOptions(room, content2, cmd.role).find((o) => o.id === cmd.optionId);
+  const condition = DEAL_CONDITIONS.find((c) => c.id === cmd.conditionId);
+  if (!option || !condition || !cmd.target || cmd.target === cmd.role) return room;
+  room.promises = room.promises.filter(drop);
+  room.promises.push({
+    id: `${cmd.role}-${round}-s`,
+    round,
+    from: cmd.role,
+    kind: "deal",
+    text: `${me} will choose \u201C${option.title}\u201D if ${condition.text(ROLE_LABEL[cmd.target])}.`,
+    optionId: option.id,
+    ifRole: cmd.target,
+    ifConditionId: condition.id,
+    outcome: "unresolved"
+  });
+  return room;
+}
 function tick(room, content2, now) {
   if (isPaused(room)) return room;
   if (room.phaseEndsAt === null || now < room.phaseEndsAt) return room;
@@ -1021,6 +1085,9 @@ function advance(room, content2, now) {
     case "choice":
       return resolveRound(room, content2, now);
     case "reckoning":
+      setPhase(room, "trust", now);
+      return room;
+    case "trust":
       setPhase(room, "summary", now);
       return room;
     case "summary":
@@ -1107,8 +1174,18 @@ function resolveRound(room, content2, now) {
 }
 function finishRound(room, log, choices, content2, now) {
   for (const p of room.promises) {
-    if (p.round !== log.round || p.kind !== "promise" || !p.optionId) continue;
-    p.outcome = choices[p.from] === p.optionId ? "kept" : "broken";
+    if (p.round !== log.round) continue;
+    const didIt = p.optionId !== null && choices[p.from] === p.optionId;
+    if (p.kind === "promise") {
+      p.outcome = didIt ? "kept" : "broken";
+      continue;
+    }
+    if (p.kind === "deal" && p.ifRole && p.ifConditionId) {
+      const them = log.reveals.find((r) => r.role === p.ifRole);
+      const condition = DEAL_CONDITIONS.find((c) => c.id === p.ifConditionId);
+      const theyDid = Boolean(them && condition?.met(them));
+      p.outcome = !theyDid ? "void" : didIt ? "kept" : "broken";
+    }
   }
   const tip = room.tips.find((t) => t.round === log.round);
   if (tip?.published) {
@@ -1126,11 +1203,11 @@ function finishRound(room, log, choices, content2, now) {
 }
 function applyTipStake(room, tip) {
   if (tip.to === "community") {
-    room.game.vetoes = tip.isTrue ? Math.min(3, room.game.vetoes + 1) : Math.max(0, room.game.vetoes - 1);
+    room.game.vetoes = Math.min(3, room.game.vetoes + 1);
     return;
   }
   const role = tip.to;
-  room.game.trust[role] = tip.isTrue ? room.game.trust[role] + 1 : Math.max(0, room.game.trust[role] - 1);
+  room.game.trust[role] = room.game.trust[role] + 1;
 }
 function dealTip(room, content2) {
   const round = roundNumber(room);
@@ -1159,42 +1236,7 @@ function buildTip(room, content2, to, round, cursorIn) {
   const tips = content2.insiderTips;
   const scenarioId = room.game.path[room.game.round];
   const nextScenarioId = room.game.path[room.game.round + 1];
-  const roll = draw(room.seed, cursor);
-  cursor = roll.cursor;
-  const wantRumour = roll.value < 0.25 && round >= 2;
-  const kinds = [];
-  if (!wantRumour) {
-    if (nextScenarioId) kinds.push("forecast");
-    kinds.push("intel");
-    if (round >= 2) kinds.push("dossier");
-  }
-  if (wantRumour || !kinds.length) kinds.push("rumour");
-  const kindPick = pick(kinds, room.seed, cursor);
-  cursor = kindPick.cursor;
-  const kind = kindPick.value;
-  if (kind === "rumour") {
-    const whisperIds = Object.keys(tips.whispers);
-    const w = pick(whisperIds, room.seed, cursor);
-    cursor = w.cursor;
-    const truth = draw(room.seed, cursor);
-    cursor = truth.cursor;
-    return {
-      tip: {
-        id: `tip-${round}`,
-        round,
-        to,
-        kind: "rumour",
-        reliability: "UNVERIFIED",
-        source: "A rumour going round",
-        text: tips.whispers[w.value],
-        isTrue: truth.value < tips.whisperAccuracy,
-        published: false,
-        revealed: false
-      },
-      cursor
-    };
-  }
-  if (kind === "forecast" && nextScenarioId) {
+  if (nextScenarioId) {
     const nextType = content2.scenarios[nextScenarioId].type;
     const lines = tips.forecasts[nextType] ?? [];
     const line = lines.length ? pick(lines, room.seed, cursor) : { value: "", cursor };
@@ -1204,50 +1246,21 @@ function buildTip(room, content2, to, round, cursorIn) {
         id: `tip-${round}`,
         round,
         to,
-        kind: "forecast",
-        reliability: "CONFIRMED",
         source: "Cabinet Situation Room",
         text: line.value || "Something is coming. Nobody will say what.",
-        isTrue: true,
         published: false,
         revealed: false
       },
       cursor
     };
   }
-  if (kind === "dossier") {
-    const others = ROLES.filter((r) => r !== to && room.players[r].goalId);
-    if (others.length) {
-      const target = pick(others, room.seed, cursor);
-      cursor = target.cursor;
-      const goalId = room.players[target.value].goalId;
-      return {
-        tip: {
-          id: `tip-${round}`,
-          round,
-          to,
-          kind: "dossier",
-          reliability: "CONFIRMED",
-          source: "A friend in the ministry",
-          text: tips.whispers[goalId] ?? "They want something they have not said out loud.",
-          isTrue: true,
-          published: false,
-          revealed: false
-        },
-        cursor
-      };
-    }
-  }
   return {
     tip: {
       id: `tip-${round}`,
       round,
       to,
-      kind: "memo",
-      reliability: "CONFIRMED",
       source: "A sealed brief",
       text: tips.intel[scenarioId] ?? "The official figures are not the real ones.",
-      isTrue: true,
       published: false,
       revealed: false
     },
@@ -1260,12 +1273,7 @@ function dashboardView(room, content2) {
   const waiting = held.filter((r) => !room.players[r].locked);
   const lastLock = held.length > 1 && waiting.length === 1 ? waiting[0] : null;
   const tip = room.tips.find((t) => t.round === displayRound(room));
-  const published = tip?.published && tip ? {
-    from: tip.to,
-    text: tip.text,
-    source: tip.source,
-    verdict: tip.revealed ? tip.isTrue ? "true" : "false" : null
-  } : null;
+  const published = tip?.published && tip ? { from: tip.to, text: tip.text, source: tip.source } : null;
   const veto = room.vetoTarget ? {
     target: room.vetoTarget,
     removed: scenario ? availableOptions(room.game, scenario, room.vetoTarget, content2).filter((o) => DIRTY.has(o.arch)).map((o) => o.title) : [],
@@ -1306,7 +1314,8 @@ function dashboardView(room, content2) {
       emissions: content2.config.tgt_e,
       growth: content2.config.tgt_g,
       happiness: content2.config.tgt_h
-    }
+    },
+    trustAward: NARRATING.has(room.phase) ? room.lastRound?.trustAwarded ?? null : null
   };
 }
 function phoneView(room, content2, role) {
@@ -1370,7 +1379,7 @@ function phoneView(room, content2, role) {
   const beforeGoals = room.phase === "lobby" || room.phase === "briefing" || room.phase === "practiceTalk" || room.phase === "practiceChoice" || room.phase === "power";
   const goalChoices = player.goalId === null && !beforeGoals ? content2.privateGoals[role].map((g) => ({ id: g.id, title: g.title, desc: g.desc })) : null;
   const ownGoal = player.goalId ? content2.privateGoals[role].find((g) => g.id === player.goalId) ?? null : null;
-  const narrating = room.phase === "reckoning" || room.phase === "summary";
+  const narrating = NARRATING.has(room.phase);
   const nation = publicState(room.game, content2);
   return {
     code: room.code,
@@ -1418,13 +1427,14 @@ function phoneView(room, content2, role) {
       connected: room.players[r].connected,
       locked: room.players[r].locked
     })),
-    roundResult: roundResultCopy(room, role),
+    roundResult: roundResultCopy(room, content2, role),
+    trustAward: narrating && room.lastRound ? room.lastRound.trustAwarded : null,
     waitingOn: ROLES.filter((r) => room.players[r].name && !room.players[r].locked).length
   };
 }
-function roundResultCopy(room, role) {
+function roundResultCopy(room, content2, role) {
   const log = room.lastRound;
-  if (!log || room.phase !== "reckoning" && room.phase !== "summary") return null;
+  if (!log || !NARRATING.has(room.phase)) return null;
   const mine = log.reveals.find((r) => r.role === role);
   if (!mine) return null;
   const player = room.players[role];
@@ -1447,18 +1457,66 @@ function roundResultCopy(room, role) {
   }
   const broken = room.promises.filter((p) => p.round === log.round && p.outcome === "broken");
   if (broken.length) others.push(`${broken.map((b) => BOARD_NAME[b.from]).join(" and ")} broke a promise.`);
-  return { didWhat, cost: costBits.join(" "), others: others.join(" ") };
+  const card = content2.scenarios[log.scenarioId]?.options[role]?.find((o) => o.id === mine.optionId);
+  return {
+    didWhat,
+    cost: costBits.join(" "),
+    others: others.join(" "),
+    title: mine.title,
+    impact: card ? optionImpact(card) : [],
+    costLabel: card ? costLabel(card) : "Free",
+    carbon: mine.emissions,
+    note: comparison(log, role)
+  };
 }
+function comparison(log, role) {
+  const mine = log.reveals.find((r) => r.role === role);
+  if (!mine) return null;
+  const cuts = log.reveals.filter((r) => r.emissions < -0.05);
+  if (mine.emissions < -0.05 && cuts.length && mine.emissions <= Math.min(...cuts.map((r) => r.emissions))) {
+    return cuts.length === 1 ? "The only cut anyone made this round." : "The biggest cut anyone made this round.";
+  }
+  if (mine.emissions > 0.05) return "This added carbon rather than cutting it.";
+  if (mine.multiplier >= 1.5) return "Something else at the table made this land harder than it should have.";
+  if (mine.multiplier <= 0.75) return "It landed at less than full strength.";
+  return null;
+}
+var CLOSE_ENOUGH = { emissions: 10, growth: 0.5, happiness: 0.5 };
 function endgame(room, content2) {
   const res = result(room.game, content2);
   const c = content2.config;
+  const targets = [
+    {
+      key: "emissions",
+      value: res.e,
+      target: c.tgt_e,
+      met: res.pe,
+      gap: Math.max(0, res.e - c.tgt_e),
+      verdict: res.pe ? res.e < -0.5 ? `Carbon went past net zero, to \u2212${Math.abs(res.e).toFixed(0)} Mt.` : "Carbon reached net zero." : `Carbon finished at ${res.e.toFixed(0)} Mt. It had to reach zero.`
+    },
+    {
+      key: "growth",
+      value: res.g,
+      target: c.tgt_g,
+      met: res.pg,
+      gap: Math.max(0, c.tgt_g - res.g),
+      verdict: res.pg ? `The economy averaged ${res.g.toFixed(1)}%.` : `The economy averaged ${res.g.toFixed(1)}%. You needed ${c.tgt_g.toFixed(1)}%.`
+    },
+    {
+      key: "happiness",
+      value: res.h,
+      target: c.tgt_h,
+      met: res.ph,
+      gap: Math.max(0, c.tgt_h - res.h),
+      verdict: res.ph ? `Quality of life reached ${res.h.toFixed(1)}.` : `Quality of life reached ${res.h.toFixed(1)}. You needed ${c.tgt_h.toFixed(1)}.`
+    }
+  ];
+  const close = targets.every((t) => t.met || t.gap <= CLOSE_ENOUGH[t.key]);
+  const grade = res.win ? "REACHED" : close ? "CLOSE" : "MISSED";
   return {
     win: res.win,
-    targets: [
-      { key: "emissions", value: res.e, target: c.tgt_e, met: res.pe },
-      { key: "growth", value: res.g, target: c.tgt_g, met: res.pg },
-      { key: "happiness", value: res.h, target: c.tgt_h, met: res.ph }
-    ],
+    grade,
+    targets,
     players: ROLES.map((role) => {
       const player = room.players[role];
       const goal = content2.privateGoals[role].find((g) => g.id === player.goalId) ?? null;

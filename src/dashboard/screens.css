@@ -440,6 +440,9 @@
 .rcard__promise--kept { color: var(--jtnz-com-warm); }
 .rcard__promise--broken { color: var(--color-accent); }
 .rcard__promise--none { color: color-mix(in srgb, #fff 45%, transparent); }
+/* A deal nobody took. Neither a win nor a betrayal, and it should not read as
+   either: the offer was made and the room declined it. */
+.rcard__promise--void { color: color-mix(in srgb, #fff 60%, transparent); }
 
 .rcard__headline { font: 400 clamp(12px, 1.25cqw, 23px) / 1.35 var(--font-body); opacity: 0.85; }
 
@@ -604,6 +607,101 @@
 .result-row__unit { font: 400 clamp(11px, 1.15cqw, 21px) / 1 var(--font-mono); color: var(--jtnz-glare); }
 .result-row__verdict { font: 800 clamp(13px, 1.4cqw, 26px) / 1 var(--font-heading); letter-spacing: 0.1em; }
 .result-row--met .result-row__verdict { color: var(--jtnz-good); }
+
+/* The gap in words, on its own line under the number it explains. */
+.result-row__gap {
+  grid-column: 1 / -1;
+  margin-top: var(--space-2);
+  font: 400 clamp(12px, 1.25cqw, 23px) / 1.35 var(--font-body);
+  color: var(--jtnz-glare);
+}
+
+/*
+ * The country's grade, above the three rows that justify it.
+ *
+ * Three states, not two. CLOSE is the one that had to exist: four in five
+ * tables miss, most of them narrowly, and a screen that says the same thing to
+ * a room that missed by three tenths of a percent and a room that never got
+ * near it has thrown away the most useful sentence in the debrief.
+ */
+.grade {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding: var(--space-4) var(--space-6);
+  border-left: 6px solid var(--color-accent);
+  background: var(--jtnz-broadcast-raise);
+}
+
+.grade--reached { border-left-color: var(--jtnz-good); }
+.grade--close { border-left-color: var(--jtnz-com-warm); }
+
+.grade__title {
+  font: 800 clamp(22px, 2.6cqw, 50px) / 1 var(--font-heading);
+  letter-spacing: 0.06em;
+}
+
+.grade--reached .grade__title { color: var(--jtnz-good); }
+.grade--close .grade__title { color: var(--jtnz-com-warm); }
+
+.grade__note {
+  font: 400 clamp(12px, 1.25cqw, 23px) / 1.35 var(--font-body);
+  color: var(--jtnz-glare);
+}
+
+/*
+ * The Public Trust beat: fifteen seconds, two names, and the running totals.
+ *
+ * Built like the briefing rather than like the meters, because it is a
+ * statement rather than a dashboard: the room should look up, read two names,
+ * and know something it did not before.
+ */
+.trust {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  align-content: center;
+}
+
+.trust__title { font: 800 clamp(32px, 4.4cqw, 84px) / 0.95 var(--font-heading); letter-spacing: -0.01em; }
+.trust__body {
+  margin-top: var(--space-4);
+  max-width: 34ch;
+  font: 400 clamp(13px, 1.4cqw, 26px) / 1.4 var(--font-body);
+  color: var(--jtnz-glare);
+}
+
+.trust__awards { display: flex; flex-direction: column; gap: var(--space-4); justify-content: center; }
+
+.trust__award {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  background: var(--jtnz-broadcast-raise);
+  border-left: 6px solid var(--skin-mark);
+}
+
+.trust__award-label {
+  font: 800 clamp(11px, 1.15cqw, 21px) / 1 var(--font-heading);
+  letter-spacing: 0.14em;
+  color: var(--jtnz-glare);
+}
+
+.trust__award-who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font: 800 clamp(20px, 2.4cqw, 46px) / 1 var(--font-heading);
+  letter-spacing: 0.04em;
+}
+
+.trust__award-why { font: 400 clamp(12px, 1.2cqw, 22px) / 1.35 var(--font-body); color: var(--jtnz-glare); }
 
 .ending { background: var(--color-bg); color: var(--color-text); padding: var(--space-6); display: flex; flex-direction: column; }
 .ending--hollow { background: var(--jtnz-broadcast-raise); color: #fff; }

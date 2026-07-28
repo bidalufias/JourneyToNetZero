@@ -22,7 +22,7 @@ import {
   tick,
   type Command,
 } from '../src/game/room'
-import { PHASE_MS, type Room } from '../src/game/session'
+import { PHASE_MS, phaseMs, type Room } from '../src/game/session'
 
 const content = loadContent(
   JSON.parse(readFileSync(fileURLToPath(new URL('../content/jtnz-content-pack-v2.json', import.meta.url)), 'utf8')),
@@ -212,11 +212,11 @@ describe('the onboarding', () => {
     advanceTo(room, 'practiceTalk')
 
     const card = phoneView(room, content, 'government').options[0]
-    run(room, { t: 'promise', role: 'government', optionId: card.id })
+    run(room, { t: 'say', role: 'government', shape: 'promise', optionId: card.id })
     expect(phoneView(room, content, 'government').promises).toHaveLength(1)
     expect(dashboardView(room, content).promises[0].text).toContain(card.title)
 
-    run(room, { t: 'demand', role: 'activist', target: 'business', phraseId: 'pay-first' })
+    run(room, { t: 'say', role: 'activist', shape: 'demand', target: 'business', phraseId: 'pay-first' })
     expect(dashboardView(room, content).promises).toHaveLength(2)
 
     advanceTo(room, 'practiceChoice')
@@ -232,8 +232,9 @@ describe('the onboarding', () => {
     run(room, { t: 'start' })
     advanceTo(room, 'practiceTalk')
     run(room, {
-      t: 'promise',
+      t: 'say',
       role: 'government',
+      shape: 'promise',
       optionId: phoneView(room, content, 'government').options[0].id,
     })
     // Spend real money in practice, to prove it is handed back. Accepting an
@@ -459,7 +460,7 @@ describe('negotiation', () => {
     const opts = phoneView(room, content, 'government').options.filter((o) => o.available)
     const pledged = opts[0]
     const actual = opts[1] ?? opts[0]
-    run(room, { t: 'promise', role: 'government', optionId: pledged.id })
+    run(room, { t: 'say', role: 'government', shape: 'promise', optionId: pledged.id })
 
     const board = dashboardView(room, content).promises
     expect(board).toHaveLength(1)
@@ -467,7 +468,7 @@ describe('negotiation', () => {
     // sentence: titles are a mix of imperatives ("Bail Out the Big Exporters")
     // and noun phrases ("Green Stimulus Package"), and only a quotation is
     // grammatical for both.
-    expect(board[0].text).toBe(`The Government promises to choose “${pledged.title}”.`)
+    expect(board[0].text).toBe(`The Government will choose “${pledged.title}”.`)
 
     expire(room) // -> choice
     // The player is free to break it. Nothing stops them.
@@ -495,12 +496,9 @@ describe('negotiation', () => {
     startPlaying(room)
     advanceTo(room, 'table')
     const opts = phoneView(room, content, 'government').options.filter((o) => o.available)
-    run(room, { t: 'promise', role: 'government', optionId: opts[0].id })
-    expire(room) // table -> choice
-    expire(room) // choice -> reckoning
-    expire(room) // reckoning -> summary
+    run(room, { t: 'say', role: 'government', shape: 'promise', optionId: opts[0].id })
+    advanceTo(room, 'summary')
 
-    expect(room.phase).toBe('summary')
     const view = dashboardView(room, content)
     expect(view.round).toBe(1)
     expect(view.promises).toHaveLength(1)
@@ -578,6 +576,273 @@ describe('the endgame', () => {
     }
     // No partial credit: a missed country is a missed country.
     if (!end.win) expect(end.players.every((p) => p.title !== 'NATION BUILDER')).toBe(true)
+  })
+
+  it('grades the country in three, and names every gap', () => {
+    const room = seated()
+    run(room, { t: 'start' })
+    let guard = 0
+    while (room.phase !== 'ended' && guard++ < 200) expire(room)
+
+    const end = endgame(room, content)
+    expect(['REACHED', 'CLOSE', 'MISSED']).toContain(end.grade)
+    expect(end.grade === 'REACHED').toBe(end.win)
+
+    for (const t of end.targets) {
+      // A met target has no gap, and a missed one always says how far.
+      if (t.met) expect(t.gap).toBe(0)
+      else expect(t.gap).toBeGreaterThan(0)
+      expect(t.verdict.length).toBeGreaterThan(0)
+      expect(t.verdict.endsWith('.')).toBe(true)
+    }
+
+    // CLOSE is every gap being small, not one of them being small. A table
+    // that hit two and missed the third by forty Mt did not nearly make it,
+    // and telling them otherwise is what empties a debrief.
+    if (end.grade === 'CLOSE') {
+      expect(end.targets.every((t) => t.met || t.gap <= 10)).toBe(true)
+      expect(end.targets.some((t) => !t.met)).toBe(true)
+    }
+  })
+
+  it('does not soften the grade for a table that hit two targets badly', () => {
+    const room = seated()
+    run(room, { t: 'start' })
+    let guard = 0
+    while (room.phase !== 'ended' && guard++ < 200) expire(room)
+
+    // Force the shape the grade has to get right: two met, one missed wide.
+    room.game.emissions = 60
+    const end = endgame(room, content)
+    expect(end.grade).toBe('MISSED')
+    expect(end.targets.find((t) => t.key === 'emissions')!.verdict).toContain('reach zero')
+  })
+})
+
+describe('SAY IT', () => {
+  /** A room in THE TALK of round one, which is where every sentence is said. */
+  const talking = () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'table')
+    return room
+  }
+
+  it('puts one sentence per player on the board, replacing the last', () => {
+    const room = talking()
+    const opts = phoneView(room, content, 'government').options.filter((o) => o.available)
+
+    run(room, { t: 'say', role: 'government', shape: 'promise', optionId: opts[0].id })
+    run(room, { t: 'say', role: 'government', shape: 'demand', target: 'business', phraseId: 'pay-first' })
+
+    const board = dashboardView(room, content).promises
+    expect(board).toHaveLength(1)
+    expect(board[0].kind).toBe('demand')
+    expect(board[0].text).toBe('The Government wants the Business pays its share before anyone else moves.')
+  })
+
+  it('says the co-funding out loud instead of hiding it in a switch', () => {
+    const room = talking()
+    run(room, { t: 'say', role: 'government', shape: 'cofund', on: true })
+
+    expect(room.coFund).toBe(true)
+    const board = dashboardView(room, content).promises
+    expect(board).toHaveLength(1)
+    expect(board[0].kind).toBe('cofund')
+    expect(board[0].text).toContain('pay half')
+
+    // And it survives a second sentence, because it is a standing commitment
+    // rather than this round's one thing to say.
+    const opts = phoneView(room, content, 'government').options.filter((o) => o.available)
+    run(room, { t: 'say', role: 'government', shape: 'promise', optionId: opts[0].id })
+    expect(dashboardView(room, content).promises).toHaveLength(2)
+    expect(room.coFund).toBe(true)
+
+    run(room, { t: 'say', role: 'government', shape: 'cofund', on: false })
+    expect(room.coFund).toBe(false)
+    expect(dashboardView(room, content).promises.filter((p) => p.kind === 'cofund')).toHaveLength(0)
+  })
+
+  it('refuses a co-funding pledge from anybody but the Government', () => {
+    const room = talking()
+    run(room, { t: 'say', role: 'business', shape: 'cofund', on: true })
+    expect(room.coFund).toBe(false)
+    expect(dashboardView(room, content).promises).toHaveLength(0)
+  })
+
+  it('composes the sentence the game exists to provoke', () => {
+    const room = talking()
+    const mine = phoneView(room, content, 'government').options.filter((o) => o.available)[0]
+    run(room, {
+      t: 'say',
+      role: 'government',
+      shape: 'deal',
+      optionId: mine.id,
+      target: 'business',
+      conditionId: 'moves-with-me',
+    })
+
+    const board = dashboardView(room, content).promises
+    expect(board).toHaveLength(1)
+    expect(board[0].kind).toBe('deal')
+    // Third person throughout. A pledge is composed on a phone and read off a
+    // projector, and "if the Business moves with me" is wrong on the projector.
+    expect(board[0].text).toBe(
+      `The Government will choose “${mine.title}” if the Business moves too.`,
+    )
+    // A deal names the other seat, which is what lets the reveal resolve it.
+    expect(board[0].ifRole).toBe('business')
+    expect(board[0].ifConditionId).toBe('moves-with-me')
+  })
+
+  it('refuses a deal against yourself, or on a condition that does not exist', () => {
+    const room = talking()
+    const mine = phoneView(room, content, 'government').options.filter((o) => o.available)[0]
+    const deal = { t: 'say', role: 'government', shape: 'deal', optionId: mine.id } as const
+
+    run(room, { ...deal, target: 'government', conditionId: 'moves-with-me' })
+    run(room, { ...deal, target: 'business', conditionId: 'invented-by-a-client' })
+    expect(dashboardView(room, content).promises).toHaveLength(0)
+  })
+})
+
+describe('a deal is judged against both people', () => {
+  /**
+   * Round 1 with a deal on the board, resolved by hand.
+   *
+   * The three outcomes are the whole point of the shape, so each is driven to
+   * directly rather than played toward and hoped for.
+   */
+  function dealt(theirArch: 'aligned' | 'dirty', keepMine: boolean) {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'table')
+
+    const mine = phoneView(room, content, 'government').options.filter((o) => o.available)
+    const pledged = mine[0]
+    run(room, {
+      t: 'say',
+      role: 'government',
+      shape: 'deal',
+      optionId: pledged.id,
+      target: 'business',
+      conditionId: 'moves-with-me',
+    })
+
+    expire(room) // -> choice
+
+    // The Business either moves with the table or takes a card that breaks it.
+    const scenario = content.scenarios[room.game.path[0]]
+    const theirs = scenario.options.business.find((o) =>
+      theirArch === 'dirty' ? DIRTY.has(o.arch) : !DIRTY.has(o.arch) && o.arch !== 'DEMAND_RELIEF',
+    )
+    expect(theirs, `no ${theirArch} card for the Business in ${scenario.id}`).toBeDefined()
+
+    lockIn(room, 'government', keepMine ? pledged.id : (mine[1] ?? mine[0]).id)
+    lockIn(room, 'business', theirs!.id)
+    for (const role of ['community', 'activist'] as const) lockIn(room, role, firstAvailable(room, role))
+
+    return room.promises.find((p) => p.kind === 'deal')!
+  }
+
+  it('is kept when both of them did it', () => {
+    expect(dealt('aligned', true).outcome).toBe('kept')
+  })
+
+  it('is broken when they came and you did not', () => {
+    expect(dealt('aligned', false).outcome).toBe('broken')
+  })
+
+  it('is void, not broken, when the condition never happened', () => {
+    // The risk of offering a deal has to be that nobody takes it, never that
+    // you get named a liar for a promise that was not called in. Otherwise the
+    // safe move is to say nothing, which is the opposite of the point.
+    expect(dealt('dirty', false).outcome).toBe('void')
+    expect(dealt('dirty', true).outcome).toBe('void')
+  })
+})
+
+describe('A Tip Off', () => {
+  it('is one kind, always true, and worth something to publish', () => {
+    const room = seated()
+    startPlaying(room)
+
+    const tip = room.tips[0]
+    expect(tip).toBeDefined()
+    // No reliability, no gamble, no coin flip left on the type at all.
+    expect(Object.keys(tip)).toEqual([
+      'id',
+      'round',
+      'to',
+      'source',
+      'text',
+      'published',
+      'revealed',
+    ])
+
+    const before =
+      tip.to === 'community' ? room.game.vetoes : room.game.trust[tip.to as 'government']
+    run(room, { t: 'publishTip', role: tip.to })
+    advanceTo(room, 'reckoning')
+
+    const after =
+      tip.to === 'community' ? room.game.vetoes : room.game.trust[tip.to as 'government']
+    expect(after).toBe(before + 1)
+    expect(dashboardView(room, content).publishedTip?.text).toBe(tip.text)
+  })
+
+  it('deals a tip in every round including the last, where nothing comes next', () => {
+    const room = seated()
+    run(room, { t: 'start' })
+    let guard = 0
+    while (room.phase !== 'ended' && guard++ < 200) expire(room)
+
+    expect(room.tips).toHaveLength(6)
+    for (const t of room.tips) expect(t.text.length).toBeGreaterThan(0)
+    // Everybody hears something across six rounds, and nobody twice running.
+    expect(new Set(room.tipRotation).size).toBe(4)
+  })
+})
+
+describe('after the reveal, the phone says what the card did', () => {
+  it('shows the delivered carbon, not the number printed on the card', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'trust')
+
+    for (const role of ROLES) {
+      const r = phoneView(room, content, role).roundResult!
+      expect(r).not.toBeNull()
+      expect(r.title.length).toBeGreaterThan(0)
+      // The same four chips the card carried, so the promise and the outcome
+      // can be held in one glance.
+      expect(r.impact).toHaveLength(4)
+      expect(typeof r.carbon).toBe('number')
+
+      const delivered = room.lastRound!.reveals.find((x) => x.role === role)!.emissions
+      expect(r.carbon).toBe(delivered)
+    }
+  })
+
+  it('says nothing about the card until the cards are face up', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'choice')
+    expect(phoneView(room, content, 'government').roundResult).toBeNull()
+    expect(phoneView(room, content, 'government').trustAward).toBeNull()
+  })
+
+  it('names where the two Public Trust tokens went', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'trust')
+
+    const award = dashboardView(room, content).trustAward!
+    expect(award).not.toBeNull()
+    expect(award).toEqual(room.lastRound!.trustAwarded)
+    // Every phone gets it too: the Community's brief says to make them earn it
+    // in front of you, which is empty if nobody can see where it landed.
+    for (const role of ROLES) expect(phoneView(room, content, role).trustAward).toEqual(award)
   })
 })
 
@@ -719,10 +984,34 @@ describe('the facilitator can stop the clock', () => {
 })
 
 describe('phase timings match the published session', () => {
-  it('spends 24 minutes on six rounds of play', () => {
-    const perRound = PHASE_MS.crisis + PHASE_MS.table + PHASE_MS.choice + PHASE_MS.reckoning
-    expect(perRound).toBe(4 * 60 * 1000)
-    expect(perRound * 6).toBe(24 * 60 * 1000)
+  const ROUND_PHASES = ['crisis', 'table', 'choice', 'reckoning', 'trust', 'summary'] as const
+  const round = (n: number) => ROUND_PHASES.reduce((ms, p) => ms + phaseMs(p, n), 0)
+
+  it('spends under 24 minutes on six rounds of play', () => {
+    // Round 1 runs long and the other five do not, so this is not one number
+    // times six. The budget is what matters: the Reveal gave back thirty
+    // seconds a round, and the Talk, Round 1's extra room and the Public Trust
+    // beat spent it. Forty seconds of headroom is deliberate; this test exists
+    // to make the next beat that "only needs ten seconds" argue for itself.
+    const play = round(1) + round(2) * 5
+    expect(play).toBeLessThanOrEqual(24 * 60 * 1000)
+  })
+
+  it('gives Round 1 more room than the rest, and only Round 1', () => {
+    expect(round(1)).toBeGreaterThan(round(2))
+    expect(round(2)).toBe(round(6))
+    // The one place the difference has to show up: a table meeting the lock
+    // button for the first time gets half as long again to find it.
+    expect(phaseMs('choice', 1)).toBe(60_000)
+    expect(phaseMs('choice', 2)).toBe(PHASE_MS.choice)
+  })
+
+  it('leaves the flip sequence room inside the Reveal', () => {
+    // The Reveal was cut from 75 seconds to 45, which is only safe while the
+    // whole sequence, four flips plus the sting plus the coalition hold, still
+    // finishes inside it. `test/reckoning.test.ts` owns the arithmetic; this
+    // owns the fact that the phase is long enough to contain it.
+    expect(PHASE_MS.reckoning).toBeGreaterThanOrEqual(25_000)
   })
 
   it('fits the whole session inside the 35 minutes on the box', () => {
@@ -732,14 +1021,13 @@ describe('phase timings match the published session', () => {
       PHASE_MS.practiceChoice +
       PHASE_MS.power +
       PHASE_MS.goal
-    const play = (PHASE_MS.crisis + PHASE_MS.table + PHASE_MS.choice + PHASE_MS.reckoning + PHASE_MS.summary) * 6
-    const total = onboarding + play
+    const total = onboarding + round(1) + round(2) * 5
 
     // Onboarding is the budget most at risk of creeping, because every step in
     // it is defensible on its own. Five minutes is the whole allowance.
     expect(onboarding).toBeLessThanOrEqual(5 * 60 * 1000)
     // Results and the debrief are facilitator-paced and sit outside the clock,
     // so the timed part has to leave room for them.
-    expect(total).toBeLessThanOrEqual(31 * 60 * 1000)
+    expect(total).toBeLessThanOrEqual(28 * 60 * 1000)
   })
 })

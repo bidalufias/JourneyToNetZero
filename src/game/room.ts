@@ -25,20 +25,21 @@ import {
 } from '../engine/engine'
 import { DIRTY, ROLES, type Content, type Option, type Role, type Scenario } from '../engine/types'
 import { costLabel, optionCondition, optionImpact } from './impact'
-import { BOARD_NAME, DEMAND_PHRASES, privateLine } from './copy'
-import { draw, pick, roomCode, shuffle } from './rng'
+import { BOARD_NAME, DEAL_CONDITIONS, DEMAND_PHRASES, privateLine } from './copy'
+import { pick, roomCode, shuffle } from './rng'
 import {
-  PHASE_MS,
   ROLE_LABEL,
   ROLE_RESOURCE,
+  phaseMs,
   type DashboardView,
   type InsiderTip,
   type Phase,
   type PhoneOption,
   type PhoneView,
   type Player,
+  type Promise_,
   type Room,
-  type TipKind,
+  type SayShape,
 } from './session'
 
 // ── Creation ───────────────────────────────────────────────────────────────
@@ -114,16 +115,19 @@ function roundNumber(room: Room): number {
  * room is still narrating, meaning the promise board, the kept/broken badges
  * and the published tip, belongs to the round just played, so the views use this.
  */
+const NARRATING: ReadonlySet<Phase> = new Set<Phase>(['reckoning', 'trust', 'summary'])
+
 function displayRound(room: Room): number {
-  if ((room.phase === 'reckoning' || room.phase === 'summary') && room.lastRound) {
-    return room.lastRound.round
-  }
+  if (NARRATING.has(room.phase) && room.lastRound) return room.lastRound.round
   return roundNumber(room)
 }
 
 function setPhase(room: Room, phase: Phase, now: number): void {
   room.phase = phase
-  const ms = PHASE_MS[phase]
+  // Round 1 gets longer beats, so the length is asked for by round rather than
+  // read off a flat table. `roundNumber` and not `displayRound`: a phase is
+  // being opened, so the round it belongs to is the one about to be played.
+  const ms = phaseMs(phase, roundNumber(room))
   room.phaseEndsAt = ms > 0 ? now + ms : null
 }
 
@@ -214,6 +218,31 @@ function choosableOptions(room: Room, content: Content, role: Role): Option[] {
 
 // ── Commands ───────────────────────────────────────────────────────────────
 
+/**
+ * SAY IT, in four sentence shapes.
+ *
+ * One command where there used to be three plus a private switch. The shapes
+ * are all optional-field variants of the same message rather than four
+ * commands, because the thing a player is doing is identical every time: they
+ * are putting one sentence on the big screen, and it replaces whatever they
+ * said last.
+ */
+export interface SayCommand {
+  t: 'say'
+  role: Role
+  shape: SayShape
+  /** promise and deal: the card being pledged. */
+  optionId?: string
+  /** demand and deal: whose behaviour the sentence is about. */
+  target?: Role
+  /** demand: which preset phrasing. */
+  phraseId?: string
+  /** deal: which condition the pledge hangs on. */
+  conditionId?: string
+  /** cofund: on or off. The Government's sentence is a standing commitment. */
+  on?: boolean
+}
+
 export type Command =
   | { t: 'join'; role: Role; name: string }
   | { t: 'leave'; role: Role }
@@ -223,13 +252,11 @@ export type Command =
   | { t: 'advance' }
   | { t: 'pause' }
   | { t: 'resume' }
-  | { t: 'promise'; role: Role; optionId: string }
-  | { t: 'demand'; role: Role; target: Role; phraseId: string }
+  | SayCommand
   | { t: 'offer'; from: Role; to: Role; resource: 'fiscal' | 'capital'; amount: number }
   | { t: 'respondOffer'; role: Role; offerId: string; accept: boolean }
   | { t: 'spotlight'; role: Role }
   | { t: 'veto'; role: Role; target: Role }
-  | { t: 'coFund'; role: Role; agree: boolean }
   | { t: 'publishTip'; role: Role }
   | { t: 'choose'; role: Role; optionId: string }
   | { t: 'lock'; role: Role }
@@ -257,12 +284,10 @@ export function authorise(seat: Role | 'dashboard', cmd: Command): Command | nul
     case 'reconnect':
     case 'leave':
     case 'pickGoal':
-    case 'promise':
-    case 'demand':
+    case 'say':
     case 'respondOffer':
     case 'spotlight':
     case 'veto':
-    case 'coFund':
     case 'publishTip':
     case 'choose':
     case 'lock':
@@ -285,13 +310,11 @@ export function authorise(seat: Role | 'dashboard', cmd: Command): Command | nul
  * surface: the phones are not the only thing that could send these.
  */
 const FROZEN_WHILE_PAUSED: ReadonlySet<Command['t']> = new Set<Command['t']>([
-  'promise',
-  'demand',
+  'say',
   'offer',
   'respondOffer',
   'spotlight',
   'veto',
-  'coFund',
   'publishTip',
   'choose',
   'lock',
@@ -385,44 +408,16 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
       return room
     }
 
-    case 'promise': {
-      if (!canNegotiate(room)) return room
-      const option = choosableOptions(room, content, cmd.role).find((o) => o.id === cmd.optionId)
-      if (!option) return room
-      // One live pledge per player per round. A second replaces the first.
-      room.promises = room.promises.filter(
-        (p) => !(p.round === roundNumber(room) && p.from === cmd.role && p.kind === 'promise'),
-      )
-      room.promises.push({
-        id: `${cmd.role}-${roundNumber(room)}-p`,
-        round: roundNumber(room),
-        from: cmd.role,
-        kind: 'promise',
-        text: `${BOARD_NAME[cmd.role]} promises to choose “${option.title}”.`,
-        optionId: option.id,
-        outcome: 'unresolved',
-      })
-      return room
-    }
-
-    case 'demand': {
-      if (!canNegotiate(room)) return room
-      const phrase = DEMAND_PHRASES.find((p) => p.id === cmd.phraseId)
-      if (!phrase) return room
-      room.promises = room.promises.filter(
-        (p) => !(p.round === roundNumber(room) && p.from === cmd.role && p.kind === 'demand'),
-      )
-      room.promises.push({
-        id: `${cmd.role}-${roundNumber(room)}-d`,
-        round: roundNumber(room),
-        from: cmd.role,
-        kind: 'demand',
-        text: `${BOARD_NAME[cmd.role]} demands ${phrase.text(ROLE_LABEL[cmd.target])}.`,
-        optionId: null,
-        outcome: 'unresolved',
-      })
-      return room
-    }
+    /**
+     * SAY IT: one verb, four sentences, one board.
+     *
+     * Every shape composes its line here rather than on a phone, for the same
+     * reason players pick a sentence instead of typing one: the promise board
+     * is read out loud by a room, so every line on it has to be grammatical,
+     * short, and about somebody the room can name.
+     */
+    case 'say':
+      return say(room, cmd, content)
 
     case 'offer': {
       if (!canNegotiate(room)) return room
@@ -493,12 +488,6 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
       return room
     }
 
-    case 'coFund': {
-      if (cmd.role !== 'government') return room
-      room.coFund = cmd.agree
-      return room
-    }
-
     case 'publishTip': {
       const tip = room.tips.find((t) => t.round === roundNumber(room) && t.to === cmd.role)
       if (!tip || tip.published) return room
@@ -547,6 +536,106 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
     default:
       return room
   }
+}
+
+/**
+ * Compose one public sentence and put it on the board.
+ *
+ * One live sentence per player per round, whatever its shape: a second SAY IT
+ * replaces the first rather than stacking. That cap is what keeps the board
+ * readable from the back of a room, and it is also the only pressure in the
+ * game to say the *right* thing rather than everything.
+ */
+function say(room: Room, cmd: SayCommand, content: Content): Room {
+  if (!canNegotiate(room)) return room
+  const round = roundNumber(room)
+  const me = BOARD_NAME[cmd.role]
+
+  /**
+   * Co-funding is a sentence, not a switch.
+   *
+   * It used to be a private toggle on the Government's phone that halved or
+   * doubled the value of somebody else's card. The Business had no way to see
+   * it, no way to ask for it on the record, and no way to hold anybody to it
+   * afterwards, which made the single most co-operative act in the game
+   * invisible to the person it was being done for.
+   */
+  if (cmd.shape === 'cofund') {
+    if (cmd.role !== 'government') return room
+    room.coFund = cmd.on ?? false
+    room.promises = room.promises.filter((p) => !(p.round === round && p.id === `government-${round}-c`))
+    if (room.coFund) {
+      room.promises.push({
+        id: `government-${round}-c`,
+        round,
+        from: 'government',
+        kind: 'cofund',
+        text: 'The Government will pay half of any partnership the Business signs.',
+        optionId: null,
+        ifRole: null,
+        ifConditionId: null,
+        outcome: 'unresolved',
+      })
+    }
+    return room
+  }
+
+  // Everything else is one sentence, and it replaces the last one.
+  const drop = (p: Promise_) => !(p.round === round && p.from === cmd.role && p.kind !== 'cofund')
+
+  if (cmd.shape === 'promise') {
+    const option = choosableOptions(room, content, cmd.role).find((o) => o.id === cmd.optionId)
+    if (!option) return room
+    room.promises = room.promises.filter(drop)
+    room.promises.push({
+      id: `${cmd.role}-${round}-s`,
+      round,
+      from: cmd.role,
+      kind: 'promise',
+      text: `${me} will choose “${option.title}”.`,
+      optionId: option.id,
+      ifRole: null,
+      ifConditionId: null,
+      outcome: 'unresolved',
+    })
+    return room
+  }
+
+  if (cmd.shape === 'demand') {
+    const phrase = DEMAND_PHRASES.find((p) => p.id === cmd.phraseId)
+    if (!phrase || !cmd.target || cmd.target === cmd.role) return room
+    room.promises = room.promises.filter(drop)
+    room.promises.push({
+      id: `${cmd.role}-${round}-s`,
+      round,
+      from: cmd.role,
+      kind: 'demand',
+      text: `${me} wants ${phrase.text(ROLE_LABEL[cmd.target])}.`,
+      optionId: null,
+      ifRole: cmd.target,
+      ifConditionId: null,
+      outcome: 'unresolved',
+    })
+    return room
+  }
+
+  // The deal. "I will choose this, if you move with me."
+  const option = choosableOptions(room, content, cmd.role).find((o) => o.id === cmd.optionId)
+  const condition = DEAL_CONDITIONS.find((c) => c.id === cmd.conditionId)
+  if (!option || !condition || !cmd.target || cmd.target === cmd.role) return room
+  room.promises = room.promises.filter(drop)
+  room.promises.push({
+    id: `${cmd.role}-${round}-s`,
+    round,
+    from: cmd.role,
+    kind: 'deal',
+    text: `${me} will choose “${option.title}” if ${condition.text(ROLE_LABEL[cmd.target])}.`,
+    optionId: option.id,
+    ifRole: cmd.target,
+    ifConditionId: condition.id,
+    outcome: 'unresolved',
+  })
+  return room
 }
 
 // ── Phase machine ──────────────────────────────────────────────────────────
@@ -614,6 +703,10 @@ function advance(room: Room, content: Content, now: number): Room {
       return resolveRound(room, content, now)
 
     case 'reckoning':
+      setPhase(room, 'trust', now)
+      return room
+
+    case 'trust':
       setPhase(room, 'summary', now)
       return room
 
@@ -749,8 +842,28 @@ function finishRound(
   // Promises are recorded and displayed but never enforced. Resolving one only
   // decides what the dashboard says about it.
   for (const p of room.promises) {
-    if (p.round !== log.round || p.kind !== 'promise' || !p.optionId) continue
-    p.outcome = choices[p.from] === p.optionId ? 'kept' : 'broken'
+    if (p.round !== log.round) continue
+    const didIt = p.optionId !== null && choices[p.from] === p.optionId
+
+    if (p.kind === 'promise') {
+      p.outcome = didIt ? 'kept' : 'broken'
+      continue
+    }
+
+    /**
+     * A deal is judged against both people, in this order.
+     *
+     * If the other seat never did their part, the pledge was never called in,
+     * and the board says so rather than calling somebody a liar for a promise
+     * that was never tested. If they did, the pledger is held to it exactly as
+     * hard as an unconditional one.
+     */
+    if (p.kind === 'deal' && p.ifRole && p.ifConditionId) {
+      const them = log.reveals.find((r) => r.role === p.ifRole)
+      const condition = DEAL_CONDITIONS.find((c) => c.id === p.ifConditionId)
+      const theyDid = Boolean(them && condition?.met(them))
+      p.outcome = !theyDid ? 'void' : didIt ? 'kept' : 'broken'
+    }
   }
 
   // A published tip resolves at round end, and only a published one.
@@ -773,20 +886,21 @@ function finishRound(
 }
 
 /**
- * Publishing stakes one Trust, or, for the Community, one veto. A CONFIRMED
- * tip is always safe; an UNVERIFIED one is a gamble.
+ * Telling the room pays, in the currency that seat actually spends.
+ *
+ * The price is not the token, it is the information: a warning about the next
+ * crisis is worth more to you while nobody else has it, and the moment you
+ * trade it for standing, everybody plans around it. That is a trade a player
+ * can reason about in five seconds. The old version was a coin flip on an
+ * UNVERIFIED rumour, which is a trade nobody can reason about at all.
  */
 function applyTipStake(room: Room, tip: InsiderTip): void {
   if (tip.to === 'community') {
-    room.game.vetoes = tip.isTrue
-      ? Math.min(3, room.game.vetoes + 1)
-      : Math.max(0, room.game.vetoes - 1)
+    room.game.vetoes = Math.min(3, room.game.vetoes + 1)
     return
   }
   const role = tip.to as 'government' | 'business' | 'activist'
-  room.game.trust[role] = tip.isTrue
-    ? room.game.trust[role] + 1
-    : Math.max(0, room.game.trust[role] - 1)
+  room.game.trust[role] = room.game.trust[role] + 1
 }
 
 // ── Insider Tips ───────────────────────────────────────────────────────────
@@ -824,6 +938,24 @@ function dealTip(room: Room, content: Content): void {
   room.rngCursor = cursor
 }
 
+/**
+ * One kind of tip: a true warning about what is coming.
+ *
+ * There were four. A forecast of the next crisis, a memo about this one, a
+ * dossier naming somebody's secret goal, and an UNVERIFIED rumour that was a
+ * straight coin flip. Four kinds is four things to explain, on a card that
+ * opens over the whole phone in the twenty-five seconds a player has to read a
+ * crisis, and the rumour was the worst of them: it asked somebody to gamble a
+ * resource on a probability the game never showed them, and then told them at
+ * the end of the round whether they had been unlucky.
+ *
+ * The forecast is the one worth keeping, because it is the only one that
+ * changes what the table does next. In the last round there is no next crisis,
+ * so the tip is a true fact about the one already on the table, which reads as
+ * the same thing from the player's side: something true, that they know and
+ * nobody else does.
+ */
+
 function buildTip(
   room: Room,
   content: Content,
@@ -836,49 +968,7 @@ function buildTip(
   const scenarioId = room.game.path[room.game.round]
   const nextScenarioId = room.game.path[room.game.round + 1]
 
-  // Roughly a quarter of cards are UNVERIFIED rumours; the rest are CONFIRMED.
-  const roll = draw(room.seed, cursor)
-  cursor = roll.cursor
-  const wantRumour = roll.value < 0.25 && round >= 2
-
-  const kinds: TipKind[] = []
-  if (!wantRumour) {
-    if (nextScenarioId) kinds.push('forecast')
-    kinds.push('intel' as TipKind)
-    if (round >= 2) kinds.push('dossier')
-  }
-  if (wantRumour || !kinds.length) kinds.push('rumour')
-
-  const kindPick = pick(kinds, room.seed, cursor)
-  cursor = kindPick.cursor
-  const kind = kindPick.value
-
-  if (kind === 'rumour') {
-    const whisperIds = Object.keys(tips.whispers)
-    const w = pick(whisperIds, room.seed, cursor)
-    cursor = w.cursor
-    // The UNVERIFIED truth roll happens here, server-side, at deal time,
-    // and the answer never leaves the server until the holder publishes.
-    const truth = draw(room.seed, cursor)
-    cursor = truth.cursor
-    return {
-      tip: {
-        id: `tip-${round}`,
-        round,
-        to,
-        kind: 'rumour',
-        reliability: 'UNVERIFIED',
-        source: 'A rumour going round',
-        text: tips.whispers[w.value],
-        isTrue: truth.value < tips.whisperAccuracy,
-        published: false,
-        revealed: false,
-      },
-      cursor,
-    }
-  }
-
-  if (kind === 'forecast' && nextScenarioId) {
+  if (nextScenarioId) {
     const nextType = content.scenarios[nextScenarioId].type
     const lines = tips.forecasts[nextType] ?? []
     const line = lines.length ? pick(lines, room.seed, cursor) : { value: '', cursor }
@@ -888,11 +978,8 @@ function buildTip(
         id: `tip-${round}`,
         round,
         to,
-        kind: 'forecast',
-        reliability: 'CONFIRMED',
         source: 'Cabinet Situation Room',
         text: line.value || 'Something is coming. Nobody will say what.',
-        isTrue: true,
         published: false,
         revealed: false,
       },
@@ -900,41 +987,15 @@ function buildTip(
     }
   }
 
-  if (kind === 'dossier') {
-    const others = ROLES.filter((r) => r !== to && room.players[r].goalId)
-    if (others.length) {
-      const target = pick(others, room.seed, cursor)
-      cursor = target.cursor
-      const goalId = room.players[target.value].goalId as string
-      return {
-        tip: {
-          id: `tip-${round}`,
-          round,
-          to,
-          kind: 'dossier',
-          reliability: 'CONFIRMED',
-          source: 'A friend in the ministry',
-          text: tips.whispers[goalId] ?? 'They want something they have not said out loud.',
-          isTrue: true,
-          published: false,
-          revealed: false,
-        },
-        cursor,
-      }
-    }
-  }
-
-  // Intel: a true fact about the crisis on the table right now.
+  // Round 6. Nothing is coming after this, so the warning is about the crisis
+  // already on the table.
   return {
     tip: {
       id: `tip-${round}`,
       round,
       to,
-      kind: 'memo',
-      reliability: 'CONFIRMED',
       source: 'A sealed brief',
       text: tips.intel[scenarioId] ?? 'The official figures are not the real ones.',
-      isTrue: true,
       published: false,
       revealed: false,
     },
@@ -952,14 +1013,7 @@ export function dashboardView(room: Room, content: Content): DashboardView {
 
   const tip = room.tips.find((t) => t.round === displayRound(room))
   const published =
-    tip?.published && tip
-      ? {
-          from: tip.to,
-          text: tip.text,
-          source: tip.source,
-          verdict: tip.revealed ? ((tip.isTrue ? 'true' : 'false') as 'true' | 'false') : null,
-        }
-      : null
+    tip?.published && tip ? { from: tip.to, text: tip.text, source: tip.source } : null
 
   const veto = room.vetoTarget
     ? {
@@ -1013,6 +1067,7 @@ export function dashboardView(room: Room, content: Content): DashboardView {
       growth: content.config.tgt_g,
       happiness: content.config.tgt_h,
     },
+    trustAward: NARRATING.has(room.phase) ? (room.lastRound?.trustAwarded ?? null) : null,
   }
 }
 
@@ -1125,7 +1180,7 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
 
   // From the Reckoning onward `currentScenario` already names the *next*
   // round's crisis, so handing it to a phone would leak the coming round.
-  const narrating = room.phase === 'reckoning' || room.phase === 'summary'
+  const narrating = NARRATING.has(room.phase)
 
   // The three national numbers, on the phone, always. They used to live only on
   // the projector, so any player who could not read it from where they sat was
@@ -1181,18 +1236,23 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
       connected: room.players[r].connected,
       locked: room.players[r].locked,
     })),
-    roundResult: roundResultCopy(room, role),
+    roundResult: roundResultCopy(room, content, role),
+    trustAward: narrating && room.lastRound ? room.lastRound.trustAwarded : null,
     waitingOn: ROLES.filter((r) => room.players[r].name && !room.players[r].locked).length,
   }
 }
 
 /**
- * The phone's round result, in three sentences and no numbers. This is the
- * only place the app interprets consequence for a player.
+ * The phone's round result: what you did, what it cost, what it actually did.
+ *
+ * The first three sentences are interpretation and carry no numbers. The rest
+ * closes the loop the card opened: the same four chips the player read before
+ * choosing, plus the carbon the choice really delivered after the multipliers,
+ * the co-funding, the Spotlight and the abatement curve had all had their say.
  */
-function roundResultCopy(room: Room, role: Role): PhoneView['roundResult'] {
+function roundResultCopy(room: Room, content: Content, role: Role): PhoneView['roundResult'] {
   const log = room.lastRound
-  if (!log || (room.phase !== 'reckoning' && room.phase !== 'summary')) return null
+  if (!log || !NARRATING.has(room.phase)) return null
 
   const mine = log.reveals.find((r) => r.role === role)
   if (!mine) return null
@@ -1233,14 +1293,76 @@ function roundResultCopy(room: Room, role: Role): PhoneView['roundResult'] {
   const broken = room.promises.filter((p) => p.round === log.round && p.outcome === 'broken')
   if (broken.length) others.push(`${broken.map((b) => BOARD_NAME[b.from]).join(' and ')} broke a promise.`)
 
-  return { didWhat, cost: costBits.join(' '), others: others.join(' ') }
+  // The card as it was authored, so the chips after the reveal are the same
+  // four the player weighed before it. `emissions` on the reveal is the
+  // delivered figure and is not the same number: that gap is the lesson.
+  const card = content.scenarios[log.scenarioId]?.options[role]?.find((o) => o.id === mine.optionId)
+
+  return {
+    didWhat,
+    cost: costBits.join(' '),
+    others: others.join(' '),
+    title: mine.title,
+    impact: card ? optionImpact(card) : [],
+    costLabel: card ? costLabel(card) : 'Free',
+    carbon: mine.emissions,
+    note: comparison(log, role),
+  }
+}
+
+/**
+ * One line placing this card against the other three.
+ *
+ * Nothing here is praise or blame. It says what happened, in the terms the
+ * table can check against the big screen, and stays silent when there is
+ * nothing true and short to say.
+ */
+function comparison(log: NonNullable<Room['lastRound']>, role: Role): string | null {
+  const mine = log.reveals.find((r) => r.role === role)
+  if (!mine) return null
+  const cuts = log.reveals.filter((r) => r.emissions < -0.05)
+
+  if (mine.emissions < -0.05 && cuts.length && mine.emissions <= Math.min(...cuts.map((r) => r.emissions))) {
+    return cuts.length === 1
+      ? 'The only cut anyone made this round.'
+      : 'The biggest cut anyone made this round.'
+  }
+  if (mine.emissions > 0.05) return 'This added carbon rather than cutting it.'
+  if (mine.multiplier >= 1.5) return 'Something else at the table made this land harder than it should have.'
+  if (mine.multiplier <= 0.75) return 'It landed at less than full strength.'
+  return null
 }
 
 // ── Endgame ────────────────────────────────────────────────────────────────
 
+/**
+ * How the country did, in three grades rather than two.
+ *
+ * Mixed tables reach all three targets 22% of the time, and a workshop group
+ * plays this once, not twenty times. Four in five rooms currently leave having
+ * simply failed, which is both demoralising and, more to the point, untrue:
+ * there is an enormous difference between missing growth by three tenths of a
+ * percent and never getting near any of it, and the ending said the same thing
+ * about both.
+ */
+export type Grade = 'REACHED' | 'CLOSE' | 'MISSED'
+
+/** How near a missed target has to be for the country to count as close. */
+const CLOSE_ENOUGH = { emissions: 10, growth: 0.5, happiness: 0.5 } as const
+
 export interface Endgame {
   win: boolean
-  targets: { key: 'emissions' | 'growth' | 'happiness'; value: number; target: number; met: boolean }[]
+  grade: Grade
+  targets: {
+    key: 'emissions' | 'growth' | 'happiness'
+    value: number
+    target: number
+    met: boolean
+    /** How far short, in that target's own unit. Zero when it was met. */
+    gap: number
+    /** "Carbon reached net zero." / "Economy averaged 4.7%. You needed 5.0%." */
+    verdict: string
+  }[]
   players: {
     role: Role
     name: string
@@ -1256,18 +1378,61 @@ export interface Endgame {
  * Hollow Victory is not a bug. If the country misses even one target, everyone
  * who hit their private goal gets it, with no partial credit and no
  * consolation. That card does more teaching than an hour of slides.
+ *
+ * Grading the country changes none of that. The grade is about the country and
+ * the title is about the player, and the whole point of Hollow Victory is that
+ * those two are not the same thing.
  */
 export function endgame(room: Room, content: Content): Endgame {
   const res = result(room.game, content)
   const c = content.config
 
+  const targets: Endgame['targets'] = [
+    {
+      key: 'emissions',
+      value: res.e,
+      target: c.tgt_e,
+      met: res.pe,
+      gap: Math.max(0, res.e - c.tgt_e),
+      verdict: res.pe
+        ? res.e < -0.5
+          ? `Carbon went past net zero, to −${Math.abs(res.e).toFixed(0)} Mt.`
+          : 'Carbon reached net zero.'
+        : `Carbon finished at ${res.e.toFixed(0)} Mt. It had to reach zero.`,
+    },
+    {
+      key: 'growth',
+      value: res.g,
+      target: c.tgt_g,
+      met: res.pg,
+      gap: Math.max(0, c.tgt_g - res.g),
+      verdict: res.pg
+        ? `The economy averaged ${res.g.toFixed(1)}%.`
+        : `The economy averaged ${res.g.toFixed(1)}%. You needed ${c.tgt_g.toFixed(1)}%.`,
+    },
+    {
+      key: 'happiness',
+      value: res.h,
+      target: c.tgt_h,
+      met: res.ph,
+      gap: Math.max(0, c.tgt_h - res.h),
+      verdict: res.ph
+        ? `Quality of life reached ${res.h.toFixed(1)}.`
+        : `Quality of life reached ${res.h.toFixed(1)}. You needed ${c.tgt_h.toFixed(1)}.`,
+    },
+  ]
+
+  // Close means every gap is small, not that one of them happens to be. A
+  // country that hit two targets and missed the third by forty Mt did not
+  // nearly make it, and telling that room otherwise is the kind of flattery
+  // that empties a debrief.
+  const close = targets.every((t) => t.met || t.gap <= CLOSE_ENOUGH[t.key])
+  const grade: Grade = res.win ? 'REACHED' : close ? 'CLOSE' : 'MISSED'
+
   return {
     win: res.win,
-    targets: [
-      { key: 'emissions', value: res.e, target: c.tgt_e, met: res.pe },
-      { key: 'growth', value: res.g, target: c.tgt_g, met: res.pg },
-      { key: 'happiness', value: res.h, target: c.tgt_h, met: res.ph },
-    ],
+    grade,
+    targets,
     players: ROLES.map((role) => {
       const player = room.players[role]
       const goal = content.privateGoals[role].find((g) => g.id === player.goalId) ?? null

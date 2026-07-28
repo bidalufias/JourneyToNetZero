@@ -19,16 +19,11 @@ export type Phase =
   | 'table'
   | 'choice'
   | 'reckoning'
+  | 'trust'
   | 'summary'
   | 'results'
   | 'ended'
 
-/**
- * Phase lengths in milliseconds. The published session is thirty-five minutes:
- * setup and onboarding, six rounds of play, then the results and the debrief.
- * It used to be advertised as thirty and run closer to thirty-seven, and a
- * workshop that overruns by seven minutes is a workshop that gets cut short.
- */
 /**
  * The onboarding, then the round.
  *
@@ -42,6 +37,15 @@ export type Phase =
  * a real round runs in. The plan had them the other way round, on the reasoning
  * that picking is the simpler verb; teaching the sequence backwards to save one
  * step of difficulty is a poor trade.
+ *
+ * The round is built around a fixed budget rather than around what each beat
+ * could justify on its own. The Reveal used to run 75 seconds, six times, which
+ * is seven and a half minutes of the session spent watching rather than
+ * playing: the flip sequence itself needs about fifteen seconds, and the rest
+ * of it was a room waiting. That time is now split between the Talk, which is
+ * where the game actually happens, and a short beat that says where the two
+ * Public Trust tokens went, which the engine has awarded every round since the
+ * first build without a single surface ever mentioning it.
  */
 export const PHASE_MS: Record<Phase, number> = {
   lobby: 0, // ends when the facilitator starts
@@ -50,13 +54,34 @@ export const PHASE_MS: Record<Phase, number> = {
   practiceChoice: 60_000,
   power: 30_000,
   goal: 45_000,
-  crisis: 30_000,
+  crisis: 25_000,
   table: 90_000,
-  choice: 45_000,
-  reckoning: 75_000,
+  choice: 40_000,
+  reckoning: 45_000,
+  trust: 15_000,
   summary: 8_000,
   results: 0, // advances on facilitator input
   ended: 0,
+}
+
+/**
+ * Round 1 runs long, and only Round 1.
+ *
+ * The first crisis is the first time anybody reads a card, makes a case to a
+ * stranger, or finds out what the lock button does under a clock. Charging that
+ * round the same forty seconds as Round 6 is what produces a table that spends
+ * its first round confused and its second round apologising for the first. The
+ * coach strip on the phone disappears at the same time these do.
+ */
+const ROUND_ONE_MS: Partial<Record<Phase, number>> = {
+  crisis: 35_000,
+  table: 120_000,
+  choice: 60_000,
+}
+
+/** How long this phase runs, for the round the room is actually in. */
+export function phaseMs(phase: Phase, round: number): number {
+  return (round <= 1 ? ROUND_ONE_MS[phase] : undefined) ?? PHASE_MS[phase]
 }
 
 /** The Reckoning flips one card at a time, ~3s apart. Never all four at once. */
@@ -87,6 +112,20 @@ export interface Player {
 }
 
 /**
+ * The three shapes of the one thing a player can say out loud.
+ *
+ * There used to be four ways to speak: promise, demand, offer and a private
+ * co-funding toggle that the room never saw. Three of them produced the same
+ * kind of line on the same board, and the fourth was the single most important
+ * commitment in the game, made by tapping a switch nobody was told about.
+ *
+ * `deal` is new, and it is the sentence the design document ends on: the most
+ * important number in a session is the number of times somebody says "what if
+ * we both did it?", and until now the game had no way to say it.
+ */
+export type SayShape = 'promise' | 'demand' | 'deal' | 'cofund'
+
+/**
  * A public pledge. Recorded and displayed, never enforced. The first time
  * somebody breaks one, the room changes, and that moment is the training.
  */
@@ -96,11 +135,21 @@ export interface Promise_ {
   from: Role
   /** The pledge text, composed from preset phrasings so it always reads well. */
   text: string
-  kind: 'promise' | 'demand'
+  kind: SayShape
   /** Option the pledge commits to, when the phrasing names one. */
   optionId: string | null
-  /** Resolved at the Reckoning: did they do what they said? */
-  outcome: 'kept' | 'broken' | 'unresolved'
+  /** For a deal: the seat the pledge is conditional on, and on what. */
+  ifRole: Role | null
+  ifConditionId: string | null
+  /**
+   * Resolved at the Reveal.
+   *
+   * `void` exists for deals only, and it is the honest answer rather than a
+   * softened one: a conditional pledge whose condition never happened did not
+   * bind anybody, so calling it broken would punish the one player who tried to
+   * build something, and calling it kept would reward a promise nobody tested.
+   */
+  outcome: 'kept' | 'broken' | 'void' | 'unresolved'
 }
 
 /** A resource transfer. Executes immediately on acceptance and is permanent. */
@@ -114,22 +163,21 @@ export interface Offer {
   status: 'pending' | 'accepted' | 'declined' | 'expired'
 }
 
-export type TipKind = 'forecast' | 'dossier' | 'memo' | 'rumour'
-
+/**
+ * A Tip Off: one true warning, to one player, about what is coming next.
+ *
+ * There were four kinds, one of which was a coin flip. A tip is now always
+ * true, so there is nothing to explain and nothing to gamble: the only decision
+ * is whether to keep an advantage or trade it for standing, which is a decision
+ * a player can make in the five seconds they actually have.
+ */
 export interface InsiderTip {
   id: string
   round: number
   /** Exactly one player per round. Never shown on the dashboard. */
   to: Role
-  kind: TipKind
-  reliability: 'CONFIRMED' | 'UNVERIFIED'
   source: string
   text: string
-  /**
-   * Whether the tip is actually true. Rolled server-side at deal time for
-   * UNVERIFIED cards and never sent to any client until the holder publishes.
-   */
-  isTrue: boolean
   published: boolean
   /** Set at the end of the round, for published tips only. */
   revealed: boolean
@@ -214,7 +262,7 @@ export interface DashboardView {
   offersInFlight: Offer[]
   /** Announced, but never who received it. */
   tipDealtThisRound: boolean
-  publishedTip: { from: Role; text: string; source: string; verdict: 'true' | 'false' | null } | null
+  publishedTip: { from: Role; text: string; source: string } | null
   /** Target is null until the choices resolve. The engine derives it. */
   spotlight: { by: Role; target: Role | null; remaining: number } | null
   veto: { target: Role; removed: string[]; remaining: number } | null
@@ -222,6 +270,14 @@ export interface DashboardView {
   history: RoundLog[]
   headlines: string[]
   targets: { emissions: number; growth: number; happiness: number }
+  /**
+   * Where this round's two Public Trust tokens went.
+   *
+   * The engine has awarded these every round since the first build and no
+   * surface has ever said so, which left the Community holding a power the
+   * game told them about and then never showed them using.
+   */
+  trustAward: { care: TrustRole; future: TrustRole } | null
 }
 
 /**
@@ -280,8 +336,29 @@ export interface PhoneView {
     clean: number
     targets: { carbon: number; economy: number; life: number }
   }
-  /** Written in plain language, no numbers: the phone's only interpretation. */
-  roundResult: { didWhat: string; cost: string; others: string } | null
+  /**
+   * What your card did, once the cards are face up.
+   *
+   * The no-numbers rule is right before a choice and wrong after it. Once four
+   * cards are on the big screen the information is not private any more, and
+   * withholding it teaches nothing: a player who cannot connect the card they
+   * read to the meter that moved has played six rounds of a guessing game.
+   */
+  roundResult: {
+    didWhat: string
+    cost: string
+    others: string
+    /** The card, and the same four chips it carried before it was chosen. */
+    title: string
+    impact: Impact[]
+    costLabel: string
+    /** Carbon actually delivered, in Mt, after every rule the engine applied. */
+    carbon: number
+    /** One line of comparison against the rest of the table, or nothing. */
+    note: string | null
+  } | null
+  /** Where the two Public Trust tokens went this round, and why. */
+  trustAward: { care: Role; future: Role } | null
   waitingOn: number
 }
 

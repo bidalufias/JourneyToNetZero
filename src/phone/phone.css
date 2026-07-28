@@ -663,3 +663,82 @@ a.btn {
   color: var(--color-text);
   border-bottom: var(--rule) solid color-mix(in srgb, var(--color-text) 20%, transparent);
 }
+
+/*
+ * After the reveal: what your card actually did.
+ *
+ * Deliberately built out of the option card's own parts. The four chips are the
+ * same component with the same colours, because the whole point of this panel
+ * is that a player recognises it as the card they read forty seconds ago and
+ * can put the promise and the outcome side by side.
+ *
+ * The delivered figure is the one number the app ever shows a player about
+ * their own choice, and it sits under the chips rather than beside the title so
+ * it reads as the consequence of them.
+ */
+.outcome {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  background: var(--color-neutral-100);
+  border-left: 3px solid var(--skin-mark);
+}
+
+.outcome__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.outcome__title { font: 700 16px/1.25 var(--font-heading); }
+
+.outcome__cost {
+  flex: 0 0 auto;
+  font: 700 10px/1 var(--font-mono);
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+.outcome .impact { margin-top: var(--space-3); }
+
+.outcome__delivered {
+  margin: var(--space-3) 0 0;
+  font: 700 15px/1.2 var(--font-mono);
+}
+
+.outcome__note {
+  margin: 4px 0 0;
+  font: italic 400 13px/1.4 var(--font-body);
+  color: var(--color-neutral-700);
+}
+
+/*
+ * SAY IT: one sentence shape per row, with the sentence itself as the label.
+ *
+ * The lead line is the sentence with a blank in it rather than a verb, because
+ * a player choosing between "Promise", "Demand" and "Deal" is being asked to
+ * classify what they want to say before they have said it.
+ */
+.say__shape {
+  display: block;
+  text-align: left;
+  height: auto;
+  padding: var(--space-3) var(--space-4);
+}
+
+.say__lead {
+  display: block;
+  font: 700 15px/1.3 var(--font-heading);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.say__hint {
+  display: block;
+  margin-top: 2px;
+  font: 400 12px/1.4 var(--font-body);
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.75;
+}

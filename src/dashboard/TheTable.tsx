@@ -9,9 +9,17 @@
  * The tip line at the bottom right is deliberately vague: announcing that
  * *someone* knows something is what makes four people suspicious of each other.
  */
-import type { DashboardView } from '../game/session'
+import type { DashboardView, SayShape } from '../game/session'
 import { ROLE_LABEL } from '../game/session'
 import { RoleGlyph } from '../ui/primitives'
+
+/** A DEAL is called out because it is the one the room should be watching. */
+const PLEDGE_LABEL: Record<SayShape, string> = {
+  promise: 'PLEDGED',
+  demand: 'ASKED FOR',
+  deal: 'A DEAL',
+  cofund: 'PAYING HALF',
+}
 
 export function TheTable({ view }: { view: DashboardView }) {
   const promises = view.promises
@@ -27,9 +35,7 @@ export function TheTable({ view }: { view: DashboardView }) {
               <li key={p.id} className="pledge" data-role={p.from}>
                 <RoleGlyph role={p.from} size={16} className="pledge__glyph" />
                 <span className="pledge__text">{p.text}</span>
-                <span className={`pledge__kind pledge__kind--${p.kind}`}>
-                  {p.kind === 'promise' ? 'PLEDGED' : 'DEMAND'}
-                </span>
+                <span className={`pledge__kind pledge__kind--${p.kind}`}>{PLEDGE_LABEL[p.kind]}</span>
               </li>
             ))}
           </ul>
@@ -54,8 +60,7 @@ export function TheTable({ view }: { view: DashboardView }) {
                   <RoleGlyph role={o.to} size={16} />
                 </span>
                 <span className="inflight__label">
-                  {o.amount} {o.resource === 'fiscal' ? 'FISCAL POINT' : 'CAPITAL'}
-                  {o.amount > 1 ? 'S' : ''}
+                  {o.amount} {o.resource === 'fiscal' ? 'BUDGET' : 'COMPANY MONEY'}
                 </span>
               </li>
             ))}
@@ -115,11 +120,6 @@ export function TheTable({ view }: { view: DashboardView }) {
             <h3 className="tip-panel__title">TOLD THE ROOM</h3>
             <p className="tip-panel__from">{ROLE_LABEL[view.publishedTip.from]} · {view.publishedTip.source}</p>
             <p className="tip-panel__body">{view.publishedTip.text}</p>
-            {view.publishedTip.verdict ? (
-              <p className={`tip-panel__verdict tip-panel__verdict--${view.publishedTip.verdict}`}>
-                {view.publishedTip.verdict === 'true' ? 'IT WAS TRUE' : 'IT WAS NOT TRUE'}
-              </p>
-            ) : null}
           </div>
         ) : null}
 

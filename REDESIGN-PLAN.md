@@ -310,28 +310,33 @@ Publishing 30 and running 37 is worse than publishing 35.
 | Trust | **Keep, and fix it** | Section 5. |
 | Legacy flags, drift, MAC, role scaling | **Hide entirely** | Felt, never explained. Remove from the guide's glossary. |
 
-### SAY IT, the merged negotiation verb
+### SAY IT, the merged negotiation verb — SHIPPED
 
-Three overlapping verbs plus a toggle become one action with three sentence
-shapes, composed not typed:
+Three overlapping verbs plus a hidden toggle became one button and one sheet,
+composed by tapping, never typed. As shipped:
 
-- `I will choose "<card>".`
-- `I want the <seat> to <condition>.`
-- `I will choose "<card>" if the <seat> chooses "<their card>".`
+- `The Business will choose "Retool for the Green Market".`
+- `The Business will choose "Retool for the Green Market" if the Government moves too.`
+- `The Activist wants the Business to pay its share before anyone else moves.`
+- `The Government will pay half of any partnership the Business signs.`
 
-The third is new and is the most valuable addition in this plan. The design
+The second is new and is the most valuable addition in this plan. The design
 document closes by saying the most important number in the game is the number of
-times somebody says *"what if we both did it?"* The game currently has no way to
-say that sentence. Make it one tap, grammatical, on the shared screen, and
-resolved at the Reveal as kept or broken by both parties.
+times somebody says *"what if we both did it?"*, and the game had no way to say
+that sentence. It is now two taps, grammatical on both surfaces, and resolved at
+the Reveal against **both** parties.
 
-The Government gets one extra sentence: `The Government will pay half of any
-partnership the Business signs.` That is co-funding, as a public commitment.
+**One live sentence per player per round.** A second SAY IT replaces the first.
+That cap is what keeps the board readable from the back of a room, and it is the
+only pressure in the game to say the *right* thing rather than everything. The
+Government's co-funding pledge is the exception, because it is a standing
+commitment rather than this round's one thing to say.
 
 **Note on the other review's proposal to cap deals at one per round:** cap the
-verbs, not the deals. The negotiation phase is where the learning happens. It is
-confusing because there are four ways to speak, not because people speak too
-often.
+verbs, not the deals. The negotiation phase is where the learning happens. It was
+confusing because there were four ways to speak, not because people speak too
+often. Shipped as one *sentence* per round, with offers, the Spotlight and the
+veto left uncapped.
 
 ---
 
@@ -517,23 +522,32 @@ stops four people reading their phones during the welcome.
 **Table mode is dropped.** It existed for a room with no projector, which is a
 room that cannot run this game as designed.
 
-## 9. Timing
+## 9. Timing — SHIPPED
 
-| Phase | Now | New | Round 1 |
+| Phase | Was | Now | Round 1 |
 |---|---|---|---|
 | The Crisis | 30s | 25s | 35s |
 | The Talk | 90s | 90s | 120s |
 | The Choice | 45s | 40s | 60s |
 | The Reveal | 75s | 45s | 45s |
-| Public Trust award | — | 15s | 15s |
-| **Round total** | **240s** | **215s** | **275s** |
+| Public Trust | — | 15s | 15s |
+| The Story So Far | 8s | 8s | 8s |
+| **Round total** | **248s** | **223s** | **283s** |
 
-The Reveal is currently 75 seconds of passive watching, six times over, which is
-7.5 minutes of the play budget spent not playing. The flip sequence needs about
-15 seconds plus room to react.
+The Reveal was 75 seconds of passive watching, six times over, which is 7.5
+minutes of the play budget spent not playing. The flip sequence runs about 20
+seconds; the rest was a room waiting.
 
-**Session:** 6 min onboarding + 21.5 min rounds + 1 min extra in Round 1 + 3 min
-results and debrief ≈ **32 minutes**, published as 35.
+**The Public Trust beat is not new content.** The engine has awarded two tokens
+every round since the first build and no surface has ever said so, while the
+Community's own brief tells them to make people earn it in front of them. It
+also gates three cards. Fifteen seconds, two names, and the running totals.
+
+**Session:** 4.25 min onboarding + 23.3 min rounds + 3 min results and debrief ≈
+**31 minutes**, published as 35. The timed part is now 27.6 minutes, which is
+under the plan's own estimate, and `test/room.test.ts` holds the ceiling at 24
+minutes of rounds so the next beat that "only needs ten seconds" has to argue
+for itself.
 
 ---
 
@@ -596,15 +610,34 @@ Sequenced so each stage ships something playable and makes the next cheaper.
 | 2.5 | Round 1 coach strip | done |
 | 2.6 | COMPROMISED made real | done, re-measured to 40.1% |
 
-### Stage 3: structure (1 week)
+### Stage 3: structure - DONE
 
-| | |
-|---|---|
-| 3.1 | SAY IT: merge promise, demand and co-funding, add the conditional |
-| 3.2 | Tips cut to one type |
-| 3.3 | Retimed phases |
-| 3.4 | Causal feedback after the Reveal |
-| 3.5 | Outcome grading |
+| | | |
+|---|---|---|
+| 3.1 | SAY IT | done, one command, four sentences, the deal is new |
+| 3.2 | Tips cut to one type | done, always true, no gamble left |
+| 3.3 | Retimed phases | done, section 9, plus a longer Round 1 |
+| 3.4 | Causal feedback after the Reveal | done, the delivered figure, not the printed one |
+| 3.5 | Outcome grading | done, three grades, every gap named |
+
+**What the deal turned out to need.** The plan's sentence was *"I will choose X
+if the &lt;seat&gt; chooses Y"*, which cannot be built: naming their card means
+showing every player all sixteen cards, or letting them pledge against something
+they cannot see. The condition is a small set instead, settled from facts the
+reveal already carries — *moves too*, *does not take the cheap card* — and it is
+worded in the **third person**, because a pledge is composed on a phone and read
+off a projector, and "if the Business moves with me" is wrong on the projector.
+
+**And a third outcome.** A deal resolves as kept, broken, **or void**. If the
+other seat never did their part the pledge was never called in, so the board
+says so. Without that the safe move is to say nothing, which is the opposite of
+the point: the risk of offering a deal has to be that nobody takes it, never
+that you get named a liar for a promise nobody tested.
+
+**Co-funding is a sentence now, not a switch.** It was a private toggle on the
+Government's phone that halved or doubled the value of somebody else's card,
+with no way for the Business to see it, ask for it on the record, or hold anyone
+to it. It is the fourth SAY IT shape and it stands on the board all round.
 
 ### Stage 4: reach (1.5 weeks)
 
@@ -616,6 +649,55 @@ Sequenced so each stage ships something playable and makes the next cheaper.
 | 4.3 | Bahasa Malaysia |
 | 4.4 | Per-player debrief |
 | 4.5 | Persistent score bug, louder Moving Together |
+
+---
+
+## 11b. Where this stands, and how to verify a stage
+
+**Merged and live:** Stage 0 (the rebase to net zero), Stage 1 (comprehension),
+Stage 2 (the onboarding), Stage 3 (structure). **Remaining:** Stage 4.
+
+**Stage 4 note.** 4.1 hands the *care* token to the Community by hand, and the
+screen it will hand it out on now exists: the Public Trust beat shipped in Stage
+3 showing the engine's award. Stage 4 changes who decides it, not where it
+appears, and it is still the one remaining change that needs a simulation re-run.
+
+Both open decisions are closed. Compromises are real, and the facilitator is
+permanent with the board carrying their line.
+
+### Drive the browser before calling a stage done
+
+Stages 1 and 2 both passed their tests and built cleanly, and driving one real
+session found **eleven defects**, three of which would have ended a workshop.
+The tests could not have caught any of them, and the worst was not cosmetic:
+every negotiation command tested for the live phase by name, so the practice
+round was entirely inert. The test covering it passed by asserting the practice
+was thrown away, which is trivially true when the practice never happened.
+
+So a stage is not finished when `npm test` is green. It is finished when a
+session has been driven end to end on both surfaces and the screenshots have
+been looked at.
+
+**How.** Chromium is pre-installed at `/opt/pw-browsers/chromium-1194/`, but
+Playwright is not a project dependency and the path is version-pinned, so it
+needs installing into a scratch directory first. The local transport shares
+state over `BroadcastChannel` and `localStorage`, which means the projector and
+all four phones have to live in **one browser context**. Drive the projector at
+1600x900 and the phones at 390x844, advance with the `n` key, and screenshot
+both surfaces at every phase.
+
+Worth capturing as a project skill via `/run-skill-generator` so this is a
+one-liner rather than fifteen minutes of setup each time.
+
+### Two silent failure modes now have tests
+
+Both were found by accident and would have recurred.
+
+- **`test/content.test.ts`** — the content pack exists twice, as JSON for the
+  game and as Python for the reference engine, and nothing held them together.
+  Six fields had already drifted.
+- **`test/tokens.test.ts`** — an undefined CSS custom property does not fall
+  back, it voids the whole declaration, silently. Three were live.
 
 ---
 

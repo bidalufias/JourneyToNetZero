@@ -159,10 +159,11 @@ export const BEATS: Beat[] = [
     onScreen: 'Who is at the table, the promises made, and the countdown.',
     say: [
       'Talking time! Ninety seconds. Talk to each other, not to your phones.',
-      'The best sentence in this game is six words long: “what if we both did it?” Somebody use it.',
+      'The best sentence in this game is six words long: “what if we both did it?” Your phone will say it for you. SAY IT, then the second option down. Somebody use it.',
     ],
     firstTime: [
-      'Everything you need is on your phone. You can send somebody money. You can promise something, out loud and on the big screen. You can ask somebody for something and name your price.',
+      'One button. SAY IT. Behind it are three sentences: I will choose this, I will choose this if you do that, or I want somebody to do something. Pick one, tap twice, and the whole room sees it.',
+      'That middle one is a deal, and it is the most powerful thing on your phone. If they do their part and you go back on yours, this screen says so in front of everybody. If they never do their part, nothing is held against you. So there is no risk in offering one.',
       'Activist, you have three Spotlights for the whole game. Name somebody in public and their dirty card only half works. Community, you have two vetoes. Take somebody’s worst card off the table completely. Three and two. That is all you get, so spend them where it hurts.',
     ],
     watch:
@@ -194,7 +195,21 @@ export const BEATS: Beat[] = [
       'Locked. Eyes up. Let us see what this table actually did.',
     ],
     watch:
-      'Then be quiet. This is the loudest ninety seconds of the round and it belongs to them. If a promise breaks on screen, the room will do the reacting; a broken promise landing in silence teaches more about trust than anything you could say over the top of it.',
+      'Then be quiet. This is the loudest forty-five seconds of the round and it belongs to them. If a promise breaks on screen, the room will do the reacting; a broken promise landing in silence teaches more about trust than anything you could say over the top of it.',
+    next: 'Shows where the two Public Trust tokens went.',
+  },
+  {
+    phase: 'trust',
+    label: 'PUBLIC TRUST',
+    length: seconds('trust'),
+    onScreen: 'The two seats the country backed this round, and the running totals.',
+    say: [
+      'And the country has been watching. Two Public Trust go out every round: one to whoever looked after people, one to whoever built the future.',
+      'Nobody hands these out and you cannot ask for them. Look at your phone as well; it now tells you what your own card actually did.',
+    ],
+    firstTime: [
+      'Minister, watch that number. Some of your best cards will not open until the country has backed you enough times.',
+    ],
     next: 'Shows the story so far.',
   },
   {
@@ -217,9 +232,10 @@ export const BEATS: Beat[] = [
       'Ladies and gentlemen, it is 2050. Let us see what became of Semenanjara.',
       '[Five seconds of silence. Count them.]',
       'Three targets. All three, or none of it counts. That was the deal you took half an hour ago.',
+      '[Read the grade off the top of the screen, then the three lines under it, exactly as written. They name the gap.]',
     ],
     watch:
-      'If somebody hit their private goal in a session where the country missed, they get Hollow Victory. Read it out and let it sit. That card does more teaching than an hour of slides, and softening it throws the session away at the last moment.',
+      'If somebody hit their private goal in a session where the country missed, they get Hollow Victory. Read it out and let it sit. That card does more teaching than an hour of slides, and softening it throws the session away at the last moment. The grade is about the country and the title is about the player: SO CLOSE and Hollow Victory can and do land on the same screen.',
     next: 'Ends the session and holds on the final screen.',
   },
   {

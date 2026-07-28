@@ -36,7 +36,7 @@ export function PracticeTalk({ view, send }: { view: PhoneView; send: (c: Comman
       <Coach step={1} of={4}>
         {said
           ? 'Good. That is on the big screen now, where everyone can see it.'
-          : 'This is where you talk. Promise something, or ask someone for something. Nothing you say here counts.'}
+          : 'This is where you talk. Tap SAY IT and pick a sentence. Nothing you say here counts.'}
       </Coach>
       <TableActions view={view} send={send} />
     </>
