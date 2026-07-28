@@ -43,7 +43,7 @@ SCEN["R1A"] = dict(
       ],
       activist=[
         op("R1A-A1","ESCALATE","No Bailouts for Polluters","Green conditions on every rescue Ringga.",None,-4,-0.3,-0.1,4,[],"Campaigners demand climate conditions on bailouts"),
-        op("R1A-A2","COLLABORATE","Join the Recovery Taskforce","Take the seat. Shape it from inside.",None,-3,0.3,0.3,5,["AT_THE_TABLE"],"Movement leader joins recovery taskforce"),
+        op("R1A-A2","COLLABORATE","Join the Recovery Taskforce","Take the seat. Shape it from inside.",None,-3,0.3,0.3,5,["AT_THE_TABLE","COMPROMISED"],"Movement leader joins recovery taskforce"),
         op("R1A-A3","EDUCATE","Publish the Green Jobs Report","Independent modelling of a clean recovery.",None,-1,0.0,0.2,3,["EVIDENCE_1"],"Report: clean recovery could create 340,000 jobs"),
       ]))
 
@@ -65,11 +65,11 @@ SCEN["R1B"] = dict(
       community=[
         op("R1B-C1","ADAPT","Switch to Local Food","Cheaper, closer, and a lot less choice.",None,-5,-0.1,-0.2,4,["FOOD_LOCAL"],"Local produce sales up 40%"),
         op("R1B-C2","DEMAND_RELIEF","Demand Price Controls","Cap the price of the forty things that matter.",None,2,0.1,0.6,-1,["PRICE_CONTROLS"],"Government caps prices on 40 essential goods"),
-        op("R1B-C3","SELF_ORGANISE","Neighbourhood Buying Groups","Buy in bulk, cut out the middle.",None,-4,0.2,0.4,4,["BUYING_GROUPS"],"Buying clubs cut household bills by a fifth"),
+        op("R1B-C3","SELF_ORGANISE","Neighbourhood Buying Groups","Buy in bulk, cut out the middleman.",None,-4,0.2,0.4,4,["BUYING_GROUPS"],"Buying clubs cut household bills by a fifth"),
       ],
       activist=[
         op("R1B-A1","ESCALATE","Expose the Speculators","Name the funds betting against the country.",None,-2,-0.5,0.1,2,[],"Investigation names the funds shorting the Ringga"),
-        op("R1B-A2","COLLABORATE","Join the Economic Council","Argue for a green industrial policy from inside.",None,-3,0.3,0.3,5,[],"Campaigner takes seat on economic council"),
+        op("R1B-A2","COLLABORATE","Join the Economic Council","Argue for a green industrial policy from inside.",None,-3,0.3,0.3,5,["COMPROMISED"],"Campaigner takes seat on economic council"),
         op("R1B-A3","EDUCATE","Map the Import Dependency","Show exactly where the country is exposed.",None,-1,0.0,0.2,3,["EVIDENCE_1"],"Study maps Semenanjara's hidden import risk"),
       ]))
 
@@ -95,7 +95,7 @@ SCEN["R1C"] = dict(
       ],
       activist=[
         op("R1C-A1","ESCALATE","Reject the Conditions","Austerity by another name. Fight it publicly.",None,-2,-0.5,0.2,2,[],"Movement rejects 'austerity by another name'"),
-        op("R1C-A2","COLLABORATE","Negotiate Green Conditionality","Rewrite the loan conditions around clean investment.",None,-4,0.2,0.3,6,["GREEN_CONDITIONS"],"Loan conditions rewritten around clean investment"),
+        op("R1C-A2","COLLABORATE","Negotiate Green Conditionality","Rewrite the loan conditions around clean investment.",None,-4,0.2,0.3,6,["GREEN_CONDITIONS","COMPROMISED"],"Loan conditions rewritten around clean investment"),
         op("R1C-A3","EDUCATE","Publish the Debt Audit","Show the public what the debt actually bought.",None,-1,0.1,0.2,3,["EVIDENCE_1"],"Citizens' audit questions RG 30bn of debt"),
       ]))
 
@@ -113,7 +113,7 @@ SCEN["R2A"] = dict(
       business=[
         op("R2A-B1","TRANSITION","Solar and Storage on Every Roof","Generate our own. Never take this call again.",C(3),-13,-0.2,0.2,11,["SELF_GEN"],"Factories go off-grid with solar and storage"),
         op("R2A-B2","EXPAND","Switch to Cheap Coal","Available, legal, filthy.",C(-2),8,0.7,-0.3,-5,["BUILT_COAL"],"Industry switches to coal as gas prices bite"),
-        op("R2A-B3","PARTNER","Corporate Power Purchase Agreement","Twenty-year clean power deal - needs the state to sign.",C(1),-8,0.3,0.1,7,["PPA"],"Landmark corporate clean power deal signed"),
+        op("R2A-B3","PARTNER","Corporate Power Purchase Agreement","Twenty-year clean power deal. Needs the state to sign.",C(1),-8,0.3,0.1,7,["PPA"],"Landmark corporate clean power deal signed"),
       ],
       community=[
         op("R2A-C1","ADAPT","National Energy Saving Pact","Everyone uses less. Nobody enjoys it.",None,-5,-0.1,-0.2,3,[],"Households cut power use by 12%"),
@@ -122,7 +122,7 @@ SCEN["R2A"] = dict(
       ],
       activist=[
         op("R2A-A1","ESCALATE","Blockade the Coal Terminal","Make the cheap option expensive.",None,-3,-0.5,-0.2,3,[],"Protesters blockade the coal terminal"),
-        op("R2A-A2","COLLABORATE","Co-Design the Energy Roadmap","Write the plan instead of shouting at it.",None,-4,0.2,0.3,6,[],"Campaigners co-write the national energy roadmap"),
+        op("R2A-A2","COLLABORATE","Co-Design the Energy Roadmap","Write the plan instead of shouting at it.",None,-4,0.2,0.3,6,["COMPROMISED"],"Campaigners co-write the national energy roadmap"),
         op("R2A-A3","EDUCATE","Expose the Subsidy Bill","Show the public where the subsidy really goes.",None,-1,0.1,-0.1,3,["EVIDENCE_2"],"Top 10% take a third of the fuel subsidy"),
       ]))
 
@@ -148,7 +148,7 @@ SCEN["R2B"] = dict(
       ],
       activist=[
         op("R2B-A1","ESCALATE","Occupy the Utility HQ","Sit in the lobby until someone explains the plan.",None,-3,-0.5,-0.1,3,[],"Protesters occupy NuriTenaga lobby"),
-        op("R2B-A2","COLLABORATE","Join the Grid Taskforce","Help fix it rather than film it.",None,-4,0.2,0.3,6,[],"Campaigner joins national grid taskforce"),
+        op("R2B-A2","COLLABORATE","Join the Grid Taskforce","Help fix it rather than film it.",None,-4,0.2,0.3,6,["COMPROMISED"],"Campaigner joins national grid taskforce"),
         op("R2B-A3","EDUCATE","Publish the Data Centre Audit","Who is actually using all this power?",None,-1,0.0,0.2,3,["EVIDENCE_2"],"Audit: data centres take 9% of the grid"),
       ]))
 
@@ -174,7 +174,7 @@ SCEN["R2C"] = dict(
       ],
       activist=[
         op("R2C-A1","ESCALATE","Name the Biggest Beneficiaries","Publish the list. Let people see it.",None,-3,-0.3,0.2,3,[],"Top earners take a third of fuel subsidy"),
-        op("R2C-A2","COLLABORATE","Co-Design the Targeting System","Make sure it doesn't miss the people it's for.",None,-4,0.3,0.4,6,[],"Civil society helps design the new system"),
+        op("R2C-A2","COLLABORATE","Co-Design the Targeting System","Make sure it doesn't miss the people it's for.",None,-4,0.3,0.4,6,["COMPROMISED"],"Civil society helps design the new system"),
         op("R2C-A3","EDUCATE","Publish the Distributional Study","Who really gains from cheap fuel?",None,-1,0.0,0.2,3,["EVIDENCE_2"],"Study shows who really gains from cheap fuel"),
       ]))
 
@@ -201,7 +201,7 @@ SCEN["R3A"] = dict(
       ],
       activist=[
         op("R3A-A1","ESCALATE","Name the Price Gougers","Publish every doubled price.",None,-2,-0.2,0.2,2,[],"Campaign names the price gougers"),
-        op("R3A-A2","COLLABORATE","Join the National Recovery Council","Fight for a green recovery from inside the room.",None,-3,0.3,0.4,5,[],"Campaigner joins national recovery council"),
+        op("R3A-A2","COLLABORATE","Join the National Recovery Council","Fight for a green recovery from inside the room.",None,-3,0.3,0.4,5,["COMPROMISED"],"Campaigner joins national recovery council"),
         op("R3A-A3","EDUCATE","Map Clean Air and Health Data","Prove what clean air is worth in lives.",None,-1,0.0,0.2,3,["EVIDENCE_3"],"Study links clean air to 12,000 lives a year"),
       ]))
 
@@ -227,7 +227,7 @@ SCEN["R3B"] = dict(
       ],
       activist=[
         op("R3B-A1","ESCALATE","Publish the Concession Maps","Overlay the fires on the ownership records.",None,-4,-0.3,0.3,4,[],"Maps link burning to named concessions"),
-        op("R3B-A2","COLLABORATE","Join the Regional Haze Panel","Slow, diplomatic, and the only thing that crosses borders.",None,-4,0.2,0.4,6,[],"Activist appointed to regional haze panel"),
+        op("R3B-A2","COLLABORATE","Join the Regional Haze Panel","Slow, diplomatic, and the only thing that crosses borders.",None,-4,0.2,0.4,6,["COMPROMISED"],"Activist appointed to regional haze panel"),
         op("R3B-A3","EDUCATE","Citizen Air Sensor Network","Two thousand sensors nobody can argue with.",None,-1,0.0,0.3,3,["EVIDENCE_3","CITIZEN_SCIENCE"],"2,000 low-cost air sensors go live"),
       ]))
 
@@ -253,7 +253,7 @@ SCEN["R3C"] = dict(
       ],
       activist=[
         op("R3C-A1","ESCALATE","Publish the Heat Death Count","Six hundred deaths nobody recorded.",None,-3,-0.3,0.2,3,[],"Investigation: 600 heat deaths uncounted"),
-        op("R3C-A2","COLLABORATE","Join the Health Adaptation Board","Write the standards instead of protesting them.",None,-4,0.2,0.4,6,[],"Campaigner joins health adaptation board"),
+        op("R3C-A2","COLLABORATE","Join the Health Adaptation Board","Write the standards instead of protesting them.",None,-4,0.2,0.4,6,["COMPROMISED"],"Campaigner joins health adaptation board"),
         op("R3C-A3","EDUCATE","Train Community Health Volunteers","Five thousand people who know the warning signs.",None,-1,0.1,0.3,3,["EVIDENCE_3","CITIZEN_SCIENCE"],"5,000 volunteers trained in heat first aid"),
       ]))
 
@@ -280,7 +280,7 @@ SCEN["R4A"] = dict(
       ],
       activist=[
         op("R4A-A1","ESCALATE","Score Every Candidate, Name and Shame","A climate scorecard for all 222 seats.",None,-3,-0.2,0.1,4,[],"Climate scorecard published for every seat"),
-        op("R4A-A2","COLLABORATE","Negotiate Manifesto Commitments","Trade our endorsement for binding pledges.",None,-5,0.2,0.3,7,["MANIFESTO_DEAL"],"Endorsement traded for binding climate pledges"),
+        op("R4A-A2","COLLABORATE","Negotiate Manifesto Commitments","Trade our endorsement for binding pledges.",None,-5,0.2,0.3,7,["MANIFESTO_DEAL","COMPROMISED"],"Endorsement traded for binding climate pledges"),
         op("R4A-A3","EDUCATE","Get Out the Youth Vote","Register everyone under thirty.",None,-2,0.1,0.4,4,["YOUTH_WAVE"],"Youth turnout jumps 19 points"),
       ]))
 
@@ -306,7 +306,7 @@ SCEN["R4B"] = dict(
       ],
       activist=[
         op("R4B-A1","ESCALATE","Campaign on the Ground","Twenty thousand doors in eleven days.",None,-3,-0.2,0.1,4,[],"Movement knocks on 20,000 doors"),
-        op("R4B-A2","COLLABORATE","Broker a Worker-Green Alliance","Unions and greens, in one room, finally.",None,-6,0.2,0.5,8,["MANIFESTO_DEAL"],"Unions and greens sign historic pact"),
+        op("R4B-A2","COLLABORATE","Broker a Worker-Green Alliance","Unions and greens, in one room, finally.",None,-6,0.2,0.5,8,["MANIFESTO_DEAL","COMPROMISED"],"Unions and greens sign historic pact"),
         op("R4B-A3","EDUCATE","Publish the Just Transition Costing","Show that keeping it open costs more.",None,-2,0.1,0.3,4,["YOUTH_WAVE"],"Costing: transition cheaper than closure"),
       ]))
 
@@ -332,7 +332,7 @@ SCEN["R4C"] = dict(
       ],
       activist=[
         op("R4C-A1","ESCALATE","Occupy Parliament Square","Tents until they commit.",None,-3,-0.4,0.0,4,[],"Tents go up outside parliament"),
-        op("R4C-A2","COLLABORATE","Extract Cross-Party Commitments","Every faction signs, or none of them govern.",None,-6,0.2,0.4,8,["MANIFESTO_DEAL"],"All sides sign a climate commitment"),
+        op("R4C-A2","COLLABORATE","Extract Cross-Party Commitments","Every faction signs, or none of them govern.",None,-6,0.2,0.4,8,["MANIFESTO_DEAL","COMPROMISED"],"All sides sign a climate commitment"),
         op("R4C-A3","EDUCATE","Publish the Lobbying Register","Who met whom, and when.",None,-2,0.0,0.3,4,["YOUTH_WAVE"],"First public register of who met whom"),
       ]))
 
@@ -348,18 +348,18 @@ SCEN["R5A"] = dict(
         op("R5A-G3","REGULATE","Nationalise the Water Utility","Water is not a business.",F(3),-5,-0.4,0.7,5,["WATER_PUBLIC","WATER_LAW"],"State takes back the water utility"),
       ],
       business=[
-        op("R5A-B1","TRANSITION","Own It - Pay for Full Restoration","Before anyone asks. Every Ringga of it.",C(3),-9,-0.5,0.8,8,["ACCOUNTABLE"],"Company pays before it is asked to"),
+        op("R5A-B1","TRANSITION","Own It and Pay for Full Restoration","Before anyone asks. Every Ringga of it.",C(3),-9,-0.5,0.8,8,["ACCOUNTABLE"],"Company pays before it is asked to"),
         op("R5A-B2","EXPAND","Deny and Litigate","Our discharge was within permit. See you in court.",C(-1),3,0.3,-0.8,-3,["DENIAL"],"Firm denies liability, heads to court"),
         op("R5A-B3","PARTNER","Lead an Industry-Wide Discharge Standard","Every plant on the river, one standard, monitored.",C(2),-10,-0.1,0.4,8,["INDUSTRY_PACT"],"Industry adopts a shared discharge standard"),
       ],
       community=[
-        op("R5A-C1","ADAPT","Ration and Endure","Buckets, tankers, and six days of queueing.",None,-3,-0.1,-0.4,1,[],"Six days of queuing for water"),
+        op("R5A-C1","ADAPT","Ration and Endure","Buckets, tankers, and six days of queuing.",None,-3,-0.1,-0.4,1,[],"Six days of queuing for water"),
         op("R5A-C2","DEMAND_RELIEF","Class Action and Street Protest","Four million plaintiffs.",None,-1,-0.3,0.3,3,["LAWSUIT"],"Four million join the class action"),
         op("R5A-C3","SELF_ORGANISE","Citizen River Watch","Two thousand volunteers. Every outfall photographed.",None,-4,0.0,0.6,5,["RIVER_WATCH"],"Volunteers begin watching every outfall"),
       ],
       activist=[
         op("R5A-A1","ESCALATE","Leak the Discharge Records","Eight years of records nobody was meant to see.",None,-5,-0.4,0.2,5,[],"Leaked records show years of illegal discharge",boost_flag="EVIDENCE_3"),
-        op("R5A-A2","COLLABORATE","Broker the Clean Water Accord","Get everyone in a room and don't leave until it's signed.",None,-6,0.1,0.5,7,[],"Clean Water Accord signed by all parties"),
+        op("R5A-A2","COLLABORATE","Broker the Clean Water Accord","Get everyone in a room and don't leave until it's signed.",None,-6,0.1,0.5,7,["COMPROMISED"],"Clean Water Accord signed by all parties"),
         op("R5A-A3","EDUCATE","Train Citizen Scientists","Give people the kit to test their own water.",None,-2,0.0,0.3,4,["CITIZEN_SCIENCE"],"Citizens trained to test their own water"),
       ]))
 
@@ -381,11 +381,11 @@ SCEN["R5B"] = dict(
       community=[
         op("R5B-C1","ADAPT","Separate Waste at Source","Three bins in every kitchen.",None,-4,-0.1,-0.2,3,[],"Household separation becomes the norm"),
         op("R5B-C2","DEMAND_RELIEF","Blockade the Landfill Road","Not one more lorry.",None,-1,-0.3,0.4,3,["LAWSUIT"],"Residents block every lorry into the dump"),
-        op("R5B-C3","SELF_ORGANISE","Neighbourhood Zero-Waste Scheme","Cut what we send, by seventy percent.",None,-5,0.0,0.6,5,["CITIZEN_MONITORING"],"Zero-waste kampung cuts landfill by 70%"),
+        op("R5B-C3","SELF_ORGANISE","Neighbourhood Zero-Waste Scheme","Cut what we send by seventy percent.",None,-5,0.0,0.6,5,["CITIZEN_MONITORING"],"Zero-waste kampung cuts landfill by 70%"),
       ],
       activist=[
         op("R5B-A1","ESCALATE","Trace the Containers","Follow every container back to its port of origin.",None,-5,-0.4,0.3,5,[],"Investigation traces waste to three countries",boost_flag="EVIDENCE_3"),
-        op("R5B-A2","COLLABORATE","Join the Waste Policy Review","Co-chair the review that rewrites the code.",None,-6,0.1,0.5,7,[],"Campaigner co-chairs waste policy review"),
+        op("R5B-A2","COLLABORATE","Join the Waste Policy Review","Co-chair the review that rewrites the code.",None,-6,0.1,0.5,7,["COMPROMISED"],"Campaigner co-chairs waste policy review"),
         op("R5B-A3","EDUCATE","Run School Air Quality Testing","Children's data is hard to ignore.",None,-2,0.0,0.3,4,["CITIZEN_SCIENCE"],"Children's air data forces a response"),
       ]))
 
@@ -411,7 +411,7 @@ SCEN["R5C"] = dict(
       ],
       activist=[
         op("R5C-A1","ESCALATE","Publish the Plume Modelling","Independent science, pinpointing the outfall.",None,-5,-0.4,0.2,5,[],"Independent model pinpoints the source",boost_flag="EVIDENCE_3"),
-        op("R5C-A2","COLLABORATE","Negotiate the Coastal Accord","Industry, villages, and the state, on one page.",None,-6,0.1,0.5,7,[],"Coastal accord signed by industry and villages"),
+        op("R5C-A2","COLLABORATE","Negotiate the Coastal Accord","Industry, villages, and the state, on one page.",None,-6,0.1,0.5,7,["COMPROMISED"],"Coastal accord signed by industry and villages"),
         op("R5C-A3","EDUCATE","Train the Fishing Communities","Teach three thousand people to test their own water.",None,-2,0.0,0.4,4,["CITIZEN_SCIENCE"],"Fishermen trained to test their own water"),
       ]))
 
@@ -427,7 +427,7 @@ SCEN["R6A"] = dict(
         op("R6A-G3","REGULATE","Declare a Climate Emergency","A binding 2050 law, passed in a week.",F(3),-16,-0.3,0.3,14,["CLIMATE_LAW"],"Parliament declares a climate emergency",gate_trust=2,boost_flag="GREEN_MANDATE"),
       ],
       business=[
-        op("R6A-B1","TRANSITION","Fund the Rebuild - Build Back Green","Rebuild it better than it was.",C(3),-12,0.3,0.8,10,[],"Industry funds a green rebuild"),
+        op("R6A-B1","TRANSITION","Fund the Rebuild, Build Back Green","Rebuild it better than it was.",C(3),-12,0.3,0.8,10,[],"Industry funds a green rebuild"),
         op("R6A-B2","EXPAND","Claim the Insurance and Relocate","This country is becoming uninsurable.",C(-2),3,-0.6,-0.7,-4,[],"Major employer announces offshore move"),
         op("R6A-B3","PARTNER","Restore the Mangroves and Catchment","Nature does flood defence cheaper than concrete.",C(2),-9,0.1,0.6,8,[],"Mangrove and catchment restoration funded"),
       ],
@@ -438,7 +438,7 @@ SCEN["R6A"] = dict(
       ],
       activist=[
         op("R6A-A1","ESCALATE","Sue the State for Climate Negligence","Make the failure legally binding.",None,-6,-0.5,-0.1,6,[],"Landmark climate negligence case filed"),
-        op("R6A-A2","COLLABORATE","Sign the 2050 National Accord","Everyone at one table, one signature.",None,-8,0.3,0.6,9,[],"2050 National Accord signed"),
+        op("R6A-A2","COLLABORATE","Sign the 2050 National Accord","Everyone at one table, one signature.",None,-8,0.3,0.6,9,["COMPROMISED"],"2050 National Accord signed"),
         op("R6A-A3","EDUCATE","Hand Over the Roadmap","Ten years of work, given away for free.",None,-4,0.2,0.4,7,[],"Movement hands its roadmap to government",boost_evidence=True),
       ]))
 
@@ -464,7 +464,7 @@ SCEN["R6B"] = dict(
       ],
       activist=[
         op("R6B-A1","ESCALATE","Expose Who Gets the Water","Forty percent goes to twelve companies.",None,-6,-0.5,-0.1,6,[],"Data shows 40% of water goes to 12 firms"),
-        op("R6B-A2","COLLABORATE","Join the Water Allocation Council","Rewrite the rules from inside.",None,-8,0.3,0.6,9,[],"Allocation council rewrites the rules"),
+        op("R6B-A2","COLLABORATE","Join the Water Allocation Council","Rewrite the rules from inside.",None,-8,0.3,0.6,9,["COMPROMISED"],"Allocation council rewrites the rules"),
         op("R6B-A3","EDUCATE","Publish the Basin Recovery Plan","A way back, costed and ready.",None,-4,0.2,0.4,7,[],"Basin recovery plan offers a way back",boost_evidence=True),
       ]))
 
@@ -490,7 +490,7 @@ SCEN["R6C"] = dict(
       ],
       activist=[
         op("R6C-A1","ESCALATE","Publish the Approval Documents","Every signature, every date.",None,-6,-0.5,-0.1,6,[],"Approval documents published in full"),
-        op("R6C-A2","COLLABORATE","Co-Write the New Planning Code","Build the rules that stop the next one.",None,-8,0.3,0.6,9,[],"New planning code written with civil society"),
+        op("R6C-A2","COLLABORATE","Co-Write the New Planning Code","Build the rules that stop the next one.",None,-8,0.3,0.6,9,["COMPROMISED"],"New planning code written with civil society"),
         op("R6C-A3","EDUCATE","Train Community Slope Monitors","People who can see it coming.",None,-4,0.2,0.4,7,[],"Communities trained to monitor their own slopes",boost_evidence=True),
       ]))
 

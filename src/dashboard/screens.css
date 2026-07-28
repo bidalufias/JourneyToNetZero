@@ -648,7 +648,7 @@
 
 .brief__body {
   font: 400 clamp(18px, 1.7vw, 24px) / 1.45 var(--font-body);
-  margin-top: var(--space-5);
+  margin-top: var(--space-4);
   max-width: 34ch;
   color: var(--jtnz-glare);
 }
@@ -679,4 +679,61 @@
   margin-top: var(--space-1);
   font: 400 15px/1 var(--font-mono);
   color: var(--jtnz-glare);
+}
+
+/*
+ * The onboarding steps on the shared screen.
+ *
+ * One instruction, readable from the back, and one line for the facilitator.
+ * There is always a facilitator: the board's job is to tell them what to say
+ * without making them look down at a laptop while the room waits.
+ */
+.onboard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-6);
+  /* Bottom clearance is the height of the pause and next panel, which is fixed
+     to this corner on every screen. Without it the one line the facilitator
+     needs to read sits underneath two buttons. */
+  padding: var(--space-8) var(--space-12) calc(var(--space-16) + var(--space-8));
+  min-height: 0;
+}
+
+.onboard__step {
+  font: 700 14px/1 var(--font-mono);
+  letter-spacing: 0.2em;
+  color: var(--jtnz-meter-green);
+}
+
+.onboard__heading { font: 800 clamp(40px, 5.5vw, 76px)/1.02 var(--font-heading); letter-spacing: -0.02em; }
+.onboard__body { font: 400 clamp(20px, 2vw, 28px)/1.4 var(--font-body); max-width: 30em; opacity: 0.85; }
+/* The number the facilitator is actually watching, so it reads as a status and
+   not as a footnote to the body copy above it. */
+.onboard__ready {
+  display: inline-block;
+  margin-top: var(--space-6);
+  padding: var(--space-2) var(--space-4);
+  border: var(--rule) solid var(--jtnz-meter-green);
+  color: var(--jtnz-meter-green);
+  font: 700 22px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+}
+
+.onboard__cue {
+  margin-top: var(--space-6);
+  border-left: 4px solid var(--jtnz-meter-green);
+  padding: var(--space-3) var(--space-4);
+  font: 400 18px/1.45 var(--font-body);
+  background: color-mix(in srgb, currentColor 6%, transparent);
+  max-width: 44em;
+}
+
+.onboard__cue-label {
+  display: block;
+  font: 700 10px/1 var(--font-mono);
+  letter-spacing: 0.16em;
+  opacity: 0.55;
+  margin-bottom: 6px;
 }

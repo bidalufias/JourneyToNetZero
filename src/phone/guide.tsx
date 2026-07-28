@@ -23,11 +23,11 @@ interface Entry {
 const RESOURCE_NOTE: Record<Role, Entry> = {
   government: {
     term: 'Budget',
-    what: 'Public money. A card priced \u201C2 Budget\u201D costs you two. A card priced \u201C+1 Budget\u201D gives you one back. You cannot pick a card you cannot afford; it greys out and says so.',
+    what: 'Public money. A card priced “2 Budget” costs you two. A card priced “+1 Budget” gives you one back. You cannot pick a card you cannot afford; it greys out and says so.',
   },
   business: {
     term: 'Company Money',
-    what: 'Your company\u2019s money. A card priced \u201C3 Company Money\u201D costs you three. A card priced \u201C+2\u201D earns you two. You cannot pick a card you cannot afford; it greys out and says so.',
+    what: 'Your company’s money. A card priced “3 Company Money” costs you three. A card priced “+2” earns you two. You cannot pick a card you cannot afford; it greys out and says so.',
   },
   community: {
     term: 'Vetoes',
@@ -103,7 +103,7 @@ export function HowToPlay({ view }: { view: PhoneView }) {
 
       {view.goalTitle ? (
         <>
-          <span className="plabel">YOUR SECRET WIN \u00B7 NOBODY ELSE SEES THIS</span>
+          <span className="plabel">YOUR SECRET WIN · NOBODY ELSE SEES THIS</span>
           <div className="bubble">
             <div className="bubble__lead">{view.goalTitle}</div>
             <p className="bubble__text">{view.goalDesc}</p>

@@ -80,8 +80,8 @@ export function Attract({
       <div className="briefing-strip">
         <span className="briefing-strip__label">BRIEFING</span>
         <span className="briefing-strip__text">
-          Carbon {s.emissions.toFixed(0)} Mt net \u00B7 Economy {s.growth.toFixed(1)}% \u00B7 Quality of life{' '}
-          {s.happiness.toFixed(1)} \u00B7 Clean economy {s.greenShare.toFixed(0)}%
+          Carbon {s.emissions.toFixed(0)} Mt net · Economy {s.growth.toFixed(1)}% · Quality of life{' '}
+          {s.happiness.toFixed(1)} · Clean economy {s.greenShare.toFixed(0)}%
         </span>
       </div>
     </div>
@@ -146,9 +146,71 @@ export function Briefing({ view, clock }: { view: DashboardView; clock: string |
       <div className="briefing-strip">
         <span className="briefing-strip__label">ON YOUR PHONE</span>
         <span className="briefing-strip__text">
-          What you can spend is in the top corner. The country\u2019s three numbers sit under it. Tap
-          \u22EF for what any word means, or \u2039 to re-read this round.
+          What you can spend is in the top corner. The country’s three numbers sit under it. Tap
+          ⋯ for what any word means, or ‹ to re-read this round.
         </span>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * The onboarding, on the shared screen.
+ *
+ * Every step is a single instruction, sized for the back of the room, plus one
+ * line of direction for the person running it. There is always a facilitator,
+ * and the board's job is to tell them what happens next without making them
+ * look away from the table.
+ */
+export function Onboarding({ view, clock }: { view: DashboardView; clock: string | null }) {
+  const steps: Record<string, { step: string; heading: string; body: string; cue: string }> = {
+    practiceChoice: {
+      step: 'PRACTICE · CHOOSING',
+      heading: 'Pick a card.',
+      body: 'Tap one, then lock it in. The arrows say which way it pushes the country. None of this counts.',
+      cue: 'Say: this one is practice. Tap a card, lock it in, then look up here.',
+    },
+    power: {
+      step: 'WHAT EACH OF YOU CAN DO',
+      heading: 'One of you can do something the others cannot.',
+      body: 'Read your own phone. Nobody else has the move you are looking at.',
+      cue: 'Say: the Activist can name people in public. The Community can say no. Read your own screen.',
+    },
+    goal: {
+      step: 'YOUR SECRET WIN',
+      heading: 'Now decide what you want.',
+      body: 'Three private goals on your phone. Pick one. Nobody sees which. It only counts if the country hits all three targets.',
+      cue: 'Say: you have seen how this country works. Now choose what you personally want out of it.',
+    },
+  }
+  const s = steps[view.phase]
+  if (!s) return null
+
+  const locked = view.seats.filter((x) => x.locked).length
+  const ready = view.phase === 'practiceChoice' ? `${locked} of 4 locked in` : null
+
+  return (
+    <div className="dash">
+      <header className="dash__masthead">
+        <span className="dash__live">LIVE</span>
+        <span className="dash__channel">SEMENANJARA TONIGHT</span>
+        <div className="dash__masthead-right">
+          <span>{s.step}</span>
+          {clock ? <span className="dash__clock">{clock}</span> : null}
+        </div>
+      </header>
+
+      <div className="onboard">
+        <div>
+          <p className="onboard__step">BEFORE IT COUNTS</p>
+          <h1 className="onboard__heading">{s.heading}</h1>
+          <p className="onboard__body">{s.body}</p>
+          {ready ? <p className="onboard__ready">{ready}</p> : null}
+        </div>
+        <p className="onboard__cue">
+          <span className="onboard__cue-label">SAY THIS</span>
+          {s.cue}
+        </p>
       </div>
     </div>
   )
@@ -191,7 +253,7 @@ export function CoalitionBonus({ view }: { view: DashboardView }) {
         </div>
         <div>
           <p className="coalition__effect">
-            {bonus.emissions} Mt carbon \u00B7 +{bonus.green}% clean economy \u00B7 +{bonus.happiness} quality of
+            {bonus.emissions} Mt carbon · +{bonus.green}% clean economy · +{bonus.happiness} quality of
             life
           </p>
           <p className="coalition__note">
@@ -357,7 +419,7 @@ export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endga
                 </div>
                 <div className="ending__player-name">{p.name}</div>
                 <div className="ending__player-goal">
-                  {p.goalTitle ?? 'No secret win'} {p.goalMet ? '\u2713' : '\u2715'}
+                  {p.goalTitle ?? 'No secret win'} {p.goalMet ? '✓' : '✕'}
                 </div>
                 <div className="ending__player-title">{p.title}</div>
               </div>

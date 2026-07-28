@@ -59,7 +59,7 @@ export function growthMeter(state: PublicState, targets: Targets): MeterSpec {
   const avg = state.averageGrowth
   const met = avg >= targets.growth
   return {
-    label: 'GROWTH',
+    label: 'ECONOMY',
     value: avg,
     display: state.growth.toFixed(1),
     unit: '%',

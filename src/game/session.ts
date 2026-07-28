@@ -11,6 +11,10 @@ import type { Impact } from './impact'
 export type Phase =
   | 'lobby'
   | 'briefing'
+  | 'practiceTalk'
+  | 'practiceChoice'
+  | 'power'
+  | 'goal'
   | 'crisis'
   | 'table'
   | 'choice'
@@ -25,9 +29,27 @@ export type Phase =
  * It used to be advertised as thirty and run closer to thirty-seven, and a
  * workshop that overruns by seven minutes is a workshop that gets cut short.
  */
+/**
+ * The onboarding, then the round.
+ *
+ * Every step teaches exactly one verb and then makes the table use it. A player
+ * used to meet the room code, a role, a resource, a sealed goal and the three
+ * national targets before making a single decision, which is roughly 850 words
+ * inside a three minute setup. Now they say something, pick something, and see
+ * it resolve, before any of it counts.
+ *
+ * The practice talk comes before the practice choice because that is the order
+ * a real round runs in. The plan had them the other way round, on the reasoning
+ * that picking is the simpler verb; teaching the sequence backwards to save one
+ * step of difficulty is a poor trade.
+ */
 export const PHASE_MS: Record<Phase, number> = {
   lobby: 0, // ends when the facilitator starts
-  briefing: 20_000,
+  briefing: 45_000,
+  practiceTalk: 75_000,
+  practiceChoice: 60_000,
+  power: 30_000,
+  goal: 45_000,
   crisis: 30_000,
   table: 90_000,
   choice: 45_000,
@@ -321,7 +343,7 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
     title: 'Minister',
     org: 'Ministry of Energy and Climate',
     post: 'Minister for Energy and Climate',
-    blurb: 'You hold the country\u2019s money and the power to make law.',
+    blurb: 'You hold the country’s money and the power to make law.',
     youAre: 'The Minister. You hold the national Budget and the power to make law.',
     youWant: 'Growth, and to still be in office in 2050.',
     yourMove: 'Spend Budget to change the country. Or give Budget away so someone else can act.',
@@ -344,7 +366,7 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
     org: 'Sawit Prima Group',
     post: 'Group CEO, Sawit Prima',
     blurb: 'You own most of the pollution. You also own most of the jobs.',
-    youAre: 'The Company Boss. You own most of the country\u2019s pollution, and most of its jobs.',
+    youAre: 'The Company Boss. You own most of the country’s pollution, and most of its jobs.',
     youWant: 'Profit, and not to bet the company on the wrong decade.',
     yourMove: 'Spend Company Money to go clean. Or get someone else to pay half.',
     whoYouAre:
@@ -364,18 +386,18 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
   community: {
     title: 'Community Leader',
     org: 'Kampung Baru Jernih residents',
-    post: 'Food stall owner, head of the residents\u2019 association',
+    post: 'Food stall owner, head of the residents’ association',
     blurb: '34 million people who want clean air, a job, and petrol they can afford.',
     youAre: 'The Community Leader. You speak for 34 million people.',
     youWant: 'Clean air and prices people can afford. You are tired of being told to pick one.',
     yourMove: 'Make them earn your support out loud. Twice a game you can say no and mean it.',
     whoYouAre:
-      'You run a food stall and head the residents\u2019 association. Your stall has flooded three times in eight years. Your child has asthma.',
+      'You run a food stall and head the residents’ association. Your stall has flooded three times in eight years. Your child has asthma.',
     believe:
       'Clean air and affordable petrol are both reasonable things to want. You have heard a lot of promises and you remember all of them.',
     afraidOf: 'Being asked to sacrifice again by people who will not have to.',
     resourcePower:
-      'You hold no money and no laws. You hold two vetoes for the whole game. Each one takes a player\u2019s dirtiest cards away for a single round, and everyone is told it was you. Public Trust is handed out every round too, one for whoever looked after people best and one for whoever did most for the future. You do not choose who gets it. It goes to whoever earned it, so your job is to make them earn it in front of you.',
+      'You hold no money and no laws. You hold two vetoes for the whole game. Each one takes a player’s dirtiest cards away for a single round, and everyone is told it was you. Public Trust is handed out every round too, one for whoever looked after people best and one for whoever did most for the future. You do not choose who gets it. It goes to whoever earned it, so your job is to make them earn it in front of you.',
     says: [
       'Explain that to me like I have to pay for it, because I do.',
       'You promised us this last time. What happened?',

@@ -36,7 +36,7 @@ export function TableActions({
 
   return (
     <div className="pbody">
-      <span className="plabel">ROUND {view.round} \u00B7 THE TALK</span>
+      <span className="plabel">ROUND {view.round} · THE TALK</span>
       <h1 className="pheading">Talk to each other.</h1>
       <p className="ptext">{view.privateLine}</p>
 
@@ -136,7 +136,7 @@ export function TableActions({
             disabled={readOnly || view.spotlightsRemaining <= 0 || view.spotlightCalled}
             onClick={() => setSheet('spotlight')}
           >
-            SPOTLIGHT \u00B7 {view.spotlightsRemaining}
+            SPOTLIGHT · {view.spotlightsRemaining}
           </button>
         ) : null}
         {view.role === 'community' ? (
@@ -145,7 +145,7 @@ export function TableActions({
             disabled={readOnly || view.vetoesRemaining <= 0}
             onClick={() => setSheet('veto')}
           >
-            SAY NO \u00B7 {view.vetoesRemaining}
+            SAY NO · {view.vetoesRemaining}
           </button>
         ) : null}
         {view.role === 'government' ? (
@@ -382,11 +382,11 @@ function VetoSheet({
         {view.vetoesRemaining - 1} left.
       </p>
       <p className="pnote" style={{ color: 'var(--jtnz-com-deep)' }}>
-        \u201CThe public will not accept this.\u201D
+        “The public will not accept this.”
       </p>
 
       <label className="plabel" htmlFor="veto-slide">
-        HOLD AND SLIDE TO SAY NO \u2192
+        HOLD AND SLIDE TO SAY NO →
       </label>
       <input
         id="veto-slide"

@@ -4,7 +4,15 @@
  * The engine reads content only through this module. Swapping the JSON for a
  * Singapore, corporate or schools pack must require no change to engine code.
  */
-import type { Content, Config, Role, Scenario, PrivateGoal, InsiderTips } from './types'
+import type {
+  Content,
+  Config,
+  Role,
+  Scenario,
+  PrivateGoal,
+  InsiderTips,
+  TutorialScenario,
+} from './types'
 import { ROLES } from './types'
 
 interface RawPack {
@@ -13,6 +21,7 @@ interface RawPack {
   resilienceFlags: string[]
   privateGoals: Record<Role, PrivateGoal[]>
   insiderTips: InsiderTips
+  tutorial: TutorialScenario
 }
 
 export function loadContent(raw: unknown): Content {
@@ -39,6 +48,7 @@ export function loadContent(raw: unknown): Content {
     resilienceFlags: new Set(pack.resilienceFlags),
     privateGoals: pack.privateGoals,
     insiderTips: pack.insiderTips,
+    tutorial: pack.tutorial,
   }
 }
 
@@ -55,6 +65,18 @@ function validate(
 
   for (let r = 1; r <= 6; r++) {
     if (!roundVariants[r]?.length) problems.push(`round ${r} has no scenarios`)
+  }
+
+  // The practice round is what teaches the loop, so a pack without one would
+  // drop four players straight into Round 1 having been told nothing.
+  if (!pack.tutorial?.options) {
+    problems.push('pack has no tutorial block')
+  } else {
+    for (const role of ROLES) {
+      if (!pack.tutorial.options[role]?.length) {
+        problems.push(`tutorial: role ${role} has no practice cards`)
+      }
+    }
   }
 
   for (const s of Object.values(scenarios)) {

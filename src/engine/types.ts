@@ -166,6 +166,12 @@ export interface PrivateGoal {
   measured: number
 }
 
+export interface TutorialScenario {
+  title: string
+  situation: string
+  options: Record<Role, Option[]>
+}
+
 export interface Content {
   config: Config
   scenarios: Record<string, Scenario>
@@ -174,6 +180,13 @@ export interface Content {
   resilienceFlags: ReadonlySet<string>
   privateGoals: Record<Role, PrivateGoal[]>
   insiderTips: InsiderTips
+  /**
+   * The practice round. Two cards a seat, and none of it reaches the engine: it
+   * exists so a player learns tap, lock and look up on a decision that cannot
+   * cost them anything. In the pack rather than in code so a variant can
+   * localise it with everything else.
+   */
+  tutorial: TutorialScenario
 }
 
 export interface InsiderTips {

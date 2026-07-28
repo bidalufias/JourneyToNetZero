@@ -73,6 +73,27 @@ function expire(room: Room): Room {
   return tick(room, content, clock)
 }
 
+/**
+ * Runs the clock until the room reaches `phase`.
+ *
+ * Tests used to count `expire()` calls, which encoded the phase list into forty
+ * places at once: adding the onboarding between the briefing and the first
+ * crisis broke twenty of them without a single one of them being about
+ * onboarding. Naming the destination says what the test actually wants.
+ */
+function advanceTo(room: Room, phase: Room['phase'], guard = 40): Room {
+  let n = 0
+  while (room.phase !== phase && n++ < guard) expire(room)
+  if (room.phase !== phase) throw new Error(`never reached ${phase}, stuck in ${room.phase}`)
+  return room
+}
+
+/** Start the session and play through the onboarding to the first real crisis. */
+function startPlaying(room: Room): Room {
+  run(room, { t: 'start' })
+  return advanceTo(room, 'crisis')
+}
+
 describe('room lifecycle', () => {
   it('creates a readable 4-letter code and a six-round path', () => {
     const room = seated()
@@ -102,10 +123,8 @@ describe('room lifecycle', () => {
 
   it('auto-locks a default when a player stops playing mid-round', () => {
     const room = seated()
-    run(room, { t: 'start' })
-    expire(room) // briefing -> crisis
-    expire(room) // crisis -> table
-    expire(room) // table -> choice
+    startPlaying(room)
+    advanceTo(room, 'choice')
 
     expect(room.phase).toBe('choice')
     lockIn(room, 'government', firstAvailable(room, 'government'))
@@ -121,10 +140,8 @@ describe('room lifecycle', () => {
 
   it('resolves the round early once all four lock', () => {
     const room = seated()
-    run(room, { t: 'start' })
-    expire(room)
-    expire(room)
-    expire(room)
+    startPlaying(room)
+    advanceTo(room, 'choice')
     expect(room.phase).toBe('choice')
 
     for (const role of ROLES) lockIn(room, role, firstAvailable(room, role))
@@ -135,10 +152,8 @@ describe('room lifecycle', () => {
   it('does not wait on a chair nobody is sitting in', () => {
     const room = seated()
     run(room, { t: 'leave', role: 'activist' })
-    run(room, { t: 'start' })
-    expire(room)
-    expire(room)
-    expire(room)
+    startPlaying(room)
+    advanceTo(room, 'choice')
     expect(room.phase).toBe('choice')
 
     for (const role of ROLES.filter((r) => r !== 'activist')) {
@@ -150,13 +165,134 @@ describe('room lifecycle', () => {
   })
 })
 
+describe('the onboarding', () => {
+  it('teaches one verb at a time, then starts the game', () => {
+    const room = seated()
+    run(room, { t: 'start' })
+    const seen: string[] = [room.phase]
+    for (let i = 0; i < 6 && room.phase !== 'crisis'; i++) {
+      expire(room)
+      seen.push(room.phase)
+    }
+    expect(seen).toEqual([
+      'briefing',
+      'practiceTalk',
+      'practiceChoice',
+      'power',
+      'goal',
+      'crisis',
+    ])
+    // The talk comes before the choice, because that is the order a real round
+    // runs in. Teaching the sequence backwards to save a step is a poor trade.
+    expect(seen.indexOf('practiceTalk')).toBeLessThan(seen.indexOf('practiceChoice'))
+  })
+
+  it('deals practice cards that cannot cost anything', () => {
+    const room = seated()
+    run(room, { t: 'start' })
+    advanceTo(room, 'practiceChoice')
+
+    for (const role of ROLES) {
+      const view = phoneView(room, content, role)
+      expect(view.options).toHaveLength(2)
+      // No affordability, no veto, no trust gate. A practice round a player can
+      // be locked out of teaches the wrong lesson on the wrong screen.
+      expect(view.options.every((o) => o.available)).toBe(true)
+      expect(view.options.every((o) => o.disabled === null)).toBe(true)
+      expect(view.options.every((o) => o.impact.length === 4)).toBe(true)
+    }
+  })
+
+  it('actually accepts what it asks the table to do', () => {
+    // Every negotiation command used to test for the live phase by name, so
+    // during practice all four buttons were visible, tappable, and silent. The
+    // step that exists to make somebody press one did not let them.
+    const room = seated()
+    run(room, { t: 'start' })
+    advanceTo(room, 'practiceTalk')
+
+    const card = phoneView(room, content, 'government').options[0]
+    run(room, { t: 'promise', role: 'government', optionId: card.id })
+    expect(phoneView(room, content, 'government').promises).toHaveLength(1)
+    expect(dashboardView(room, content).promises[0].text).toContain(card.title)
+
+    run(room, { t: 'demand', role: 'activist', target: 'business', phraseId: 'pay-first' })
+    expect(dashboardView(room, content).promises).toHaveLength(2)
+
+    advanceTo(room, 'practiceChoice')
+    const pick = phoneView(room, content, 'business').options[1]
+    lockIn(room, 'business', pick.id)
+    const after = phoneView(room, content, 'business')
+    expect(after.choiceId).toBe(pick.id)
+    expect(after.locked).toBe(true)
+  })
+
+  it('throws the practice away rather than carrying it into Round 1', () => {
+    const room = seated()
+    run(room, { t: 'start' })
+    advanceTo(room, 'practiceTalk')
+    run(room, {
+      t: 'promise',
+      role: 'government',
+      optionId: phoneView(room, content, 'government').options[0].id,
+    })
+    // Spend real money in practice, to prove it is handed back. Accepting an
+    // offer is a permanent transfer wherever it happens.
+    run(room, { t: 'offer', from: 'government', to: 'business', resource: 'fiscal', amount: 2 })
+    const offer = dashboardView(room, content).offersInFlight[0]
+    run(room, { t: 'respondOffer', role: 'business', offerId: offer.id, accept: true })
+    expect(room.game.fiscal).toBe(content.config.start.fiscal - 2)
+
+    advanceTo(room, 'practiceChoice')
+    for (const role of ROLES) lockIn(room, role, phoneView(room, content, role).options[0].id)
+
+    // It has to have happened before it can be thrown away, or this asserts
+    // nothing at all. That is how the inert practice round passed this test.
+    expect(ROLES.every((r) => phoneView(room, content, r).locked)).toBe(true)
+    expect(dashboardView(room, content).promises).toHaveLength(1)
+    // Four locks must not resolve anything. The practice deck is not in any
+    // scenario, so handing it to the engine throws and ends the session.
+    expect(room.phase).toBe('practiceChoice')
+    expect(room.game.round).toBe(0)
+
+    advanceTo(room, 'crisis')
+    for (const role of ROLES) {
+      const view = phoneView(room, content, role)
+      expect(view.choiceId).toBeNull()
+      expect(view.locked).toBe(false)
+    }
+    // Nothing said in practice is on the record when the game starts.
+    expect(dashboardView(room, content).promises).toHaveLength(0)
+    // And no practice card reached the engine.
+    expect(room.game.picks).toHaveLength(0)
+    // Money moved in practice is money the design did not mean them to have.
+    expect(room.game.fiscal).toBe(content.config.start.fiscal)
+    expect(room.game.capital).toBe(content.config.start.capital)
+  })
+
+  it('asks for the secret win after the practice, not before it', () => {
+    const room = createRoom(content, 999, clock)
+    for (const role of ROLES) run(room, { t: 'join', role, name: 'P' })
+
+    // Nothing is offered while a player is still learning what the units mean.
+    for (const phase of ['lobby', 'briefing', 'practiceTalk', 'practiceChoice', 'power'] as const) {
+      if (room.phase !== phase) advanceTo(room, phase)
+      expect(phoneView(room, content, 'government').goalChoices, phase).toBeNull()
+      if (phase === 'lobby') run(room, { t: 'start' })
+    }
+
+    advanceTo(room, 'goal')
+    const choices = phoneView(room, content, 'government').goalChoices
+    expect(choices).not.toBeNull()
+    expect(choices).toHaveLength(3)
+  })
+})
+
 describe('choosing is not committing', () => {
   const atChoice = () => {
     const room = seated()
-    run(room, { t: 'start' })
-    expire(room)
-    expire(room)
-    expire(room)
+    startPlaying(room)
+    advanceTo(room, 'choice')
     return room
   }
 
@@ -224,8 +360,7 @@ describe('a seat can be given up', () => {
 
   it('offers a goal to whoever takes a vacated seat mid-session', () => {
     const room = seated()
-    run(room, { t: 'start' })
-    expire(room) // briefing -> crisis
+    startPlaying(room)
 
     run(room, { t: 'leave', role: 'business' })
     run(room, { t: 'join', role: 'business', name: 'Nadia' })
@@ -259,9 +394,8 @@ describe('the phone can never see the numbers', () => {
 
   it('sends no effect values with an option card', () => {
     const room = seated()
-    run(room, { t: 'start' })
-    expire(room)
-    expire(room)
+    startPlaying(room)
+    advanceTo(room, 'table')
 
     const view = phoneView(room, content, 'government')
     expect(view.options.length).toBeGreaterThan(0)
@@ -292,8 +426,7 @@ describe('the phone can never see the numbers', () => {
 
   it('never sends another player a tip that is not theirs', () => {
     const room = seated()
-    run(room, { t: 'start' })
-    expire(room) // deals the round's single tip
+    startPlaying(room) // the crisis deals the round's single tip
 
     const dealt = room.tips.find((t) => t.round === 1)
     expect(dealt).toBeDefined()
@@ -307,8 +440,7 @@ describe('the phone can never see the numbers', () => {
 
   it('announces that a tip was dealt but never to whom', () => {
     const room = seated()
-    run(room, { t: 'start' })
-    expire(room)
+    startPlaying(room)
 
     const view = dashboardView(room, content)
     expect(view.tipDealtThisRound).toBe(true)
@@ -320,9 +452,8 @@ describe('the phone can never see the numbers', () => {
 describe('negotiation', () => {
   it('records a promise and marks it broken without enforcing it', () => {
     const room = seated()
-    run(room, { t: 'start' })
-    expire(room)
-    expire(room)
+    startPlaying(room)
+    advanceTo(room, 'table')
     expect(room.phase).toBe('table')
 
     const opts = phoneView(room, content, 'government').options.filter((o) => o.available)
@@ -361,9 +492,8 @@ describe('negotiation', () => {
 
   it('keeps the promise board on screen through the round summary', () => {
     const room = seated()
-    run(room, { t: 'start' })
-    expire(room)
-    expire(room)
+    startPlaying(room)
+    advanceTo(room, 'table')
     const opts = phoneView(room, content, 'government').options.filter((o) => o.available)
     run(room, { t: 'promise', role: 'government', optionId: opts[0].id })
     expire(room) // table -> choice
@@ -378,9 +508,8 @@ describe('negotiation', () => {
 
   it('executes an accepted offer immediately and permanently', () => {
     const room = seated()
-    run(room, { t: 'start' })
-    expire(room)
-    expire(room)
+    startPlaying(room)
+    advanceTo(room, 'table')
 
     const fiscalBefore = room.game.fiscal
     const capitalBefore = room.game.capital
@@ -396,9 +525,8 @@ describe('negotiation', () => {
 
   it('removes the dirty options a Public Mandate names, for that round only', () => {
     const room = seated()
-    run(room, { t: 'start' })
-    expire(room)
-    expire(room)
+    startPlaying(room)
+    advanceTo(room, 'table')
 
     const before = phoneView(room, content, 'government').options.filter((o) => o.available).length
     run(room, { t: 'veto', role: 'community', target: 'government' })
@@ -415,9 +543,8 @@ describe('negotiation', () => {
 
   it('spends only two vetoes across a whole game', () => {
     const room = seated()
-    run(room, { t: 'start' })
-    expire(room)
-    expire(room)
+    startPlaying(room)
+    advanceTo(room, 'table')
     run(room, { t: 'veto', role: 'community', target: 'government' })
     // A second veto in the same round is refused.
     run(room, { t: 'veto', role: 'community', target: 'business' })
@@ -458,10 +585,8 @@ describe('the facilitator can stop the clock', () => {
   /** A room sitting in THE CHOICE, which is the tightest phase to be stopped in. */
   const atChoice = () => {
     const room = seated()
-    run(room, { t: 'start' })
-    expire(room)
-    expire(room)
-    expire(room)
+    startPlaying(room)
+    advanceTo(room, 'choice')
     return room
   }
 
@@ -598,5 +723,23 @@ describe('phase timings match the published session', () => {
     const perRound = PHASE_MS.crisis + PHASE_MS.table + PHASE_MS.choice + PHASE_MS.reckoning
     expect(perRound).toBe(4 * 60 * 1000)
     expect(perRound * 6).toBe(24 * 60 * 1000)
+  })
+
+  it('fits the whole session inside the 35 minutes on the box', () => {
+    const onboarding =
+      PHASE_MS.briefing +
+      PHASE_MS.practiceTalk +
+      PHASE_MS.practiceChoice +
+      PHASE_MS.power +
+      PHASE_MS.goal
+    const play = (PHASE_MS.crisis + PHASE_MS.table + PHASE_MS.choice + PHASE_MS.reckoning + PHASE_MS.summary) * 6
+    const total = onboarding + play
+
+    // Onboarding is the budget most at risk of creeping, because every step in
+    // it is defensible on its own. Five minutes is the whole allowance.
+    expect(onboarding).toBeLessThanOrEqual(5 * 60 * 1000)
+    // Results and the debrief are facilitator-paced and sit outside the clock,
+    // so the timed part has to leave room for them.
+    expect(total).toBeLessThanOrEqual(31 * 60 * 1000)
   })
 })

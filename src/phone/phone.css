@@ -230,13 +230,24 @@ a.btn {
 
 .ocard__title { font: 800 19px/1.12 var(--font-heading); letter-spacing: -0.015em; flex: 1; }
 
+/*
+ * A price, not a warning. Every card wore an accent-red outline, which on the
+ * cards priced "+3 Company Money" was telling a player that being paid was a
+ * problem. Spending is neutral, being paid is green.
+ */
 .ocard__cost {
   flex: 0 0 auto;
   font: 800 12px/1 var(--font-mono);
   letter-spacing: 0.06em;
-  border: var(--rule) solid var(--color-accent);
-  color: var(--color-accent);
+  border: var(--rule) solid color-mix(in srgb, currentColor 35%, transparent);
+  color: inherit;
   padding: 5px 7px;
+  white-space: nowrap;
+}
+
+.ocard__cost--gain {
+  border-color: var(--jtnz-meter-green);
+  color: var(--jtnz-meter-green);
 }
 
 .ocard--selected .ocard__cost { border-color: var(--skin-mark); color: var(--skin-mark); }
@@ -254,7 +265,8 @@ a.btn {
 .impact {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1px;
+  column-gap: var(--space-4);
+  row-gap: 2px;
   margin-top: auto;
   padding-top: var(--space-3);
   border-top: var(--rule) solid color-mix(in srgb, currentColor 22%, transparent);
@@ -266,15 +278,23 @@ a.btn {
   justify-content: space-between;
   gap: var(--space-2);
   padding: 3px 0;
+  min-width: 0;
 }
 
 .impact__label {
   font: 700 9px/1.2 var(--font-mono);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.impact__arrows { font: 700 12px/1 var(--font-mono); letter-spacing: -0.05em; }
+.impact__arrows {
+  flex: 0 0 auto;
+  font: 700 12px/1 var(--font-mono);
+  letter-spacing: -0.05em;
+}
 
 .impact__cell--good .impact__arrows { color: var(--jtnz-meter-green); }
 .impact__cell--bad .impact__arrows { color: var(--color-accent); }
@@ -553,12 +573,12 @@ a.btn {
 .nation {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  border-bottom: var(--rule) solid var(--color-line);
+  border-bottom: var(--rule) solid var(--color-text);
   background: var(--color-surface);
 }
 
 .nation__cell { padding: 5px var(--space-3); text-align: center; }
-.nation__cell + .nation__cell { border-left: var(--rule) solid var(--color-line); }
+.nation__cell + .nation__cell { border-left: var(--rule) solid color-mix(in srgb, var(--color-text) 20%, transparent); }
 .nation__label { display: block; font: 700 8px/1.2 var(--font-mono); letter-spacing: 0.1em; opacity: 0.6; }
 .nation__value { display: block; font: 800 15px/1.2 var(--font-heading); }
 .nation__value--met { color: var(--jtnz-meter-green); }
@@ -611,3 +631,35 @@ a.btn {
 }
 
 .paused__mark { font-size: 14px; letter-spacing: 0.06em; }
+
+/*
+ * The onboarding banner, and the Round 1 coach strip.
+ *
+ * Says what is being learned right now and that it does not count. Sits above
+ * the screen it is teaching rather than replacing it, because every step is
+ * meant to be practised rather than read.
+ */
+.coach {
+  background: var(--color-text);
+  color: var(--paper, #FAF7F2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.coach__step {
+  display: block;
+  font: 700 9px/1.2 var(--font-mono);
+  letter-spacing: 0.14em;
+  opacity: 0.65;
+  margin-bottom: 4px;
+}
+
+.coach__text { margin: 0; font: 500 14px/1.45 var(--font-body); }
+
+/* Round 1, where the table already knows the shape and only needs the cue. */
+.coach--slim {
+  font: 500 13px/1.4 var(--font-body);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-neutral-100);
+  color: var(--color-text);
+  border-bottom: var(--rule) solid color-mix(in srgb, var(--color-text) 20%, transparent);
+}

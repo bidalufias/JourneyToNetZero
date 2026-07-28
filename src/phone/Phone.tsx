@@ -22,6 +22,7 @@ import { MenuSheet } from './Menu'
 import { TheChoice } from './TheChoice'
 import { TableActions } from './TableActions'
 import { Crisis, GoalPicker, Lobby, LookUp, RoleReveal, RoundResult, TipCard } from './screens'
+import { PracticeChoice, PracticeTalk, RoundOneCoach, YourPower } from './onboarding'
 import './phone.css'
 
 export interface PhoneProps {
@@ -63,17 +64,27 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
       return <TheChoice view={view} send={send} remaining={remaining} readOnly />
     }
 
+    // Read your seat, then wait. The secret win is no longer asked for here;
+    // it comes after the practice round, once the units in it mean something.
     if (view.phase === 'lobby') {
-      // The briefing comes first: choosing a win condition before being told
-      // what your resource is asks somebody to guess.
-      if (!readBriefing && needsGoal) return <RoleReveal view={view} onNext={() => setReadBriefing(true)} />
+      if (!readBriefing) return <RoleReveal view={view} onNext={() => setReadBriefing(true)} />
+      return <Lobby view={view} />
+    }
+    if (view.phase === 'briefing') return <Lobby view={view} />
+    if (view.phase === 'practiceTalk') return <PracticeTalk view={view} send={send} />
+    if (view.phase === 'practiceChoice') {
+      return <PracticeChoice view={view} send={send} remaining={remaining} />
+    }
+    if (view.phase === 'power') return <YourPower view={view} />
+    if (view.phase === 'goal') {
+      // A latecomer who took a vacated seat still lands here, which is why the
+      // goal screen is reachable after the phase has passed.
       return needsGoal ? <GoalPicker view={view} send={send} /> : <Lobby view={view} />
     }
     if (needsGoal) {
-      // Took a vacated seat mid-session, or arrived late. Still needs a goal.
+      // Took a vacated seat mid-session. Still owes a secret win.
       return <GoalPicker view={view} send={send} />
     }
-    if (view.phase === 'briefing') return <Lobby view={view} />
     if (view.phase === 'crisis') return <Crisis view={view} />
     if (view.phase === 'table') return <TableActions view={view} send={send} />
     if (view.phase === 'choice') return <TheChoice view={view} send={send} remaining={remaining} />
@@ -108,6 +119,9 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
         />
       ) : null}
       {screen ? <ReviewBar screen={screen} onNow={() => setReviewing(null)} /> : null}
+      {/* Round 1 keeps its coaching and Round 2 does not. A table that still
+          needs telling what to do by the second round has a different problem. */}
+      {!screen ? <RoundOneCoach view={view} /> : null}
       {body}
 
       {/* The tip lands the moment the crisis is revealed, before THE TABLE. */}

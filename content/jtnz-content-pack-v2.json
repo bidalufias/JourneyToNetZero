@@ -230,7 +230,7 @@
    {
     "id": "G-a",
     "title": "Landslide",
-    "desc": "End the game holding 6 or more Trust tokens.",
+    "desc": "End the game holding 6 or more Public Trust.",
     "check": "trust.government >= 6",
     "measured": 0.414
    },
@@ -244,7 +244,7 @@
    {
     "id": "G-c",
     "title": "The Legacy",
-    "desc": "Green Economy Share reaches 55% or more.",
+    "desc": "Clean Economy reaches 55% or more.",
     "check": "greenShare >= 55",
     "measured": 0.289
    }
@@ -253,7 +253,7 @@
    {
     "id": "B-a",
     "title": "Market Dominance",
-    "desc": "End with 6 or more Capital.",
+    "desc": "End with 6 or more Company Money.",
     "check": "capital >= 6",
     "measured": 0.391
    },
@@ -267,7 +267,7 @@
    {
     "id": "B-c",
     "title": "Licence to Operate",
-    "desc": "End with 2+ Trust and 4+ Capital.",
+    "desc": "End with 2+ Public Trust and 4+ Company Money.",
     "check": "trust.business >= 2 && capital >= 4",
     "measured": 0.338
    }
@@ -276,14 +276,14 @@
    {
     "id": "C-a",
     "title": "A Happy Nation",
-    "desc": "Happiness ends at 8.0 or above.",
+    "desc": "Quality of life ends at 8.0 or above.",
     "check": "happiness >= 8.0",
     "measured": 0.374
    },
    {
     "id": "C-b",
     "title": "Nobody Left Behind",
-    "desc": "Happiness never drops below 6.3 in any round.",
+    "desc": "Quality of life never drops below 6.3 in any round.",
     "check": "min(happinessHistory) >= 6.3",
     "measured": 0.35
    },
@@ -299,21 +299,21 @@
    {
     "id": "A-a",
     "title": "No Compromise",
-    "desc": "Never collaborate, and still take the country 25 Mt past net zero.",
+    "desc": "Never take a Collaborate card, and still take the country 25 Mt past net zero.",
     "check": "!flags.COMPROMISED && emissions <= -25",
-    "measured": 0.42
+    "measured": 0.401
    },
    {
     "id": "A-b",
     "title": "The Long Game",
-    "desc": "Green Economy Share reaches 52% or more.",
+    "desc": "Clean Economy reaches 52% or more.",
     "check": "greenShare >= 52",
     "measured": 0.439
    },
    {
     "id": "A-c",
     "title": "Justice First",
-    "desc": "Happiness 7.0+ and at least one Spotlight lands.",
+    "desc": "Quality of life 7.0+ and at least one Spotlight lands.",
     "check": "happiness >= 7.0 && spotlightHits >= 1",
     "measured": 0.238
    }
@@ -513,7 +513,8 @@
       "h": 0.3,
       "gr": 5,
       "flags": [
-       "AT_THE_TABLE"
+       "AT_THE_TABLE",
+       "COMPROMISED"
       ],
       "headline": "Movement leader joins recovery taskforce"
      },
@@ -724,7 +725,10 @@
       "g": 0.3,
       "h": 0.3,
       "gr": 5,
-      "headline": "Campaigner takes seat on economic council"
+      "headline": "Campaigner takes seat on economic council",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R1B-A3",
@@ -932,7 +936,8 @@
       "h": 0.3,
       "gr": 6,
       "flags": [
-       "GREEN_CONDITIONS"
+       "GREEN_CONDITIONS",
+       "COMPROMISED"
       ],
       "headline": "Loan conditions rewritten around clean investment"
      },
@@ -1141,7 +1146,10 @@
       "g": 0.2,
       "h": 0.3,
       "gr": 6,
-      "headline": "Campaigners co-write the national energy roadmap"
+      "headline": "Campaigners co-write the national energy roadmap",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R2A-A3",
@@ -1344,7 +1352,10 @@
       "g": 0.2,
       "h": 0.3,
       "gr": 6,
-      "headline": "Campaigner joins national grid taskforce"
+      "headline": "Campaigner joins national grid taskforce",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R2B-A3",
@@ -1554,7 +1565,10 @@
       "g": 0.3,
       "h": 0.4,
       "gr": 6,
-      "headline": "Civil society helps design the new system"
+      "headline": "Civil society helps design the new system",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R2C-A3",
@@ -1760,7 +1774,10 @@
       "g": 0.3,
       "h": 0.4,
       "gr": 5,
-      "headline": "Campaigner joins national recovery council"
+      "headline": "Campaigner joins national recovery council",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R3A-A3",
@@ -1963,7 +1980,10 @@
       "g": 0.2,
       "h": 0.4,
       "gr": 6,
-      "headline": "Activist appointed to regional haze panel"
+      "headline": "Activist appointed to regional haze panel",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R3B-A3",
@@ -2164,7 +2184,10 @@
       "g": 0.2,
       "h": 0.4,
       "gr": 6,
-      "headline": "Campaigner joins health adaptation board"
+      "headline": "Campaigner joins health adaptation board",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R3C-A3",
@@ -2373,7 +2396,8 @@
       "h": 0.3,
       "gr": 7,
       "flags": [
-       "MANIFESTO_DEAL"
+       "MANIFESTO_DEAL",
+       "COMPROMISED"
       ],
       "headline": "Endorsement traded for binding climate pledges"
      },
@@ -2586,7 +2610,8 @@
       "h": 0.5,
       "gr": 8,
       "flags": [
-       "MANIFESTO_DEAL"
+       "MANIFESTO_DEAL",
+       "COMPROMISED"
       ],
       "headline": "Unions and greens sign historic pact"
      },
@@ -2792,7 +2817,8 @@
       "h": 0.4,
       "gr": 8,
       "flags": [
-       "MANIFESTO_DEAL"
+       "MANIFESTO_DEAL",
+       "COMPROMISED"
       ],
       "headline": "All sides sign a climate commitment"
      },
@@ -3003,7 +3029,10 @@
       "g": 0.1,
       "h": 0.5,
       "gr": 7,
-      "headline": "Clean Water Accord signed by all parties"
+      "headline": "Clean Water Accord signed by all parties",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R5A-A3",
@@ -3211,7 +3240,10 @@
       "g": 0.1,
       "h": 0.5,
       "gr": 7,
-      "headline": "Campaigner co-chairs waste policy review"
+      "headline": "Campaigner co-chairs waste policy review",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R5B-A3",
@@ -3419,7 +3451,10 @@
       "g": 0.1,
       "h": 0.5,
       "gr": 7,
-      "headline": "Coastal accord signed by industry and villages"
+      "headline": "Coastal accord signed by industry and villages",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R5C-A3",
@@ -3606,7 +3641,10 @@
       "g": 0.3,
       "h": 0.6,
       "gr": 9,
-      "headline": "2050 National Accord signed"
+      "headline": "2050 National Accord signed",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R6A-A3",
@@ -3791,7 +3829,10 @@
       "g": 0.3,
       "h": 0.6,
       "gr": 9,
-      "headline": "Allocation council rewrites the rules"
+      "headline": "Allocation council rewrites the rules",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R6B-A3",
@@ -3976,7 +4017,10 @@
       "g": 0.3,
       "h": 0.6,
       "gr": 9,
-      "headline": "New planning code written with civil society"
+      "headline": "New planning code written with civil society",
+      "flags": [
+       "COMPROMISED"
+      ]
      },
      {
       "id": "R6C-A3",
@@ -3994,5 +4038,131 @@
     ]
    }
   }
- ]
+ ],
+ "tutorial": {
+  "title": "A Practice Round",
+  "situation": "Nothing has happened yet. This one is for practice, and none of it counts. Pick a card so you know how it works when it does.",
+  "options": {
+   "government": [
+    {
+     "id": "T-G1",
+     "arch": "SPEND_STEER",
+     "title": "Fund the Bus Network",
+     "desc": "Cleaner buses, and more of them.",
+     "cost": {
+      "fiscal": 2
+     },
+     "e": -9,
+     "g": 0.3,
+     "h": 0.4,
+     "gr": 8,
+     "flags": [],
+     "headline": ""
+    },
+    {
+     "id": "T-G2",
+     "arch": "DEREGULATE",
+     "title": "Do Nothing This Year",
+     "desc": "Save the money. See what happens.",
+     "cost": {
+      "fiscal": -1
+     },
+     "e": 2,
+     "g": 0.2,
+     "h": -0.2,
+     "gr": -2,
+     "flags": [],
+     "headline": ""
+    }
+   ],
+   "business": [
+    {
+     "id": "T-B1",
+     "arch": "TRANSITION",
+     "title": "Switch the Factory to Solar",
+     "desc": "Costly now. Cheaper every year after.",
+     "cost": {
+      "capital": 3
+     },
+     "e": -10,
+     "g": 0.2,
+     "h": 0.3,
+     "gr": 9,
+     "flags": [],
+     "headline": ""
+    },
+    {
+     "id": "T-B2",
+     "arch": "EXPAND",
+     "title": "Run the Old Plant Harder",
+     "desc": "More output. More smoke.",
+     "cost": {
+      "capital": -2
+     },
+     "e": 6,
+     "g": 0.7,
+     "h": -0.4,
+     "gr": -2,
+     "flags": [],
+     "headline": ""
+    }
+   ],
+   "community": [
+    {
+     "id": "T-C1",
+     "arch": "SELF_ORGANISE",
+     "title": "Start a Car Pool",
+     "desc": "Cheap, small, and it adds up.",
+     "cost": {},
+     "e": -4,
+     "g": 0.1,
+     "h": 0.4,
+     "gr": 4,
+     "flags": [],
+     "headline": ""
+    },
+    {
+     "id": "T-C2",
+     "arch": "DEMAND_RELIEF",
+     "title": "Demand Cheaper Fuel",
+     "desc": "Popular today. Someone else pays.",
+     "cost": {},
+     "e": 2,
+     "g": 0.2,
+     "h": 0.6,
+     "gr": -1,
+     "flags": [],
+     "headline": ""
+    }
+   ],
+   "activist": [
+    {
+     "id": "T-A1",
+     "arch": "ESCALATE",
+     "title": "March on the Ministry",
+     "desc": "Loud. It makes enemies and it works.",
+     "cost": {},
+     "e": -3,
+     "g": -0.4,
+     "h": -0.2,
+     "gr": 3,
+     "flags": [],
+     "headline": ""
+    },
+    {
+     "id": "T-A2",
+     "arch": "EDUCATE",
+     "title": "Publish the Numbers",
+     "desc": "Nothing today. Something later.",
+     "cost": {},
+     "e": -1,
+     "g": 0.0,
+     "h": 0.2,
+     "gr": 3,
+     "flags": [],
+     "headline": ""
+    }
+   ]
+  }
+ }
 }

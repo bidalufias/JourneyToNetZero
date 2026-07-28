@@ -485,24 +485,37 @@ so a mixed table can run in two languages simultaneously.
 
 ---
 
-## 8. Running it without a facilitator
+## 8. The facilitator, and what the board owes them
 
-Today four people cannot play. Somebody must drive the shared screen by keyboard
-while reading a 285-line host script. The facilitator is a dependency, not an
-option.
+**Decided: there is always a facilitator.** Self-run mode is not built. A game
+master sets the scene, and the shared board guides them through it.
 
-1. **Self-run mode.** The shared screen advances itself and renders the host line
-   as on-screen text. The script already contains every word; it needs to be
-   renderable, not only readable. Toggle in the lobby: `WITH A HOST` / `ON OUR OWN`.
-2. **Four printed role cards, one A5 page each.** The artefact that actually
-   makes a game pick-up-and-play, and it does not exist. Job, resource, one
-   power, three lines you might say, three national targets on the back.
-3. **Table mode.** One phone or laptop as the shared screen, laid out for 300mm
-   rather than 3m.
-4. **Per-player debrief at the end.** Six choices, what each did, the moment that
-   mattered. The thing a participant photographs and takes back to their desk.
+That settles the open question and reverses one item of earlier scope. It also
+raises the bar rather than lowering it, because a required facilitator who is
+handed nothing is worse than no facilitator at all.
 
----
+### What follows from it
+
+**The board carries the cue.** The script lives in a second window today, which
+assumes a laptop the facilitator can read while talking. The shared screen knows
+what phase the room is in and what happens next, so it should say so: a single
+line of direction, sized for the person running it and ignorable by everyone
+else. `/facilitator` stays as the full run of show for preparation and for the
+person who wants the whole script.
+
+**The acceptance test changes.** It is no longer "leave four people alone in a
+room". It is:
+
+> Give one person who has never run this the board and nothing else. Give four
+> more the phones. Come back in forty minutes.
+
+If the facilitator had to ask a question, that question is the next ticket.
+
+**Printed role cards stay.** They are not a substitute facilitator, they are what
+stops four people reading their phones during the welcome.
+
+**Table mode is dropped.** It existed for a room with no projector, which is a
+room that cannot run this game as designed.
 
 ## 9. Timing
 
@@ -572,15 +585,16 @@ Sequenced so each stage ships something playable and makes the next cheaper.
 | 1.5 | National numbers on the phone |
 | 1.6 | The eight defects in `DESIGN-REVIEW.md` section 13 |
 
-### Stage 2: the onboarding (1.5 weeks)
+### Stage 2: the onboarding - DONE
 
-| | |
-|---|---|
-| 2.1 | Steps 0 to 8 as a phase sequence |
-| 2.2 | Practice round, step 4 |
-| 2.3 | Per-seat power tutorial, step 6 |
-| 2.4 | Goal pick relocated to step 7 |
-| 2.5 | Round 1 coach strip |
+| | | |
+|---|---|---|
+| 2.1 | Steps as a phase sequence | done, four new phases |
+| 2.2 | Practice round | done, in the content pack so a variant can localise it |
+| 2.3 | Per-seat power tutorial | done |
+| 2.4 | Goal pick relocated | done, and still offered to a latecomer |
+| 2.5 | Round 1 coach strip | done |
+| 2.6 | COMPROMISED made real | done, re-measured to 40.1% |
 
 ### Stage 3: structure (1 week)
 
@@ -597,7 +611,8 @@ Sequenced so each stage ships something playable and makes the next cheaper.
 | | |
 |---|---|
 | 4.1 | Community awards the care token, plus simulation re-run |
-| 4.2 | Self-run mode, printed role cards, table mode |
+| 4.1b | Facilitator cue on the shared board, section 8 |
+| 4.2 | Printed role cards |
 | 4.3 | Bahasa Malaysia |
 | 4.4 | Per-player debrief |
 | 4.5 | Persistent score bug, louder Moving Together |
@@ -608,10 +623,10 @@ Sequenced so each stage ships something playable and makes the next cheaper.
 
 One cheap, brutal experiment decides whether any of this worked:
 
-> Sit four people who have never seen the game in a room. Give them nothing but
-> four role cards and a screen. Leave. Come back in forty minutes.
+> Give one person who has never run this the board and nothing else. Give four
+> more the phones. Come back in forty minutes.
 
-If they played, it works. Every question they had to ask somebody is a ticket.
+If they played, it works. Every question the facilitator had to ask is a ticket.
 Run it four times with four different tables and the result is a better
 prioritised backlog than this document.
 
@@ -625,8 +640,9 @@ Run it after Stage 2. Decide Stages 3 and 4 by what the room actually asks for.
     section 0, which makes 100 Mt net honest at the current population. If that
     framing is ever rejected, the population has to come down to about 12
     million instead.
-2. **Should the COMPROMISED flag be made real?** Section 2.6. Fixing it means
-    re-measuring the Activist's No Compromise goal against the fixed version.
+2. ~~Should the COMPROMISED flag be made real?~~ **Decided: yes.** Built in
+    Stage 2; every Collaborate card now sets it and the Activist's No Compromise
+    goal was re-measured against the fixed version.
 3. **What is the published session length?** Recommended 35 minutes with a
     29-minute returning-table path. Publishing 30 and running 37 is worse.
 4. **Who is the primary audience?** A corporate workshop, a university class and
@@ -635,6 +651,5 @@ Run it after Stage 2. Decide Stages 3 and 4 by what the room actually asks for.
 5. **Is Bahasa Malaysia a translation or a co-design?** Translating current copy
     produces something stiff. Writing the plain-language pass in both languages
     at once produces something good, at roughly the same cost.
-6. **Does the facilitator become optional, or is the game designed to have
-    none?** Self-run mode is cheap. Designing so a facilitator adds value but is
-    never required is a larger and different job.
+6. ~~Does the facilitator become optional?~~ **Decided: no.** There is always a
+    facilitator, and the board guides them. See section 8.
