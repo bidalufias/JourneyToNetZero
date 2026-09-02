@@ -14,10 +14,11 @@
  * history: it cannot change anything, it cannot reach another round, and it can
  * never show you a card you have not been dealt. It exists because the crisis
  * brief scrolled past in twenty-five seconds and there was no way to read it
- * again, and because "LOCKED IN" would not tell you what you had locked in.
+ * again, and because "LOCKED" would not tell you what you had locked.
  */
 import type { PhoneView } from '../game/session'
 import { ROLE_CHARACTER, ROLE_LABEL } from '../game/session'
+import { STEP_LABEL } from '../game/vocab'
 import { RoleGlyph, formatClock } from '../ui/primitives'
 
 /** The screens of one round, in the order they happen. */
@@ -26,15 +27,15 @@ export type Screen = 'crisis' | 'table' | 'choice'
 export const SCREEN_ORDER: Screen[] = ['crisis', 'table', 'choice']
 
 export const SCREEN_LABEL: Record<Screen, string> = {
-  crisis: 'THE CRISIS',
-  table: 'THE TALK',
-  choice: 'THE CHOICE',
+  crisis: STEP_LABEL.crisis,
+  table: STEP_LABEL.table,
+  choice: STEP_LABEL.choice,
 }
 
 /**
  * How far back this player may look right now.
  *
- * Only within the live round: from the Reckoning onward the phone is handed the
+ * Only within the live round: from the Reveal onward the phone is handed the
  * *next* round's scenario, so letting the history reach that far would show
  * somebody a crisis that has not broken yet.
  */
@@ -142,9 +143,9 @@ function Nation({ view }: { view: PhoneView }) {
 export function ReviewBar({ screen, onNow }: { screen: Screen; onNow: () => void }) {
   return (
     <div className="review">
-      <span className="review__label">LOOKING BACK · {SCREEN_LABEL[screen]}</span>
+      <span className="review__label">EARLIER THIS ROUND · {SCREEN_LABEL[screen]}</span>
       <button className="review__now" onClick={onNow}>
-        BACK TO NOW
+        BACK TO THE GAME
       </button>
     </div>
   )

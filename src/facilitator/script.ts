@@ -103,7 +103,7 @@ export const BEATS: Beat[] = [
     length: seconds('practiceChoice'),
     onScreen: 'One instruction, and how many have locked in.',
     say: [
-      'Now the other half. Two cards each on your phone. Tap one to pick it, then press LOCK IT IN.',
+      'Now the other half. Two cards each on your phone. Tap one to pick it, then press LOCK MY CARD.',
       'Look at the four arrows on each card. They tell you which way it pushes the country: carbon, the economy, quality of life, and the clean economy. Green is the direction we want.',
       'You can change your mind right up until you lock. After that you cannot. Still practice, still counts for nothing.',
     ],
@@ -122,11 +122,11 @@ export const BEATS: Beat[] = [
     ],
     watch:
       'Thirty seconds, heads down, then move. Teaching all four powers to all four players is four times the words and three times the irrelevance, which is why each phone only shows its own.',
-    next: 'Asks everybody for their secret win.',
+    next: 'Asks everybody for their secret goal.',
   },
   {
     phase: 'goal',
-    label: 'YOUR SECRET WIN',
+    label: 'YOUR SECRET GOAL',
     length: seconds('goal'),
     onScreen: 'The instruction, and the line to say over it.',
     say: [
@@ -149,7 +149,7 @@ export const BEATS: Beat[] = [
       'Do not start fixing it yet. Take it in. The table opens in a moment and then you can shout at each other.',
     ],
     watch:
-      'One player gets an insider tip this round and nobody is told who. If somebody suddenly goes quiet or suddenly gets loud, that is probably why. Let it play.',
+      'One player gets a tip this round and nobody is told who. If somebody suddenly goes quiet or suddenly gets loud, that is probably why. Let it play.',
     next: 'Opens the table. The clock starts on its own if you leave it.',
   },
   {
@@ -180,7 +180,7 @@ export const BEATS: Beat[] = [
       'And remember, you do not have to do what you just promised.',
     ],
     firstTime: [
-      'Tap a card to choose it, then LOCK IT IN. You can change your mind right up until you lock. If the clock beats you, it locks whatever you were holding, so pick something early.',
+      'Tap a card to choose it, then LOCK MY CARD. You can change your mind right up until you lock. If the clock beats you, it locks whatever you were holding, so pick something early.',
     ],
     watch:
       'Say nothing else. The screen is naming the last seat that has not locked, and four people looking at one person does more than you can.',
@@ -225,9 +225,9 @@ export const BEATS: Beat[] = [
   },
   {
     phase: 'results',
-    label: 'THE NATIONAL MISSION',
+    label: 'THE COUNTRY’S RESULT',
     length: 'until you advance it',
-    onScreen: 'The three targets judged, then the secret wins and the titles.',
+    onScreen: 'The three targets judged, then the secret goals and the titles.',
     say: [
       'Ladies and gentlemen, it is 2050. Let us see what became of Semenanjara.',
       '[Five seconds of silence. Count them.]',
@@ -235,7 +235,7 @@ export const BEATS: Beat[] = [
       '[Read the grade off the top of the screen, then the three lines under it, exactly as written. They name the gap.]',
     ],
     watch:
-      'If somebody hit their private goal in a session where the country missed, they get Hollow Victory. Read it out and let it sit. That card does more teaching than an hour of slides, and softening it throws the session away at the last moment. The grade is about the country and the title is about the player: SO CLOSE and Hollow Victory can and do land on the same screen.',
+      'If somebody hit their secret goal in a session where the country missed, they get Hollow Victory. Read it out and let it sit. That card does more teaching than an hour of slides, and softening it throws the session away at the last moment. The grade is about the country and the title is about the player: SO CLOSE and Hollow Victory can and do land on the same screen.',
     next: 'Ends the session and holds on the final screen.',
   },
   {

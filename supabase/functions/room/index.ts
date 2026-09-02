@@ -501,11 +501,11 @@ function optionImpact(option) {
   });
 }
 function optionCondition(option) {
-  if (BREAKS_COALITION.has(option.arch)) return "The table will not count this as moving together.";
-  if (option.arch === "PARTNER") return "Only half works unless the Government pays too.";
-  if (option.arch === "SELF_ORGANISE") return "Twice as strong if the Government or Business helps.";
-  if (option.arch === "COLLABORATE") return "You gain influence. You lose some support.";
-  if ((option.flags ?? []).some((f) => f.startsWith("EVIDENCE"))) return "Nothing now. It pays off every round after.";
+  if (BREAKS_COALITION.has(option.arch)) return "Dirty card. It breaks moving together.";
+  if (option.arch === "PARTNER") return "Partnership. Only half works unless the Government pays half.";
+  if (option.arch === "SELF_ORGANISE") return "Works twice as well if the Government or Business helps.";
+  if (option.arch === "COLLABORATE") return "You work with them. You gain power. Some supporters leave you.";
+  if ((option.flags ?? []).some((f) => f.startsWith("EVIDENCE"))) return "Does nothing now. Helps every round after this.";
   return null;
 }
 var BREAKS_COALITION = /* @__PURE__ */ new Set([
@@ -527,63 +527,63 @@ var PRIVATE_LINE = {
     government: "Your finance team wants one answer. Your own party wants another.",
     business: "The board meets in an hour. They want to know what this costs.",
     community: "Three people on your street lost their jobs before lunch.",
-    activist: "Every rescue is a chance to attach a condition. Or to be ignored."
+    activist: "Every rescue is a chance to ask for something in return."
   },
   energy: {
-    government: "Fuel subsidies are now the biggest line in your budget. Everyone knows it.",
-    business: "Your energy costs just became your biggest risk, and your biggest opportunity.",
+    government: "Fuel subsidies are now the biggest cost in your Budget. Everyone knows it.",
+    business: "Your energy bill is now your biggest risk, and your biggest chance.",
     community: "The bill arrived this morning. People are talking about nothing else.",
     activist: "This round decides the country\u2019s power supply for thirty years."
   },
   health: {
     government: "Hospitals are calling your office directly. So are the employers.",
-    business: "Your workforce is the exposure here, not your plant.",
-    community: "People are frightened. They are looking to each other, not upward.",
+    business: "Your workers are the ones at risk here, not your factory.",
+    community: "People are frightened. They are helping each other, not waiting for you.",
     activist: "Clean air just became real to people. Use that now or lose it."
   },
   election: {
-    government: "Every choice you made so far is now a poster or a scandal.",
-    business: "Whoever wins writes your rules. Money talks, and it is on the record.",
-    community: "You are the only one in this room who actually casts a vote.",
-    activist: "Your backing is all you have to give. Spend it once, spend it well."
+    government: "Every choice you made is now a poster or a scandal.",
+    business: "Whoever wins writes your rules. Everyone can see who you paid.",
+    community: "You are the only one in this room who actually votes.",
+    activist: "Your support is all you have to give. Give it once, and wisely."
   },
   pollution: {
     government: "Somebody will be blamed. You decide if it is a company or a law.",
-    business: "Your permit may be legal. That is not the same as defensible.",
-    community: "This happened to your neighbourhood, not to a statistic.",
-    activist: "The evidence exists. The question is whether anyone has to look."
+    business: "Your permit may be legal. People will still blame you.",
+    community: "This happened to your neighbourhood, not to a number on a screen.",
+    activist: "The evidence exists. The question is whether anyone has to look at it."
   },
   disaster: {
-    government: "Last round. Whatever you do now is what you are remembered for.",
+    government: "Last round. Whatever you do now is what people will remember.",
     business: "The rebuild is a contract. It is also your last chance to be right.",
-    community: "Your people are in the water and the boats are mostly volunteers.",
-    activist: "Ten years of work, and one afternoon to decide what it was for."
+    community: "Your people are in the water. Most of the boats are volunteers.",
+    activist: "Ten years of work. This afternoon decides what it was for."
   }
 };
 function privateLine(type, role) {
   return PRIVATE_LINE[type]?.[role] ?? "The room is waiting for you.";
 }
 var DEMAND_PHRASES = [
-  { id: "pay-first", text: (t) => `the ${t} pays its share before anyone else moves` },
-  { id: "no-dirty", text: (t) => `the ${t} does not take the cheap card this round` },
-  { id: "go-public", text: (t) => `the ${t} says out loud what it is about to pick` },
-  { id: "co-fund", text: (t) => `the ${t} pays half of the partnership` },
-  { id: "protect-jobs", text: (t) => `the ${t} promises nobody loses a job over this` },
-  { id: "no-more-delay", text: (t) => `the ${t} stops asking everyone else to go first` }
+  { id: "pay-first", text: (t) => `the ${t} to pay first` },
+  { id: "no-dirty", text: (t) => `the ${t} not to pick a dirty card` },
+  { id: "go-public", text: (t) => `the ${t} to tell us its card` },
+  { id: "co-fund", text: (t) => `the ${t} to pay half of the partnership` },
+  { id: "protect-jobs", text: (t) => `the ${t} to promise no job cuts` },
+  { id: "no-more-delay", text: (t) => `the ${t} to stop waiting for others` }
 ];
 var DEAL_CONDITIONS = [
   {
     id: "moves-with-me",
-    text: (t) => `the ${t} moves too`,
+    text: (t) => `the ${t} also picks a good card`,
     met: (them) => them.aligned
   },
   {
     // Weaker than moving together, and deliberately so: a seat that spends the
-    // round asking somebody else to pay has not taken a cheap card, and it has
+    // round asking somebody else to pay has not picked a dirty card, and it has
     // not moved with you either. A table that learns the difference has learned
-    // most of what the coalition bonus is for.
+    // most of what the moving together bonus is for.
     id: "no-cheap-card",
-    text: (t) => `the ${t} does not take the cheap card`,
+    text: (t) => `the ${t} does not pick a dirty card`,
     met: (them) => !DIRTY.has(them.arch)
   }
 ];
@@ -985,7 +985,7 @@ function say(room, cmd, content2) {
         round,
         from: "government",
         kind: "cofund",
-        text: "The Government will pay half of any partnership the Business signs.",
+        text: "The Government will pay half of any partnership the Business picks.",
         optionId: null,
         ifRole: null,
         ifConditionId: null,
@@ -1004,7 +1004,7 @@ function say(room, cmd, content2) {
       round,
       from: cmd.role,
       kind: "promise",
-      text: `${me} will choose \u201C${option2.title}\u201D.`,
+      text: `${me} will pick \u201C${option2.title}\u201D.`,
       optionId: option2.id,
       ifRole: null,
       ifConditionId: null,
@@ -1038,7 +1038,7 @@ function say(room, cmd, content2) {
     round,
     from: cmd.role,
     kind: "deal",
-    text: `${me} will choose \u201C${option.title}\u201D if ${condition.text(ROLE_LABEL[cmd.target])}.`,
+    text: `${me} will pick \u201C${option.title}\u201D if ${condition.text(ROLE_LABEL[cmd.target])}.`,
     optionId: option.id,
     ifRole: cmd.target,
     ifConditionId: condition.id,
@@ -1259,7 +1259,7 @@ function buildTip(room, content2, to, round, cursorIn) {
       id: `tip-${round}`,
       round,
       to,
-      source: "A sealed brief",
+      source: "A leaked report",
       text: tips.intel[scenarioId] ?? "The official figures are not the real ones.",
       published: false,
       revealed: false
@@ -1347,19 +1347,19 @@ function phoneView(room, content2, role) {
       if (!open) {
         if (o.gate_trust && room.game.trust.government < o.gate_trust) {
           disabled = "gate";
-          note = `Needs ${o.gate_trust} Trust. The country has not backed you.`;
+          note = `Needs ${o.gate_trust} Public Trust. You have ${room.game.trust.government}.`;
         } else if (o.block_flag && room.game.flags.has(String(o.block_flag))) {
           disabled = "gate";
-          note = "A promise you made earlier closed this door.";
+          note = "A promise you made in an earlier round blocks this.";
         } else {
           disabled = "afford";
           const need = o.cost?.fiscal ?? o.cost?.capital ?? 0;
           const have = o.cost?.fiscal ? room.game.fiscal : room.game.capital;
-          note = `You have ${have} of ${need}.`;
+          note = `You have ${have}. It costs ${need}.`;
         }
       } else if (!choosable) {
         disabled = "veto";
-        note = "\u201CThe public will simply not accept this.\u201D Removed by the Community, this round only.";
+        note = "The Community took this card away for this round.";
       }
       return {
         id: o.id,
@@ -1438,25 +1438,31 @@ function roundResultCopy(room, content2, role) {
   const mine = log.reveals.find((r) => r.role === role);
   if (!mine) return null;
   const player = room.players[role];
-  const didWhat = player.defaulted ? `You ran out of time. The clock picked \u201C${mine.title}\u201D.` : player.autoLocked ? `You had \u201C${mine.title}\u201D selected, and the clock locked it in.` : `You chose \u201C${mine.title}\u201D.`;
+  const didWhat = player.defaulted ? `Time ran out and you had no card. The game picked \u201C${mine.title}\u201D.` : player.autoLocked ? `Time ran out. Your card \u201C${mine.title}\u201D was locked for you.` : `You picked \u201C${mine.title}\u201D.`;
   const costBits = [];
-  if (mine.partnerUnfunded) costBits.push("Nobody co-funded it, so it landed at half strength.");
-  if (mine.spotlit) costBits.push("You were named publicly, and it cost you.");
-  if (mine.selfOrganiseSupported) costBits.push("Real backing arrived, and it counted double.");
+  if (mine.partnerUnfunded) costBits.push("The Government did not pay half, so it only half worked.");
+  if (mine.spotlit) costBits.push("The Activist\u2019s Spotlight caught you. Your card only half worked.");
+  if (mine.selfOrganiseSupported) costBits.push("The Government or Business helped, so it worked twice as well.");
   if (log.govIsolated && role === "government") {
-    costBits.push("You moved alone, and the country only half-followed.");
+    costBits.push("You acted alone. The country only half followed.");
   }
-  if (!costBits.length) costBits.push("It landed as you intended.");
+  if (!costBits.length) {
+    costBits.push(
+      player.defaulted ? "You did not pick this card. It still counted." : player.autoLocked ? "You did not lock this card yourself. It still counted." : "It worked as planned."
+    );
+  }
   const others = [];
   if (log.alignedCount >= 3) {
     others.push(
-      log.alignedCount === 4 ? "All four of you moved together, and the coalition held." : "Three of you moved together, and the coalition held."
+      log.alignedCount === 4 ? "All four of you picked good cards. You got the moving together bonus." : "Three of you picked good cards. You got the moving together bonus."
     );
   } else {
-    others.push("The table did not move together this round.");
+    others.push("Fewer than three of you picked good cards. No bonus this round.");
   }
   const broken = room.promises.filter((p) => p.round === log.round && p.outcome === "broken");
-  if (broken.length) others.push(`${broken.map((b) => BOARD_NAME[b.from]).join(" and ")} broke a promise.`);
+  for (const b of broken) {
+    others.push(b.from === role ? "You broke your promise." : `${BOARD_NAME[b.from]} broke a promise.`);
+  }
   const card = content2.scenarios[log.scenarioId]?.options[role]?.find((o) => o.id === mine.optionId);
   return {
     didWhat,
@@ -1474,11 +1480,11 @@ function comparison(log, role) {
   if (!mine) return null;
   const cuts = log.reveals.filter((r) => r.emissions < -0.05);
   if (mine.emissions < -0.05 && cuts.length && mine.emissions <= Math.min(...cuts.map((r) => r.emissions))) {
-    return cuts.length === 1 ? "The only cut anyone made this round." : "The biggest cut anyone made this round.";
+    return cuts.length === 1 ? "The only carbon cut this round." : "The biggest carbon cut this round.";
   }
-  if (mine.emissions > 0.05) return "This added carbon rather than cutting it.";
-  if (mine.multiplier >= 1.5) return "Something else at the table made this land harder than it should have.";
-  if (mine.multiplier <= 0.75) return "It landed at less than full strength.";
+  if (mine.emissions > 0.05) return "This card added carbon. It did not cut it.";
+  if (mine.multiplier >= 1.5) return "Another player\u2019s card made yours work better.";
+  if (mine.multiplier <= 0.75) return "Your card did not work at full strength.";
   return null;
 }
 var CLOSE_ENOUGH = { emissions: 10, growth: 0.5, happiness: 0.5 };
@@ -1492,7 +1498,7 @@ function endgame(room, content2) {
       target: c.tgt_e,
       met: res.pe,
       gap: Math.max(0, res.e - c.tgt_e),
-      verdict: res.pe ? res.e < -0.5 ? `Carbon went past net zero, to \u2212${Math.abs(res.e).toFixed(0)} Mt.` : "Carbon reached net zero." : `Carbon finished at ${res.e.toFixed(0)} Mt. It had to reach zero.`
+      verdict: res.pe ? res.e < -0.5 ? `Carbon went below zero, to \u2212${Math.abs(res.e).toFixed(0)} million tonnes.` : "Carbon reached net zero." : `Carbon finished at ${res.e.toFixed(0)} million tonnes. It had to reach zero.`
     },
     {
       key: "growth",

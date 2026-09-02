@@ -570,7 +570,7 @@ function say(room: Room, cmd: SayCommand, content: Content): Room {
         round,
         from: 'government',
         kind: 'cofund',
-        text: 'The Government will pay half of any partnership the Business signs.',
+        text: 'The Government will pay half of any partnership the Business picks.',
         optionId: null,
         ifRole: null,
         ifConditionId: null,
@@ -592,7 +592,7 @@ function say(room: Room, cmd: SayCommand, content: Content): Room {
       round,
       from: cmd.role,
       kind: 'promise',
-      text: `${me} will choose “${option.title}”.`,
+      text: `${me} will pick “${option.title}”.`,
       optionId: option.id,
       ifRole: null,
       ifConditionId: null,
@@ -629,7 +629,7 @@ function say(room: Room, cmd: SayCommand, content: Content): Room {
     round,
     from: cmd.role,
     kind: 'deal',
-    text: `${me} will choose “${option.title}” if ${condition.text(ROLE_LABEL[cmd.target])}.`,
+    text: `${me} will pick “${option.title}” if ${condition.text(ROLE_LABEL[cmd.target])}.`,
     optionId: option.id,
     ifRole: cmd.target,
     ifConditionId: condition.id,
@@ -994,7 +994,7 @@ function buildTip(
       id: `tip-${round}`,
       round,
       to,
-      source: 'A sealed brief',
+      source: 'A leaked report',
       text: tips.intel[scenarioId] ?? 'The official figures are not the real ones.',
       published: false,
       revealed: false,
@@ -1109,19 +1109,19 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
         // "she stopped me" and "I did this to myself" are three feelings.
         if (o.gate_trust && room.game.trust.government < o.gate_trust) {
           disabled = 'gate'
-          note = `Needs ${o.gate_trust} Trust. The country has not backed you.`
+          note = `Needs ${o.gate_trust} Public Trust. You have ${room.game.trust.government}.`
         } else if (o.block_flag && room.game.flags.has(String(o.block_flag))) {
           disabled = 'gate'
-          note = 'A promise you made earlier closed this door.'
+          note = 'A promise you made in an earlier round blocks this.'
         } else {
           disabled = 'afford'
           const need = o.cost?.fiscal ?? o.cost?.capital ?? 0
           const have = o.cost?.fiscal ? room.game.fiscal : room.game.capital
-          note = `You have ${have} of ${need}.`
+          note = `You have ${have}. It costs ${need}.`
         }
       } else if (!choosable) {
         disabled = 'veto'
-        note = '“The public will simply not accept this.” Removed by the Community, this round only.'
+        note = 'The Community took this card away for this round.'
       }
 
       return {
@@ -1266,32 +1266,45 @@ function roundResultCopy(room: Room, content: Content, role: Role): PhoneView['r
   // one sentence in the app that can be flatly untrue.
   const player = room.players[role]
   const didWhat = player.defaulted
-    ? `You ran out of time. The clock picked “${mine.title}”.`
+    ? `Time ran out and you had no card. The game picked “${mine.title}”.`
     : player.autoLocked
-      ? `You had “${mine.title}” selected, and the clock locked it in.`
-      : `You chose “${mine.title}”.`
+      ? `Time ran out. Your card “${mine.title}” was locked for you.`
+      : `You picked “${mine.title}”.`
 
   const costBits: string[] = []
-  if (mine.partnerUnfunded) costBits.push('Nobody co-funded it, so it landed at half strength.')
-  if (mine.spotlit) costBits.push('You were named publicly, and it cost you.')
-  if (mine.selfOrganiseSupported) costBits.push('Real backing arrived, and it counted double.')
+  if (mine.partnerUnfunded) costBits.push('The Government did not pay half, so it only half worked.')
+  if (mine.spotlit) costBits.push('The Activist’s Spotlight caught you. Your card only half worked.')
+  if (mine.selfOrganiseSupported) costBits.push('The Government or Business helped, so it worked twice as well.')
   if (log.govIsolated && role === 'government') {
-    costBits.push('You moved alone, and the country only half-followed.')
+    costBits.push('You acted alone. The country only half followed.')
   }
-  if (!costBits.length) costBits.push('It landed as you intended.')
+  // Never "as planned" on a card the clock picked: that sentence would be
+  // flatly untrue, and it is the one a player who froze reads most closely.
+  if (!costBits.length) {
+    costBits.push(
+      player.defaulted
+        ? 'You did not pick this card. It still counted.'
+        : player.autoLocked
+          ? 'You did not lock this card yourself. It still counted.'
+          : 'It worked as planned.',
+    )
+  }
 
   const others: string[] = []
   if (log.alignedCount >= 3) {
     others.push(
       log.alignedCount === 4
-        ? 'All four of you moved together, and the coalition held.'
-        : 'Three of you moved together, and the coalition held.',
+        ? 'All four of you picked good cards. You got the moving together bonus.'
+        : 'Three of you picked good cards. You got the moving together bonus.',
     )
   } else {
-    others.push('The table did not move together this round.')
+    others.push('Fewer than three of you picked good cards. No bonus this round.')
   }
+  // Your own broken promise is said to you, not about you.
   const broken = room.promises.filter((p) => p.round === log.round && p.outcome === 'broken')
-  if (broken.length) others.push(`${broken.map((b) => BOARD_NAME[b.from]).join(' and ')} broke a promise.`)
+  for (const b of broken) {
+    others.push(b.from === role ? 'You broke your promise.' : `${BOARD_NAME[b.from]} broke a promise.`)
+  }
 
   // The card as it was authored, so the chips after the reveal are the same
   // four the player weighed before it. `emissions` on the reveal is the
@@ -1324,12 +1337,12 @@ function comparison(log: NonNullable<Room['lastRound']>, role: Role): string | n
 
   if (mine.emissions < -0.05 && cuts.length && mine.emissions <= Math.min(...cuts.map((r) => r.emissions))) {
     return cuts.length === 1
-      ? 'The only cut anyone made this round.'
-      : 'The biggest cut anyone made this round.'
+      ? 'The only carbon cut this round.'
+      : 'The biggest carbon cut this round.'
   }
-  if (mine.emissions > 0.05) return 'This added carbon rather than cutting it.'
-  if (mine.multiplier >= 1.5) return 'Something else at the table made this land harder than it should have.'
-  if (mine.multiplier <= 0.75) return 'It landed at less than full strength.'
+  if (mine.emissions > 0.05) return 'This card added carbon. It did not cut it.'
+  if (mine.multiplier >= 1.5) return 'Another player’s card made yours work better.'
+  if (mine.multiplier <= 0.75) return 'Your card did not work at full strength.'
   return null
 }
 
@@ -1396,9 +1409,9 @@ export function endgame(room: Room, content: Content): Endgame {
       gap: Math.max(0, res.e - c.tgt_e),
       verdict: res.pe
         ? res.e < -0.5
-          ? `Carbon went past net zero, to −${Math.abs(res.e).toFixed(0)} Mt.`
+          ? `Carbon went below zero, to −${Math.abs(res.e).toFixed(0)} million tonnes.`
           : 'Carbon reached net zero.'
-        : `Carbon finished at ${res.e.toFixed(0)} Mt. It had to reach zero.`,
+        : `Carbon finished at ${res.e.toFixed(0)} million tonnes. It had to reach zero.`,
     },
     {
       key: 'growth',

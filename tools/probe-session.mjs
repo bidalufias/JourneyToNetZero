@@ -41,7 +41,7 @@ const phones = {}
 for (const [i, role] of ROLES.entries()) {
   const p = await ctx.newPage(); await p.setViewportSize({ width: 390, height: 844 })
   await p.goto(`${BASE}/play?room=${code}&seat=${role}`); await wait(400)
-  await p.fill('input.field', ['Aisha', 'Ben', 'Chen', 'Dara'][i]); await btn(p, 'TAKE THE SEAT').click(); await wait(300)
+  await p.fill('input.field', ['Aisha', 'Ben', 'Chen', 'Dara'][i]); await btn(p, 'TAKE THIS SEAT').click(); await wait(300)
   phones[role] = p
 }
 // Leave government still reading their role, start the session: what happens to that phone?
@@ -52,18 +52,18 @@ note('phones after start: ' + (await bodyText(phones.business)).includes('I AM R
 
 await next('practiceTalk'); await next('practiceChoice'); await next('power'); await next('goal')
 // Only 3 seal a goal. Advance anyway (what the 45s clock would do).
-for (const r of ['government', 'business', 'community']) { await phones[r].locator('.goal').first().click(); await wait(100); await btn(phones[r], 'SEAL IT').click(); await wait(150) }
+for (const r of ['government', 'business', 'community']) { await phones[r].locator('.goal').first().click(); await wait(100); await btn(phones[r], 'CHOOSE THIS ONE').click(); await wait(150) }
 await shot(dash, 'dash-goal-3-of-4-sealed')
 await next('crisis R1 with activist unsealed')
 await shot(phones.activist, 'activist-goal-during-crisis', true)
 // The tip card can land on this phone and cover the goal picker.
-if ((await bodyText(phones.activist)).includes('A TIP OFF')) { note('tip landed on the unsealed activist'); await btn(phones.activist, 'SAY NOTHING').click(); await wait(200) }
-await phones.activist.locator('.goal').first().click(); await wait(100); await btn(phones.activist, 'SEAL IT').click(); await wait(300)
+if ((await bodyText(phones.activist)).includes('A TIP')) { note('tip landed on the unsealed activist'); await btn(phones.activist, 'KEEP IT SECRET').click(); await wait(200) }
+await phones.activist.locator('.goal').first().click(); await wait(100); await btn(phones.activist, 'CHOOSE THIS ONE').click(); await wait(300)
 await shot(phones.activist, 'activist-after-late-seal', true)
 
 // Tip: whoever has it says nothing. Remember who.
 let tipped1 = null
-for (const r of ROLES) { if ((await bodyText(phones[r])).includes('A TIP OFF')) { tipped1 = r; await btn(phones[r], 'SAY NOTHING').click(); await wait(200) } }
+for (const r of ROLES) { if ((await bodyText(phones[r])).includes('A TIP')) { tipped1 = r; await btn(phones[r], 'KEEP IT SECRET').click(); await wait(200) } }
 note(`R1 tip -> ${tipped1}, said nothing`)
 
 await next('table R1')
@@ -79,12 +79,12 @@ await shot(phones.business, 'business-table-after-veto', true)
 await shot(dash, 'dash-table-after-veto')
 // Business promises the card it will NOT pick (to break a promise)
 const b = phones.business
-await btn(b, 'SAY IT').click(); await wait(200); await b.getByText('I will choose…', { exact: true }).click(); await wait(200)
+await btn(b, 'SAY IT').click(); await wait(200); await b.getByText('I will pick…', { exact: true }).click(); await wait(200)
 const promiseBtns = b.locator('.sheet__body .btn--ghost')
 note(`business promise options: ${await promiseBtns.count()}`)
 await promiseBtns.first().click(); await wait(300)
 // Gov turns co-funding on
-await btn(phones.government, 'SAY IT').click(); await wait(200); await phones.government.getByText('I will pay half of any partnership.').click(); await wait(300)
+await btn(phones.government, 'SAY IT').click(); await wait(200); await phones.government.getByText('I will pay half of a Business partnership.').click(); await wait(300)
 await shot(dash, 'dash-table-cofund-and-pledge')
 await shot(phones.government, 'gov-table-after-cofund', true)
 
@@ -92,8 +92,8 @@ await next('choice R1')
 await shot(b, 'business-choice-vetoed', true)
 // Business locks a DIFFERENT available card than promised (last available)
 const bcards = b.locator('.ocard:not([disabled])'); note(`business available cards: ${await bcards.count()}`)
-await bcards.last().click(); await wait(100); await btn(b, 'LOCK IT IN').click(); await wait(200)
-for (const r of ['government', 'community']) { const p = phones[r]; await p.locator('.ocard:not([disabled])').first().click(); await wait(100); await btn(p, 'LOCK IT IN').click(); await wait(150) }
+await bcards.last().click(); await wait(100); await btn(b, 'LOCK MY CARD').click(); await wait(200)
+for (const r of ['government', 'community']) { const p = phones[r]; await p.locator('.ocard:not([disabled])').first().click(); await wait(100); await btn(p, 'LOCK MY CARD').click(); await wait(150) }
 // Activist selects but does not lock; let the 60s clock lock it.
 await phones.activist.locator('.ocard:not([disabled])').first().click(); await wait(200)
 await shot(phones.activist, 'activist-selected-not-locked', true)
@@ -112,7 +112,7 @@ for (let round = 2; round <= 6; round++) {
   await next(`crisis R${round}`)
   for (const r of ROLES) {
     const t = await bodyText(phones[r])
-    if (t.includes('A TIP OFF')) { note(`R${round} tip card visible on ${r}`); await btn(phones[r], 'SAY NOTHING').click(); await wait(150) }
+    if (t.includes('A TIP')) { note(`R${round} tip card visible on ${r}`); await btn(phones[r], 'KEEP IT SECRET').click(); await wait(150) }
   }
   // Ask the room directly who was dealt the tip this round (read the dashboard's tip line is anonymous; use the phone body instead)
   if (round === 2) {
@@ -125,7 +125,7 @@ for (let round = 2; round <= 6; round++) {
     continue
   }
   await next('table'); await next('choice')
-  for (const r of ROLES) { const p = phones[r]; const cards = p.locator('.ocard:not([disabled])'); if (await cards.count()) { await cards.first().click(); await wait(80); await btn(p, 'LOCK IT IN').click(); await wait(120) } }
+  for (const r of ROLES) { const p = phones[r]; const cards = p.locator('.ocard:not([disabled])'); if (await cards.count()) { await cards.first().click(); await wait(80); await btn(p, 'LOCK MY CARD').click(); await wait(120) } }
   await wait(600); await next('trust'); await next('summary')
 }
 // Which roles ever showed a tip card after round 1? Compare with the rotation rule (everyone gets one in R1-4, repeats in R5-6).

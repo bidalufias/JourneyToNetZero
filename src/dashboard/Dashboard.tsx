@@ -17,6 +17,7 @@ import { serverNow } from '../net/clock'
 import type { DashboardView } from '../game/session'
 import type { Endgame } from '../game/room'
 import { ROLE_LABEL } from '../game/session'
+import { STEP_LABEL } from '../game/vocab'
 import { Meter, RoleGlyph, Sparkline, formatClock } from '../ui/primitives'
 import {
   driftSentence,
@@ -38,20 +39,6 @@ import {
 import './dashboard.css'
 import './screens.css'
 
-const PHASE_LABEL: Record<string, string> = {
-  briefing: 'THE BRIEFING',
-  practiceTalk: 'PRACTICE · TALKING',
-  practiceChoice: 'PRACTICE · CHOOSING',
-  power: 'WHAT EACH OF YOU CAN DO',
-  goal: 'YOUR SECRET WIN',
-  crisis: 'THE CRISIS',
-  table: 'THE TALK',
-  choice: 'THE CHOICE',
-  reckoning: 'THE REVEAL',
-  trust: 'PUBLIC TRUST',
-  summary: 'THE STORY SO FAR',
-  results: 'THE NATIONAL MISSION',
-}
 
 /**
  * Ticks locally between server snapshots so the countdown stays smooth.
@@ -128,9 +115,9 @@ export function Dashboard({
       <Ticker headlines={view.headlines} />
 
       {view.phase === 'crisis' && view.scenario ? <CrisisSting view={view} clock={clock} /> : null}
-      {/* The Reckoning owns its own beats, including when the Coalition Bonus
+      {/* The Reveal owns its own beats, including when the moving together bonus
           is allowed to interrupt. It must land after the meters settle. */}
-      {/* Keyed on the round so every Reckoning starts its own stopwatch, even
+      {/* Keyed on the round so every Reveal starts its own stopwatch, even
           in the case where one follows another without the screen unmounting. */}
       {view.phase === 'reckoning' && view.lastRound ? (
         <Reckoning key={view.lastRound.round} view={view} />
@@ -156,7 +143,7 @@ function Masthead({
         <span>
           ROUND {view.round} OF 6
         </span>
-        <span>{PHASE_LABEL[view.phase] ?? ''}</span>
+        <span>{STEP_LABEL[view.phase] ?? ''}</span>
         {clock ? (
           <span
             className={`dash__clock${urgent ? ' dash__clock--urgent' : ''}${
@@ -211,7 +198,7 @@ function TheNation({ view }: { view: DashboardView }) {
         </div>
 
         <div className="proj">
-          <span className="proj__label">ON CURRENT PATH, 2050</span>
+          <span className="proj__label">IF NOTHING CHANGES, IN 2050</span>
           <div className="proj__row">
             <span className="proj__value" data-on-track={projection.onTrack}>
               {s.projection2050.toFixed(0)}
@@ -253,8 +240,8 @@ function LockRow({ view }: { view: DashboardView }) {
                     : seat.locked
                       ? 'LOCKED'
                       : seat.lastToLock
-                        ? 'LAST ONE'
-                        : 'THINKING'}
+                        ? 'LAST TO LOCK'
+                        : 'STILL CHOOSING'}
               </div>
             </div>
           </div>
@@ -300,7 +287,7 @@ function CrisisSting({ view, clock }: { view: DashboardView; clock: string | nul
     health: 'THE PEOPLE',
     election: 'THE ELECTION',
     pollution: 'THE DAMAGE',
-    disaster: 'THE RECKONING',
+    disaster: 'THE DISASTER',
   }
   return (
     <div className="sting">
@@ -327,7 +314,7 @@ function CrisisSting({ view, clock }: { view: DashboardView; clock: string | nul
         </div>
         {clock ? (
           <div className="sting__countdown">
-            <div className="sting__countdown-label">THE TABLE OPENS IN</div>
+            <div className="sting__countdown-label">THE TALK STARTS IN</div>
             <div className="sting__countdown-value">{clock}</div>
           </div>
         ) : null}

@@ -339,8 +339,8 @@ describe('choosing is not committing', () => {
     expect(room.players.business.defaulted).toBe(true)
 
     expire(room) // reckoning, where the round summary is written
-    expect(phoneView(room, content, 'government').roundResult?.didWhat).toContain('clock locked it in')
-    expect(phoneView(room, content, 'business').roundResult?.didWhat).toContain('ran out of time')
+    expect(phoneView(room, content, 'government').roundResult?.didWhat).toContain('was locked for you')
+    expect(phoneView(room, content, 'business').roundResult?.didWhat).toContain('The game picked')
   })
 })
 
@@ -382,7 +382,7 @@ describe('the phone can never see the numbers', () => {
     // statements of one rule. The Community's veto trigger was duplicated the
     // same way and the copies drifted, so this asserts they agree for all 216
     // options rather than trusting that they were written to match.
-    const breaks = 'The table will not count this as moving together.'
+    const breaks = 'Dirty card. It breaks moving together.'
     for (const scenario of Object.values(content.scenarios)) {
       for (const options of Object.values(scenario.options)) {
         for (const o of options) {
@@ -468,7 +468,7 @@ describe('negotiation', () => {
     // sentence: titles are a mix of imperatives ("Bail Out the Big Exporters")
     // and noun phrases ("Green Stimulus Package"), and only a quotation is
     // grammatical for both.
-    expect(board[0].text).toBe(`The Government will choose “${pledged.title}”.`)
+    expect(board[0].text).toBe(`The Government will pick “${pledged.title}”.`)
 
     expire(room) // -> choice
     // The player is free to break it. Nothing stops them.
@@ -536,7 +536,7 @@ describe('negotiation', () => {
     expect(after.options.filter((o) => o.available).length).toBeLessThanOrEqual(before)
     const vetoed = after.options.filter((o) => o.disabled === 'veto')
     expect(vetoed.length).toBeGreaterThan(0)
-    expect(vetoed[0].disabledNote).toContain('will simply not accept')
+    expect(vetoed[0].disabledNote).toContain('took this card away')
   })
 
   it('spends only two vetoes across a whole game', () => {
@@ -638,7 +638,7 @@ describe('SAY IT', () => {
     const board = dashboardView(room, content).promises
     expect(board).toHaveLength(1)
     expect(board[0].kind).toBe('demand')
-    expect(board[0].text).toBe('The Government wants the Business pays its share before anyone else moves.')
+    expect(board[0].text).toBe('The Government wants the Business to pay first.')
   })
 
   it('says the co-funding out loud instead of hiding it in a switch', () => {
@@ -688,7 +688,7 @@ describe('SAY IT', () => {
     // Third person throughout. A pledge is composed on a phone and read off a
     // projector, and "if the Business moves with me" is wrong on the projector.
     expect(board[0].text).toBe(
-      `The Government will choose “${mine.title}” if the Business moves too.`,
+      `The Government will pick “${mine.title}” if the Business also picks a good card.`,
     )
     // A deal names the other seat, which is what lets the reveal resolve it.
     expect(board[0].ifRole).toBe('business')

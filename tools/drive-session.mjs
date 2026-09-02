@@ -63,19 +63,19 @@ for (const [i, role] of ROLES.entries()) {
     await shot(p, 'phone-scan-choice')
     await shot(p, 'phone-scan-choice-full', true)
   }
-  await p.getByRole('button', { name: 'PROCEED TO THE GAME' }).click()
+  await p.getByRole('button', { name: 'JOIN THE GAME' }).click()
   await wait(300)
   if (i === 0) await shot(p, 'phone-join-seats', true)
   await p.getByRole('button', { name: new RegExp(role, 'i') }).first().click()
   await wait(500)
   if (i === 0) await shot(p, 'phone-take-seat')
   await p.fill('input.field', ['Aisha', 'Ben', 'Chen', 'Dara'][i])
-  await p.getByRole('button', { name: 'TAKE THE SEAT' }).click()
+  await p.getByRole('button', { name: 'TAKE THIS SEAT' }).click()
   await wait(500)
   await shot(p, `phone-role-reveal-${role}`)
   await shot(p, `phone-role-reveal-${role}-full`, true)
   if (i === 0) {
-    await p.getByRole('button', { name: 'MORE ABOUT ME' }).click(); await wait(200)
+    await p.getByRole('button', { name: 'READ MORE' }).click(); await wait(200)
     await shot(p, `phone-role-reveal-${role}-more-full`, true)
   }
   await p.getByRole('button', { name: 'I AM READY' }).click()
@@ -111,7 +111,7 @@ await shot(phones.government, 'phone-practice-talk', true)
 // Gov: open SAY IT
 await phones.government.getByText('SAY IT', { exact: true }).click(); await wait(300)
 await shot(phones.government, 'phone-say-sheet', true)
-await phones.government.getByText('I will choose… if you…').click(); await wait(300)
+await phones.government.getByText('I will pick… if you…').click(); await wait(300)
 await shot(phones.government, 'phone-say-deal-1', true)
 await phones.government.locator('.sheet__body .btn--ghost').first().click(); await wait(300)
 await shot(phones.government, 'phone-say-deal-2', true)
@@ -119,7 +119,7 @@ await phones.government.locator('.sheet__body .btn--ghost').first().click(); awa
 await shot(phones.government, 'phone-practice-talk-said', true)
 // Business: promise
 await phones.business.getByText('SAY IT', { exact: true }).click(); await wait(300)
-await phones.business.getByText('I will choose…', { exact: true }).click(); await wait(300)
+await phones.business.getByText('I will pick…', { exact: true }).click(); await wait(300)
 await shot(phones.business, 'phone-say-promise', true)
 await phones.business.locator('.sheet__body .btn--ghost').first().click(); await wait(400)
 // Community: veto sheet + demand
@@ -127,13 +127,13 @@ await phones.community.getByRole('button', { name: /SAY NO/ }).click(); await wa
 await shot(phones.community, 'phone-veto-sheet', true)
 await phones.community.locator('.sheet__close').click(); await wait(200)
 await phones.community.getByText('SAY IT', { exact: true }).click(); await wait(300)
-await phones.community.getByText('I want someone to…').click(); await wait(300)
+await phones.community.getByText('I want you to…').click(); await wait(300)
 await shot(phones.community, 'phone-say-demand', true)
 await phones.community.locator('.sheet__body .btn--ghost').first().click(); await wait(400)
 // Activist: spotlight sheet
 await phones.activist.getByRole('button', { name: /SPOTLIGHT/ }).click(); await wait(300)
 await shot(phones.activist, 'phone-spotlight-sheet', true)
-await phones.activist.getByRole('button', { name: 'CALL IT' }).click(); await wait(400)
+await phones.activist.getByRole('button', { name: 'USE SPOTLIGHT' }).click(); await wait(400)
 await shot(phones.activist, 'phone-practice-talk-activist-after-spotlight', true)
 // Gov: send money sheet
 await phones.government.getByRole('button', { name: 'SEND MONEY' }).click(); await wait(300)
@@ -153,7 +153,7 @@ for (const r of ROLES) {
   const p = phones[r]
   await p.locator('.ocard').first().click(); await wait(200)
   if (r === 'community') await shot(p, 'phone-practice-choice-selected', true)
-  await p.getByRole('button', { name: 'LOCK IT IN' }).click(); await wait(300)
+  await p.getByRole('button', { name: 'LOCK MY CARD' }).click(); await wait(300)
   if (r === 'community') await shot(p, 'phone-practice-choice-locked', true)
 }
 await shot(dash, 'dash-practice-choice-all-locked')
@@ -170,12 +170,12 @@ await shot(dash, 'dash-goal')
 await shot(phones.activist, 'phone-goal-picker', true)
 await phones.activist.locator('.goal').first().click(); await wait(200)
 await shot(phones.activist, 'phone-goal-confirm', true)
-await phones.activist.getByRole('button', { name: 'SEAL IT' }).click(); await wait(400)
+await phones.activist.getByRole('button', { name: 'CHOOSE THIS ONE' }).click(); await wait(400)
 await shot(phones.activist, 'phone-goal-sealed', true)
 for (const r of ROLES) {
   if (r === 'activist') continue
   await phones[r].locator('.goal').first().click(); await wait(150)
-  await phones[r].getByRole('button', { name: 'SEAL IT' }).click(); await wait(200)
+  await phones[r].getByRole('button', { name: 'CHOOSE THIS ONE' }).click(); await wait(200)
 }
 await shot(dash, 'dash-goal-all-sealed')
 
@@ -184,13 +184,13 @@ await next('crisis R1')
 await shot(dash, 'dash-r1-crisis')
 for (const r of ROLES) {
   const t = await bodyText(phones[r])
-  if (t.includes('A TIP OFF')) { note(`tip went to ${r}`); await shot(phones[r], `phone-r1-tip-${r}`, true) }
+  if (t.includes('A TIP')) { note(`tip went to ${r}`); await shot(phones[r], `phone-r1-tip-${r}`, true) }
 }
 await shot(phones.government, 'phone-r1-crisis', true)
 // Dismiss any tip with SAY NOTHING on whoever has it, except keep one to test publish
 for (const r of ROLES) {
   const p = phones[r]
-  if ((await bodyText(p)).includes('A TIP OFF')) { await p.getByRole('button', { name: 'TELL THE ROOM' }).click(); await wait(300); note(`${r} published tip`) }
+  if ((await bodyText(p)).includes('A TIP')) { await p.getByRole('button', { name: 'SHARE IT' }).click(); await wait(300); note(`${r} published tip`) }
 }
 
 // ── Round 1: table ───────────────────────────────────────────────
@@ -200,11 +200,11 @@ await shot(phones.government, 'phone-r1-table', true)
 await shot(phones.community, 'phone-r1-table-community', true)
 // Gov pledges deal, business promises, community vetoes business
 await phones.government.getByText('SAY IT', { exact: true }).click(); await wait(200)
-await phones.government.getByText('I will choose… if you…').click(); await wait(200)
+await phones.government.getByText('I will pick… if you…').click(); await wait(200)
 await phones.government.locator('.sheet__body .btn--ghost').first().click(); await wait(200)
 await phones.government.locator('.sheet__body .btn--ghost').first().click(); await wait(300)
 await phones.business.getByText('SAY IT', { exact: true }).click(); await wait(200)
-await phones.business.getByText('I will choose…', { exact: true }).click(); await wait(200)
+await phones.business.getByText('I will pick…', { exact: true }).click(); await wait(200)
 await shot(phones.business, 'phone-r1-promise-list', true)
 await phones.business.locator('.sheet__body .btn--ghost').first().click(); await wait(300)
 await phones.community.getByRole('button', { name: /SAY NO/ }).click(); await wait(200)
@@ -217,7 +217,7 @@ await shot(dash, 'dash-r1-table-board')
 // Back button review on gov phone
 await phones.government.locator('.phead__btn[aria-label*="Look back"]').click(); await wait(300)
 await shot(phones.government, 'phone-r1-lookback-crisis', true)
-await phones.government.getByRole('button', { name: 'BACK TO NOW' }).click(); await wait(200)
+await phones.government.getByRole('button', { name: 'BACK TO THE GAME' }).click(); await wait(200)
 
 // ── Round 1: choice ──────────────────────────────────────────────
 await next('choice R1')
@@ -228,13 +228,13 @@ await shot(phones.government, 'phone-r1-choice-gov', true)
 for (const r of ['government', 'business', 'community']) {
   const p = phones[r]
   await p.locator('.ocard:not([disabled])').first().click(); await wait(150)
-  await p.getByRole('button', { name: 'LOCK IT IN' }).click(); await wait(250)
+  await p.getByRole('button', { name: 'LOCK MY CARD' }).click(); await wait(250)
 }
 await shot(dash, 'dash-r1-choice-last-one')
 await shot(phones.government, 'phone-r1-locked', true)
 await shot(phones.activist, 'phone-r1-choice-activist-unlocked', true)
 await phones.activist.locator('.ocard:not([disabled])').first().click(); await wait(150)
-await phones.activist.getByRole('button', { name: 'LOCK IT IN' }).click(); await wait(500)
+await phones.activist.getByRole('button', { name: 'LOCK MY CARD' }).click(); await wait(500)
 note(`after all lock: masthead="${await phaseOf()}"`)
 
 // ── Reckoning ────────────────────────────────────────────────────
@@ -264,7 +264,7 @@ for (let round = 2; round <= 6; round++) {
   await next(`crisis R${round}`)
   if (round === 2) { await shot(dash, 'dash-r2-crisis'); await shot(phones.activist, 'phone-r2-crisis', true) }
   // dismiss tips silently
-  for (const r of ROLES) { const p = phones[r]; if ((await bodyText(p)).includes('A TIP OFF')) { await p.getByRole('button', { name: 'SAY NOTHING' }).click(); await wait(200) } }
+  for (const r of ROLES) { const p = phones[r]; if ((await bodyText(p)).includes('A TIP')) { await p.getByRole('button', { name: 'KEEP IT SECRET' }).click(); await wait(200) } }
   await next(`table R${round}`)
   if (round === 2) await shot(phones.business, 'phone-r2-table', true)
   if (round === 4) { await shot(dash, 'dash-r4-table'); await shot(phones.government, 'phone-r4-table', true) }
@@ -275,7 +275,7 @@ for (let round = 2; round <= 6; round++) {
   for (const r of ROLES) {
     const p = phones[r]
     const cards = p.locator('.ocard:not([disabled])')
-    if (await cards.count()) { await cards.first().click(); await wait(100); await p.getByRole('button', { name: 'LOCK IT IN' }).click(); await wait(150) }
+    if (await cards.count()) { await cards.first().click(); await wait(100); await p.getByRole('button', { name: 'LOCK MY CARD' }).click(); await wait(150) }
   }
   await wait(600)
   note(`R${round} resolved: masthead="${await phaseOf()}"`)

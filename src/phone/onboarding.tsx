@@ -35,8 +35,8 @@ export function PracticeTalk({ view, send }: { view: PhoneView; send: (c: Comman
     <>
       <Coach step={1} of={4}>
         {said
-          ? 'Good. That is on the big screen now, where everyone can see it.'
-          : 'This is where you talk. Tap SAY IT and pick a sentence. Nothing you say here counts.'}
+          ? 'Good. Everyone can see it on the big screen.'
+          : 'Practice. Tap SAY IT and pick a sentence. This does not count.'}
       </Coach>
       <TableActions view={view} send={send} />
     </>
@@ -57,8 +57,8 @@ export function PracticeChoice({
     <>
       <Coach step={2} of={4}>
         {view.locked
-          ? 'Locked. In a real round the cards turn over on the big screen now.'
-          : 'Tap a card to select it. Then LOCK IT IN. The arrows show which way each card pushes the country.'}
+          ? 'Locked. Now look up. The cards will show on the big screen.'
+          : 'Tap a card. Then tap LOCK MY CARD. The arrows show what the card does to the country.'}
       </Coach>
       <TheChoice view={view} send={send} remaining={remaining} />
     </>
@@ -76,9 +76,9 @@ export function YourPower({ view }: { view: PhoneView }) {
   const c = ROLE_CHARACTER[view.role]
   return (
     <div className="pbody">
-      <Coach step={3} of={4}>Only you have this. The others are reading about theirs.</Coach>
+      <Coach step={3} of={4}>This is your special power. Each player has a different one.</Coach>
 
-      <span className="plabel">YOUR MOVE</span>
+      <span className="plabel">WHAT YOU CAN DO</span>
       <h1 className="pheading">{c.yourMove}</h1>
 
       <span className="plabel">HOW IT WORKS</span>
@@ -88,7 +88,7 @@ export function YourPower({ view }: { view: PhoneView }) {
           button that only dismissed this player's screen would have them
           waiting on a blank one. */}
       <p className="pnote" style={{ marginTop: 'auto' }}>
-        Read it. The room moves on together in a moment.
+        Read this. The game will move on soon.
       </p>
     </div>
   )
@@ -101,7 +101,7 @@ export function RoundOneCoach({ view }: { view: PhoneView }) {
     view.phase === 'crisis'
       ? 'Read the news. Nothing to tap yet.'
       : view.phase === 'table'
-        ? 'Talk to each other. Try saying: what if we both did it?'
+        ? 'Talk to each other. Try asking: what if we both did it?'
         : view.phase === 'choice'
           ? 'Pick one card. You can change it until you lock.'
           : view.phase === 'reckoning'

@@ -298,7 +298,7 @@ function PhoneSurface({
             disabled={!name.trim()}
             onClick={() => send({ t: 'join', role, name: name.trim() })}
           >
-            TAKE THE SEAT
+            TAKE THIS SEAT
           </button>
           <button className="btn btn--ghost" onClick={leave}>
             PICK A DIFFERENT SEAT
@@ -591,15 +591,15 @@ function ScanChoice({ code, onProceed }: { code: string; onProceed: () => void }
         <a className="btn btn--ghost" href={howToPlayUrl(code)}>
           HOW TO PLAY
         </a>
-        <p className="pnote">The full rules. You can come straight back here afterwards.</p>
+        <p className="pnote">The full rules. You can come back here after.</p>
 
         <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
           READY
         </span>
         <button className="btn btn--primary" onClick={onProceed}>
-          PROCEED TO THE GAME
+          JOIN THE GAME
         </button>
-        <p className="pmono">PICK YOUR SEAT. THE PHONE TEACHES THE REST AS IT GOES.</p>
+        <p className="pmono">PICK YOUR SEAT. YOUR PHONE WILL TEACH YOU THE REST.</p>
       </div>
     </div>
   )

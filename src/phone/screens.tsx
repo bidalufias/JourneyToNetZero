@@ -8,6 +8,7 @@ import type { Command } from '../game/room'
 import type { InsiderTip, PhoneView } from '../game/session'
 import { ROLE_CHARACTER, ROLE_LABEL } from '../game/session'
 import { arrows } from '../game/impact'
+import { LABEL, TERM } from '../game/vocab'
 import { RoleGlyph, formatClock } from '../ui/primitives'
 
 /**
@@ -44,7 +45,8 @@ export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => vo
         <strong>
           {view.resource.value} {view.resource.label.replace(/^Your /, '')}
         </strong>
-        . It stays in the corner of your screen. The big screen tracks everything else.
+        . It is in the corner of your screen.
+        The big screen shows everything else.
       </p>
 
       {/* Three lines a player can open their mouth with in Round 1. The single
@@ -77,7 +79,7 @@ export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => vo
         </>
       ) : (
         <button className="btn btn--ghost" onClick={() => setFull(true)}>
-          MORE ABOUT ME
+          READ MORE
         </button>
       )}
 
@@ -88,36 +90,36 @@ export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => vo
   )
 }
 
-/** P-04: three secret cards. Lying about which you took is legal and expected. */
+/** P-04: three secret goals. Lying about which you took is legal and expected. */
 export function GoalPicker({ view, send }: { view: PhoneView; send: (c: Command) => void }) {
   const choices = view.goalChoices ?? []
   const [picked, setPicked] = useState<string | null>(null)
   const chosen = choices.find((g) => g.id === picked)
 
-  // Sealing is permanent and used to happen on a single tap, with no statement
-  // of what had been sealed. Two taps, and the second one says it back to you.
+  // Choosing is permanent and used to happen on a single tap, with no statement
+  // of what had been chosen. Two taps, and the second one says it back to you.
   if (chosen) {
     return (
       <div className="pbody">
         <span className="plabel">SECRET · NOBODY ELSE SEES THIS</span>
-        <h1 className="pheading">Take this one?</h1>
+        <h1 className="pheading">Choose this one?</h1>
         <div className="bubble">
           <div className="bubble__lead">{chosen.title}</div>
           <p className="bubble__text">{chosen.desc}</p>
         </div>
         <p className="ptext">
-          You cannot change this later. It only counts if the country hits all 3 targets. Read it
-          again any time under ⋯.
+          You cannot change this later. It only counts if the country reaches all 3 targets. You
+          can read it again under ⋯.
         </p>
         <button
           className="btn btn--primary"
           style={{ marginTop: 'auto' }}
           onClick={() => send({ t: 'pickGoal', role: view.role, goalId: chosen.id })}
         >
-          SEAL IT
+          CHOOSE THIS ONE
         </button>
         <button className="btn btn--ghost" onClick={() => setPicked(null)}>
-          LOOK AGAIN
+          BACK
         </button>
       </div>
     )
@@ -126,10 +128,10 @@ export function GoalPicker({ view, send }: { view: PhoneView; send: (c: Command)
   return (
     <div className="pbody">
       <span className="plabel">SECRET · NOBODY ELSE SEES THIS</span>
-      <h1 className="pheading">Your secret win.</h1>
+      <h1 className="pheading">Your secret goal.</h1>
       <p className="ptext">
-        Pick one of these three. Nobody sees which one you took. The other three are choosing in
-        secret too, and you may lie about yours.
+        Choose one of these three. Nobody sees which one you took. The others are choosing in
+        secret too. You may lie about yours.
       </p>
       {choices.map((g) => (
         <button key={g.id} className="goal" onClick={() => setPicked(g.id)}>
@@ -198,7 +200,7 @@ export function Crisis({ view }: { view: PhoneView }) {
 }
 
 /**
- * P-07: A Tip Off. The only dark screen on any phone, and the only place the
+ * P-07: A Tip. The only dark screen on any phone, and the only place the
  * app uses a large shadow: it should feel like the app has gone quiet around
  * you.
  *
@@ -219,19 +221,19 @@ export function TipCard({
   send: (c: Command) => void
   onClose: () => void
 }) {
-  const stake = role === 'community' ? 'a veto' : 'Public Trust'
+  const stake = role === 'community' ? '1 veto' : `1 ${TERM.publicTrust}`
   const clock = formatClock(remaining)
 
   return (
-    <div className="tip" role="dialog" aria-label="A tip off">
-      <span className="tip__label">A TIP OFF</span>
+    <div className="tip" role="dialog" aria-label="A tip">
+      <span className="tip__label">A {LABEL.tip}</span>
       <span className="tip__eyes">ONLY YOU CAN SEE THIS</span>
       {/* This is the only overlay that covers the whole phone, so it has to
           carry the clock it is hiding, because otherwise it is a timed decision with
           the timer behind it. */}
       {clock ? <span className="tip__clock">{clock}</span> : null}
 
-      <span className="tip__chip tip__chip--confirmed">CHECKED · TRUE</span>
+      <span className="tip__chip tip__chip--confirmed">THIS IS TRUE</span>
 
       <p className="tip__source">{tip.source}</p>
       <p className="tip__body">{tip.text}</p>
@@ -244,13 +246,13 @@ export function TipCard({
             onClose()
           }}
         >
-          TELL THE ROOM
+          SHARE IT
         </button>
-        <p className="tip__reminder">You gain {stake}. Everyone else gets the warning too.</p>
+        <p className="tip__reminder">You get {stake}. Everyone sees the warning.</p>
         <button className="btn" onClick={onClose} style={{ color: '#fff' }}>
-          SAY NOTHING
+          KEEP IT SECRET
         </button>
-        <p className="tip__reminder">Nobody knows you got this. You keep the head start.</p>
+        <p className="tip__reminder">Only you know this. You can use it first.</p>
       </div>
     </div>
   )
@@ -260,7 +262,7 @@ export function TipCard({
 export function LookUp({ view, reckoning = false }: { view: PhoneView; reckoning?: boolean }) {
   return (
     <div className="lookup" data-role={view.role}>
-      <span className="lookup__label">{reckoning ? 'THE REVEAL' : 'LOCKED IN'}</span>
+      <span className="lookup__label">{reckoning ? LABEL.reveal : 'LOCKED'}</span>
       <h1 className="lookup__big">
         Look
         <br />
@@ -269,12 +271,12 @@ export function LookUp({ view, reckoning = false }: { view: PhoneView; reckoning
       <div className="lookup__rule" />
       <p className="lookup__note">
         {reckoning
-          ? 'The cards are turning over on the big screen.'
-          : 'The cards turn over on the big screen. Nothing more to do here.'}
+          ? 'The cards are showing on the big screen.'
+          : 'Your card is locked. The cards will show on the big screen.'}
       </p>
       {!reckoning && view.waitingOn > 0 ? (
         <p className="lookup__note" style={{ opacity: 0.7 }}>
-          {4 - view.waitingOn} OF 4 LOCKED IN
+          {4 - view.waitingOn} OF 4 LOCKED
         </p>
       ) : null}
     </div>
@@ -327,8 +329,8 @@ export function RoundResult({ view }: { view: PhoneView }) {
           ))}
         </span>
         <p className="outcome__delivered">
-          {r.carbon <= 0 ? '−' : '+'}
-          {Math.abs(r.carbon).toFixed(1)} Mt carbon, delivered
+          {r.carbon <= 0 ? 'Cut carbon by' : 'Added'} {Math.abs(r.carbon).toFixed(1)} million tonnes
+          {r.carbon <= 0 ? '' : ' of carbon'}
         </p>
         {r.note ? <p className="outcome__note">{r.note}</p> : null}
       </div>

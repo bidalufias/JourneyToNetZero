@@ -58,9 +58,9 @@ export function optionImpact(option: Option): Impact[] {
   })
 }
 
-/** "▼▼▼", "▲", or "–". The only thing a player reads off a card. */
+/** "▼▼▼", "▲", or "-". The only thing a player reads off a card. */
 export function arrows(dir: number): string {
-  if (dir === 0) return '–'
+  if (dir === 0) return '-'
   return (dir < 0 ? '▼' : '▲').repeat(Math.abs(dir))
 }
 
@@ -75,11 +75,11 @@ export function optionCondition(option: Option): string | null {
   // a green carbon arrow and is still the card that costs the table its bonus.
   // That trade is the whole lesson, and a player can only weigh it if they are
   // told which side of it they are standing on.
-  if (BREAKS_COALITION.has(option.arch)) return 'The table will not count this as moving together.'
-  if (option.arch === 'PARTNER') return 'Only half works unless the Government pays too.'
-  if (option.arch === 'SELF_ORGANISE') return 'Twice as strong if the Government or Business helps.'
-  if (option.arch === 'COLLABORATE') return 'You gain influence. You lose some support.'
-  if ((option.flags ?? []).some((f) => f.startsWith('EVIDENCE'))) return 'Nothing now. It pays off every round after.'
+  if (BREAKS_COALITION.has(option.arch)) return 'Dirty card. It breaks moving together.'
+  if (option.arch === 'PARTNER') return 'Partnership. Only half works unless the Government pays half.'
+  if (option.arch === 'SELF_ORGANISE') return 'Works twice as well if the Government or Business helps.'
+  if (option.arch === 'COLLABORATE') return 'You work with them. You gain power. Some supporters leave you.'
+  if ((option.flags ?? []).some((f) => f.startsWith('EVIDENCE'))) return 'Does nothing now. Helps every round after this.'
   return null
 }
 

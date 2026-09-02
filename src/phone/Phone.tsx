@@ -1,9 +1,9 @@
 /**
- * The phone: join, take a seat, seal a goal, argue, choose, look up.
+ * The phone: join, take a seat, choose a goal, argue, choose, look up.
  *
  * The design rule this file exists to honour: every second on the phone is a
  * second not spent negotiating. Nothing here scrolls when it could fit, no
- * Table action takes more than two taps, and the app never shows a number that
+ * Talk action takes more than two taps, and the app never shows a number that
  * would turn a judgement call into a spreadsheet call.
  *
  * The one thing the phone now does when it is *not* your turn is remember. BACK
@@ -16,6 +16,7 @@ import type { Command } from '../game/room'
 import type { Endgame } from '../game/room'
 import type { PhoneView } from '../game/session'
 import type { ConnectionState } from '../net/transport'
+import { STEP_LABEL } from '../game/vocab'
 import { useCountdown } from '../dashboard/Dashboard'
 import { PhoneHeader, ReviewBar, SCREEN_ORDER, reviewableUpTo, type Screen } from './Chrome'
 import { MenuSheet } from './Menu'
@@ -48,7 +49,7 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
     setReviewing(null)
   }, [view.phase, view.round])
 
-  // Sealed goal first: chosen once, before anything else can happen.
+  // Secret goal first: chosen once, before anything else can happen.
   const needsGoal = view.goalId === null && view.goalChoices !== null
   const [readBriefing, setReadBriefing] = useState(false)
 
@@ -64,7 +65,7 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
       return <TheChoice view={view} send={send} remaining={remaining} readOnly />
     }
 
-    // Read your seat, then wait. The secret win is no longer asked for here;
+    // Read your seat, then wait. The secret goal is no longer asked for here;
     // it comes after the practice round, once the units in it mean something.
     if (view.phase === 'lobby') {
       if (!readBriefing) return <RoleReveal view={view} onNext={() => setReadBriefing(true)} />
@@ -82,7 +83,7 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
       return needsGoal ? <GoalPicker view={view} send={send} /> : <Lobby view={view} />
     }
     if (needsGoal) {
-      // Took a vacated seat mid-session. Still owes a secret win.
+      // Took a vacated seat mid-session. Still owes a secret goal.
       return <GoalPicker view={view} send={send} />
     }
     if (view.phase === 'crisis') return <Crisis view={view} />
@@ -110,7 +111,7 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
       {view.paused ? (
         <div className="paused" role="status">
           <span className="paused__mark">❙❙</span>
-          <span>PAUSED. Look up. Nothing you tap counts until the room restarts.</span>
+          <span>PAUSED. Look up. Your phone will not work until the game restarts.</span>
         </div>
       ) : null}
       {!bare ? (
@@ -127,7 +128,7 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
       {!screen ? <RoundOneCoach view={view} /> : null}
       {body}
 
-      {/* The tip lands the moment the crisis is revealed, before THE TABLE. */}
+      {/* The tip arrives the moment the crisis is revealed, before the Talk. */}
       {!screen && view.tip && !view.tip.published && tipOpen && (view.phase === 'crisis' || view.phase === 'table') ? (
         <TipCard tip={view.tip} role={view.role} remaining={remaining} send={send} onClose={() => setTipOpen(false)} />
       ) : null}
@@ -139,7 +140,7 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
       {connection !== 'live' ? (
         <div className="reconnect" role="status">
           {connection === 'reconnecting'
-            ? 'RECONNECTING · YOUR SEAT IS HELD'
+            ? 'RECONNECTING · YOUR SEAT IS SAFE'
             : connection === 'unreachable'
               ? "CAN'T REACH THE GAME SERVER · TELL THE FACILITATOR"
               : 'CONNECTING…'}
@@ -153,28 +154,31 @@ function Endgame({ view, endgame }: { view: PhoneView; endgame: Endgame | null }
   if (!endgame) return null
   const me = endgame.players.find((p) => p.role === view.role)
   const hadGoal = Boolean(me?.goalTitle)
+  // Hollow Victory is a title, and a Malaysian student will not know the word
+  // "hollow", so the plain line under it says what it means. It is only yours
+  // if you reached your goal while the country missed.
+  const hollow = !endgame.win && hadGoal && Boolean(me?.goalMet)
   return (
     <div className="pbody">
-      <span className="plabel">THE NATIONAL MISSION · 2050</span>
-      <h1 className="pbig">{endgame.win ? 'Nation Builder' : 'Hollow Victory'}</h1>
+      <span className="plabel">{STEP_LABEL.results} · 2050</span>
+      <h1 className="pbig">{endgame.win ? 'Nation Builder' : hollow ? 'Hollow Victory' : 'The country missed'}</h1>
       <p className="ptext">
         {endgame.win
-          ? 'Three targets. All three. 34 million people live in a country that still works.'
-          : 'The country missed. Look up. The room is reading the rest of it together.'}
+          ? 'All three targets. 34 million people live in a country that works.'
+          : hollow
+            ? 'You reached your own goal. The country did not.'
+            : 'The country missed. Look up. Everyone is reading the result together.'}
       </p>
       {me ? (
         <div className="bubble">
-          <div className="bubble__label">YOUR PRIVATE GOAL</div>
-          <div className="bubble__lead">{me.goalTitle ?? 'You never sealed one'}</div>
+          <div className="bubble__label">YOUR SECRET GOAL</div>
+          <div className="bubble__lead">{me.goalTitle ?? 'You never chose one'}</div>
           <p className="bubble__text">
             {!hadGoal
-              ? 'You joined after the goals were dealt, so there was nothing of your own to hit.'
+              ? 'You joined after the goals were chosen. You had no goal of your own.'
               : me!.goalMet
-                ? 'You hit it.'
-                : 'You did not hit it.'}{' '}
-            {!endgame.win && hadGoal && me!.goalMet
-              ? 'You got exactly what you wanted. Was it worth it?'
-              : ''}
+                ? 'You reached it.'
+                : 'You did not reach it.'}
           </p>
         </div>
       ) : null}

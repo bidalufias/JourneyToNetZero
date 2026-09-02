@@ -51,7 +51,7 @@ export function emissionsMeter(state: PublicState, targets: Targets, content: Co
       : onTrack
         ? { text: 'ON TRACK', tone: 'good' }
         : { text: 'OFF TRACK', tone: 'bad' },
-    footLeft: `from ${start} net`,
+    footLeft: `from ${start}`,
   }
 }
 
@@ -126,7 +126,7 @@ export function happinessMeter(state: PublicState, targets: Targets): MeterSpec 
 
 /** The carbon coupling sentence: the one interpreted line on the screen. */
 export function driftSentence(k: number): string {
-  return `Every 1% of growth now adds ${k.toFixed(1)} Mt of carbon.`
+  return `Every 1% of growth now adds ${k.toFixed(1)} million tonnes of carbon.`
 }
 
 /** How the 2050 projection is framed once the arithmetic is settled. */
@@ -138,7 +138,7 @@ export function projectionNote(
   const roundsLeft = 6 - round
   const over = projection - target
   if (projection <= target) {
-    return { text: 'On this path the country reaches net zero.', onTrack: true, dead: false }
+    return { text: 'If nothing changes, the country reaches net zero.', onTrack: true, dead: false }
   }
   // Once no remaining round can close the gap, say so plainly. The tone of
   // the rest of the session should change.
@@ -147,13 +147,13 @@ export function projectionNote(
   // rebase to a 100 Mt country left it where it was.
   const bestCase = 50 * roundsLeft
   if (roundsLeft > 0 && over > bestCase) {
-    return { text: 'Net zero is no longer reachable.', onTrack: false, dead: true }
+    return { text: 'Net zero can no longer be reached.', onTrack: false, dead: true }
   }
   if (roundsLeft === 0) {
-    return { text: `${over.toFixed(0)} Mt short, and no rounds left.`, onTrack: false, dead: true }
+    return { text: `${over.toFixed(0)} million tonnes short, and no rounds left.`, onTrack: false, dead: true }
   }
   return {
-    text: `${over.toFixed(0)} Mt to go, with ${roundsLeft} round${roundsLeft === 1 ? '' : 's'} left.`,
+    text: `${over.toFixed(0)} million tonnes to go, with ${roundsLeft} round${roundsLeft === 1 ? '' : 's'} left.`,
     onTrack: false,
     dead: false,
   }

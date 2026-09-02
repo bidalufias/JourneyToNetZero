@@ -400,7 +400,7 @@ export interface RoleCharacter {
   whoYouAre: string
   believe: string
   afraidOf: string
-  /** What this seat actually does with the one thing it holds. */
+  /** What this seat does with the one thing it holds, in the shape of a power card. */
   resourcePower: string
   /** Three things this character would say at the table. */
   says: string[]
@@ -422,21 +422,21 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
     post: 'Minister for Energy and Climate',
     blurb: 'You hold the country’s money and the power to make law.',
     youAre: 'The Minister. You hold the national Budget and the power to make law.',
-    youWant: 'Growth, and to still be in office in 2050.',
+    youWant: 'A growing economy, and to still be Minister in 2050.',
     yourMove: 'Spend Budget to change the country. Or give Budget away so someone else can act.',
     whoYouAre:
       'Twenty-four years in the civil service, then politics. Half your voters work on plantations. The other half commute into the city.',
     believe:
-      'The change has to happen, and you are the only one who can pay for it. But a government that loses an election changes nothing.',
-    afraidOf: 'Being the minister who made petrol expensive.',
+      'The change has to happen. Only you can pay for it. But a government that loses an election changes nothing.',
+    afraidOf: 'Being the Minister who made petrol expensive.',
     resourcePower:
-      'You start with 4 Budget. From Round 2 you get 2 more each round, and 1 extra when the economy is strong, up to 8. Big moves cost 2 or 3, so it often pays to save a round and then spend properly. You can also give Budget to another player, or pay half of a Business partnership so it works at full strength instead of half.',
+      'You spend Budget to change the country. You get 2 more each round. Big cards cost 2 or 3, so save up. You can also give Budget to the Business. Or pay half of a partnership.',
     says: [
       'I can fund that. What do I tell the people who voted for me?',
-      'Give me a public reason to spend this and I will spend it.',
-      'If I do that I lose the seat, and then none of this happens.',
+      'Give me a public reason, and I will spend it.',
+      'If I do that, I lose the election. Then nothing happens.',
     ],
-    neverSay: 'Money is no object.',
+    neverSay: 'Money does not matter.',
   },
   business: {
     title: 'Company Boss',
@@ -444,17 +444,17 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
     post: 'Group CEO, Sawit Prima',
     blurb: 'You own most of the pollution. You also own most of the jobs.',
     youAre: 'The Company Boss. You own most of the country’s pollution, and most of its jobs.',
-    youWant: 'Profit, and not to bet the company on the wrong decade.',
+    youWant: 'Profit, and not to go clean too early and lose money.',
     yourMove: 'Spend Company Money to go clean. Or get someone else to pay half.',
     whoYouAre:
-      'Third generation. You took over at 41. Forty thousand staff. You have read every big climate report and can quote them.',
+      'Third generation. You took over at 41. Forty thousand staff. You have read every big climate report.',
     believe:
-      'You will go clean when it is cheaper than staying dirty, or when someone makes staying dirty expensive. You think that is honest, not villainous.',
-    afraidOf: 'Being the boss who moved early and got it wrong.',
+      'You will go clean when it is cheaper than staying dirty. Or when someone makes dirty expensive. You think that is honest, not evil.',
+    afraidOf: 'Being the boss who went clean too early and lost money.',
     resourcePower:
-      'You start with 5 Company Money and gain 1 each round, 2 when the economy is booming, up to 12. Going clean costs 3 and hurts, but it is the biggest single cut on the table and it earns you Public Trust. Partnerships cost only 1, but they work only if the Government pays too, so agree that during the talk. Sitting on your money keeps you safe, and is also how the country misses.',
+      'You spend Company Money to go clean. You get 1 more each round. Going clean costs 3. It is the biggest carbon cut in the game. A partnership costs 1. It only works fully if the Government pays half.',
     says: [
-      'I will do it, if the Government shares the cost.',
+      'I will do it if the Government pays half.',
       'That is a ten-year investment and I am judged every quarter.',
       'You want me to cut thirty percent? Fine. Who pays for the retraining?',
     ],
@@ -464,19 +464,19 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
     title: 'Community Leader',
     org: 'Kampung Baru Jernih residents',
     post: 'Food stall owner, head of the residents’ association',
-    blurb: '34 million people who want clean air, a job, and petrol they can afford.',
+    blurb: 'You speak for 34 million people. They want clean air and prices they can afford.',
     youAre: 'The Community Leader. You speak for 34 million people.',
     youWant: 'Clean air and prices people can afford. You are tired of being told to pick one.',
-    yourMove: 'Make them earn your support out loud. Twice a game you can say no and mean it.',
+    yourMove: 'Make them earn your support in public. Twice a game you can veto a player.',
     whoYouAre:
       'You run a food stall and head the residents’ association. Your stall has flooded three times in eight years. Your child has asthma.',
     believe:
-      'Clean air and affordable petrol are both reasonable things to want. You have heard a lot of promises and you remember all of them.',
+      'Clean air and affordable petrol are both reasonable things to want. You have heard many promises. You remember all of them.',
     afraidOf: 'Being asked to sacrifice again by people who will not have to.',
     resourcePower:
-      'You hold no money and no laws. You hold two vetoes for the whole game. Each one takes a player’s dirtiest cards away for a single round, and everyone is told it was you. Public Trust is handed out every round too, one for whoever looked after people best and one for whoever did most for the future. You do not choose who gets it. It goes to whoever earned it, so your job is to make them earn it in front of you.',
+      'Twice a game you can veto a player. A veto takes their dirty cards away for one round. Everyone will know it was you. You also watch Public Trust. The people give 2 points each round to whoever helped them most.',
     says: [
-      'Explain that to me like I have to pay for it, because I do.',
+      'Explain it to me like I have to pay for it. Because I do.',
       'You promised us this last time. What happened?',
       'We will accept it. But you go first.',
     ],
@@ -487,22 +487,22 @@ export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
     org: 'Bangkit Iklim',
     post: 'Founder, Bangkit Iklim',
     blurb: 'You can make ignoring you expensive. Three times, and only three.',
-    youAre: 'The Youth Activist. You have no money and the largest following in the country.',
-    youWant: 'Real change, fast. And not to become the person who signed something and changed nothing.',
-    yourMove: 'Name someone in public. Three times a game, and only if you push hard yourself.',
+    youAre: 'The Youth Activist. You have no money, and the biggest movement in the country.',
+    youWant: 'Real change, fast. And never to sign something that changes nothing.',
+    yourMove: 'Name one player in public. Three times a game. It only works if you also pick a protest card.',
     whoYouAre:
-      'Law degree, no job in law. You ran the first climate strike here at nineteen and four hundred people came. Last year ninety thousand came.',
+      'Law degree, no job in law. You ran the first climate strike here at nineteen. Four hundred people came. Last year ninety thousand came.',
     believe:
-      'The science is not negotiable and the timeline is not a preference. Everyone in this room will be fine whatever happens. That is the problem.',
+      'The science is not up for debate. The deadline is not a preference. Everyone in this room will be fine. That is the problem.',
     afraidOf: 'Sitting in a nice room, signing something, and changing nothing.',
     resourcePower:
-      'You cannot build or buy anything. You have three Spotlights for the whole game. A Spotlight names one player before everyone locks in. If that player then takes their dirtiest card, it only half works, they lose Public Trust, and the country feels better for the accountability. It only fires if you also escalate with your own card that round, so save it for a round when you expect someone to cave. Every time you sit down and compromise instead, the next one bites a little less.',
+      'Three times a game, you name one player. If they pick a dirty card that round, it only half works. They also lose Public Trust. Your Spotlight only works if you also pick a protest card.',
     says: [
       'That is not a plan, that is a press release.',
-      'I will back you in public if you commit to it in public.',
+      'I will support you in public if you promise in public.',
       'Everyone in this room will be fine. That is the problem.',
     ],
-    neverSay: 'Let us look at this again next year.',
+    neverSay: 'Let us talk about it next year.',
   },
 }
 
