@@ -55,14 +55,16 @@ export function Attract({
                   FACILITATOR SCRIPT <span className="dashbtn__key">F</span>
                 </button>
               ) : null}
-              <span className="attract__hint">SPACE STARTS THE SESSION</span>
+              <span className="attract__hint">
+                {view.readyCount >= 4 ? 'ALL FOUR READY · SPACE STARTS THE SESSION' : 'SPACE STARTS THE SESSION'}
+              </span>
             </div>
           ) : null}
         </div>
 
         <div className="attract__seats">
           <p className="attract__seats-label">
-            THE FOUR SEATS · {view.seats.filter((x) => x.name).length} OF 4
+            THE FOUR SEATS · {view.seats.filter((x) => x.name).length} OF 4 · {view.readyCount} READY
           </p>
           {view.seats.map((seat) => (
             <div
@@ -73,7 +75,10 @@ export function Attract({
               <RoleGlyph role={seat.role} size={22} />
               <div>
                 <div className="seat__role">{ROLE_LABEL[seat.role].toUpperCase()}</div>
-                <div className="seat__name">{seat.name ?? 'waiting…'}</div>
+                <div className="seat__name">
+                  {seat.name ?? 'waiting…'}
+                  {seat.ready ? <span style={{ opacity: 0.6 }}> · READY</span> : null}
+                </div>
               </div>
             </div>
           ))}
@@ -194,8 +199,17 @@ export function Onboarding({ view, clock }: { view: DashboardView; clock: string
   const s = steps[view.phase]
   if (!s) return null
 
+  // Every step prints how many of the four have done it, because every step
+  // now ends when the fourth one does, and the clock is only the fallback.
   const locked = view.seats.filter((x) => x.locked).length
-  const ready = view.phase === 'practiceChoice' ? `${locked} of 4 locked` : null
+  const ready =
+    view.phase === 'practiceChoice'
+      ? `${locked} OF 4 LOCKED`
+      : view.phase === 'power'
+        ? `${view.readyCount} OF 4 READY`
+        : view.phase === 'goal'
+          ? `${view.sealedCount} OF 4 CHOSEN`
+          : null
 
   return (
     <div className="dash">

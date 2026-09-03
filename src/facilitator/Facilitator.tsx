@@ -80,7 +80,11 @@ export function Facilitator({
         <div className="fac__head-main">
           <p className="fac__kicker">FACILITATOR · JOURNEY TO NET ZERO</p>
           <h1 className="fac__title">
-            {live ? `ROUND ${Math.max(round, 1)} OF 6 · ${beatFor(phase!).label}` : 'THE RUN OF SHOW'}
+            {live
+              ? round > 0
+                ? `ROUND ${round} OF 6 · ${beatFor(phase!).label}`
+                : beatFor(phase!).label
+              : 'THE RUN OF SHOW'}
           </h1>
           <p className="fac__status">
             {live

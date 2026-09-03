@@ -119,8 +119,8 @@ export function Dashboard({
           is allowed to interrupt. It must land after the meters settle. */}
       {/* Keyed on the round so every Reveal starts its own stopwatch, even
           in the case where one follows another without the screen unmounting. */}
-      {view.phase === 'reckoning' && view.lastRound ? (
-        <Reckoning key={view.lastRound.round} view={view} />
+      {(view.phase === 'reckoning' || view.phase === 'practiceReveal') && view.lastRound ? (
+        <Reckoning key={view.phase === 'practiceReveal' ? 'practice' : view.lastRound.round} view={view} />
       ) : null}
     </div>
   )
@@ -140,9 +140,8 @@ function Masthead({
       <span className="dash__live">LIVE</span>
       <span className="dash__channel">SEMENANJARA TONIGHT</span>
       <div className="dash__masthead-right">
-        <span>
-          ROUND {view.round} OF 6
-        </span>
+        {/* No round before the first crisis. The step name carries the line. */}
+        {view.round > 0 ? <span>ROUND {view.round} OF 6</span> : null}
         <span>{STEP_LABEL[view.phase] ?? ''}</span>
         {clock ? (
           <span

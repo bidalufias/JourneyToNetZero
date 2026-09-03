@@ -156,16 +156,26 @@ for (const r of ROLES) {
   await p.getByRole('button', { name: 'LOCK MY CARD' }).click(); await wait(300)
   if (r === 'community') await shot(p, 'phone-practice-choice-locked', true)
 }
-await shot(dash, 'dash-practice-choice-all-locked')
+// The fourth lock turns the cards over by itself. No Next here.
 note(`after practice locks: masthead="${await phaseOf()}"`)
+await shot(dash, 'dash-practice-reveal-0s')
+await shot(phones.community, 'phone-practice-reveal', true)
+await wait(4000); await shot(dash, 'dash-practice-reveal-4s')
+await wait(6000); await shot(dash, 'dash-practice-reveal-10s')
 
 // ── Power ────────────────────────────────────────────────────────
 await next('power')
 await shot(dash, 'dash-power')
 for (const r of ROLES) await shot(phones[r], `phone-power-${r}`, true)
+// GOT IT on all four ends the step by itself. No Next here.
+for (const [i, r] of ROLES.entries()) {
+  await phones[r].getByRole('button', { name: 'GOT IT' }).click(); await wait(250)
+  if (i === 0) { await shot(phones[r], 'phone-power-got-it', true); await shot(dash, 'dash-power-1-of-4') }
+}
+await wait(400)
+note(`after four GOT IT: masthead="${await phaseOf()}"`)
 
 // ── Goal ─────────────────────────────────────────────────────────
-await next('goal')
 await shot(dash, 'dash-goal')
 await shot(phones.activist, 'phone-goal-picker', true)
 await phones.activist.locator('.goal').first().click(); await wait(200)
@@ -174,13 +184,15 @@ await phones.activist.getByRole('button', { name: 'CHOOSE THIS ONE' }).click(); 
 await shot(phones.activist, 'phone-goal-sealed', true)
 for (const r of ROLES) {
   if (r === 'activist') continue
+  if (r === 'community') await shot(dash, 'dash-goal-3-of-4')
   await phones[r].locator('.goal').first().click(); await wait(150)
   await phones[r].getByRole('button', { name: 'CHOOSE THIS ONE' }).click(); await wait(200)
 }
-await shot(dash, 'dash-goal-all-sealed')
+// The fourth goal opens the first crisis by itself. No Next here.
+await wait(500)
+note(`after four goals: masthead="${await phaseOf()}"`)
 
 // ── Round 1: crisis ──────────────────────────────────────────────
-await next('crisis R1')
 await shot(dash, 'dash-r1-crisis')
 for (const r of ROLES) {
   const t = await bodyText(phones[r])

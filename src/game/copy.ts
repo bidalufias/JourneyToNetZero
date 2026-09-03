@@ -60,6 +60,20 @@ export function privateLine(type: string, role: Role): string {
 }
 
 /**
+ * The line for this seat during the practice round.
+ *
+ * The practice talk used to show the Round 1 private line, so a player read
+ * their real brief a step early, in a phase that told them nothing counted.
+ * These say what the step is for and suggest the one button to press.
+ */
+export const PRACTICE_LINE: Record<Role, string> = {
+  government: 'This is practice. Say anything. Try offering the Business some Budget.',
+  business: 'This is practice. Say anything. Try asking the Government to pay half.',
+  community: 'This is practice. Say anything. Try telling one player no.',
+  activist: 'This is practice. Say anything. Try a deal: I will support you if you go clean.',
+}
+
+/**
  * Demands are public requests with no mechanical hook. They raise the cost of
  * ignoring somebody, socially. Composed, never typed.
  *

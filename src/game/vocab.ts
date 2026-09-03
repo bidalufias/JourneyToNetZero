@@ -72,6 +72,7 @@ export const STEP_LABEL: Record<Phase, string> = {
   briefing: 'THE BRIEFING',
   practiceTalk: 'PRACTICE · THE TALK',
   practiceChoice: 'PRACTICE · THE CHOICE',
+  practiceReveal: 'PRACTICE · THE REVEAL',
   power: 'YOUR POWER',
   goal: 'YOUR SECRET GOAL',
   crisis: LABEL.crisis,

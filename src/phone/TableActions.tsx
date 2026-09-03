@@ -46,9 +46,14 @@ export function TableActions({
 
   return (
     <div className="pbody">
-      <span className="plabel">ROUND {view.round} · {STEP_LABEL.table}</span>
+      <span className="plabel">
+        {view.round > 0 ? `ROUND ${view.round} · ${STEP_LABEL.table}` : STEP_LABEL.practiceTalk}
+      </span>
       <h1 className="pheading">Talk to each other.</h1>
       <p className="ptext">{view.privateLine}</p>
+      {/* The one player the veto is on used to find out at the choice, from a
+          greyed-out card. They should hear it while they can still argue. */}
+      {view.vetoed ? <p className="pnote">The Community took your dirty cards away this round.</p> : null}
 
       {/* An incoming offer is the only interrupt allowed during the Talk. */}
       {view.incomingOffers.map((o) => (

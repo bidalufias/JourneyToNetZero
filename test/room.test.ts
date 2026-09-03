@@ -170,7 +170,7 @@ describe('the onboarding', () => {
     const room = seated()
     run(room, { t: 'start' })
     const seen: string[] = [room.phase]
-    for (let i = 0; i < 6 && room.phase !== 'crisis'; i++) {
+    for (let i = 0; i < 7 && room.phase !== 'crisis'; i++) {
       expire(room)
       seen.push(room.phase)
     }
@@ -178,6 +178,7 @@ describe('the onboarding', () => {
       'briefing',
       'practiceTalk',
       'practiceChoice',
+      'practiceReveal',
       'power',
       'goal',
       'crisis',
@@ -250,13 +251,24 @@ describe('the onboarding', () => {
     // It has to have happened before it can be thrown away, or this asserts
     // nothing at all. That is how the inert practice round passed this test.
     expect(ROLES.every((r) => phoneView(room, content, r).locked)).toBe(true)
-    expect(dashboardView(room, content).promises).toHaveLength(1)
-    // Four locks must not resolve anything. The practice deck is not in any
-    // scenario, so handing it to the engine throws and ends the session.
-    expect(room.phase).toBe('practiceChoice')
+    // The fourth lock turns the cards over, against a scratch country. The
+    // real one has not moved.
+    expect(room.phase).toBe('practiceReveal')
     expect(room.game.round).toBe(0)
+    expect(room.game.picks).toHaveLength(0)
+    const reveal = dashboardView(room, content)
+    expect(reveal.promises).toHaveLength(1)
+    expect(reveal.promises[0].outcome).toBe('kept')
+    expect(reveal.lastRound?.reveals.map((r) => r.optionId)).toEqual(
+      ROLES.map((r) => content.tutorial.options[r][0].id),
+    )
+    expect(reveal.state.emissions).not.toBe(content.config.start.e)
+    expect(room.history).toHaveLength(0)
 
     advanceTo(room, 'crisis')
+    expect(room.practiceLog).toBeNull()
+    expect(dashboardView(room, content).lastRound).toBeNull()
+    expect(dashboardView(room, content).state.emissions).toBe(content.config.start.e)
     for (const role of ROLES) {
       const view = phoneView(room, content, role)
       expect(view.choiceId).toBeNull()
@@ -276,7 +288,7 @@ describe('the onboarding', () => {
     for (const role of ROLES) run(room, { t: 'join', role, name: 'P' })
 
     // Nothing is offered while a player is still learning what the units mean.
-    for (const phase of ['lobby', 'briefing', 'practiceTalk', 'practiceChoice', 'power'] as const) {
+    for (const phase of ['lobby', 'briefing', 'practiceTalk', 'practiceChoice', 'practiceReveal', 'power'] as const) {
       if (room.phase !== phase) advanceTo(room, phase)
       expect(phoneView(room, content, 'government').goalChoices, phase).toBeNull()
       if (phase === 'lobby') run(room, { t: 'start' })
@@ -286,6 +298,235 @@ describe('the onboarding', () => {
     const choices = phoneView(room, content, 'government').goalChoices
     expect(choices).not.toBeNull()
     expect(choices).toHaveLength(3)
+  })
+})
+
+describe('the table ends each step, and the clock is only the fallback', () => {
+  /** Four people in chairs and nothing pressed yet. */
+  function joined(seed = 4242): Room {
+    clock = 1_700_000_000_000
+    const room = createRoom(content, seed, clock)
+    for (const role of ROLES) run(room, { t: 'join', role, name: 'P' })
+    return room
+  }
+
+  it('remembers who has read their card, and keeps it up until they have', () => {
+    const room = joined()
+    expect(dashboardView(room, content).readyCount).toBe(0)
+    expect(phoneView(room, content, 'government').ready).toBe(false)
+
+    run(room, { t: 'ack', role: 'government' })
+    expect(phoneView(room, content, 'government').ready).toBe(true)
+    expect(dashboardView(room, content).readyCount).toBe(1)
+    expect(dashboardView(room, content).seats.find((s) => s.role === 'government')?.ready).toBe(true)
+
+    // Starting the session must not take the card off a phone still reading
+    // it, nor put it back on one that has finished.
+    run(room, { t: 'start' })
+    expect(room.phase).toBe('briefing')
+    expect(phoneView(room, content, 'government').ready).toBe(true)
+    expect(phoneView(room, content, 'business').ready).toBe(false)
+
+    // The next step has its own button, so the flag starts again.
+    advanceTo(room, 'practiceTalk')
+    expect(dashboardView(room, content).readyCount).toBe(0)
+  })
+
+  it('ends the power step on the fourth GOT IT', () => {
+    const room = joined()
+    run(room, { t: 'start' })
+    advanceTo(room, 'power')
+    for (const role of ['government', 'business', 'community'] as const) {
+      run(room, { t: 'ack', role })
+      expect(room.phase).toBe('power')
+    }
+    expect(dashboardView(room, content).readyCount).toBe(3)
+    run(room, { t: 'ack', role: 'activist' })
+    expect(room.phase).toBe('goal')
+
+    // And the clock still ends it for a table that never presses anything.
+    const slow = joined(99)
+    run(slow, { t: 'start' })
+    advanceTo(slow, 'power')
+    expire(slow)
+    expect(slow.phase).toBe('goal')
+  })
+
+  it('opens the first crisis on the fourth goal, not on the clock', () => {
+    const room = joined()
+    run(room, { t: 'start' })
+    advanceTo(room, 'goal')
+    for (const role of ['government', 'business', 'community'] as const) {
+      run(room, { t: 'pickGoal', role, goalId: content.privateGoals[role][0].id })
+      expect(room.phase).toBe('goal')
+    }
+    expect(dashboardView(room, content).sealedCount).toBe(3)
+    run(room, { t: 'pickGoal', role: 'activist', goalId: content.privateGoals.activist[0].id })
+    expect(room.phase).toBe('crisis')
+    expect(dashboardView(room, content).round).toBe(1)
+  })
+
+  it('turns the practice cards over on the fourth lock, in a country it then throws away', () => {
+    const room = joined()
+    run(room, { t: 'start' })
+    advanceTo(room, 'practiceChoice')
+    for (const role of ROLES) {
+      // The dirty card each time, so the reveal has something to show.
+      lockIn(room, role, content.tutorial.options[role][1].id)
+    }
+    expect(room.phase).toBe('practiceReveal')
+
+    const view = dashboardView(room, content)
+    expect(view.round).toBe(0)
+    expect(view.lastRound?.reveals).toHaveLength(4)
+    expect(view.lastRound?.reveals.map((r) => r.title)).toEqual(
+      ROLES.map((r) => content.tutorial.options[r][1].title),
+    )
+    // The meters the room is watching are the scratch country's.
+    expect(view.state.emissions).toBeGreaterThan(content.config.start.e)
+    // Nothing on the phone is a real result: the reveal belongs to the screen.
+    expect(phoneView(room, content, 'business').roundResult).toBeNull()
+
+    expire(room)
+    expect(room.phase).toBe('power')
+    expect(room.practiceLog).toBeNull()
+    expect(room.game.emissions).toBe(content.config.start.e)
+    expect(room.game.picks).toHaveLength(0)
+    expect(dashboardView(room, content).lastRound).toBeNull()
+  })
+
+  it('resolves the practice with the quiet default when the clock ends it', () => {
+    const room = joined()
+    run(room, { t: 'start' })
+    advanceTo(room, 'practiceChoice')
+    expire(room)
+    expect(room.phase).toBe('practiceReveal')
+    expect(room.practiceLog?.reveals).toHaveLength(4)
+    expect(room.players.government.defaulted).toBe(true)
+    // Round 1 has not started: the real country never saw a practice card.
+    expect(room.game.round).toBe(0)
+  })
+
+  it('applies a practice veto the way a real one works', () => {
+    const room = joined()
+    run(room, { t: 'start' })
+    advanceTo(room, 'practiceTalk')
+    run(room, { t: 'veto', role: 'community', target: 'business' })
+    const view = phoneView(room, content, 'business')
+    expect(view.vetoed).toBe(true)
+    expect(view.options.filter((o) => o.available)).toHaveLength(1)
+    expect(view.options.find((o) => !o.available)?.disabled).toBe('veto')
+    // The projector names the practice card it took, not a Round 1 card.
+    const removed = dashboardView(room, content).veto?.removed ?? []
+    expect(removed).toEqual([content.tutorial.options.business[1].title])
+    // And the vetoes are handed back with the rest of the practice.
+    advanceTo(room, 'power')
+    expect(phoneView(room, content, 'community').vetoesRemaining).toBe(content.config.vetoes)
+  })
+
+  it('seals the practice off from the live scenario', () => {
+    const room = joined()
+    run(room, { t: 'start' })
+    // Everything a Round 1 crisis could leak, from every variant of it.
+    const live: string[] = []
+    for (const id of content.roundVariants[1]) {
+      const s = content.scenarios[id]
+      live.push(s.title, s.situation)
+      for (const opts of Object.values(s.options)) for (const o of opts) live.push(o.title, o.desc, o.headline)
+    }
+    for (const phase of ['practiceTalk', 'practiceChoice', 'practiceReveal'] as const) {
+      advanceTo(room, phase)
+      for (const role of ROLES) {
+        const text = JSON.stringify(phoneView(room, content, role))
+        for (const line of live) expect(text, `${phase} ${role}`).not.toContain(line)
+      }
+      expect(phoneView(room, content, 'activist').scenario?.title).toBe(content.tutorial.title)
+      expect(phoneView(room, content, 'activist').privateLine).toMatch(/^This is practice\./)
+      expect(dashboardView(room, content).scenario?.title).toBe(content.tutorial.title)
+    }
+  })
+
+  it('prints no round number before the first crisis', () => {
+    const room = joined()
+    for (const phase of [
+      'lobby',
+      'briefing',
+      'practiceTalk',
+      'practiceChoice',
+      'practiceReveal',
+      'power',
+      'goal',
+    ] as const) {
+      if (room.phase !== phase) advanceTo(room, phase)
+      expect(dashboardView(room, content).round, phase).toBe(0)
+      expect(phoneView(room, content, 'community').round, phase).toBe(0)
+      if (phase === 'lobby') run(room, { t: 'start' })
+    }
+    advanceTo(room, 'crisis')
+    expect(dashboardView(room, content).round).toBe(1)
+    expect(phoneView(room, content, 'community').round).toBe(1)
+  })
+
+  it('puts a tip on the phone in every round it is dealt', () => {
+    const room = seated()
+    startPlaying(room)
+    const ids = new Set<string>()
+    for (let round = 1; round <= 6; round++) {
+      expect(room.phase).toBe('crisis')
+      const carried = ROLES.map((r) => phoneView(room, content, r).tip).filter((t) => t !== null)
+      expect(carried, `round ${round}`).toHaveLength(1)
+      expect(carried[0]!.round).toBe(round)
+      ids.add(carried[0]!.id)
+      advanceTo(room, 'choice')
+      for (const role of ROLES) lockIn(room, role, firstAvailable(room, role))
+      if (round < 6) advanceTo(room, 'crisis')
+    }
+    // Six different ids, so a phone that hides a tip by id shows the next one.
+    expect(ids.size).toBe(6)
+  })
+
+  it('gives a silent player the quiet card, never the first one', () => {
+    const room = seated()
+    startPlaying(room)
+    // Round 4 is where the Government's first affordable card is a dirty one
+    // whenever the country has not backed them, which at this point it has not.
+    for (let round = 1; round <= 3; round++) {
+      advanceTo(room, 'choice')
+      for (const role of ROLES) lockIn(room, role, firstAvailable(room, role))
+      advanceTo(room, 'crisis')
+    }
+    advanceTo(room, 'choice')
+    const options = phoneView(room, content, 'government').options.filter((o) => o.available)
+    const loudness = (o: (typeof options)[number]) => o.impact.reduce((n, i) => n + Math.abs(i.dir), 0)
+    const quietest = Math.min(...options.map(loudness))
+    expect(loudness(options[0])).toBeGreaterThan(quietest)
+
+    for (const role of ['business', 'community', 'activist'] as const) lockIn(room, role, firstAvailable(room, role))
+    expire(room)
+    const gov = room.players.government
+    expect(gov.defaulted).toBe(true)
+    expect(gov.choiceId).not.toBe(options[0].id)
+    expect(loudness(options.find((o) => o.id === gov.choiceId)!)).toBe(quietest)
+  })
+
+  it('tells the vetoed player, and says when a partnership is paid for', () => {
+    // A seed whose first crisis deals the Business a partnership card.
+    let room = seated()
+    for (let seed = 1; !content.scenarios[room.game.path[0]].options.business.some((o) => o.arch === 'PARTNER'); seed++) {
+      room = seated(seed)
+    }
+    startPlaying(room)
+    advanceTo(room, 'table')
+    expect(phoneView(room, content, 'business').vetoed).toBe(false)
+    run(room, { t: 'veto', role: 'community', target: 'business' })
+    expect(phoneView(room, content, 'business').vetoed).toBe(true)
+    expect(phoneView(room, content, 'government').vetoed).toBe(false)
+
+    const partner = () =>
+      phoneView(room, content, 'business').options.find((o) => o.condition?.startsWith('Partnership'))!
+    expect(partner().condition).toBe('Partnership. Only half works unless the Government pays half.')
+    run(room, { t: 'say', role: 'government', shape: 'cofund', on: true })
+    expect(partner().condition).toBe('Partnership. The Government pays half. It works in full.')
   })
 })
 
@@ -1019,6 +1260,7 @@ describe('phase timings match the published session', () => {
       PHASE_MS.briefing +
       PHASE_MS.practiceTalk +
       PHASE_MS.practiceChoice +
+      PHASE_MS.practiceReveal +
       PHASE_MS.power +
       PHASE_MS.goal
     const total = onboarding + round(1) + round(2) * 5

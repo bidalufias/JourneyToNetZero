@@ -18,7 +18,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Role } from '../engine/types'
 import type { DashboardView } from '../game/session'
 import { ROLE_LABEL } from '../game/session'
-import { LABEL } from '../game/vocab'
+import { LABEL, STEP_LABEL } from '../game/vocab'
 import { COALITION_HOLD_MS, PROMISE_STING_MS } from '../game/session'
 import { serverNow } from '../net/clock'
 import { RoleGlyph } from '../ui/primitives'
@@ -113,7 +113,9 @@ export function Reckoning({ view }: { view: DashboardView }) {
     <div className="reckoning">
       <header className="reckoning__bar">
         <span className="dash__live">LIVE</span>
-        <span className="dash__channel">{LABEL.reveal} · ROUND {log.round}</span>
+        <span className="dash__channel">
+          {view.round > 0 ? `${LABEL.reveal} · ROUND ${log.round}` : STEP_LABEL.practiceReveal}
+        </span>
         <span className="reckoning__emissions">
           <span className="reckoning__emissions-label">CARBON</span>
           <span className="reckoning__emissions-value">{log.state.emissions.toFixed(0)}</span>
@@ -170,7 +172,9 @@ export function Reckoning({ view }: { view: DashboardView }) {
                     ) : reveal.partnerUnfunded ? (
                       <div className="rcard__promise rcard__promise--broken">NOBODY PAID HALF</div>
                     ) : null}
-                    <p className="rcard__headline">“{reveal.headline}”</p>
+                    {/* The practice cards carry no headline. An empty pair of
+                        quotes is not a headline either. */}
+                    {reveal.headline ? <p className="rcard__headline">“{reveal.headline}”</p> : null}
                   </div>
                 </>
               ) : (

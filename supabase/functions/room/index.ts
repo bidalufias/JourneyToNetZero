@@ -500,9 +500,11 @@ function optionImpact(option) {
     };
   });
 }
-function optionCondition(option) {
+function optionCondition(option, coFund = false) {
   if (BREAKS_COALITION.has(option.arch)) return "Dirty card. It breaks moving together.";
-  if (option.arch === "PARTNER") return "Partnership. Only half works unless the Government pays half.";
+  if (option.arch === "PARTNER") {
+    return coFund ? "Partnership. The Government pays half. It works in full." : "Partnership. Only half works unless the Government pays half.";
+  }
   if (option.arch === "SELF_ORGANISE") return "Works twice as well if the Government or Business helps.";
   if (option.arch === "COLLABORATE") return "You work with them. You gain power. Some supporters leave you.";
   if ((option.flags ?? []).some((f) => f.startsWith("EVIDENCE"))) return "Does nothing now. Helps every round after this.";
@@ -563,6 +565,12 @@ var PRIVATE_LINE = {
 function privateLine(type, role) {
   return PRIVATE_LINE[type]?.[role] ?? "The room is waiting for you.";
 }
+var PRACTICE_LINE = {
+  government: "This is practice. Say anything. Try offering the Business some Budget.",
+  business: "This is practice. Say anything. Try asking the Government to pay half.",
+  community: "This is practice. Say anything. Try telling one player no.",
+  activist: "This is practice. Say anything. Try a deal: I will support you if you go clean."
+};
 var DEMAND_PHRASES = [
   { id: "pay-first", text: (t) => `the ${t} to pay first` },
   { id: "no-dirty", text: (t) => `the ${t} not to pick a dirty card` },
@@ -632,6 +640,7 @@ var PHASE_MS = {
   briefing: 45e3,
   practiceTalk: 75e3,
   practiceChoice: 6e4,
+  practiceReveal: 2e4,
   power: 3e4,
   goal: 45e3,
   crisis: 25e3,
@@ -681,6 +690,7 @@ function createRoom(content2, seed, now) {
         role,
         name: "",
         connected: false,
+        ready: false,
         goalId: null,
         choiceId: null,
         locked: false,
@@ -706,6 +716,7 @@ function createRoom(content2, seed, now) {
     spotlightCalled: false,
     lastRound: null,
     history: [],
+    practiceLog: null,
     tipRotation: [],
     seed,
     rngCursor: cursor
@@ -715,16 +726,50 @@ function currentScenario(room, content2) {
   const id = room.game.path[room.game.round];
   return id ? content2.scenarios[id] ?? null : null;
 }
+var PRACTISING = /* @__PURE__ */ new Set(["practiceTalk", "practiceChoice", "practiceReveal"]);
+var BEFORE_FIRST_CRISIS = /* @__PURE__ */ new Set([
+  "lobby",
+  "briefing",
+  "practiceTalk",
+  "practiceChoice",
+  "practiceReveal",
+  "power",
+  "goal"
+]);
+var PRACTICE_ID = "T";
+function practiceScenario(content2) {
+  return {
+    id: PRACTICE_ID,
+    round: 0,
+    variant: "practice",
+    type: "practice",
+    title: content2.tutorial.title,
+    situation: content2.tutorial.situation,
+    shock: { g: 0, h: 0, e: 0 },
+    options: content2.tutorial.options
+  };
+}
+function practiceContent(content2) {
+  return { ...content2, scenarios: { ...content2.scenarios, [PRACTICE_ID]: practiceScenario(content2) } };
+}
+function sceneFor(room, content2) {
+  return PRACTISING.has(room.phase) ? practiceScenario(content2) : currentScenario(room, content2);
+}
 function roundNumber(room) {
   return Math.min(room.game.round + 1, 6);
 }
 var NARRATING = /* @__PURE__ */ new Set(["reckoning", "trust", "summary"]);
-function displayRound(room) {
+function boardRound(room) {
   if (NARRATING.has(room.phase) && room.lastRound) return room.lastRound.round;
   return roundNumber(room);
 }
+function displayRound(room) {
+  if (BEFORE_FIRST_CRISIS.has(room.phase)) return 0;
+  return boardRound(room);
+}
 function setPhase(room, phase, now) {
   room.phase = phase;
+  if (phase !== "briefing") for (const role of ROLES) room.players[role].ready = false;
   const ms = phaseMs(phase, roundNumber(room));
   room.phaseEndsAt = ms > 0 ? now + ms : null;
 }
@@ -735,9 +780,18 @@ function clockNow(room, now) {
   return room.pausedAt ?? now;
 }
 function everyoneLocked(room) {
+  return everyHeldSeat(room, (p) => p.locked);
+}
+function everyoneAcked(room) {
+  return everyHeldSeat(room, (p) => p.ready);
+}
+function everyoneSealed(room) {
+  return everyHeldSeat(room, (p) => p.goalId !== null);
+}
+function everyHeldSeat(room, test) {
   const held = ROLES.filter((r) => room.players[r].name);
   if (!held.length) return false;
-  return held.every((r) => room.players[r].locked);
+  return held.every((r) => test(room.players[r]));
 }
 function vetoesRemaining(room) {
   return Math.max(0, room.game.vetoes - (room.vetoTarget ? 1 : 0));
@@ -750,8 +804,9 @@ function canReceive(role) {
   return kind === "fiscal" || kind === "capital";
 }
 function choosableOptions(room, content2, role) {
-  if (room.phase === "practiceTalk" || room.phase === "practiceChoice") {
-    return content2.tutorial.options[role];
+  if (PRACTISING.has(room.phase)) {
+    const deck = content2.tutorial.options[role];
+    return role === room.vetoTarget ? applyVeto(deck) : deck;
   }
   const scenario = currentScenario(room, content2);
   if (!scenario) return [];
@@ -767,6 +822,7 @@ function authorise(seat, cmd) {
     case "reconnect":
     case "leave":
     case "pickGoal":
+    case "ack":
     case "say":
     case "respondOffer":
     case "spotlight":
@@ -798,6 +854,7 @@ function apply(room, cmd, content2, now) {
     case "join": {
       const p = room.players[cmd.role];
       if (p.name && p.name !== cmd.name) return room;
+      if (!p.name) p.ready = false;
       p.name = cmd.name;
       p.connected = true;
       return room;
@@ -817,6 +874,7 @@ function apply(room, cmd, content2, now) {
       const p = room.players[cmd.role];
       p.name = "";
       p.connected = false;
+      p.ready = false;
       p.goalId = null;
       p.choiceId = null;
       p.locked = false;
@@ -828,6 +886,22 @@ function apply(room, cmd, content2, now) {
     case "pickGoal": {
       if (room.players[cmd.role].goalId) return room;
       room.players[cmd.role].goalId = cmd.goalId;
+      if (room.phase === "goal" && everyoneSealed(room)) return openRound(room, content2, at);
+      return room;
+    }
+    /**
+     * The one button an onboarding step offers, pressed.
+     *
+     * In the lobby it is I AM READY under the role card, and it is what lets the
+     * phone keep the card up until this player, not the facilitator, has
+     * finished with it. On the power step it is GOT IT, and the step ends the
+     * moment the fourth one arrives, with the clock as the fallback.
+     */
+    case "ack": {
+      const p = room.players[cmd.role];
+      if (!p.name) return room;
+      p.ready = true;
+      if (room.phase === "power" && everyoneAcked(room)) return advance(room, content2, at);
       return room;
     }
     case "start": {
@@ -963,9 +1037,8 @@ function apply(room, cmd, content2, now) {
       p.autoLocked = false;
       p.defaulted = false;
       p.lockedAt = at;
-      if (room.phase === "practiceChoice") return room;
-      if (everyoneLocked(room)) return resolveRound(room, content2, at);
-      return room;
+      if (!everyoneLocked(room)) return room;
+      return room.phase === "practiceChoice" ? startPracticeReveal(room, content2, at) : resolveRound(room, content2, at);
     }
     default:
       return room;
@@ -1070,6 +1143,8 @@ function advance(room, content2, now) {
       setPhase(room, "practiceChoice", now);
       return room;
     case "practiceChoice":
+      return startPracticeReveal(room, content2, now);
+    case "practiceReveal":
       return endPractice(room, content2, now);
     case "power":
       setPhase(room, "goal", now);
@@ -1117,6 +1192,7 @@ function endPractice(room, content2, now) {
   room.vetoTarget = null;
   room.coFund = false;
   room.spotlightCalled = false;
+  room.practiceLog = null;
   const start = content2.config.start;
   room.game.fiscal = start.fiscal;
   room.game.capital = start.capital;
@@ -1140,39 +1216,76 @@ function openRound(room, content2, now) {
   setPhase(room, "crisis", now);
   return room;
 }
-function resolveRound(room, content2, now) {
+function quietest(opts) {
+  const loudness = (o) => optionImpact(o).reduce((n, i) => n + Math.abs(i.dir), 0);
+  let best = opts[0];
+  for (const o of opts) if (loudness(o) < loudness(best)) best = o;
+  return best;
+}
+function fillChoices(room, content2, now) {
   for (const role of ROLES) {
     const p = room.players[role];
     if (p.locked) continue;
     if (p.choiceId === null) {
       const opts = choosableOptions(room, content2, role);
       if (!opts.length) continue;
-      p.choiceId = opts[0].id;
+      p.choiceId = quietest(opts).id;
       p.defaulted = true;
     }
     p.locked = true;
     p.autoLocked = true;
     p.lockedAt = now;
   }
-  const choices = Object.fromEntries(
-    ROLES.map((r) => [r, room.players[r].choiceId])
-  );
+  return Object.fromEntries(ROLES.map((r) => [r, room.players[r].choiceId]));
+}
+function runEngine(game, content2, room, choices) {
+  const input = { choices, vetoTarget: room.vetoTarget, coFund: room.coFund };
   if (!room.spotlightCalled) {
-    const activistOption = content2.scenarios[room.game.path[room.game.round]].options.activist.find(
+    const activistOption = content2.scenarios[game.path[game.round]].options.activist.find(
       (o) => o.id === choices.activist
     );
     if (activistOption?.arch === "ESCALATE") {
-      const held = room.game.spotlights;
-      room.game.spotlights = 0;
-      const log2 = playRound(room.game, { choices, vetoTarget: room.vetoTarget, coFund: room.coFund }, content2);
-      room.game.spotlights = held;
-      return finishRound(room, log2, choices, content2, now);
+      const held = game.spotlights;
+      game.spotlights = 0;
+      const log = playRound(game, input, content2);
+      game.spotlights = held;
+      return log;
     }
   }
-  const log = playRound(room.game, { choices, vetoTarget: room.vetoTarget, coFund: room.coFund }, content2);
+  return playRound(game, input, content2);
+}
+function resolveRound(room, content2, now) {
+  const choices = fillChoices(room, content2, now);
+  const log = runEngine(room.game, content2, room, choices);
   return finishRound(room, log, choices, content2, now);
 }
+function startPracticeReveal(room, content2, now) {
+  const choices = fillChoices(room, content2, now);
+  const scratchContent = practiceContent(content2);
+  const scratch = createGame([PRACTICE_ID], scratchContent);
+  const log = runEngine(scratch, scratchContent, room, choices);
+  judgePromises(room, log, choices);
+  room.practiceLog = log;
+  setPhase(room, "practiceReveal", now);
+  return room;
+}
 function finishRound(room, log, choices, content2, now) {
+  judgePromises(room, log, choices);
+  const tip = room.tips.find((t) => t.round === log.round);
+  if (tip?.published) {
+    tip.revealed = true;
+    applyTipStake(room, tip);
+  }
+  for (const o of room.offers) {
+    if (o.round === log.round && o.status === "pending") o.status = "expired";
+  }
+  room.lastRound = log;
+  room.history.push(log);
+  void content2;
+  setPhase(room, "reckoning", now);
+  return room;
+}
+function judgePromises(room, log, choices) {
   for (const p of room.promises) {
     if (p.round !== log.round) continue;
     const didIt = p.optionId !== null && choices[p.from] === p.optionId;
@@ -1187,19 +1300,6 @@ function finishRound(room, log, choices, content2, now) {
       p.outcome = !theyDid ? "void" : didIt ? "kept" : "broken";
     }
   }
-  const tip = room.tips.find((t) => t.round === log.round);
-  if (tip?.published) {
-    tip.revealed = true;
-    applyTipStake(room, tip);
-  }
-  for (const o of room.offers) {
-    if (o.round === log.round && o.status === "pending") o.status = "expired";
-  }
-  room.lastRound = log;
-  room.history.push(log);
-  void content2;
-  setPhase(room, "reckoning", now);
-  return room;
 }
 function applyTipStake(room, tip) {
   if (tip.to === "community") {
@@ -1268,17 +1368,20 @@ function buildTip(room, content2, to, round, cursorIn) {
   };
 }
 function dashboardView(room, content2) {
-  const scenario = currentScenario(room, content2);
+  const scenario = sceneFor(room, content2);
+  const practising = PRACTISING.has(room.phase);
   const held = ROLES.filter((r) => room.players[r].name);
   const waiting = held.filter((r) => !room.players[r].locked);
   const lastLock = held.length > 1 && waiting.length === 1 ? waiting[0] : null;
-  const tip = room.tips.find((t) => t.round === displayRound(room));
+  const tip = room.tips.find((t) => t.round === boardRound(room));
   const published = tip?.published && tip ? { from: tip.to, text: tip.text, source: tip.source } : null;
   const veto = room.vetoTarget ? {
     target: room.vetoTarget,
-    removed: scenario ? availableOptions(room.game, scenario, room.vetoTarget, content2).filter((o) => DIRTY.has(o.arch)).map((o) => o.title) : [],
+    removed: scenario ? (practising ? scenario.options[room.vetoTarget] : availableOptions(room.game, scenario, room.vetoTarget, content2)).filter((o) => DIRTY.has(o.arch)).map((o) => o.title) : [],
     remaining: vetoesRemaining(room)
   } : null;
+  const practice = room.phase === "practiceReveal" ? room.practiceLog : null;
+  const shown = practice ?? room.lastRound;
   return {
     code: room.code,
     phase: room.phase,
@@ -1287,27 +1390,31 @@ function dashboardView(room, content2) {
     pausedAt: room.pausedAt ?? null,
     round: displayRound(room),
     scenario: scenario ? { id: scenario.id, title: scenario.title, type: scenario.type, situation: scenario.situation } : null,
-    state: publicState(room.game, content2),
+    state: practice ? practice.state : publicState(room.game, content2),
     seats: ROLES.map((role) => ({
       role,
       name: room.players[role].name || null,
       connected: room.players[role].connected,
       locked: room.players[role].locked,
-      lastToLock: lastLock === role
+      lastToLock: lastLock === role,
+      ready: room.players[role].ready,
+      sealed: room.players[role].goalId !== null
     })),
-    promises: room.promises.filter((p) => p.round === displayRound(room)),
-    offersInFlight: room.offers.filter((o) => o.round === displayRound(room) && o.status === "pending"),
+    readyCount: held.filter((r) => room.players[r].ready).length,
+    sealedCount: held.filter((r) => room.players[r].goalId !== null).length,
+    promises: room.promises.filter((p) => p.round === boardRound(room)),
+    offersInFlight: room.offers.filter((o) => o.round === boardRound(room) && o.status === "pending"),
     tipDealtThisRound: Boolean(tip),
     publishedTip: published,
     spotlight: room.spotlightCalled ? {
       by: "activist",
       // Whoever takes the dirtiest option this round wears it. Nobody
       // knows who that is until the choices lock, so do not pretend to.
-      target: room.lastRound?.spotlightTarget ?? null,
+      target: shown?.spotlightTarget ?? null,
       remaining: spotlightsRemaining(room)
     } : null,
     veto,
-    lastRound: room.lastRound,
+    lastRound: shown,
     history: room.history,
     headlines: room.history.flatMap((h) => h.reveals.map((r) => r.headline)).slice(-12),
     targets: {
@@ -1319,25 +1426,13 @@ function dashboardView(room, content2) {
   };
 }
 function phoneView(room, content2, role) {
-  const scenario = currentScenario(room, content2);
+  const scenario = sceneFor(room, content2);
   const player = room.players[role];
-  const showOptions = room.phase === "table" || room.phase === "choice";
-  const practising = room.phase === "practiceTalk" || room.phase === "practiceChoice";
+  const practising = PRACTISING.has(room.phase);
+  const showOptions = room.phase === "table" || room.phase === "choice" || room.phase === "practiceTalk" || room.phase === "practiceChoice";
   let options = [];
-  if (practising) {
-    options = content2.tutorial.options[role].map((o) => ({
-      id: o.id,
-      title: o.title,
-      desc: o.desc,
-      cost: costLabel(o),
-      impact: optionImpact(o),
-      condition: optionCondition(o),
-      available: true,
-      disabled: null,
-      disabledNote: null
-    }));
-  } else if (scenario && showOptions) {
-    const affordableAndOpen = availableOptions(room.game, scenario, role, content2);
+  if (scenario && showOptions) {
+    const affordableAndOpen = practising ? scenario.options[role] : availableOptions(room.game, scenario, role, content2);
     const afterVeto = role === room.vetoTarget ? applyVeto(affordableAndOpen) : affordableAndOpen;
     options = scenario.options[role].map((o) => {
       const open = affordableAndOpen.some((a) => a.id === o.id);
@@ -1367,7 +1462,7 @@ function phoneView(room, content2, role) {
         desc: o.desc,
         cost: costLabel(o),
         impact: optionImpact(o),
-        condition: optionCondition(o),
+        condition: optionCondition(o, room.coFund),
         available: choosable,
         disabled,
         disabledNote: note
@@ -1376,7 +1471,7 @@ function phoneView(room, content2, role) {
   }
   const resourceKind = ROLE_RESOURCE[role].kind;
   const resourceValue = resourceKind === "fiscal" ? room.game.fiscal : resourceKind === "capital" ? room.game.capital : resourceKind === "spotlights" ? room.game.spotlights : vetoesRemaining(room);
-  const beforeGoals = room.phase === "lobby" || room.phase === "briefing" || room.phase === "practiceTalk" || room.phase === "practiceChoice" || room.phase === "power";
+  const beforeGoals = room.phase === "lobby" || room.phase === "briefing" || room.phase === "practiceTalk" || room.phase === "practiceChoice" || room.phase === "practiceReveal" || room.phase === "power";
   const goalChoices = player.goalId === null && !beforeGoals ? content2.privateGoals[role].map((g) => ({ id: g.id, title: g.title, desc: g.desc })) : null;
   const ownGoal = player.goalId ? content2.privateGoals[role].find((g) => g.id === player.goalId) ?? null : null;
   const narrating = NARRATING.has(room.phase);
@@ -1402,7 +1497,9 @@ function phoneView(room, content2, role) {
     pausedAt: room.pausedAt ?? null,
     round: displayRound(room),
     scenario: scenario && !narrating ? { id: scenario.id, title: scenario.title, situation: scenario.situation, type: scenario.type } : null,
-    privateLine: scenario && !narrating ? privateLine(scenario.type, role) : null,
+    // The practice line, not the live one: the Round 1 brief used to show up a
+    // step early, on the screen that said nothing here counts.
+    privateLine: practising ? PRACTICE_LINE[role] : scenario && !narrating ? privateLine(scenario.type, role) : null,
     options,
     choiceId: player.choiceId,
     locked: player.locked,
@@ -1412,20 +1509,23 @@ function phoneView(room, content2, role) {
     spotlightsRemaining: spotlightsRemaining(room),
     spotlightCalled: room.spotlightCalled,
     coFund: room.coFund,
+    ready: player.ready,
+    vetoed: room.vetoTarget === role,
     goalId: player.goalId,
     goalTitle: ownGoal?.title ?? null,
     goalDesc: ownGoal?.desc ?? null,
     goalChoices,
     // Only ever your own tip, and only while it is yours to act on.
-    tip: room.tips.find((t) => t.to === role && t.round === displayRound(room)) ?? null,
-    promises: room.promises.filter((p) => p.round === displayRound(room)),
+    tip: room.tips.find((t) => t.to === role && t.round === boardRound(room)) ?? null,
+    promises: room.promises.filter((p) => p.round === boardRound(room)),
     incomingOffers: room.offers.filter((o) => o.to === role && o.status === "pending"),
-    sentOffers: room.offers.filter((o) => o.from === role && o.round === displayRound(room)),
+    sentOffers: room.offers.filter((o) => o.from === role && o.round === boardRound(room)),
     seats: ROLES.map((r) => ({
       role: r,
       name: room.players[r].name || null,
       connected: room.players[r].connected,
-      locked: room.players[r].locked
+      locked: room.players[r].locked,
+      ready: room.players[r].ready
     })),
     roundResult: roundResultCopy(room, content2, role),
     trustAward: narrating && room.lastRound ? room.lastRound.trustAwarded : null,

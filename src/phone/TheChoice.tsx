@@ -33,7 +33,7 @@ export function TheChoice({
   return (
     <div className="pbody">
       <span className="plabel">
-        ROUND {view.round} · {committed ? 'LOCKED' : 'YOUR CHOICE'}
+        {view.round > 0 ? `ROUND ${view.round}` : 'PRACTICE'} · {committed ? 'LOCKED' : 'YOUR CHOICE'}
       </span>
       <h1 className="pheading">{committed ? 'Locked.' : 'Pick one card.'}</h1>
       {urgent ? (

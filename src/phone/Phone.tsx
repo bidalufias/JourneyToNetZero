@@ -23,7 +23,7 @@ import { MenuSheet } from './Menu'
 import { TheChoice } from './TheChoice'
 import { TableActions } from './TableActions'
 import { Crisis, GoalChosen, GoalPicker, Lobby, LookUp, RoleReveal, RoundResult, TipCard } from './screens'
-import { PracticeChoice, PracticeTalk, RoundOneCoach, YourPower } from './onboarding'
+import { PracticeChoice, PracticeReveal, PracticeTalk, RoundOneCoach, YourPower } from './onboarding'
 import './phone.css'
 
 export interface PhoneProps {
@@ -36,7 +36,10 @@ export interface PhoneProps {
 
 export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) {
   const remaining = useCountdown(view.phaseEndsAt, view.pausedAt)
-  const [tipOpen, setTipOpen] = useState(true)
+  // Which tip has been put away, by id. A flag that only ever went from true to
+  // false meant one tip per phone per session: whoever got Round 5's warning
+  // never saw it.
+  const [dismissedTip, setDismissedTip] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   /** Which earlier screen of this round is being read, or null for "now". */
   const [reviewing, setReviewing] = useState<number | null>(null)
@@ -51,7 +54,8 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
 
   // Secret goal first: chosen once, before anything else can happen.
   const needsGoal = view.goalId === null && view.goalChoices !== null
-  const [readBriefing, setReadBriefing] = useState(false)
+  /** I AM READY and GOT IT both say this, and the room remembers it. */
+  const ack = () => send({ t: 'ack', role: view.role })
 
   const screen: Screen | null = reviewing !== null ? SCREEN_ORDER[reviewing] : null
   const canGoBack = live > 0 && (reviewing === null ? live > 0 : reviewing > 0)
@@ -65,18 +69,19 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
       return <TheChoice view={view} send={send} remaining={remaining} readOnly />
     }
 
-    // Read your seat, then wait. The secret goal is no longer asked for here;
-    // it comes after the practice round, once the units in it mean something.
-    if (view.phase === 'lobby') {
-      if (!readBriefing) return <RoleReveal view={view} onNext={() => setReadBriefing(true)} />
-      return <Lobby view={view} />
+    // Read your seat, then wait. The card stays up until this player says they
+    // are done with it, whatever the facilitator has pressed: the room knows
+    // who has read it, so starting the session cannot take it away mid-read.
+    if (view.phase === 'lobby' || view.phase === 'briefing') {
+      if (!view.ready) return <RoleReveal view={view} onNext={ack} />
+      return view.phase === 'lobby' ? <Lobby view={view} /> : <LookUp view={view} variant="briefing" />
     }
-    if (view.phase === 'briefing') return <Lobby view={view} />
     if (view.phase === 'practiceTalk') return <PracticeTalk view={view} send={send} />
     if (view.phase === 'practiceChoice') {
       return <PracticeChoice view={view} send={send} remaining={remaining} />
     }
-    if (view.phase === 'power') return <YourPower view={view} />
+    if (view.phase === 'practiceReveal') return <PracticeReveal view={view} />
+    if (view.phase === 'power') return <YourPower view={view} onAck={ack} />
     if (view.phase === 'goal') {
       // A latecomer who took a vacated seat still lands here, which is why the
       // goal screen is reachable after the phase has passed.
@@ -89,7 +94,7 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
     if (view.phase === 'crisis') return <Crisis view={view} />
     if (view.phase === 'table') return <TableActions view={view} send={send} />
     if (view.phase === 'choice') return <TheChoice view={view} send={send} remaining={remaining} />
-    if (view.phase === 'reckoning') return <LookUp view={view} reckoning />
+    if (view.phase === 'reckoning') return <LookUp view={view} variant="reveal" />
     // The reveal belongs to the big screen; from the Public Trust beat onward
     // the phone answers the question the reveal just raised, which is what that
     // card of mine actually did.
@@ -100,7 +105,7 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
     return null
   })()
 
-  const bare = !screen && view.phase === 'reckoning'
+  const bare = !screen && (view.phase === 'reckoning' || view.phase === 'practiceReveal')
   const skin = bare ? 'deep' : 'role'
 
   return (
@@ -129,8 +134,18 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
       {body}
 
       {/* The tip arrives the moment the crisis is revealed, before the Talk. */}
-      {!screen && view.tip && !view.tip.published && tipOpen && (view.phase === 'crisis' || view.phase === 'table') ? (
-        <TipCard tip={view.tip} role={view.role} remaining={remaining} send={send} onClose={() => setTipOpen(false)} />
+      {!screen &&
+      view.tip &&
+      !view.tip.published &&
+      view.tip.id !== dismissedTip &&
+      (view.phase === 'crisis' || view.phase === 'table') ? (
+        <TipCard
+          tip={view.tip}
+          role={view.role}
+          remaining={remaining}
+          send={send}
+          onClose={() => setDismissedTip(view.tip!.id)}
+        />
       ) : null}
 
       {menuOpen ? (

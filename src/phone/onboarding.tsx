@@ -11,8 +11,9 @@
  * game, and most of it went unread.
  */
 import type { Command } from '../game/room'
-import type { PhoneView } from '../game/session'
+import type { Phase, PhoneView } from '../game/session'
 import { RoleCard } from '../ui/RoleCard'
+import { LookUp } from './screens'
 import { TheChoice } from './TheChoice'
 import { TableActions } from './TableActions'
 
@@ -66,42 +67,64 @@ export function PracticeChoice({
 }
 
 /**
+ * Between the practice choice and the power step: the cards turn over.
+ *
+ * The projector runs the real flip sequence on the practice cards, so the
+ * phone does the one thing it does at every Reveal, which is send the eyes up.
+ */
+export function PracticeReveal({ view }: { view: PhoneView }) {
+  return (
+    <>
+      <div className="coach coach--slim">Look up. This is what a Reveal looks like.</div>
+      <LookUp view={view} variant="practice" />
+    </>
+  )
+}
+
+/**
  * Step 3: the one thing this seat can do that nobody else can.
  *
  * Taught to one player at a time. This is what lets the Spotlight and the veto
  * stay in the game from Round 1 without every player paying for them in rules:
  * the other three are not being asked to absorb anything while this is on screen.
  */
-export function YourPower({ view }: { view: PhoneView }) {
+export function YourPower({ view, onAck }: { view: PhoneView; onAck: () => void }) {
+  const ready = view.seats.filter((s) => s.name && s.ready).length
   return (
     <div className="pbody">
       <Coach step={3} of={4}>This is your special power. Each player has a different one.</Coach>
 
       <RoleCard role={view.role} size="big" lines="power" />
 
-      {/* No button. The room moves on together, on the facilitator's cue, and a
-          button that only dismissed this player's screen would have them
-          waiting on a blank one. */}
-      <p className="pnote" style={{ marginTop: 'auto' }}>
-        Read this. The game will move on soon.
-      </p>
+      {/* The card stays up after GOT IT. The button tells the room this player
+          has read it, and the step ends when the fourth one does, so a quick
+          reader waits with the card rather than with a blank screen. */}
+      {view.ready ? (
+        <p className="pnote" style={{ marginTop: 'auto' }}>
+          {ready} OF 4 READY. The game moves on when everyone has read theirs.
+        </p>
+      ) : (
+        <button className="btn" style={{ marginTop: 'auto' }} onClick={onAck}>
+          GOT IT
+        </button>
+      )}
     </div>
   )
 }
 
 /** The Round 1 strip. Says what to do now, and goes away from Round 2. */
+const ROUND_ONE_LINE: Partial<Record<Phase, string>> = {
+  crisis: 'Read the news. Nothing to tap yet.',
+  table: 'Talk to each other. Try asking: what if we both did it?',
+  choice: 'Pick one card. You can change it until you lock.',
+  reckoning: 'Look up at the big screen.',
+}
+
 export function RoundOneCoach({ view }: { view: PhoneView }) {
-  if (view.round !== 1) return null
-  const line =
-    view.phase === 'crisis'
-      ? 'Read the news. Nothing to tap yet.'
-      : view.phase === 'table'
-        ? 'Talk to each other. Try asking: what if we both did it?'
-        : view.phase === 'choice'
-          ? 'Pick one card. You can change it until you lock.'
-          : view.phase === 'reckoning'
-            ? 'Look up at the big screen.'
-            : null
+  // The line is chosen by the step, and shown only while the round counter
+  // reads 1, which it does from the first crisis to the first summary and at
+  // no point before: the onboarding has its own coach.
+  const line = view.round === 1 ? ROUND_ONE_LINE[view.phase] : undefined
   if (!line) return null
   return <div className="coach coach--slim">{line}</div>
 }

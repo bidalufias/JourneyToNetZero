@@ -13,6 +13,7 @@ export type Phase =
   | 'briefing'
   | 'practiceTalk'
   | 'practiceChoice'
+  | 'practiceReveal'
   | 'power'
   | 'goal'
   | 'crisis'
@@ -38,6 +39,11 @@ export type Phase =
  * that picking is the simpler verb; teaching the sequence backwards to save one
  * step of difficulty is a poor trade.
  *
+ * The practice reveal is short because it is the third time the table has seen
+ * the shape of the beat and the first time it has seen the payoff: the four
+ * cards flip, the promise is judged, the meters move, and then all of it is
+ * thrown away. Twenty seconds is the flip sequence and a breath.
+ *
  * The round is built around a fixed budget rather than around what each beat
  * could justify on its own. The Reveal used to run 75 seconds, six times, which
  * is seven and a half minutes of the session spent watching rather than
@@ -52,6 +58,7 @@ export const PHASE_MS: Record<Phase, number> = {
   briefing: 45_000,
   practiceTalk: 75_000,
   practiceChoice: 60_000,
+  practiceReveal: 20_000,
   power: 30_000,
   goal: 45_000,
   crisis: 25_000,
@@ -94,6 +101,13 @@ export interface Player {
   role: Role
   name: string
   connected: boolean
+  /**
+   * Has pressed the one button the current onboarding step offers: I AM READY
+   * on the role card, GOT IT on the power step. A room fact rather than a
+   * phone fact, so the projector can count it and the step can end on four.
+   * Cleared whenever an onboarding step opens, so the same flag serves each.
+   */
+  ready: boolean
   /** Set once during setup, never revealed until the endgame. */
   goalId: string | null
   /**
@@ -219,6 +233,14 @@ export interface Room {
   /** Populated at the Reckoning and read by both surfaces. */
   lastRound: RoundLog | null
   history: RoundLog[]
+  /**
+   * The practice round, resolved against a scratch copy of the country.
+   *
+   * Held only for the length of the practice reveal, so the projector can run
+   * the real flip sequence on it, and then discarded with everything else the
+   * practice touched. It never enters `history` and never moves `game`.
+   */
+  practiceLog: RoundLog | null
 
   /** Roles that have already received a tip, for the rotation rule. */
   tipRotation: Role[]
@@ -257,7 +279,15 @@ export interface DashboardView {
     locked: boolean
     /** True for the one player everybody is waiting on. */
     lastToLock: boolean
+    /** Has pressed the current onboarding step's button. */
+    ready: boolean
+    /** Has chosen a secret goal. Never which one. */
+    sealed: boolean
   }[]
+  /** Held seats that have pressed the current step's button. */
+  readyCount: number
+  /** Held seats that have chosen a secret goal. */
+  sealedCount: number
   promises: Promise_[]
   offersInFlight: Offer[]
   /** Announced, but never who received it. */
@@ -318,6 +348,10 @@ export interface PhoneView {
   spotlightCalled: boolean
   /** The Government has agreed to co-fund the Business's partnership option. */
   coFund: boolean
+  /** You have pressed the current onboarding step's button. */
+  ready: boolean
+  /** The Community's veto is on you this round. Your dirty cards are gone. */
+  vetoed: boolean
   goalId: string | null
   /** Your own sealed goal, so the phone can remind you what you are chasing. */
   goalTitle: string | null
@@ -327,7 +361,7 @@ export interface PhoneView {
   promises: Promise_[]
   incomingOffers: Offer[]
   sentOffers: Offer[]
-  seats: { role: Role; name: string | null; connected: boolean; locked: boolean }[]
+  seats: { role: Role; name: string | null; connected: boolean; locked: boolean; ready: boolean }[]
   /** The three national targets and where the country stands, for the header. */
   nation: {
     carbon: number

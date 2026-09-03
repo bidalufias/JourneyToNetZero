@@ -140,7 +140,14 @@ function DashboardSurface({ code }: { code: string }) {
   /** Space and N both mean "on you go"; the lobby's version of that is start. */
   const step = () => {
     const next = nextStep(phaseRef.current)
-    if (next) send({ t: next.cmd })
+    if (!next) return
+    // A fresh room, not a reload: the URL carries the old code, and reloading
+    // it walks straight back into the session that just ended.
+    if (next.cmd === 'new') {
+      window.location.assign('/dashboard')
+      return
+    }
+    send({ t: next.cmd })
   }
   const togglePause = () => send({ t: pausedRef.current ? 'resume' : 'pause' })
 

@@ -23,9 +23,18 @@ import {
   result,
   goalMet,
 } from '../engine/engine'
-import { DIRTY, ROLES, type Content, type Option, type Role, type Scenario } from '../engine/types'
+import {
+  DIRTY,
+  ROLES,
+  type Content,
+  type GameState,
+  type Option,
+  type Role,
+  type RoundLog,
+  type Scenario,
+} from '../engine/types'
 import { costLabel, optionCondition, optionImpact } from './impact'
-import { BOARD_NAME, DEAL_CONDITIONS, DEMAND_PHRASES, privateLine } from './copy'
+import { BOARD_NAME, DEAL_CONDITIONS, DEMAND_PHRASES, PRACTICE_LINE, privateLine } from './copy'
 import { pick, roomCode, shuffle } from './rng'
 import {
   ROLE_LABEL,
@@ -63,6 +72,7 @@ export function createRoom(content: Content, seed: number, now: number): Room {
         role,
         name: '',
         connected: false,
+        ready: false,
         goalId: null,
         choiceId: null,
         locked: false,
@@ -89,6 +99,7 @@ export function createRoom(content: Content, seed: number, now: number): Room {
     spotlightCalled: false,
     lastRound: null,
     history: [],
+    practiceLog: null,
     tipRotation: [],
     seed,
     rngCursor: cursor,
@@ -100,6 +111,60 @@ export function createRoom(content: Content, seed: number, now: number): Room {
 function currentScenario(room: Room, content: Content): Scenario | null {
   const id = room.game.path[room.game.round]
   return id ? (content.scenarios[id] ?? null) : null
+}
+
+/** The three practice phases: the tutorial deck, the tutorial scenario, nothing on the record. */
+const PRACTISING: ReadonlySet<Phase> = new Set<Phase>(['practiceTalk', 'practiceChoice', 'practiceReveal'])
+
+/** Everything before the first crisis. No round number is printed here. */
+const BEFORE_FIRST_CRISIS: ReadonlySet<Phase> = new Set<Phase>([
+  'lobby',
+  'briefing',
+  'practiceTalk',
+  'practiceChoice',
+  'practiceReveal',
+  'power',
+  'goal',
+])
+
+/** The id the practice round plays under, in a scratch copy of the content. */
+const PRACTICE_ID = 'T'
+
+/**
+ * The tutorial, in the shape the engine and the views expect a crisis to be.
+ *
+ * A scenario with no shock, so the only thing that moves the meters in the
+ * practice reveal is the four cards, which is the one lesson the reveal exists
+ * to teach.
+ */
+function practiceScenario(content: Content): Scenario {
+  return {
+    id: PRACTICE_ID,
+    round: 0,
+    variant: 'practice',
+    type: 'practice',
+    title: content.tutorial.title,
+    situation: content.tutorial.situation,
+    shock: { g: 0, h: 0, e: 0 },
+    options: content.tutorial.options,
+  }
+}
+
+/** The content with the tutorial filed as a scenario, so `playRound` can find it. */
+function practiceContent(content: Content): Content {
+  return { ...content, scenarios: { ...content.scenarios, [PRACTICE_ID]: practiceScenario(content) } }
+}
+
+/**
+ * What the surfaces should call the current crisis.
+ *
+ * During practice it is the tutorial, never the live scenario. Both views used
+ * to read `currentScenario` throughout, which put the real Round 1 brief on the
+ * phone and the real Round 1 cards in the veto panel a step before either was
+ * supposed to exist.
+ */
+function sceneFor(room: Room, content: Content): Scenario | null {
+  return PRACTISING.has(room.phase) ? practiceScenario(content) : currentScenario(room, content)
 }
 
 /** The round now being played, used for choices, tips and new pledges. */
@@ -117,13 +182,31 @@ function roundNumber(room: Room): number {
  */
 const NARRATING: ReadonlySet<Phase> = new Set<Phase>(['reckoning', 'trust', 'summary'])
 
-function displayRound(room: Room): number {
+/** The round whose promises, offers and tip are on the board right now. */
+function boardRound(room: Room): number {
   if (NARRATING.has(room.phase) && room.lastRound) return room.lastRound.round
   return roundNumber(room)
 }
 
+/**
+ * The round number printed on the mastheads, or 0 when there is not one.
+ *
+ * Before the first crisis every screen said Round 1, through the lobby, the
+ * briefing and the practice, so the first thing a player learned was that the
+ * round counter did not mean anything. Zero here means print the step instead.
+ */
+function displayRound(room: Room): number {
+  if (BEFORE_FIRST_CRISIS.has(room.phase)) return 0
+  return boardRound(room)
+}
+
 function setPhase(room: Room, phase: Phase, now: number): void {
   room.phase = phase
+  // Each onboarding step has its own button, so the flag that says it was
+  // pressed starts false at every step. The briefing is the one exception: a
+  // player who pressed I AM READY in the lobby is still ready when the
+  // facilitator starts, and a player who had not is still reading their card.
+  if (phase !== 'briefing') for (const role of ROLES) room.players[role].ready = false
   // Round 1 gets longer beats, so the length is asked for by round rather than
   // read off a flat table. `roundNumber` and not `displayRound`: a phase is
   // being opened, so the round it belongs to is the one about to be played.
@@ -162,9 +245,23 @@ function clockNow(room: Room, now: number): number {
  * players does not need. The clock still defaults them at resolution.
  */
 function everyoneLocked(room: Room): boolean {
+  return everyHeldSeat(room, (p) => p.locked)
+}
+
+/** Every occupied seat has pressed the current onboarding step's button. */
+function everyoneAcked(room: Room): boolean {
+  return everyHeldSeat(room, (p) => p.ready)
+}
+
+/** Every occupied seat has chosen a secret goal. */
+function everyoneSealed(room: Room): boolean {
+  return everyHeldSeat(room, (p) => p.goalId !== null)
+}
+
+function everyHeldSeat(room: Room, test: (p: Player) => boolean): boolean {
   const held = ROLES.filter((r) => room.players[r].name)
   if (!held.length) return false
-  return held.every((r) => room.players[r].locked)
+  return held.every((r) => test(room.players[r]))
 }
 
 /**
@@ -207,8 +304,12 @@ function canReceive(role: Role): boolean {
  * practice round would look live and do nothing.
  */
 function choosableOptions(room: Room, content: Content, role: Role): Option[] {
-  if (room.phase === 'practiceTalk' || room.phase === 'practiceChoice') {
-    return content.tutorial.options[role]
+  if (PRACTISING.has(room.phase)) {
+    // No affordability and no trust gate, because nothing here can be lost.
+    // The veto still applies, because the practice is where the Community
+    // finds out what one does, and it has to do the same thing here as later.
+    const deck = content.tutorial.options[role]
+    return role === room.vetoTarget ? applyVeto(deck) : deck
   }
   const scenario = currentScenario(room, content)
   if (!scenario) return []
@@ -248,6 +349,8 @@ export type Command =
   | { t: 'leave'; role: Role }
   | { t: 'reconnect'; role: Role }
   | { t: 'pickGoal'; role: Role; goalId: string }
+  /** I AM READY, GOT IT: the one button the current onboarding step offers. */
+  | { t: 'ack'; role: Role }
   | { t: 'start' }
   | { t: 'advance' }
   | { t: 'pause' }
@@ -284,6 +387,7 @@ export function authorise(seat: Role | 'dashboard', cmd: Command): Command | nul
     case 'reconnect':
     case 'leave':
     case 'pickGoal':
+    case 'ack':
     case 'say':
     case 'respondOffer':
     case 'spotlight':
@@ -332,6 +436,7 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
     case 'join': {
       const p = room.players[cmd.role]
       if (p.name && p.name !== cmd.name) return room // seat taken
+      if (!p.name) p.ready = false // a fresh player has not read anything yet
       p.name = cmd.name
       p.connected = true
       return room
@@ -353,6 +458,7 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
       const p = room.players[cmd.role]
       p.name = ''
       p.connected = false
+      p.ready = false
       p.goalId = null
       p.choiceId = null
       p.locked = false
@@ -368,6 +474,25 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
       // vacated mid-session, still needs a goal to be playing the same game.
       if (room.players[cmd.role].goalId) return room
       room.players[cmd.role].goalId = cmd.goalId
+      // The goal step ends on four, not on the clock. A phase that moved on
+      // with a goal still unchosen put the picker over the first crisis.
+      if (room.phase === 'goal' && everyoneSealed(room)) return openRound(room, content, at)
+      return room
+    }
+
+    /**
+     * The one button an onboarding step offers, pressed.
+     *
+     * In the lobby it is I AM READY under the role card, and it is what lets the
+     * phone keep the card up until this player, not the facilitator, has
+     * finished with it. On the power step it is GOT IT, and the step ends the
+     * moment the fourth one arrives, with the clock as the fallback.
+     */
+    case 'ack': {
+      const p = room.players[cmd.role]
+      if (!p.name) return room
+      p.ready = true
+      if (room.phase === 'power' && everyoneAcked(room)) return advance(room, content, at)
       return room
     }
 
@@ -524,13 +649,13 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
       p.autoLocked = false
       p.defaulted = false
       p.lockedAt = at
-      // The practice round never reaches the engine. Four practice cards handed
-      // to it are four ids from a deck the scenario has never heard of, and it
-      // throws rather than resolve them, which would end the session on the
-      // step that exists to teach somebody how to lock a card.
-      if (room.phase === 'practiceChoice') return room
-      if (everyoneLocked(room)) return resolveRound(room, content, at)
-      return room
+      if (!everyoneLocked(room)) return room
+      // The fourth lock resolves the round, and the practice round is a round.
+      // It used to stop here and wait for the clock, so the step that exists to
+      // teach the lock button never showed what locking leads to.
+      return room.phase === 'practiceChoice'
+        ? startPracticeReveal(room, content, at)
+        : resolveRound(room, content, at)
     }
 
     default:
@@ -682,6 +807,9 @@ function advance(room: Room, content: Content, now: number): Room {
       return room
 
     case 'practiceChoice':
+      return startPracticeReveal(room, content, now)
+
+    case 'practiceReveal':
       return endPractice(room, content, now)
 
     case 'power':
@@ -750,6 +878,7 @@ function endPractice(room: Room, content: Content, now: number): Room {
   room.vetoTarget = null
   room.coFund = false
   room.spotlightCalled = false
+  room.practiceLog = null
 
   const start = content.config.start
   room.game.fiscal = start.fiscal
@@ -778,58 +907,103 @@ function openRound(room: Room, content: Content, now: number): Room {
   return room
 }
 
-function resolveRound(room: Room, content: Content, now: number): Room {
-  /**
-   * Nobody reaches the engine without a choice.
-   *
-   * A round resolves either because everyone at the table committed or because
-   * the deadline passed, and both paths can arrive here with an empty chair or
-   * a player who never selected anything. Filling the gaps here rather than at
-   * the deadline means there is exactly one place that can leave a role
-   * unanswered, and it cannot.
-   *
-   * The three ways a choice can arrive are recorded separately, because the
-   * round summary must never tell somebody they chose a card the clock picked.
-   */
+/**
+ * The card the clock picks for somebody who picked nothing.
+ *
+ * It used to be the first affordable card, which in this pack is the loudest
+ * one the seat has more often than not, and in some rounds the dirtiest: a
+ * player who froze in Round 4 was handed a coal plant. The quiet card is the
+ * one that moves the country least, measured on the same four arrows the
+ * player would have read, and it is the closest thing to what they actually
+ * did, which was nothing. Ties go to the first, so the choice is stable.
+ */
+function quietest(opts: Option[]): Option {
+  const loudness = (o: Option) => optionImpact(o).reduce((n, i) => n + Math.abs(i.dir), 0)
+  let best = opts[0]
+  for (const o of opts) if (loudness(o) < loudness(best)) best = o
+  return best
+}
+
+/**
+ * Nobody reaches the engine without a choice.
+ *
+ * A round resolves either because everyone at the table committed or because
+ * the deadline passed, and both paths can arrive here with an empty chair or
+ * a player who never selected anything. Filling the gaps here rather than at
+ * the deadline means there is exactly one place that can leave a role
+ * unanswered, and it cannot.
+ *
+ * The three ways a choice can arrive are recorded separately, because the
+ * round summary must never tell somebody they chose a card the clock picked.
+ */
+function fillChoices(room: Room, content: Content, now: number): Record<Role, string> {
   for (const role of ROLES) {
     const p = room.players[role]
     if (p.locked) continue
     if (p.choiceId === null) {
       const opts = choosableOptions(room, content, role)
       if (!opts.length) continue
-      p.choiceId = opts[0].id
+      p.choiceId = quietest(opts).id
       p.defaulted = true
     }
     p.locked = true
     p.autoLocked = true
     p.lockedAt = now
   }
+  return Object.fromEntries(ROLES.map((r) => [r, room.players[r].choiceId as string])) as Record<Role, string>
+}
 
-  const choices = Object.fromEntries(
-    ROLES.map((r) => [r, room.players[r].choiceId as string]),
-  ) as Record<Role, string>
-
-  // The Activist's Spotlight is a Table action, but the engine derives its
-  // target from the choices, and it only lands on a role that actually went
-  // dirty. Calling it without a dirty target simply spends nothing.
+/**
+ * Hands the four cards to the engine, with the room's Spotlight rule applied.
+ *
+ * The Activist's Spotlight is a Table action, but the engine derives its
+ * target from the choices, and it only lands on a role that actually went
+ * dirty. Calling it without a dirty target simply spends nothing. When it was
+ * never called, the reserve is hidden for the length of the call so the engine
+ * cannot target anyone, then put back.
+ */
+function runEngine(game: GameState, content: Content, room: Room, choices: Record<Role, string>): RoundLog {
+  const input = { choices, vetoTarget: room.vetoTarget, coFund: room.coFund }
   if (!room.spotlightCalled) {
-    // Suppress the engine's automatic spotlight when it was never called.
-    const activistOption = content.scenarios[room.game.path[room.game.round]].options.activist.find(
+    const activistOption = content.scenarios[game.path[game.round]].options.activist.find(
       (o) => o.id === choices.activist,
     )
     if (activistOption?.arch === 'ESCALATE') {
-      // Escalating without spending a Spotlight: temporarily hide the reserve
-      // so the engine cannot target anyone, then restore it.
-      const held = room.game.spotlights
-      room.game.spotlights = 0
-      const log = playRound(room.game, { choices, vetoTarget: room.vetoTarget, coFund: room.coFund }, content)
-      room.game.spotlights = held
-      return finishRound(room, log, choices, content, now)
+      const held = game.spotlights
+      game.spotlights = 0
+      const log = playRound(game, input, content)
+      game.spotlights = held
+      return log
     }
   }
+  return playRound(game, input, content)
+}
 
-  const log = playRound(room.game, { choices, vetoTarget: room.vetoTarget, coFund: room.coFund }, content)
+function resolveRound(room: Room, content: Content, now: number): Room {
+  const choices = fillChoices(room, content, now)
+  const log = runEngine(room.game, content, room, choices)
   return finishRound(room, log, choices, content, now)
+}
+
+/**
+ * The practice round resolves, against a country that is thrown away.
+ *
+ * A real round with the stakes removed: the four practice cards go through the
+ * real engine, the practice promises are judged the real way, and the projector
+ * runs the real flip sequence on the result. It all happens to a scratch copy
+ * of the country built from the starting numbers, so the live game never sees
+ * a practice card, a practice promise or a practice meter. `endPractice` wipes
+ * the rest when the reveal ends.
+ */
+function startPracticeReveal(room: Room, content: Content, now: number): Room {
+  const choices = fillChoices(room, content, now)
+  const scratchContent = practiceContent(content)
+  const scratch = createGame([PRACTICE_ID], scratchContent)
+  const log = runEngine(scratch, scratchContent, room, choices)
+  judgePromises(room, log, choices)
+  room.practiceLog = log
+  setPhase(room, 'practiceReveal', now)
+  return room
 }
 
 function finishRound(
@@ -839,8 +1013,32 @@ function finishRound(
   content: Content,
   now: number,
 ): Room {
-  // Promises are recorded and displayed but never enforced. Resolving one only
-  // decides what the dashboard says about it.
+  judgePromises(room, log, choices)
+
+  // A published tip resolves at round end, and only a published one.
+  const tip = room.tips.find((t) => t.round === log.round)
+  if (tip?.published) {
+    tip.revealed = true
+    applyTipStake(room, tip)
+  }
+
+  // Offers that nobody answered expire with the round.
+  for (const o of room.offers) {
+    if (o.round === log.round && o.status === 'pending') o.status = 'expired'
+  }
+
+  room.lastRound = log
+  room.history.push(log)
+  void content
+  setPhase(room, 'reckoning', now)
+  return room
+}
+
+/**
+ * Promises are recorded and displayed but never enforced. Resolving one only
+ * decides what the dashboard says about it.
+ */
+function judgePromises(room: Room, log: RoundLog, choices: Record<Role, string>): void {
   for (const p of room.promises) {
     if (p.round !== log.round) continue
     const didIt = p.optionId !== null && choices[p.from] === p.optionId
@@ -865,24 +1063,6 @@ function finishRound(
       p.outcome = !theyDid ? 'void' : didIt ? 'kept' : 'broken'
     }
   }
-
-  // A published tip resolves at round end, and only a published one.
-  const tip = room.tips.find((t) => t.round === log.round)
-  if (tip?.published) {
-    tip.revealed = true
-    applyTipStake(room, tip)
-  }
-
-  // Offers that nobody answered expire with the round.
-  for (const o of room.offers) {
-    if (o.round === log.round && o.status === 'pending') o.status = 'expired'
-  }
-
-  room.lastRound = log
-  room.history.push(log)
-  void content
-  setPhase(room, 'reckoning', now)
-  return room
 }
 
 /**
@@ -1006,12 +1186,13 @@ function buildTip(
 // ── Views ──────────────────────────────────────────────────────────────────
 
 export function dashboardView(room: Room, content: Content): DashboardView {
-  const scenario = currentScenario(room, content)
+  const scenario = sceneFor(room, content)
+  const practising = PRACTISING.has(room.phase)
   const held = ROLES.filter((r) => room.players[r].name)
   const waiting = held.filter((r) => !room.players[r].locked)
   const lastLock = held.length > 1 && waiting.length === 1 ? waiting[0] : null
 
-  const tip = room.tips.find((t) => t.round === displayRound(room))
+  const tip = room.tips.find((t) => t.round === boardRound(room))
   const published =
     tip?.published && tip ? { from: tip.to, text: tip.text, source: tip.source } : null
 
@@ -1019,13 +1200,22 @@ export function dashboardView(room: Room, content: Content): DashboardView {
     ? {
         target: room.vetoTarget,
         removed: scenario
-          ? availableOptions(room.game, scenario, room.vetoTarget, content)
+          ? (practising
+              ? scenario.options[room.vetoTarget]
+              : availableOptions(room.game, scenario, room.vetoTarget, content)
+            )
               .filter((o) => DIRTY.has(o.arch))
               .map((o) => o.title)
           : [],
         remaining: vetoesRemaining(room),
       }
     : null
+
+  // For the length of the practice reveal the projector shows the scratch
+  // country the practice cards were played against, so the meters move and
+  // the flip sequence has something to flip. `endPractice` puts the real one back.
+  const practice = room.phase === 'practiceReveal' ? room.practiceLog : null
+  const shown = practice ?? room.lastRound
 
   return {
     code: room.code,
@@ -1037,16 +1227,20 @@ export function dashboardView(room: Room, content: Content): DashboardView {
     scenario: scenario
       ? { id: scenario.id, title: scenario.title, type: scenario.type, situation: scenario.situation }
       : null,
-    state: publicState(room.game, content),
+    state: practice ? practice.state : publicState(room.game, content),
     seats: ROLES.map((role) => ({
       role,
       name: room.players[role].name || null,
       connected: room.players[role].connected,
       locked: room.players[role].locked,
       lastToLock: lastLock === role,
+      ready: room.players[role].ready,
+      sealed: room.players[role].goalId !== null,
     })),
-    promises: room.promises.filter((p) => p.round === displayRound(room)),
-    offersInFlight: room.offers.filter((o) => o.round === displayRound(room) && o.status === 'pending'),
+    readyCount: held.filter((r) => room.players[r].ready).length,
+    sealedCount: held.filter((r) => room.players[r].goalId !== null).length,
+    promises: room.promises.filter((p) => p.round === boardRound(room)),
+    offersInFlight: room.offers.filter((o) => o.round === boardRound(room) && o.status === 'pending'),
     tipDealtThisRound: Boolean(tip),
     publishedTip: published,
     spotlight: room.spotlightCalled
@@ -1054,12 +1248,12 @@ export function dashboardView(room: Room, content: Content): DashboardView {
           by: 'activist' as Role,
           // Whoever takes the dirtiest option this round wears it. Nobody
           // knows who that is until the choices lock, so do not pretend to.
-          target: room.lastRound?.spotlightTarget ?? null,
+          target: shown?.spotlightTarget ?? null,
           remaining: spotlightsRemaining(room),
         }
       : null,
     veto,
-    lastRound: room.lastRound,
+    lastRound: shown,
     history: room.history,
     headlines: room.history.flatMap((h) => h.reveals.map((r) => r.headline)).slice(-12),
     targets: {
@@ -1072,29 +1266,24 @@ export function dashboardView(room: Room, content: Content): DashboardView {
 }
 
 export function phoneView(room: Room, content: Content, role: Role): PhoneView {
-  const scenario = currentScenario(room, content)
+  const scenario = sceneFor(room, content)
   const player = room.players[role]
-  const showOptions = room.phase === 'table' || room.phase === 'choice'
-  const practising = room.phase === 'practiceTalk' || room.phase === 'practiceChoice'
+  const practising = PRACTISING.has(room.phase)
+  const showOptions =
+    room.phase === 'table' ||
+    room.phase === 'choice' ||
+    room.phase === 'practiceTalk' ||
+    room.phase === 'practiceChoice'
 
   let options: PhoneOption[] = []
-  if (practising) {
-    // The practice cards, straight through. No affordability, no veto, no gate:
-    // this round cannot be lost and the point is that a player finds out what a
-    // card looks like before one matters.
-    options = content.tutorial.options[role].map((o) => ({
-      id: o.id,
-      title: o.title,
-      desc: o.desc,
-      cost: costLabel(o),
-      impact: optionImpact(o),
-      condition: optionCondition(o),
-      available: true,
-      disabled: null,
-      disabledNote: null,
-    }))
-  } else if (scenario && showOptions) {
-    const affordableAndOpen = availableOptions(room.game, scenario, role, content)
+  if (scenario && showOptions) {
+    // The practice cards go straight through. No affordability and no trust
+    // gate: this round cannot be lost and the point is that a player finds out
+    // what a card looks like before one matters. The veto still applies, so
+    // the Community sees what it does on the step built for finding out.
+    const affordableAndOpen = practising
+      ? scenario.options[role]
+      : availableOptions(room.game, scenario, role, content)
     const afterVeto = role === room.vetoTarget ? applyVeto(affordableAndOpen) : affordableAndOpen
 
     options = scenario.options[role].map((o): PhoneOption => {
@@ -1130,7 +1319,7 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
         desc: o.desc,
         cost: costLabel(o),
         impact: optionImpact(o),
-        condition: optionCondition(o),
+        condition: optionCondition(o, room.coFund),
         available: choosable,
         disabled,
         disabledNote: note,
@@ -1165,6 +1354,7 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
     room.phase === 'briefing' ||
     room.phase === 'practiceTalk' ||
     room.phase === 'practiceChoice' ||
+    room.phase === 'practiceReveal' ||
     room.phase === 'power'
   const goalChoices =
     player.goalId === null && !beforeGoals
@@ -1211,7 +1401,13 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
       scenario && !narrating
         ? { id: scenario.id, title: scenario.title, situation: scenario.situation, type: scenario.type }
         : null,
-    privateLine: scenario && !narrating ? privateLine(scenario.type, role) : null,
+    // The practice line, not the live one: the Round 1 brief used to show up a
+    // step early, on the screen that said nothing here counts.
+    privateLine: practising
+      ? PRACTICE_LINE[role]
+      : scenario && !narrating
+        ? privateLine(scenario.type, role)
+        : null,
     options,
     choiceId: player.choiceId,
     locked: player.locked,
@@ -1221,20 +1417,23 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
     spotlightsRemaining: spotlightsRemaining(room),
     spotlightCalled: room.spotlightCalled,
     coFund: room.coFund,
+    ready: player.ready,
+    vetoed: room.vetoTarget === role,
     goalId: player.goalId,
     goalTitle: ownGoal?.title ?? null,
     goalDesc: ownGoal?.desc ?? null,
     goalChoices,
     // Only ever your own tip, and only while it is yours to act on.
-    tip: room.tips.find((t) => t.to === role && t.round === displayRound(room)) ?? null,
-    promises: room.promises.filter((p) => p.round === displayRound(room)),
+    tip: room.tips.find((t) => t.to === role && t.round === boardRound(room)) ?? null,
+    promises: room.promises.filter((p) => p.round === boardRound(room)),
     incomingOffers: room.offers.filter((o) => o.to === role && o.status === 'pending'),
-    sentOffers: room.offers.filter((o) => o.from === role && o.round === displayRound(room)),
+    sentOffers: room.offers.filter((o) => o.from === role && o.round === boardRound(room)),
     seats: ROLES.map((r) => ({
       role: r,
       name: room.players[r].name || null,
       connected: room.players[r].connected,
       locked: room.players[r].locked,
+      ready: room.players[r].ready,
     })),
     roundResult: roundResultCopy(room, content, role),
     trustAward: narrating && room.lastRound ? room.lastRound.trustAwarded : null,

@@ -17,7 +17,7 @@
  * again, and because "LOCKED" would not tell you what you had locked.
  */
 import type { PhoneView } from '../game/session'
-import { ROLE_CARD, ROLE_LABEL } from '../game/session'
+import { ROLE_CARD, ROLE_LABEL, phaseMs } from '../game/session'
 import { STEP_LABEL } from '../game/vocab'
 import { RoleGlyph, formatClock } from '../ui/primitives'
 
@@ -63,7 +63,22 @@ export function PhoneHeader({
   // saying what is happening; a flashing red countdown under it would say the
   // opposite.
   const urgent = !view.paused && (remaining ?? 1e9) < 10_000
-  const pct = view.phaseEndsAt && remaining !== null ? Math.max(0, Math.min(100, (remaining / 90_000) * 100)) : 0
+  // Divided by this phase's own length. A fixed ninety seconds meant the bar
+  // started a third full on a forty-second phase and never emptied on a
+  // two-minute one.
+  const length = phaseMs(view.phase, view.round)
+  const pct =
+    view.phaseEndsAt && remaining !== null && length > 0
+      ? Math.max(0, Math.min(100, (remaining / length) * 100))
+      : 0
+  // Before the first crisis there is no round to number. The practice says so;
+  // the steps either side of it are the table getting ready.
+  const where =
+    view.round > 0
+      ? `Round ${view.round}`
+      : view.phase === 'practiceTalk' || view.phase === 'practiceChoice' || view.phase === 'practiceReveal'
+        ? 'Practice'
+        : 'Getting ready'
 
   return (
     <>
@@ -78,7 +93,7 @@ export function PhoneHeader({
         <div className="phead__org">
           <div>{character.org.toUpperCase()}</div>
           <div className="phead__title">
-            {ROLE_LABEL[view.role]} · Round {view.round}
+            {ROLE_LABEL[view.role]} · {where}
           </div>
         </div>
         <Resource view={view} />

@@ -8,7 +8,7 @@ import type { Command } from '../game/room'
 import type { InsiderTip, PhoneView } from '../game/session'
 import { ROLE_CARD, ROLE_LABEL } from '../game/session'
 import { arrows } from '../game/impact'
-import { LABEL, TERM } from '../game/vocab'
+import { LABEL, STEP_LABEL, TERM } from '../game/vocab'
 import { RoleGlyph, formatClock } from '../ui/primitives'
 import { RoleCard } from '../ui/RoleCard'
 
@@ -140,7 +140,11 @@ export function Lobby({ view }: { view: PhoneView }) {
             <div className="pseat__role">{ROLE_LABEL[s.role]}</div>
             <div className="pseat__name">{s.name ?? 'waiting…'}</div>
           </div>
-          {s.role === view.role ? <span className="pseat__tag">YOU</span> : s.name ? <span className="pseat__tag">IN</span> : null}
+          {s.role === view.role ? (
+            <span className="pseat__tag">YOU</span>
+          ) : s.name ? (
+            <span className="pseat__tag">{s.ready ? 'READY' : 'IN'}</span>
+          ) : null}
         </div>
       ))}
     </div>
@@ -225,22 +229,38 @@ export function TipCard({
 }
 
 /** P-10: locked. The phone gets out of the way. */
-export function LookUp({ view, reckoning = false }: { view: PhoneView; reckoning?: boolean }) {
+/**
+ * The four moments the phone has nothing to do but say so.
+ *
+ * A phone left on the seat list, or on a locked card, with no instruction
+ * reads as a phone that has stopped working. Each of these names the step and
+ * says where to look.
+ */
+export type LookUpVariant = 'locked' | 'reveal' | 'briefing' | 'practice'
+
+const LOOK_UP: Record<LookUpVariant, { label: string; note: string }> = {
+  locked: { label: 'LOCKED', note: 'Your card is locked. The cards will show on the big screen.' },
+  reveal: { label: LABEL.reveal, note: 'The cards are showing on the big screen.' },
+  briefing: {
+    label: STEP_LABEL.briefing,
+    note: 'The big screen is explaining the game. Your phone comes back for the practice.',
+  },
+  practice: { label: STEP_LABEL.practiceReveal, note: 'This is what a Reveal looks like. Nothing here counts.' },
+}
+
+export function LookUp({ view, variant = 'locked' }: { view: PhoneView; variant?: LookUpVariant }) {
+  const copy = LOOK_UP[variant]
   return (
     <div className="lookup" data-role={view.role}>
-      <span className="lookup__label">{reckoning ? LABEL.reveal : 'LOCKED'}</span>
+      <span className="lookup__label">{copy.label}</span>
       <h1 className="lookup__big">
         Look
         <br />
         up.
       </h1>
       <div className="lookup__rule" />
-      <p className="lookup__note">
-        {reckoning
-          ? 'The cards are showing on the big screen.'
-          : 'Your card is locked. The cards will show on the big screen.'}
-      </p>
-      {!reckoning && view.waitingOn > 0 ? (
+      <p className="lookup__note">{copy.note}</p>
+      {variant === 'locked' && view.waitingOn > 0 ? (
         <p className="lookup__note" style={{ opacity: 0.7 }}>
           {4 - view.waitingOn} OF 4 LOCKED
         </p>
@@ -261,7 +281,7 @@ export function LookUp({ view, reckoning = false }: { view: PhoneView; reckoning
  */
 export function RoundResult({ view }: { view: PhoneView }) {
   const r = view.roundResult
-  if (!r) return <LookUp view={view} reckoning />
+  if (!r) return <LookUp view={view} variant="reveal" />
   const c = ROLE_CARD[view.role]
 
   return (

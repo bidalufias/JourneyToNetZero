@@ -50,7 +50,10 @@ await dash.bringToFront(); await dash.keyboard.press('Space'); await wait(600)
 await shot(phones.government, 'gov-after-start-yanked')
 note('phones after start: ' + (await bodyText(phones.business)).includes('I AM READY'))
 
-await next('practiceTalk'); await next('practiceChoice'); await next('power'); await next('goal')
+await next('practiceTalk'); await next('practiceChoice')
+// Nobody locks: Next resolves the practice with the quiet defaults and shows the Reveal anyway.
+await next('practiceReveal'); await shot(dash, 'dash-practice-reveal-defaulted')
+await next('power'); await next('goal')
 // Only 3 seal a goal. Advance anyway (what the 45s clock would do).
 for (const r of ['government', 'business', 'community']) { await phones[r].locator('.goal').first().click(); await wait(100); await btn(phones[r], 'CHOOSE THIS ONE').click(); await wait(150) }
 await shot(dash, 'dash-goal-3-of-4-sealed')
@@ -76,6 +79,7 @@ await c.mouse.move(box.x + 8, box.y + box.height / 2); await c.mouse.down()
 await c.mouse.move(box.x + box.width - 2, box.y + box.height / 2, { steps: 12 }); await c.mouse.up(); await wait(500)
 await shot(c, 'community-after-real-veto', true)
 await shot(phones.business, 'business-table-after-veto', true)
+note('business told of the veto: ' + (await bodyText(phones.business)).includes('took your dirty cards away'))
 await shot(dash, 'dash-table-after-veto')
 // Business promises the card it will NOT pick (to break a promise)
 const b = phones.business
@@ -90,6 +94,7 @@ await shot(phones.government, 'gov-table-after-cofund', true)
 
 await next('choice R1')
 await shot(b, 'business-choice-vetoed', true)
+note('partnership card says it is funded: ' + (await bodyText(b)).includes('The Government pays half. It works in full.'))
 // Business locks a DIFFERENT available card than promised (last available)
 const bcards = b.locator('.ocard:not([disabled])'); note(`business available cards: ${await bcards.count()}`)
 await bcards.last().click(); await wait(100); await btn(b, 'LOCK MY CARD').click(); await wait(200)
@@ -112,7 +117,7 @@ for (let round = 2; round <= 6; round++) {
   await next(`crisis R${round}`)
   for (const r of ROLES) {
     const t = await bodyText(phones[r])
-    if (t.includes('A TIP')) { note(`R${round} tip card visible on ${r}`); await btn(phones[r], 'KEEP IT SECRET').click(); await wait(150) }
+    if (t.includes('A TIP')) { note(`R${round} tip card visible on ${r}`); if (round === 6) await shot(phones[r], `r6-tip-${r}`, true); await btn(phones[r], 'KEEP IT SECRET').click(); await wait(150) }
   }
   // Ask the room directly who was dealt the tip this round (read the dashboard's tip line is anonymous; use the phone body instead)
   if (round === 2) {

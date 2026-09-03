@@ -64,7 +64,7 @@ export const BEATS: Beat[] = [
       'And one warning before we begin. Not one of you can do this alone. That is not a hint. That is the entire design of the game.',
     ],
     watch:
-      'Names on all four seats before you start. A seat still empty at the crisis is a phone that gets handed round all session, and one player carrying two roles argues with themselves, which is the one thing this game cannot do for you.',
+      'Names on all four seats before you start, and the screen counts who has pressed I AM READY. Anyone still reading keeps their card through the briefing, so you are not waiting on them. A seat still empty at the crisis is a phone that gets handed round all session, and one player carrying two roles argues with themselves, which is the one thing this game cannot do for you.',
     next: 'Starts the session and opens the briefing.',
   },
   {
@@ -102,15 +102,29 @@ export const BEATS: Beat[] = [
     phase: 'practiceChoice',
     label: 'PRACTICE: CHOOSING',
     length: seconds('practiceChoice'),
-    onScreen: 'One instruction, and how many have locked in.',
+    onScreen: 'One instruction, and how many of the four have locked.',
     say: [
       'Now the other half. Two cards each on your phone. Tap one to pick it, then press LOCK MY CARD.',
       'Look at the four arrows on each card. They tell you which way it pushes the country: carbon, the economy, quality of life, and the clean economy. Green is the direction we want.',
       'You can change your mind right up until you lock. After that you cannot. Still practice, still counts for nothing.',
     ],
     watch:
-      'Four locks on the screen before you move on. If somebody has not, say their seat out loud once; that is the whole lesson about the clock and it is cheaper to learn here.',
-    next: 'Introduces each seat to its own special move.',
+      'The fourth lock turns the cards over by itself. If somebody has not locked, say their seat out loud once; that is the whole lesson about the clock and it is cheaper to learn here.',
+    next: 'Shows the practice Reveal. The fourth lock does this on its own.',
+  },
+  {
+    phase: 'practiceReveal',
+    label: 'PRACTICE: THE REVEAL',
+    length: seconds('practiceReveal'),
+    onScreen: 'The four practice cards turning over, any practice promise judged, and the meters moving.',
+    say: [
+      'Eyes up. This is what happens at the end of every round: the four cards turn over, one at a time, in front of everybody.',
+      'Watch the meters move. And if anybody promised something up here and then did the other thing, the screen says so. That is the part that is going to matter.',
+      'None of this counted. In a moment the country goes back to where it started.',
+    ],
+    watch:
+      'Point at the promise board if a practice promise was broken. A table that has seen the sting once, for free, plays the first real Talk very differently.',
+    next: 'Throws the practice away and introduces each seat to its own special move.',
   },
   {
     phase: 'power',
@@ -122,8 +136,8 @@ export const BEATS: Beat[] = [
       'Activist, you have three Spotlights. Community, you have two vetoes. Minister and Company Boss, you have money, and you are the only two who do.',
     ],
     watch:
-      'Thirty seconds, heads down, then move. Teaching all four powers to all four players is four times the words and three times the irrelevance, which is why each phone only shows its own.',
-    next: 'Asks everybody for their secret goal.',
+      'Heads down, then GOT IT on every phone; the screen counts them, and the step moves on by itself at four. Teaching all four powers to all four players is four times the words and three times the irrelevance, which is why each phone only shows its own.',
+    next: 'Asks everybody for their secret goal. The fourth GOT IT does this on its own.',
   },
   {
     phase: 'goal',
@@ -137,7 +151,7 @@ export const BEATS: Beat[] = [
     ],
     watch:
       'They are choosing now rather than at the start on purpose. The goals are written in carbon and Public Trust and clean economy, and asking somebody to commit to one before they have watched any of those move is asking them to pick the nicest title.',
-    next: 'Opens the first real crisis.',
+    next: 'Opens the first real crisis. The fourth goal chosen does this on its own.',
   },
   {
     phase: 'crisis',
@@ -248,7 +262,7 @@ export const BEATS: Beat[] = [
       'Give yourselves a hand. You just ran a country for half an hour, which is longer than most people manage.',
       'Now the part that is actually worth your time. Five questions, ten minutes, and nobody is allowed to be in character any more.',
     ],
-    next: 'Nothing further. Reload the big screen for a new session.',
+    next: 'NEW SESSION opens a fresh room with a new code. Everybody joins the new code on their phone.',
   },
 ]
 
@@ -360,7 +374,7 @@ export const TROUBLE: Trouble[] = [
   },
   {
     problem: 'The phones say the game server is not answering.',
-    fix: 'That is the backend, not their phones. The big screen has to stay open for the room to exist. If it persists, restart from the lobby with a fresh code.',
+    fix: 'That is the backend, not their phones. The big screen has to stay open for the room to exist. If it persists, open a new session from the big screen and have everyone join the new code. Do not reload: the address remembers the old room and takes you straight back into it.',
   },
   {
     problem: 'A latecomer arrives after the start.',
@@ -373,7 +387,7 @@ export const TROUBLE: Trouble[] = [
 ]
 
 export const CONTROLS: { key: string; what: string }[] = [
-  { key: 'Space  ·  N', what: 'Start the session, then go straight to the next step.' },
+  { key: 'Space  ·  N', what: 'Start the session, then go straight to the next step. After the ending, open a new session.' },
   {
     key: 'P',
     what: 'Stop the clock, anywhere in the session, and start it again with the seconds it had left. Nobody at the table can lock, promise or spend while it is stopped.',
