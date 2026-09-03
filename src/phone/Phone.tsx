@@ -22,7 +22,7 @@ import { PhoneHeader, ReviewBar, SCREEN_ORDER, reviewableUpTo, type Screen } fro
 import { MenuSheet } from './Menu'
 import { TheChoice } from './TheChoice'
 import { TableActions } from './TableActions'
-import { Crisis, GoalPicker, Lobby, LookUp, RoleReveal, RoundResult, TipCard } from './screens'
+import { Crisis, GoalChosen, GoalPicker, Lobby, LookUp, RoleReveal, RoundResult, TipCard } from './screens'
 import { PracticeChoice, PracticeTalk, RoundOneCoach, YourPower } from './onboarding'
 import './phone.css'
 
@@ -80,7 +80,7 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
     if (view.phase === 'goal') {
       // A latecomer who took a vacated seat still lands here, which is why the
       // goal screen is reachable after the phase has passed.
-      return needsGoal ? <GoalPicker view={view} send={send} /> : <Lobby view={view} />
+      return needsGoal ? <GoalPicker view={view} send={send} /> : <GoalChosen view={view} />
     }
     if (needsGoal) {
       // Took a vacated seat mid-session. Still owes a secret goal.

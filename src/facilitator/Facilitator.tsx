@@ -23,7 +23,7 @@ import {
   type FacilitatorMessage,
   type FacilitatorState,
 } from './channel'
-import { BEATS, CONTROLS, DEBRIEF, MOMENTS, SETUP, TROUBLE } from './script'
+import { BEATS, CHARACTERS, CONTROLS, DEBRIEF, MOMENTS, SETUP, TROUBLE } from './script'
 import './facilitator.css'
 
 /** What the buttons do next, given where the room is. */
@@ -207,6 +207,31 @@ export function Facilitator({
           <section key={m.title} className={`fac__card${m === moment ? ' fac__card--live' : ''}`}>
             <p className="fac__label">ROUND {m.round} · {m.title.toUpperCase()}</p>
             <p className="fac__card-text">{m.text}</p>
+          </section>
+        ))}
+
+        <h2 className="fac__h2">The four characters</h2>
+        <p className="fac__lead">
+          The card on each phone is sixty words: who you are, what you want, what you have, how
+          to play. This is the rest. Read it aloud when a table wants colour. Nobody has to.
+        </p>
+        {CHARACTERS.map((c) => (
+          <section key={c.role} className="fac__card">
+            <p className="fac__label">
+              {ROLE_LABEL[c.role].toUpperCase()} · {c.title.toUpperCase()}
+            </p>
+            <p className="fac__card-text">
+              <strong>{c.post}</strong>, {c.org}. {c.whoYouAre}
+            </p>
+            <p className="fac__card-text">
+              <strong>Believes:</strong> {c.believe}
+            </p>
+            <p className="fac__card-text">
+              <strong>Afraid of:</strong> {c.afraidOf}
+            </p>
+            <p className="fac__card-text">
+              <strong>Would never say:</strong> “{c.neverSay}”
+            </p>
           </section>
         ))}
 

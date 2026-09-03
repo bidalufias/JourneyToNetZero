@@ -17,7 +17,7 @@
  * again, and because "LOCKED" would not tell you what you had locked.
  */
 import type { PhoneView } from '../game/session'
-import { ROLE_CHARACTER, ROLE_LABEL } from '../game/session'
+import { ROLE_CARD, ROLE_LABEL } from '../game/session'
 import { STEP_LABEL } from '../game/vocab'
 import { RoleGlyph, formatClock } from '../ui/primitives'
 
@@ -57,7 +57,7 @@ export function PhoneHeader({
   onBack: (() => void) | null
   onMenu: () => void
 }) {
-  const character = ROLE_CHARACTER[view.role]
+  const character = ROLE_CARD[view.role]
   const clock = formatClock(remaining)
   // A stopped clock never nags. The pause banner above the header is already
   // saying what is happening; a flashing red countdown under it would say the

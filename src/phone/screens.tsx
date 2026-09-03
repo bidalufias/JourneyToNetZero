@@ -6,86 +6,52 @@ import { useState } from 'react'
 import type { Role } from '../engine/types'
 import type { Command } from '../game/room'
 import type { InsiderTip, PhoneView } from '../game/session'
-import { ROLE_CHARACTER, ROLE_LABEL } from '../game/session'
+import { ROLE_CARD, ROLE_LABEL } from '../game/session'
 import { arrows } from '../game/impact'
 import { LABEL, TERM } from '../game/vocab'
 import { RoleGlyph, formatClock } from '../ui/primitives'
+import { RoleCard } from '../ui/RoleCard'
 
 /**
  * P-03: the role reveal. The skin applies here and never changes again.
  *
- * Three lines, then the seat's resource, then three sentences this character
- * would actually say. That is the whole brief. It used to be nine labelled
- * sections and about 450 words, handed to somebody who had never seen the game
- * and had ninety seconds, so most of it went unread and the useful part went
- * unread with it. The rest is one tap away and nobody needs it to play.
+ * The card, the player's name, and I AM READY. That is the whole brief. It
+ * used to be nine labelled sections and about 450 words, handed to somebody who
+ * had never seen the game and had ninety seconds, so most of it went unread and
+ * the useful part went unread with it. The two say-lines are one tap away.
  */
 export function RoleReveal({ view, onNext }: { view: PhoneView; onNext: () => void }) {
-  const c = ROLE_CHARACTER[view.role]
-  const [full, setFull] = useState(false)
+  const c = ROLE_CARD[view.role]
 
   return (
     <div className="pbody">
       <span className="plabel">{c.org.toUpperCase()}</span>
       <h1 className="pbig">{c.title}</h1>
       <div style={{ height: 4, background: 'var(--skin-mark)', width: 120 }} />
-      {view.name ? <h2 className="pheading">{view.name}</h2> : null}
 
-      <span className="plabel">YOU ARE</span>
-      <p className="ptext">{c.youAre}</p>
+      <RoleCard role={view.role} name={view.name} says />
 
-      <span className="plabel">YOU WANT</span>
-      <p className="ptext">{c.youWant}</p>
+      <p className="pnote">Your card is always under ⋯, top right.</p>
 
-      <span className="plabel">YOUR MOVE</span>
-      <p className="ptext">{c.yourMove}</p>
-
-      <span className="plabel">YOU HOLD</span>
-      <p className="ptext">
-        <strong>
-          {view.resource.value} {view.resource.label.replace(/^Your /, '')}
-        </strong>
-        . It is in the corner of your screen.
-        The big screen shows everything else.
-      </p>
-
-      {/* Three lines a player can open their mouth with in Round 1. The single
-          most useful thing on this screen, so it survives the cut. */}
-      <span className="plabel">THINGS YOU MIGHT SAY</span>
-      {c.says.map((line) => (
-        <div key={line} className="bubble">
-          <p className="bubble__text">“{line}”</p>
-        </div>
-      ))}
-
-      {full ? (
-        <>
-          <span className="plabel">WHO YOU ARE</span>
-          <p className="ptext">{c.whoYouAre}</p>
-
-          <span className="plabel">WHAT YOU BELIEVE</span>
-          <p className="ptext">{c.believe}</p>
-
-          <span className="plabel">WHAT YOU FEAR</span>
-          <p className="ptext">{c.afraidOf}</p>
-
-          <span className="plabel">HOW YOUR RESOURCE WORKS</span>
-          <p className="ptext">{c.resourcePower}</p>
-
-          <span className="plabel">YOU WOULD NEVER SAY</span>
-          <div className="bubble bubble--them">
-            <p className="bubble__text">“{c.neverSay}”</p>
-          </div>
-        </>
-      ) : (
-        <button className="btn btn--ghost" onClick={() => setFull(true)}>
-          READ MORE
-        </button>
-      )}
-
-      <button className="btn btn--primary" style={{ marginTop: 'var(--space-4)' }} onClick={onNext}>
+      <button className="btn btn--primary" style={{ marginTop: 'auto' }} onClick={onNext}>
         I AM READY
       </button>
+    </div>
+  )
+}
+
+/** After the goal is chosen: the card with its fifth line, and nothing to do. */
+export function GoalChosen({ view }: { view: PhoneView }) {
+  return (
+    <div className="pbody">
+      <span className="plabel">SECRET · NOBODY ELSE SEES THIS</span>
+      <h1 className="pheading">Chosen. Look up.</h1>
+      <RoleCard
+        role={view.role}
+        name={view.name}
+        goal={view.goalTitle && view.goalDesc ? { title: view.goalTitle, desc: view.goalDesc } : null}
+      />
+      <p className="pnote">Your goal only counts if the country reaches all 3 targets.</p>
     </div>
   )
 }
@@ -296,7 +262,7 @@ export function LookUp({ view, reckoning = false }: { view: PhoneView; reckoning
 export function RoundResult({ view }: { view: PhoneView }) {
   const r = view.roundResult
   if (!r) return <LookUp view={view} reckoning />
-  const c = ROLE_CHARACTER[view.role]
+  const c = ROLE_CARD[view.role]
 
   return (
     <div className="pbody">

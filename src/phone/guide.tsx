@@ -15,7 +15,7 @@
  */
 import type { Role } from '../engine/types'
 import type { PhoneView } from '../game/session'
-import { ROLE_CHARACTER } from '../game/session'
+import { RoleCard } from '../ui/RoleCard'
 import { DEFINE, STEP_LABEL, TERM } from '../game/vocab'
 
 interface Entry {
@@ -79,14 +79,16 @@ const PHASES: Entry[] = [
 ]
 
 export function HowToPlay({ view }: { view: PhoneView }) {
-  const character = ROLE_CHARACTER[view.role]
   const resource = RESOURCE_NOTE[view.role]
 
   return (
     <>
-      <p className="ptext">
-        You are the <strong>{character.title}</strong>. {character.blurb}
-      </p>
+      <RoleCard
+        role={view.role}
+        name={view.name}
+        goal={view.goalTitle && view.goalDesc ? { title: view.goalTitle, desc: view.goalDesc } : null}
+        says
+      />
 
       <span className="plabel">WHAT YOU SPEND</span>
       <div className="bubble">
@@ -97,14 +99,7 @@ export function HowToPlay({ view }: { view: PhoneView }) {
       </div>
 
       {view.goalTitle ? (
-        <>
-          <span className="plabel">YOUR SECRET GOAL · NOBODY ELSE SEES THIS</span>
-          <div className="bubble">
-            <div className="bubble__lead">{view.goalTitle}</div>
-            <p className="bubble__text">{view.goalDesc}</p>
-            <p className="bubble__text">This only counts if the country reaches all 3 targets too.</p>
-          </div>
-        </>
+        <p className="pnote">Your secret goal only counts if the country reaches all 3 targets.</p>
       ) : null}
 
       <span className="plabel">HOW A ROUND GOES</span>

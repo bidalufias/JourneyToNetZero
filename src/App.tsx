@@ -14,7 +14,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { ROLES, type Role } from './engine/types'
 import type { Command } from './game/room'
 import type { DashboardView, PhoneView } from './game/session'
-import { ROLE_CHARACTER, ROLE_LABEL } from './game/session'
+import { ROLE_LABEL } from './game/session'
+import { RoleCard } from './ui/RoleCard'
 import type { Endgame } from './game/room'
 import { createTransport } from './net'
 import type { ConnectionState, DeniedSnapshot, Snapshot, Transport } from './net/transport'
@@ -275,15 +276,12 @@ function PhoneSurface({
   const view = snapshot.view as PhoneView
 
   if (!view.name) {
-    const c = ROLE_CHARACTER[role]
     return (
       <div className="phone" data-role={role} data-skin="role">
         <div className="pbody">
-          <span className="plabel">{c.org.toUpperCase()}</span>
-          <h1 className="pheading">Take a seat</h1>
-          <p className="ptext">
-            You are the <strong>{c.title}</strong>.
-          </p>
+          <span className="plabel">TAKE A SEAT</span>
+          <h1 className="pheading">This is your seat.</h1>
+          <RoleCard role={role} lines="seat" />
           <span className="plabel">YOUR NAME</span>
           <input
             className="field"
@@ -497,12 +495,8 @@ function Home({
         <>
           <span className="plabel">TAKE A SEAT</span>
           {ROLES.map((r) => (
-            <button
-              key={r}
-              className="btn btn--ghost"
-              onClick={() => go(`/play?room=${code}&seat=${r}`)}
-            >
-              <RoleGlyph role={r} size={14} /> {ROLE_LABEL[r]} · {ROLE_CHARACTER[r].title}
+            <button key={r} className="seatpick" onClick={() => go(`/play?room=${code}&seat=${r}`)}>
+              <RoleCard role={r} lines="seat" />
             </button>
           ))}
         </>

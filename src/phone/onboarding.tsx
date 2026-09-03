@@ -12,7 +12,7 @@
  */
 import type { Command } from '../game/room'
 import type { PhoneView } from '../game/session'
-import { ROLE_CHARACTER } from '../game/session'
+import { RoleCard } from '../ui/RoleCard'
 import { TheChoice } from './TheChoice'
 import { TableActions } from './TableActions'
 
@@ -73,16 +73,11 @@ export function PracticeChoice({
  * the other three are not being asked to absorb anything while this is on screen.
  */
 export function YourPower({ view }: { view: PhoneView }) {
-  const c = ROLE_CHARACTER[view.role]
   return (
     <div className="pbody">
       <Coach step={3} of={4}>This is your special power. Each player has a different one.</Coach>
 
-      <span className="plabel">WHAT YOU CAN DO</span>
-      <h1 className="pheading">{c.yourMove}</h1>
-
-      <span className="plabel">HOW IT WORKS</span>
-      <p className="ptext">{c.resourcePower}</p>
+      <RoleCard role={view.role} size="big" lines="power" />
 
       {/* No button. The room moves on together, on the facilitator's cue, and a
           button that only dismissed this player's screen would have them

@@ -383,125 +383,131 @@ export const ROLE_LABEL: Record<Role, string> = {
  *
  * Nothing here is gendered. The archetype is played by whoever takes it.
  */
-export interface RoleCharacter {
+export interface RoleCard {
   /** The archetype, without its article. */
   title: string
   org: string
-  post: string
-  /** One line, for the places that only have room for one. */
-  blurb: string
 
-  /* The three lines. Everything a player needs to open their mouth in Round 1. */
-  youAre: string
-  youWant: string
-  yourMove: string
-
-  /* The full profile, behind a tap. Nobody has to read this to play. */
-  whoYouAre: string
-  believe: string
-  afraidOf: string
-  /** What this seat does with the one thing it holds, in the shape of a power card. */
-  resourcePower: string
-  /** Three things this character would say at the table. */
-  says: string[]
-  /** And the one they never would. */
-  neverSay: string
+  /*
+   * The card. Four lines under four fixed headings, in this order, on every
+   * surface: who you are, what you want, what you have, how to play. Seventy
+   * words or fewer between them, and the same words wherever the card shows.
+   */
+  who: string
+  wants: string
+  /** The seat's money or power, with the number. */
+  has: string
+  /** Three short instructions. The line the old role screens never had. */
+  howToPlay: string
+  /** Two lines a shy player can open their mouth with. Behind a tap, never on the card. */
+  says: [string, string]
 }
 
 /**
- * The role screen used to stack nine labelled sections and about 450 words, in
- * front of a player who had ninety seconds and had never seen the game. Now the
- * first three lines are the whole brief and the rest is optional.
- *
- * Nothing here is gendered. The archetype is played by whoever takes it.
+ * A player used to learn their role from five screens, at five moments, under
+ * five sets of headings, and around 250 words. Now it is one card of about
+ * sixty words, shown in the same shape at every moment the player needs it.
  */
-export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
+export const ROLE_CARD: Record<Role, RoleCard> = {
   government: {
     title: 'Minister',
     org: 'Ministry of Energy and Climate',
+    who: 'The Minister. You run the government.',
+    wants: 'A growing economy, and to stay in power.',
+    has: 'Budget: 4. You get 2 more each round. Cards cost 1 to 3 Budget.',
+    howToPlay:
+      'Spend on big changes. Give Budget to the Business when a deal is worth it. Always ask what the voters get.',
+    says: [
+      'I can pay for that. What do I tell the voters?',
+      'If I do that, I lose the election. Then nothing happens.',
+    ],
+  },
+  business: {
+    title: 'Company Boss',
+    org: 'Sawit Prima Group',
+    who: 'The Company Boss. You own the biggest company in the country.',
+    wants: 'Profit, and a company that still exists in 2050.',
+    has: 'Company Money: 5. You get 1 more each round. Going clean costs 3.',
+    howToPlay:
+      'Go clean when someone helps you pay. Ask the Government to pay half. Protect your workers’ jobs.',
+    says: ['I will do it if the Government pays half.', 'Who pays to retrain my workers?'],
+  },
+  community: {
+    title: 'Community Leader',
+    org: 'Kampung Baru Jernih residents',
+    who: 'The Community Leader. You speak for 34 million ordinary people.',
+    wants: 'Clean air, and prices people can afford.',
+    has: '2 vetoes. A veto takes one player’s dirty cards away for one round.',
+    howToPlay:
+      'Ask what each plan costs ordinary people. Remind players what they promised. Use a veto when someone is about to hurt everyone.',
+    says: [
+      'Explain it to me like I have to pay for it. Because I do.',
+      'You promised this last time. What happened?',
+    ],
+  },
+  activist: {
+    title: 'Youth Activist',
+    org: 'Bangkit Iklim',
+    who: 'The Youth Activist. You lead the biggest movement in the country.',
+    wants: 'Real climate action, fast.',
+    has: '3 Spotlights. A Spotlight punishes a player who picks a dirty card.',
+    howToPlay:
+      'Push everyone to pick clean cards. Offer deals: “I will support you if you go clean”. Use a Spotlight when you think someone will pick a dirty card.',
+    says: [
+      'That is not a plan. That is a press release.',
+      'I will support you in public if you promise in public.',
+    ],
+  },
+}
+
+/**
+ * Everything the card does not carry. Read by the facilitator's script and
+ * nowhere else: a host can read it aloud when a table wants colour, and a
+ * player never has to.
+ */
+export interface Backstory {
+  post: string
+  whoYouAre: string
+  believe: string
+  afraidOf: string
+  neverSay: string
+}
+
+export const BACKSTORY: Record<Role, Backstory> = {
+  government: {
     post: 'Minister for Energy and Climate',
-    blurb: 'You hold the country’s money and the power to make law.',
-    youAre: 'The Minister. You hold the national Budget and the power to make law.',
-    youWant: 'A growing economy, and to still be Minister in 2050.',
-    yourMove: 'Spend Budget to change the country. Or give Budget away so someone else can act.',
     whoYouAre:
       'Twenty-four years in the civil service, then politics. Half your voters work on plantations. The other half commute into the city.',
     believe:
       'The change has to happen. Only you can pay for it. But a government that loses an election changes nothing.',
     afraidOf: 'Being the Minister who made petrol expensive.',
-    resourcePower:
-      'You spend Budget to change the country. You get 2 more each round. Big cards cost 2 or 3, so save up. You can also give Budget to the Business. Or pay half of a partnership.',
-    says: [
-      'I can fund that. What do I tell the people who voted for me?',
-      'Give me a public reason, and I will spend it.',
-      'If I do that, I lose the election. Then nothing happens.',
-    ],
     neverSay: 'Money does not matter.',
   },
   business: {
-    title: 'Company Boss',
-    org: 'Sawit Prima Group',
     post: 'Group CEO, Sawit Prima',
-    blurb: 'You own most of the pollution. You also own most of the jobs.',
-    youAre: 'The Company Boss. You own most of the country’s pollution, and most of its jobs.',
-    youWant: 'Profit, and not to go clean too early and lose money.',
-    yourMove: 'Spend Company Money to go clean. Or get someone else to pay half.',
     whoYouAre:
       'Third generation. You took over at 41. Forty thousand staff. You have read every big climate report.',
     believe:
       'You will go clean when it is cheaper than staying dirty. Or when someone makes dirty expensive. You think that is honest, not evil.',
     afraidOf: 'Being the boss who went clean too early and lost money.',
-    resourcePower:
-      'You spend Company Money to go clean. You get 1 more each round. Going clean costs 3. It is the biggest carbon cut in the game. A partnership costs 1. It only works fully if the Government pays half.',
-    says: [
-      'I will do it if the Government pays half.',
-      'That is a ten-year investment and I am judged every quarter.',
-      'You want me to cut thirty percent? Fine. Who pays for the retraining?',
-    ],
     neverSay: 'Profit does not matter here.',
   },
   community: {
-    title: 'Community Leader',
-    org: 'Kampung Baru Jernih residents',
     post: 'Food stall owner, head of the residents’ association',
-    blurb: 'You speak for 34 million people. They want clean air and prices they can afford.',
-    youAre: 'The Community Leader. You speak for 34 million people.',
-    youWant: 'Clean air and prices people can afford. You are tired of being told to pick one.',
-    yourMove: 'Make them earn your support in public. Twice a game you can veto a player.',
     whoYouAre:
       'You run a food stall and head the residents’ association. Your stall has flooded three times in eight years. Your child has asthma.',
     believe:
       'Clean air and affordable petrol are both reasonable things to want. You have heard many promises. You remember all of them.',
     afraidOf: 'Being asked to sacrifice again by people who will not have to.',
-    resourcePower:
-      'Twice a game you can veto a player. A veto takes their dirty cards away for one round. Everyone will know it was you. You also watch Public Trust. The people give 2 points each round to whoever helped them most.',
-    says: [
-      'Explain it to me like I have to pay for it. Because I do.',
-      'You promised us this last time. What happened?',
-      'We will accept it. But you go first.',
-    ],
     neverSay: 'Whatever you think is best.',
   },
   activist: {
-    title: 'Youth Activist',
-    org: 'Bangkit Iklim',
     post: 'Founder, Bangkit Iklim',
-    blurb: 'You can make ignoring you expensive. Three times, and only three.',
-    youAre: 'The Youth Activist. You have no money, and the biggest movement in the country.',
-    youWant: 'Real change, fast. And never to sign something that changes nothing.',
-    yourMove: 'Name one player in public. Three times a game. It only works if you also pick a protest card.',
     whoYouAre:
       'Law degree, no job in law. You ran the first climate strike here at nineteen. Four hundred people came. Last year ninety thousand came.',
     believe:
       'The science is not up for debate. The deadline is not a preference. Everyone in this room will be fine. That is the problem.',
     afraidOf: 'Sitting in a nice room, signing something, and changing nothing.',
-    resourcePower:
-      'Three times a game, you name one player. If they pick a dirty card that round, it only half works. They also lose Public Trust. Your Spotlight only works if you also pick a protest card.',
-    says: [
-      'That is not a plan, that is a press release.',
-      'I will support you in public if you promise in public.',
-      'Everyone in this room will be fine. That is the problem.',
-    ],
     neverSay: 'Let us talk about it next year.',
   },
 }

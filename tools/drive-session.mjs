@@ -75,7 +75,7 @@ for (const [i, role] of ROLES.entries()) {
   await shot(p, `phone-role-reveal-${role}`)
   await shot(p, `phone-role-reveal-${role}-full`, true)
   if (i === 0) {
-    await p.getByRole('button', { name: 'READ MORE' }).click(); await wait(200)
+    await p.getByRole('button', { name: 'TWO LINES YOU CAN SAY' }).click(); await wait(200)
     await shot(p, `phone-role-reveal-${role}-more-full`, true)
   }
   await p.getByRole('button', { name: 'I AM READY' }).click()

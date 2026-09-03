@@ -819,6 +819,15 @@
   letter-spacing: 0.1em;
 }
 
+/* The power step: four cards side by side, so every player learns what the
+   other three can do to them. */
+.onboard__cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  min-height: 0;
+}
+
 .onboard__cue {
   margin-top: var(--space-6);
   border-left: 4px solid var(--jtnz-meter-green);

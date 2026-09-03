@@ -21,6 +21,8 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import { ROLES } from '../src/engine/types'
+import { ROLE_CARD } from '../src/game/session'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const SRC = join(root, 'src')
@@ -198,6 +200,36 @@ describe('the words on every screen', () => {
   })
 })
 
+// ── The role card ─────────────────────────────────────────────────────────
+
+/**
+ * The card is seventy words or fewer, so a player reads it several times
+ * instead of reading two hundred and fifty words once. Every card carries the
+ * same four lines, and the twelve goals fit on its fifth line.
+ */
+describe('the role card', () => {
+  it('keeps every card to seventy words', () => {
+    for (const role of ROLES) {
+      const c = ROLE_CARD[role]
+      const total = words(`${c.who} ${c.wants} ${c.has} ${c.howToPlay}`)
+      expect(total, role).toBeLessThanOrEqual(70)
+      expect(c.says).toHaveLength(2)
+    }
+  })
+
+  it('writes every goal in twelve words or fewer, without Mt', () => {
+    const raw = readFileSync(join(root, 'content/jtnz-content-pack-v2.json'), 'utf8')
+    const pack = JSON.parse(raw) as { privateGoals: Record<string, { title: string; desc: string }[]> }
+    for (const goals of Object.values(pack.privateGoals)) {
+      expect(goals).toHaveLength(3)
+      for (const g of goals) {
+        expect(tooLong(g.desc, PHONE_WORDS), g.title).toEqual([])
+        expect(banned(g.desc), g.title).toEqual([])
+      }
+    }
+  })
+})
+
 // ── The content pack ──────────────────────────────────────────────────────
 
 /**
@@ -241,8 +273,8 @@ describe('the words in the content pack', () => {
    * WP5 lowers them and the final pass sets both to zero. A change that
    * raises either is a change that added an idiom or a long sentence.
    */
-  const BANNED_TODAY = 44
-  const LONG_TODAY = 40
+  const BANNED_TODAY = 36
+  const LONG_TODAY = 39
 
   it('uses no more banned words than it did', () => {
     const hits = texts.flatMap((t) => banned(t.text).map((term) => `${t.path}: "${t.text}" (${term})`))

@@ -230,21 +230,21 @@
    {
     "id": "G-a",
     "title": "Landslide",
-    "desc": "End the game holding 6 or more Public Trust.",
+    "desc": "Finish with 6 or more Public Trust.",
     "check": "trust.government >= 6",
     "measured": 0.414
    },
    {
     "id": "G-b",
     "title": "Steady Hand",
-    "desc": "Growth never falls below 4.0% in any round.",
+    "desc": "The economy never grows less than 4% in any round.",
     "check": "min(gdpHistory) >= 4.0",
     "measured": 0.442
    },
    {
     "id": "G-c",
     "title": "The Legacy",
-    "desc": "Clean Economy reaches 55% or more.",
+    "desc": "Clean Economy reaches 55%. It is 10% today.",
     "check": "greenShare >= 55",
     "measured": 0.289
    }
@@ -252,22 +252,22 @@
   "business": [
    {
     "id": "B-a",
-    "title": "Market Dominance",
-    "desc": "End with 6 or more Company Money.",
+    "title": "Market Leader",
+    "desc": "Finish with 6 or more Company Money.",
     "check": "capital >= 6",
     "measured": 0.391
    },
    {
     "id": "B-b",
     "title": "Green Champion",
-    "desc": "Personally deliver 33 Mt or more of cuts.",
+    "desc": "Your own cards cut 33 million tonnes of carbon or more.",
     "check": "playerEmissions.business <= -33",
     "measured": 0.414
    },
    {
     "id": "B-c",
-    "title": "Licence to Operate",
-    "desc": "End with 2+ Public Trust and 4+ Company Money.",
+    "title": "Trusted Company",
+    "desc": "Finish with at least 2 Public Trust and 4 Company Money.",
     "check": "trust.business >= 2 && capital >= 4",
     "measured": 0.338
    }
@@ -276,21 +276,21 @@
    {
     "id": "C-a",
     "title": "A Happy Nation",
-    "desc": "Quality of life ends at 8.0 or above.",
+    "desc": "Quality of life reaches 8. It is 6 today.",
     "check": "happiness >= 8.0",
     "measured": 0.374
    },
    {
     "id": "C-b",
     "title": "Nobody Left Behind",
-    "desc": "Quality of life never drops below 6.3 in any round.",
+    "desc": "Quality of life never falls below 6.3.",
     "check": "min(happinessHistory) >= 6.3",
     "measured": 0.35
    },
    {
     "id": "C-c",
-    "title": "Our Own Two Hands",
-    "desc": "Land 4 or more successful community-led actions.",
+    "title": "Our Own Hands",
+    "desc": "4 of your community cards get help from the Government or Business.",
     "check": "selfOrganiseSucceeded >= 4",
     "measured": 0.465
    }
@@ -299,21 +299,21 @@
    {
     "id": "A-a",
     "title": "No Compromise",
-    "desc": "Never take a Collaborate card, and still take the country 25 Mt past net zero.",
+    "desc": "Never pick a “join them” card. Carbon still reaches 25 million tonnes below zero.",
     "check": "!flags.COMPROMISED && emissions <= -25",
     "measured": 0.401
    },
    {
     "id": "A-b",
     "title": "The Long Game",
-    "desc": "Clean Economy reaches 52% or more.",
+    "desc": "Clean Economy reaches 52%. It is 10% today.",
     "check": "greenShare >= 52",
     "measured": 0.439
    },
    {
     "id": "A-c",
     "title": "Justice First",
-    "desc": "Quality of life 7.0+ and at least one Spotlight lands.",
+    "desc": "Quality of life reaches 7, and one of your Spotlights catches someone.",
     "check": "happiness >= 7.0 && spotlightHits >= 1",
     "measured": 0.238
    }

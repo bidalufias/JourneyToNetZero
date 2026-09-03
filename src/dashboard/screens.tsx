@@ -8,6 +8,7 @@ import { ROLE_LABEL } from '../game/session'
 import { STEP_LABEL } from '../game/vocab'
 import type { Endgame } from '../game/room'
 import { RoleGlyph } from '../ui/primitives'
+import { RoleCard } from '../ui/RoleCard'
 import { JoinPanel } from './Join'
 
 /**
@@ -180,8 +181,8 @@ export function Onboarding({ view, clock }: { view: DashboardView; clock: string
     power: {
       step: STEP_LABEL.power,
       heading: 'Each of you can do one thing the others cannot.',
-      body: 'Read your own phone. Nobody else has the power you are reading about.',
-      cue: 'Say: the Activist has Spotlights. The Community has vetoes. Read your own screen.',
+      body: 'Your phone shows your own card. This screen shows all four.',
+      cue: 'Say: read your own phone. Then look up and see what the other three can do to you.',
     },
     goal: {
       step: STEP_LABEL.goal,
@@ -214,6 +215,13 @@ export function Onboarding({ view, clock }: { view: DashboardView; clock: string
           <p className="onboard__body">{s.body}</p>
           {ready ? <p className="onboard__ready">{ready}</p> : null}
         </div>
+        {view.phase === 'power' ? (
+          <div className="onboard__cards">
+            {view.seats.map((seat) => (
+              <RoleCard key={seat.role} role={seat.role} size="tile" lines="power" name={seat.name} />
+            ))}
+          </div>
+        ) : null}
         <p className="onboard__cue">
           <span className="onboard__cue-label">SAY THIS</span>
           {s.cue}

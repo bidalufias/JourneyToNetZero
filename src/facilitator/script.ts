@@ -25,7 +25,8 @@
  * `JOURNEY-TO-NET-ZERO-design.md`. The timings are read from `PHASE_MS` rather
  * than retyped, so a phase that is retuned cannot leave this page lying.
  */
-import { PHASE_MS, type Phase } from '../game/session'
+import { ROLES, type Role } from '../engine/types'
+import { BACKSTORY, PHASE_MS, ROLE_CARD, type Phase } from '../game/session'
 
 const seconds = (phase: Phase) => `${Math.round(PHASE_MS[phase] / 1000)} seconds`
 
@@ -59,7 +60,7 @@ export const BEATS: Beat[] = [
     say: [
       'Good evening, and welcome to the Republic of Semenanjara! Thirty-four million people, one very warm peninsula, and, as of tonight, four of you in charge of the whole thing.',
       'Phones out. Point your camera at the code on that screen, or type those four letters in. Then take a seat: Government, Business, Community, Activist. First come, first served.',
-      'While the rest of them are joining, read your character. Name, job, what they want, what they are frightened of. You are going to be that person for the next half hour, and I promise you it is a great deal more fun if you commit to it.',
+      'While the rest of them are joining, read your card. Four lines: who you are, what you want, what you have, how to play. You are going to be that person for the next half hour, and I promise you it is a great deal more fun if you commit to it.',
       'And one warning before we begin. Not one of you can do this alone. That is not a hint. That is the entire design of the game.',
     ],
     watch:
@@ -115,9 +116,9 @@ export const BEATS: Beat[] = [
     phase: 'power',
     label: 'WHAT EACH OF YOU CAN DO',
     length: seconds('power'),
-    onScreen: 'One line saying that each seat holds something the others do not.',
+    onScreen: 'All four role cards side by side, showing what each seat has and how to play it.',
     say: [
-      'One more thing, and this one is different for each of you. Read your own phone, because nobody else has what you are looking at.',
+      'One more thing, and this one is different for each of you. Read your own phone, then look up: all four cards are on the screen, so you can see what the other three can do to you.',
       'Activist, you have three Spotlights. Community, you have two vetoes. Minister and Company Boss, you have money, and you are the only two who do.',
     ],
     watch:
@@ -292,6 +293,32 @@ export const MOMENTS: Moment[] = [
 ]
 
 /** Ten minutes, in this order, in plain English rather than in character. */
+/**
+ * The four characters, for a table that wants colour.
+ *
+ * None of this is on a phone any more. The card a player reads is sixty words
+ * and says who they are, what they want, what they have and how to play; the
+ * backstory lives here so the host can read it aloud when it would help, and
+ * a player never has to.
+ */
+export interface Character {
+  role: Role
+  title: string
+  org: string
+  post: string
+  whoYouAre: string
+  believe: string
+  afraidOf: string
+  neverSay: string
+}
+
+export const CHARACTERS: Character[] = ROLES.map((role) => ({
+  role,
+  title: ROLE_CARD[role].title,
+  org: ROLE_CARD[role].org,
+  ...BACKSTORY[role],
+}))
+
 export const DEBRIEF: string[] = [
   'Who did you need most in there, and did you ever actually tell them?',
   'What is the one thing you gave up?',
