@@ -82,14 +82,34 @@ export const PRACTICE_LINE: Record<Role, string> = {
  * the big screen as "The Community wants the Government to pay first". It
  * used to be a clause of its own ("the Government pays its share"), which was
  * not grammatical after "wants".
+ *
+ * `you` is the same request before a player has said who it is for. The
+ * sheet offers the six sentences first and the three players second: six
+ * buttons and then three, where it used to be eighteen in one list.
  */
-export const DEMAND_PHRASES: { id: string; text: (target: string) => string }[] = [
-  { id: 'pay-first', text: (t) => `the ${t} to pay first` },
-  { id: 'no-dirty', text: (t) => `the ${t} not to pick a dirty card` },
-  { id: 'go-public', text: (t) => `the ${t} to tell us its card` },
-  { id: 'co-fund', text: (t) => `the ${t} to pay half of the partnership` },
-  { id: 'protect-jobs', text: (t) => `the ${t} to promise no job cuts` },
-  { id: 'no-more-delay', text: (t) => `the ${t} to stop waiting for others` },
+export const DEMAND_PHRASES: { id: string; you: string; text: (target: string) => string }[] = [
+  { id: 'pay-first', you: 'I want you to pay first.', text: (t) => `the ${t} to pay first` },
+  {
+    id: 'no-dirty',
+    you: 'I want you not to pick a dirty card.',
+    text: (t) => `the ${t} not to pick a dirty card`,
+  },
+  { id: 'go-public', you: 'I want you to tell us your card.', text: (t) => `the ${t} to tell us its card` },
+  {
+    id: 'co-fund',
+    you: 'I want you to pay half of the partnership.',
+    text: (t) => `the ${t} to pay half of the partnership`,
+  },
+  {
+    id: 'protect-jobs',
+    you: 'I want you to promise no job cuts.',
+    text: (t) => `the ${t} to promise no job cuts`,
+  },
+  {
+    id: 'no-more-delay',
+    you: 'I want you to stop waiting for others.',
+    text: (t) => `the ${t} to stop waiting for others`,
+  },
 ]
 
 /**

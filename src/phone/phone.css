@@ -212,10 +212,12 @@ a.btn {
   flex-direction: column;
   align-items: stretch;
   width: 100%;
-  min-height: 132px;
+  min-height: 120px;
   background: #fff;
   border: var(--rule) solid var(--color-text);
-  padding: var(--space-4);
+  /* Tight enough that three cards, the heading and the lock button fit above
+     the fold on a 390 by 844 phone with the coach strip showing. */
+  padding: var(--space-3) var(--space-4);
   text-align: left;
   cursor: pointer;
   position: relative;
@@ -252,7 +254,7 @@ a.btn {
 
 .ocard--selected .ocard__cost { border-color: var(--skin-mark); color: var(--skin-mark); }
 
-.ocard__desc { display: block; margin-top: var(--space-2); font: 400 14px/1.4 var(--font-body); }
+.ocard__desc { display: block; margin-top: var(--space-1); font: 400 14px/1.35 var(--font-body); }
 
 /*
  * The four impact chips: which way this card pushes each meter, and roughly how
@@ -266,9 +268,9 @@ a.btn {
   display: grid;
   grid-template-columns: 1fr 1fr;
   column-gap: var(--space-4);
-  row-gap: 2px;
+  row-gap: 0;
   margin-top: auto;
-  padding-top: var(--space-3);
+  padding-top: var(--space-2);
   border-top: var(--rule) solid color-mix(in srgb, currentColor 22%, transparent);
 }
 
@@ -597,6 +599,11 @@ a.btn {
 .nation__label { display: block; font: 700 8px/1.2 var(--font-mono); letter-spacing: 0.1em; opacity: 0.6; }
 .nation__value { display: block; font: 800 15px/1.2 var(--font-heading); }
 .nation__value--met { color: var(--jtnz-meter-green); }
+
+/* During the Choice: the same three numbers on one short line. */
+.nation--folded .nation__cell { padding: 3px var(--space-2); display: flex; justify-content: center; align-items: baseline; gap: 5px; }
+.nation--folded .nation__label { font-size: 7px; }
+.nation--folded .nation__value { font-size: 12px; }
 
 /* ── Short screens ──────────────────────────────────────────────────── */
 

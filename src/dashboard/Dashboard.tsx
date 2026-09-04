@@ -87,10 +87,12 @@ export function Dashboard({
     return <Attract view={view} onShowQr={onShowQr} onOpenScript={onOpenScript} />
   }
   if (view.phase === 'briefing') return <Briefing view={view} clock={clock} />
-  // The onboarding owns the whole screen, the way the briefing does. Rendered
-  // inside the meters column it overflowed, and put the one line the person
-  // running the room needs to read behind the pause and next buttons.
-  if (view.phase === 'practiceChoice' || view.phase === 'power' || view.phase === 'goal') {
+  // The power and goal steps own the whole screen, the way the briefing does.
+  // Rendered inside the meters column they overflowed, and put the one line
+  // the person running the room needs to read behind the pause and next
+  // buttons. The practice choice stays on the board below, because it is the
+  // second half of the practice and should look like the first.
+  if (view.phase === 'power' || view.phase === 'goal') {
     return <Onboarding view={view} clock={clock} />
   }
   // Two names, fifteen seconds, its own screen. Rendered beside the meters it
@@ -105,7 +107,10 @@ export function Dashboard({
       <Masthead view={view} clock={clock} urgent={!view.paused && (remaining ?? 1e9) < 10_000} />
       <div className="dash__body">
         <TheNation view={view} />
-        {view.phase === 'table' || view.phase === 'choice' || view.phase === 'practiceTalk' ? (
+        {view.phase === 'table' ||
+        view.phase === 'choice' ||
+        view.phase === 'practiceTalk' ||
+        view.phase === 'practiceChoice' ? (
           <TheTable view={view} />
         ) : null}
 
@@ -142,6 +147,11 @@ function Masthead({
       <div className="dash__masthead-right">
         {/* No round before the first crisis. The step name carries the line. */}
         {view.round > 0 ? <span>ROUND {view.round} OF 6</span> : null}
+        {/* The practice choice ends on the fourth lock, so the count is the
+            one number the facilitator is watching. */}
+        {view.phase === 'practiceChoice' ? (
+          <span>{view.seats.filter((x) => x.locked).length} OF 4 LOCKED</span>
+        ) : null}
         <span>{STEP_LABEL[view.phase] ?? ''}</span>
         {clock ? (
           <span
@@ -213,7 +223,7 @@ function TheNation({ view }: { view: DashboardView }) {
 }
 
 function LockRow({ view }: { view: DashboardView }) {
-  const showLocks = view.phase === 'choice' || view.phase === 'table'
+  const showLocks = view.phase === 'choice' || view.phase === 'table' || view.phase === 'practiceChoice'
   return (
     <div className="locks">
       {view.seats.map((seat) => {

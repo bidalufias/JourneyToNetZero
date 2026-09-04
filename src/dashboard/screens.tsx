@@ -144,7 +144,11 @@ export function Briefing({ view, clock }: { view: DashboardView; clock: string |
               from: `${s.emissions.toFixed(0)} million tonnes today`,
               target: 'DOWN TO NET ZERO',
             },
-            { label: 'ECONOMY', from: `${s.growth.toFixed(1)}% today`, target: 'GROWING 5% A YEAR' },
+            {
+              label: 'ECONOMY',
+              from: `${s.growth.toFixed(1)}% today`,
+              target: 'GROWING 5% A YEAR ON AVERAGE',
+            },
             { label: 'QUALITY OF LIFE', from: `${s.happiness.toFixed(1)} today`, target: 'UP TO 7 OUT OF 10' },
           ].map((t) => (
             <div key={t.label} className="brief__target">
@@ -168,21 +172,17 @@ export function Briefing({ view, clock }: { view: DashboardView; clock: string |
 }
 
 /**
- * The onboarding, on the shared screen.
+ * The two onboarding steps that own the shared screen: the power and the goal.
  *
- * Every step is a single instruction, sized for the back of the room, plus one
- * line of direction for the person running it. There is always a facilitator,
- * and the board's job is to tell them what happens next without making them
- * look away from the table.
+ * Each is a single instruction, sized for the back of the room, plus one line
+ * of direction for the person running it. There is always a facilitator, and
+ * the board's job is to tell them what happens next without making them look
+ * away from the table. The practice choice is not here: it shows the same
+ * board as the practice talk, so the two halves of the practice look alike
+ * and neither looks like a live round.
  */
 export function Onboarding({ view, clock }: { view: DashboardView; clock: string | null }) {
   const steps: Record<string, { step: string; heading: string; body: string; cue: string }> = {
-    practiceChoice: {
-      step: STEP_LABEL.practiceChoice,
-      heading: 'Pick a card.',
-      body: 'Tap one card. Then tap LOCK MY CARD. The arrows show what the card does to the country. This does not count.',
-      cue: 'Say: this is practice. Tap a card, lock it, then look up here.',
-    },
     power: {
       step: STEP_LABEL.power,
       heading: 'Each of you can do one thing the others cannot.',
@@ -199,17 +199,14 @@ export function Onboarding({ view, clock }: { view: DashboardView; clock: string
   const s = steps[view.phase]
   if (!s) return null
 
-  // Every step prints how many of the four have done it, because every step
-  // now ends when the fourth one does, and the clock is only the fallback.
-  const locked = view.seats.filter((x) => x.locked).length
+  // Both steps print how many of the four have done it, because both end when
+  // the fourth one does, and the clock is only the fallback.
   const ready =
-    view.phase === 'practiceChoice'
-      ? `${locked} OF 4 LOCKED`
-      : view.phase === 'power'
-        ? `${view.readyCount} OF 4 READY`
-        : view.phase === 'goal'
-          ? `${view.sealedCount} OF 4 CHOSEN`
-          : null
+    view.phase === 'power'
+      ? `${view.readyCount} OF 4 READY`
+      : view.phase === 'goal'
+        ? `${view.sealedCount} OF 4 CHOSEN`
+        : null
 
   return (
     <div className="dash">

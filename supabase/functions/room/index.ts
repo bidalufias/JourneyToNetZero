@@ -572,12 +572,28 @@ var PRACTICE_LINE = {
   activist: "This is practice. Say anything. Try a deal: I will support you if you go clean."
 };
 var DEMAND_PHRASES = [
-  { id: "pay-first", text: (t) => `the ${t} to pay first` },
-  { id: "no-dirty", text: (t) => `the ${t} not to pick a dirty card` },
-  { id: "go-public", text: (t) => `the ${t} to tell us its card` },
-  { id: "co-fund", text: (t) => `the ${t} to pay half of the partnership` },
-  { id: "protect-jobs", text: (t) => `the ${t} to promise no job cuts` },
-  { id: "no-more-delay", text: (t) => `the ${t} to stop waiting for others` }
+  { id: "pay-first", you: "I want you to pay first.", text: (t) => `the ${t} to pay first` },
+  {
+    id: "no-dirty",
+    you: "I want you not to pick a dirty card.",
+    text: (t) => `the ${t} not to pick a dirty card`
+  },
+  { id: "go-public", you: "I want you to tell us your card.", text: (t) => `the ${t} to tell us its card` },
+  {
+    id: "co-fund",
+    you: "I want you to pay half of the partnership.",
+    text: (t) => `the ${t} to pay half of the partnership`
+  },
+  {
+    id: "protect-jobs",
+    you: "I want you to promise no job cuts.",
+    text: (t) => `the ${t} to promise no job cuts`
+  },
+  {
+    id: "no-more-delay",
+    you: "I want you to stop waiting for others.",
+    text: (t) => `the ${t} to stop waiting for others`
+  }
 ];
 var DEAL_CONDITIONS = [
   {

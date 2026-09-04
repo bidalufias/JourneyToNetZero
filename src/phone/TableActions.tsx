@@ -246,6 +246,11 @@ function ActionSheet({
  * position, then trade, then push. The deal is second rather than last because
  * it is the sentence the whole game is built to provoke, and a player scrolling
  * for it will not find it in ninety seconds.
+ *
+ * The request is built the same way as the deal: the sentence first, then who
+ * it is for. Six buttons and then three. It used to be one list of eighteen,
+ * every sentence repeated for each of the other three players, and a player
+ * with seventy-five seconds could not read it.
  */
 function SaySheet({
   view,
@@ -257,7 +262,9 @@ function SaySheet({
   onClose: () => void
 }) {
   const [shape, setShape] = useState<SayShape | null>(null)
+  const [phraseId, setPhraseId] = useState<string | null>(null)
   const others = ROLES.filter((r) => r !== view.role)
+  const phrase = DEMAND_PHRASES.find((p) => p.id === phraseId)
 
   if (shape === null) {
     return (
@@ -324,29 +331,42 @@ function SaySheet({
 
   if (shape === 'deal') return <DealSheet view={view} send={send} onClose={onClose} onBack={() => setShape(null)} />
 
+  if (!phrase) {
+    return (
+      <>
+        <p className="pnote">
+          This is a request. They do not have to do it. Everyone sees you ask.
+        </p>
+        <span className="plabel">WHAT DO YOU WANT</span>
+        {DEMAND_PHRASES.map((p) => (
+          <button key={p.id} className="btn btn--ghost" onClick={() => setPhraseId(p.id)}>
+            {p.you}
+          </button>
+        ))}
+        <button className="btn" onClick={() => setShape(null)}>
+          BACK
+        </button>
+      </>
+    )
+  }
+
   return (
     <>
-      <p className="pnote">
-        This is a request. They do not have to do it. Everyone sees you ask.
-      </p>
+      <p className="ptext">“{phrase.you}”</p>
+      <span className="plabel">SAY IT TO</span>
       {others.map((target) => (
-        <div key={target}>
-          <span className="plabel">{ROLE_LABEL[target].toUpperCase()}</span>
-          {DEMAND_PHRASES.map((phrase) => (
-            <button
-              key={`${target}-${phrase.id}`}
-              className="btn btn--ghost"
-              onClick={() => {
-                send({ t: 'say', role: view.role, shape: 'demand', target, phraseId: phrase.id })
-                onClose()
-              }}
-            >
-              I want {phrase.text(ROLE_LABEL[target])}.
-            </button>
-          ))}
-        </div>
+        <button
+          key={target}
+          className="btn btn--ghost"
+          onClick={() => {
+            send({ t: 'say', role: view.role, shape: 'demand', target, phraseId: phrase.id })
+            onClose()
+          }}
+        >
+          <RoleGlyph role={target} size={14} /> {ROLE_LABEL[target]}
+        </button>
       ))}
-      <button className="btn" onClick={() => setShape(null)}>
+      <button className="btn" onClick={() => setPhraseId(null)}>
         BACK
       </button>
     </>

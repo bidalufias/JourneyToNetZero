@@ -81,7 +81,8 @@ function useBottomInset(phase: Phase): number {
   useEffect(() => {
     const measure = () => {
       let top = window.innerHeight
-      const revealUp = document.querySelector('.dash .reckoning') !== null
+      // The strip of meters exists only while the Reveal overlay is up.
+      const revealUp = document.querySelector(REVEAL_FURNITURE) !== null
       for (const el of document.querySelectorAll(revealUp ? REVEAL_FURNITURE : BOTTOM_FURNITURE)) {
         const box = el.getBoundingClientRect()
         if (box.height > 0) top = Math.min(top, box.top)

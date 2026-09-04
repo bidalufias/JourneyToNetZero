@@ -142,8 +142,13 @@ function Nation({ view }: { view: PhoneView }) {
     { label: 'ECONOMY', value: `${n.economy.toFixed(1)}%`, met: n.economy >= n.targets.economy },
     { label: 'QUALITY OF LIFE', value: n.life.toFixed(1), met: n.life >= n.targets.life },
   ]
+  // Folded to one line while a card is being chosen. Three cards and the lock
+  // button have to fit above the fold on a small phone, and the arrows on the
+  // cards are saying what the numbers say here, so the bar gives up its height
+  // for those forty seconds and keeps its three numbers.
+  const folded = view.phase === 'choice' || view.phase === 'practiceChoice'
   return (
-    <div className="nation">
+    <div className={`nation${folded ? ' nation--folded' : ''}`}>
       {cells.map((c) => (
         <div key={c.label} className="nation__cell">
           <span className="nation__label">{c.label}</span>

@@ -59,12 +59,6 @@ for (const [i, role] of ROLES.entries()) {
   // Scanned QR route
   await p.goto(`${BASE}/play?room=${code}`)
   await wait(400)
-  if (i === 0) {
-    await shot(p, 'phone-scan-choice')
-    await shot(p, 'phone-scan-choice-full', true)
-  }
-  await p.getByRole('button', { name: 'JOIN THE GAME' }).click()
-  await wait(300)
   if (i === 0) await shot(p, 'phone-join-seats', true)
   await p.getByRole('button', { name: new RegExp(role, 'i') }).first().click()
   await wait(500)
@@ -129,6 +123,8 @@ await phones.community.locator('.sheet__close').click(); await wait(200)
 await phones.community.getByText('SAY IT', { exact: true }).click(); await wait(300)
 await phones.community.getByText('I want you to…').click(); await wait(300)
 await shot(phones.community, 'phone-say-demand', true)
+await phones.community.locator('.sheet__body .btn--ghost').first().click(); await wait(300)
+await shot(phones.community, 'phone-say-demand-who', true)
 await phones.community.locator('.sheet__body .btn--ghost').first().click(); await wait(400)
 // Activist: spotlight sheet
 await phones.activist.getByRole('button', { name: /SPOTLIGHT/ }).click(); await wait(300)

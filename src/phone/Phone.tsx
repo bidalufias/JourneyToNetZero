@@ -60,6 +60,15 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
   const screen: Screen | null = reviewing !== null ? SCREEN_ORDER[reviewing] : null
   const canGoBack = live > 0 && (reviewing === null ? live > 0 : reviewing > 0)
 
+  // The tip arrives the moment the crisis is revealed, before the Talk, and
+  // covers the whole phone until it is answered.
+  const tipOpen =
+    !screen &&
+    Boolean(view.tip) &&
+    !view.tip!.published &&
+    view.tip!.id !== dismissedTip &&
+    (view.phase === 'crisis' || view.phase === 'table')
+
   const body = (() => {
     // Reading back through the round. Nothing here may send a command that
     // changes a committed decision.
@@ -129,16 +138,13 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
       ) : null}
       {screen ? <ReviewBar screen={screen} onNow={() => setReviewing(null)} /> : null}
       {/* Round 1 keeps its coaching and Round 2 does not. A table that still
-          needs telling what to do by the second round has a different problem. */}
-      {!screen ? <RoundOneCoach view={view} /> : null}
+          needs telling what to do by the second round has a different problem.
+          Under the tip it goes: "nothing to tap yet" over two buttons is a
+          strip and a screen disagreeing. */}
+      {!screen && !tipOpen ? <RoundOneCoach view={view} /> : null}
       {body}
 
-      {/* The tip arrives the moment the crisis is revealed, before the Talk. */}
-      {!screen &&
-      view.tip &&
-      !view.tip.published &&
-      view.tip.id !== dismissedTip &&
-      (view.phase === 'crisis' || view.phase === 'table') ? (
+      {tipOpen && view.tip ? (
         <TipCard
           tip={view.tip}
           role={view.role}

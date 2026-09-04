@@ -588,7 +588,7 @@ footer{border-top:1px solid var(--line);padding-top:24px;color:var(--soft);font-
   // Validated rather than trusted: the value is about to become a link, and
   // room codes are always exactly four letters.
   if (!/^[A-Z]{4}$/.test(room)) return;
-  var href = '/play?room=' + room + '&ready=1';
+  var href = '/play?room=' + room;
   var blocks = document.querySelectorAll('[data-resume]');
   for (var i = 0; i < blocks.length; i++) {
     blocks[i].querySelector('[data-resume-link]').setAttribute('href', href);

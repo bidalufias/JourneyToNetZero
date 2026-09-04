@@ -102,7 +102,7 @@ export const BEATS: Beat[] = [
     phase: 'practiceChoice',
     label: 'PRACTICE: CHOOSING',
     length: seconds('practiceChoice'),
-    onScreen: 'One instruction, and how many of the four have locked.',
+    onScreen: 'The same board as the practice talk. The four seats lock one at a time, and the count is in the top corner.',
     say: [
       'Now the other half. Two cards each on your phone. Tap one to pick it, then press LOCK MY CARD.',
       'Look at the four arrows on each card. They tell you which way it pushes the country: carbon, the economy, quality of life, and the clean economy. Green is the direction we want.',

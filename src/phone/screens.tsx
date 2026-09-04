@@ -46,6 +46,7 @@ export function GoalChosen({ view }: { view: PhoneView }) {
     <div className="pbody">
       <span className="plabel">SECRET · NOBODY ELSE SEES THIS</span>
       <h1 className="pheading">Chosen. Look up.</h1>
+      <p className="ptext">The first crisis is coming. Your phone will tell you what to do.</p>
       <RoleCard
         role={view.role}
         name={view.name}
@@ -98,6 +99,13 @@ export function GoalPicker({ view, send }: { view: PhoneView; send: (c: Command)
       <p className="ptext">
         Choose one of these three. Nobody sees which one you took. The others are choosing in
         secret too. You may lie about yours.
+      </p>
+      {/* The goals are written in the country's numbers, and the numbers live
+          at the top of this phone. Said once, here, where a player first has
+          to read a number and know what it is. */}
+      <p className="pnote">
+        The goals use the country’s numbers. They are at the top of your phone. Carbon must reach
+        0. Clean Economy is on the big screen.
       </p>
       {choices.map((g) => (
         <button key={g.id} className="goal" onClick={() => setPicked(g.id)}>
