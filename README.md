@@ -27,7 +27,7 @@ phone, or just open `/` and pick a surface.
 | `/play?room=CODE` | The join page with the code filled in (where the QR points) |
 | `/play?room=CODE&seat=ROLE` | A phone in that chair |
 | `/facilitator?room=CODE` | The run of show, live with the big screen — reached from the big screen only, never from the join page |
-| `/how-to-play.html` | The written player guide — static, no app around it |
+| `/how-to-play.html` | The written player guide, about 800 words — static, no app around it |
 
 | Script | What it does |
 |---|---|
@@ -41,10 +41,10 @@ phone, or just open `/` and pick a surface.
 ## How it is put together
 
 ```
-content/     the game, as data - 18 scenarios, 216 options, config, goals, practice round
+content/     the game, as data - 18 scenarios, 216 options, config, secret goals, practice round
 reference/   engine.py and content.py, the balance-tested implementation
 src/engine/  the engine, ported from reference/engine.py
-src/game/    the room: phases, timers, negotiation, insider tips, views
+src/game/    the room: phases, timers, negotiation, tips, views
 src/net/     transports — local (one browser) and Supabase (real sessions)
 src/dashboard/ the broadcast surface
 src/phone/   the player surface
@@ -193,13 +193,22 @@ pulling, or the countdown keeps whatever error the projector's clock has.
 ## Running a session
 
 **There is always a facilitator.** The board's job is to tell them what happens
-next without making them look away from the table, so every onboarding step
+next without making them look away from the room, so every onboarding step
 carries the line to say. `/facilitator` is the full run of show for preparation.
 
-The session opens with about four minutes of onboarding before anything counts:
-the briefing, a practice talk, a practice choice, each seat's own special move,
-and then the secret win. Every step teaches one verb and makes the table use it.
-Nothing from the practice reaches the engine.
+The session opens with about five minutes of onboarding before anything counts.
+In order: the lobby, the briefing, a practice Talk, a practice Choice, a
+practice Reveal, each seat's own power, and then the secret goal. Then six
+rounds of Crisis, Talk, Choice, Reveal, Public Trust and the story so far, the
+country's result, and an end screen that holds. Every onboarding step teaches
+one verb and makes the room use it. Nothing from the practice reaches the
+engine. The practice Choice resolves when the fourth seat locks, the power and
+goal steps when the fourth phone confirms, and a round's Choice when all four
+lock, so a room that is ready never waits for a clock.
+
+The seat list is the only thing a scanned phone sees. Nothing on the join path
+points at the written guide; it is under the ⋯ menu once a player has sat
+down, and it is short enough to read in the lobby.
 
 35 minutes end to end. The facilitator drives it from
 the dashboard, which carries exactly two buttons — PAUSE and NEXT — in the
@@ -212,18 +221,23 @@ Everything they do is also a key:
 
 | Key | What it does |
 |---|---|
-| `Space` · `N` | Start the session, then go straight to the next step |
-| `P` | Stop the clock anywhere in the session, and start it again |
+| `Space` · `N` | Start the session, then go straight to the next step. After the end screen, open a new session |
+| `P` | Stop the clock anywhere in the session, and start it again with the seconds it had left |
 | `Q` | The join code and its QR, full screen, for a latecomer |
 | `F` | The facilitator's script, in a window of its own |
 | `Esc` | Close whatever is over the broadcast |
+
+After the end screen the control bar offers NEW SESSION, which opens a fresh
+room with a new code. Everybody joins the new code on their phone. Reloading
+the big screen does not do this: the address remembers the old room and goes
+straight back into it.
 
 Pausing is a fact about the room, not about the big screen: the server stops
 expiring the phase, every phone freezes its countdown and says why, and nothing
 that moves the round — locking, promising, spending a veto — is accepted until
 it restarts. The deadline is kept rather than recomputed and pushed forward by
-however long the pause lasted, so a table stopped with nine seconds of THE
-CHOICE left restarts with nine seconds. Taking a seat and sealing a goal still
+however long the pause lasted, so a room stopped with nine seconds of THE
+CHOICE left restarts with nine seconds. Taking a seat and choosing a goal still
 work while it is stopped, because a latecomer arriving is one of the two
 reasons anybody presses it. Stepping on with NEXT works too, and the phase you
 land in gets its full length when the clock starts again.
@@ -244,9 +258,12 @@ page is what four players see, and handing them the host's lines spoils a game
 that works because nobody has read it first.
 
 The script is written to be **said**, not skimmed — full sentences in the voice
-of somebody hosting a broadcast, because that is what the dashboard already is.
-Lines a table only needs explained once are marked `FIRST ROUND ONLY` and drop
-out of the live script from round two.
+of somebody hosting a broadcast, because that is what the dashboard already is,
+and in plain English, because the room may not be reading in its first
+language. Lines a room only needs explained once are marked `FIRST ROUND ONLY`
+and drop out of the live script from round two. The four character backstories,
+the notes on playing in character and the strategy the old guide taught all
+live on the facilitator page now, not on anything a player reads.
 
 Four moments worth catching, all of them in the script:
 
@@ -274,9 +291,8 @@ Four moments worth catching, all of them in the script:
 
 ## Not built yet
 
-- The rest of the facilitator console — pause, resume, custom shocks, timer
-  control. The script window covers reading and advancing; it cannot yet take
-  the clock off the rails.
+- The rest of the facilitator console — custom shocks and timer control. The
+  script window covers reading, advancing and pausing.
 - Session analytics: which options get picked, which promises break, win rates
   by cohort.
 - Bahasa Malaysia localisation, and the 45-minute workshop variant.

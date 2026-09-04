@@ -15,7 +15,7 @@ body{background:var(--paper);color:var(--ink);
   font:400 17px/1.65 ui-serif,Georgia,"Times New Roman",serif;
   -webkit-text-size-adjust:100%}
 .wrap{max-width:720px;margin:0 auto;padding:0 20px 80px}
-h1,h2,h3,h4,.ui{font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3,h4{font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif}
 
 /* hero */
 .hero{background:var(--ink);color:var(--paper);padding:56px 20px 48px;margin-bottom:36px}
@@ -37,23 +37,14 @@ nav a:hover{border-bottom-color:var(--sys)}
 section{margin-bottom:52px;scroll-margin-top:16px}
 h2{font-size:15px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
   color:var(--sys);padding-bottom:10px;border-bottom:2px solid var(--sys);margin-bottom:22px}
-h3{font-size:25px;font-weight:700;line-height:1.2;margin:30px 0 10px;letter-spacing:-.01em}
 h4{font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--soft);margin:22px 0 8px}
+  color:var(--soft);margin:18px 0 6px}
 p{margin-bottom:15px}
 p.lead{font-size:19px;color:#3A3733}
 strong{font-weight:700}
-em{font-style:italic}
-ul,ol.n{margin:0 0 16px 22px}
+ul{margin:0 0 16px 22px}
 li{margin-bottom:8px}
 
-.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:18px}
-.note{background:#F2EFE8;border-left:4px solid var(--sys);border-radius:0 10px 10px 0;
-  padding:16px 18px;margin:20px 0}
-.note b{display:block;font:700 12px/1 ui-sans-serif,sans-serif;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--sys);margin-bottom:8px}
-.warn{background:#FBF0E7;border-left-color:var(--com)}
-.warn b{color:var(--com)}
 
 /* meters */
 .meters{display:grid;gap:12px;margin:22px 0}
@@ -65,47 +56,24 @@ li{margin-bottom:8px}
 
 /* character */
 .char{border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:26px;background:#fff}
-.char header{padding:22px 22px 18px;color:#fff}
+.char header{padding:20px 22px 16px;color:#fff}
 .char .role{font:700 11px/1 ui-sans-serif,sans-serif;letter-spacing:.16em;text-transform:uppercase;
   opacity:.85;margin-bottom:8px}
-.char h3{color:#fff;margin:0;font-size:27px}
+.char h3{color:#fff;margin:0;font-size:26px;line-height:1.2}
 .char .sub{font:500 15px/1.4 ui-sans-serif,sans-serif;opacity:.9;margin-top:5px}
-.char .body{padding:22px}
-.char .body h4:first-child{margin-top:0}
+.char .body{padding:6px 22px 22px}
+.char .body p{margin-bottom:0;font-size:16px}
 .g header{background:var(--gov)} .g .body{background:var(--gov-bg)}
 .b header{background:var(--biz)} .b .body{background:var(--biz-bg)}
 .c header{background:var(--com)} .c .body{background:var(--com-bg)}
 .a header{background:var(--act)} .a .body{background:var(--act-bg)}
-.says{list-style:none;margin:0 0 4px}
-.says li{position:relative;padding-left:20px;font-style:italic;margin-bottom:7px}
-.says li:before{content:"“";position:absolute;left:0;top:-2px;font-size:22px;color:var(--soft)}
-.never{background:#fff;border:1px dashed var(--line);border-radius:10px;padding:12px 14px;
-  font-style:italic;font-size:16px;color:#55504B}
 
-/* goals */
-.goal-list{list-style:none;margin:0}
-.goal-list li{background:#fff;border:1px solid var(--line);border-radius:10px;
-  padding:13px 15px;margin-bottom:9px}
-.goal-list b{display:block;font-family:ui-sans-serif,sans-serif;font-size:16px;margin-bottom:2px}
-.goal-list span{font-size:16px;color:#4D4842}
-
-/* timeline */
+/* the round */
 .step{display:flex;gap:16px;margin-bottom:18px;align-items:flex-start}
 .step .t{flex:0 0 74px;font:700 13px/1.4 ui-sans-serif,sans-serif;color:#fff;background:var(--ink);
   border-radius:8px;padding:7px 0;text-align:center}
 .step .c2 h4{margin:0 0 4px}
 .step .c2 p{margin:0;font-size:16px}
-
-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:16px;background:#fff}
-th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font:700 12px/1.3 ui-sans-serif,sans-serif;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--soft);background:#F4F1EA}
-td b{font-family:ui-sans-serif,sans-serif}
-
-.big{background:var(--ink);color:var(--paper);border-radius:16px;padding:28px 24px;margin:22px 0}
-.big h3{color:#fff;margin-top:0}
-.big p{color:#DED6C9}
-.big.hollow{background:#3A3733;border:2px solid #6B6560}
 
 dl dt{font:700 16px/1.4 ui-sans-serif,sans-serif;margin-top:14px}
 dl dd{margin:2px 0 0;color:#443F3A}
@@ -131,448 +99,198 @@ footer{border-top:1px solid var(--line);padding-top:24px;color:var(--soft);font-
 <body>
 
 <div class="hero"><div class="hero-in">
-  <div class="kicker">A 35-minute simulation · four players</div>
+  <div class="kicker">A 35-minute game · four players</div>
   <h1>Journey to<br>Net Zero</h1>
-  <p>Four people who don't trust each other have six crises to save a country. None of you can do it alone. That's not a hint. It's the whole design.</p>
+  <p>Four people run one country through six crises. None of you can win alone.</p>
 </div></div>
 
 <div class="wrap">
 
 <div class="resume" data-resume hidden>
-  <p>You are joining room <b data-resume-code></b>. Read as much as you want.</p>
-  <a data-resume-link href="/">Skip to the game</a>
+  <p>You are joining room <b data-resume-code></b>.</p>
+  <a data-resume-link href="/">Go to the game</a>
 </div>
 
 <nav>
-  <p>What's in here</p>
+  <p>What is in here</p>
   <ol>
     <li><a href="#country">1. The country</a></li>
-    <li><a href="#mission">2. Your mission</a></li>
-    <li><a href="#hidden">3. The hidden number</a></li>
-    <li><a href="#who">4. Who you are</a></li>
-    <li><a href="#secret">5. Your secret goal</a></li>
-    <li><a href="#round">6. How a round works</a></li>
-    <li><a href="#buttons">7. What your buttons do</a></li>
-    <li><a href="#tips">8. Insider tips</a></li>
-    <li><a href="#winning">9. Winning and losing</a></li>
-    <li><a href="#acting">10. Playing in character</a></li>
-    <li><a href="#words">11. Every word explained</a></li>
+    <li><a href="#targets">2. The three targets</a></li>
+    <li><a href="#who">3. Who you are</a></li>
+    <li><a href="#round">4. How a round works</a></li>
+    <li><a href="#words">5. Words on your screen</a></li>
   </ol>
 </nav>
 
 <section id="country">
 <h2>1 · The country</h2>
-<p class="lead">You are running the <strong>Republic of Semenanjara</strong>. It doesn't exist. It could.</p>
-<p>Thirty-four million people on a tropical peninsula. Monsoon rains from November. Palm and rubber plantations inland, chemical parks and semiconductor factories on the west coast, gas fields offshore, tourist islands to the east. The capital is <strong>Kota Damai</strong>. The currency is the <strong>Ringga</strong>. The river that gives four million people their drinking water is the <strong>Sungai Jernih</strong>.</p>
-<p>Semenanjara has grown fast for thirty years. It is now middle-income, young, impatient and online. It also burns a great deal of fossil fuel, floods every year, and has an economy built on exactly the industries the world is trying to move away from.</p>
-<p>The year is 2025. You have until 2050. In game terms, that's <strong>six rounds and about thirty-five minutes.</strong></p>
+<p class="lead">You are running the <strong>Republic of Semenanjara</strong>. It is a made-up country on a hot peninsula.</p>
+<p>34 million people live here, with plantations, factories, gas fields and tourist islands. The capital is <strong>Kota Damai</strong>. The money is the <strong>Ringga</strong>. It is 2025, and you have until 2050. That is six rounds and about 35 minutes.</p>
 </section>
 
-<section id="mission">
-<h2>2 · Your mission</h2>
-<p class="lead">All four of you share one mission. There are three numbers, and you must hit <strong>all three</strong>. Two out of three is a failure.</p>
+<section id="targets">
+<h2>2 · The three targets</h2>
+<p class="lead">All four of you share one mission. Three numbers must reach their target by 2050. <strong>Miss one and nobody wins.</strong></p>
 
 <div class="meters">
   <div class="meter">
-    <div class="top"><span class="name">🌍 Emissions</span><span class="goal">100 net → zero</span></div>
-    <p>How much greenhouse gas the country adds to the air, measured in million tonnes. It puts out 300 a year and its forests and peatlands absorb about 200, so the <em>net</em> figure is 100. You need that 100 down to nothing. That is what net zero means: not that nothing is emitted, but that nothing is left over once the land has done its work.</p>
+    <div class="top"><span class="name">Carbon</span><span class="goal">Today 100 · Target 0</span></div>
+    <p>The country puts out 300 million tonnes of carbon a year. Its forests take in 200. The 100 million tonnes left over must reach 0. That is net zero.</p>
   </div>
   <div class="meter">
-    <div class="top"><span class="name">📈 Economy</span><span class="goal">5% average</span></div>
-    <p>How fast the economy is growing. Today it's 4.5%. You need the <em>average across all six rounds</em> to be 5% or better. A bad round early has to be made up later. Growth means jobs, wages and tax money, and this is not optional.</p>
+    <div class="top"><span class="name">Economy</span><span class="goal">Today 4.5% · Target 5% a year on average</span></div>
+    <p>How fast the economy grows each year. Growth means jobs and wages. The average over all six rounds must be 5% or more.</p>
   </div>
   <div class="meter">
-    <div class="top"><span class="name">😊 Quality of life</span><span class="goal">6.0 → 7.0 or above</span></div>
-    <p>How good life actually is here, out of 10. Air, water, jobs, prices, safety, trust. Today it's 6.0. A country can hit its climate target and still be miserable. That counts as losing.</p>
+    <div class="top"><span class="name">Quality of life</span><span class="goal">Today 6.0 · Target 7 out of 10</span></div>
+    <p>Air, water, jobs, prices and safety, out of 10. A country can reach net zero and still be a bad place to live. That counts as losing.</p>
   </div>
 </div>
-
-<div class="note">
-  <b>The point of three numbers</b>
-  <p style="margin:0">Any one of these is easy on its own. You could crash the economy and emissions would fall. You could burn coal and growth would soar. The game is the trade-off between them, and no single player controls more than a slice of any one number.</p>
-</div>
-</section>
-
-<section id="hidden">
-<h2>3 · The hidden number</h2>
-<p class="lead">There is a fourth meter on the big screen: <strong>Clean Economy</strong>. It starts at 10%. Nobody will tell you how important it is. It is the most important thing in the game.</p>
-<p>Here is why. <strong>Growth creates emissions.</strong> Every round, the economy grows, and that growth automatically adds emissions, whatever anyone chooses. You can be doing everything right and still watch the number climb.</p>
-<p>Clean Economy is how much of the economy runs on clean things: renewable power, efficient transport, restored land, clean manufacturing. <strong>The higher it goes, the less carbon each bit of growth adds.</strong></p>
-
-<table>
-<tr><th>Clean Economy</th><th>What growth costs you in carbon</th></tr>
-<tr><td>Under 20%</td><td>Brutal. Every bit of growth adds a lot of emissions</td></tr>
-<tr><td>21% to 40%</td><td>Heavy</td></tr>
-<tr><td>41% to 60%</td><td>Manageable</td></tr>
-<tr><td>Over 60%</td><td>Light. You can grow and still cut</td></tr>
-</table>
-
-<p>And there's a bonus: a bigger clean economy <strong>also raises growth and quality of life</strong>, because it is the new growth sector and because people prefer living in a clean, working country.</p>
-<p>So the real answer to "how do we cut 100 million tonnes without wrecking the economy?" is not <em>do less</em>. It's <em>build a different economy</em>. Most tables work this out around Round 3. The earlier you work it out, the better your Round 6 will be.</p>
 </section>
 
 <section id="who">
-<h2>4 · Who you are</h2>
-<p class="lead">Four seats. Each of you gets one. Read your own character properly, because you're going to be them for half an hour, and the game is far better if you actually argue like they would.</p>
+<h2>3 · Who you are</h2>
+<p class="lead">Four seats. You get one. Play the part.</p>
 
 <div class="char g">
   <header>
-    <div class="role">🏛 The Government</div>
+    <div class="role">Government</div>
     <h3>The Minister</h3>
-    <div class="sub">Minister for Energy and Climate</div>
+    <div class="sub">Ministry of Energy and Climate</div>
   </header>
   <div class="body">
     <h4>Who you are</h4>
-    <p>Twenty-four years in the civil service before you went into politics. You represent Kuala Jernih, a semi-rural seat where half your voters work in plantations and the other half commute into the city. People call you competent and slightly boring. You take that as a compliment.</p>
-    <h4>What you believe</h4>
-    <p>The transition has to happen and you are the only person in this room who can actually fund it. You also believe that a government that loses an election achieves nothing at all, so staying in power is not vanity. It's the job.</p>
-    <h4>What you're afraid of</h4>
-    <p>Being remembered as the minister who made petrol expensive.</p>
-    <h4>Your money: Budget</h4>
-    <p>You start with <strong>4</strong>. From Round 2 you get <strong>+2 every round</strong>, and +1 more if the economy is doing well, up to 8. Big moves cost 2 or 3, so sometimes you save a round to afford the one that matters. You can also give Budget away so someone else can act, or pay half of a Business partnership.</p>
-    <h4>How to play it</h4>
-    <p>You move faster than anyone else here. You can spend, and you can make law. But everything you do is paid for by someone who votes. Never give something away without asking what you get back.</p>
-    <h4>Things you might say</h4>
-    <ul class="says">
-      <li>I can fund that. What do I tell the people in Perindu?</li>
-      <li>Give me a public reason to spend this and I'll spend it.</li>
-      <li>If I do that I lose the seat, and then none of this happens.</li>
-    </ul>
-    <div class="never">You'd never say: <b>"Money's no object."</b></div>
+    <p>The Minister. You run the government.</p>
+    <h4>What you want</h4>
+    <p>A growing economy, and to stay in power.</p>
+    <h4>What you have</h4>
+    <p>Budget: 4. You get 2 more each round. Cards cost 1 to 3 Budget.</p>
+    <h4>How to play</h4>
+    <p>Spend on big changes. Give Budget to the Business when a deal is worth it. Always ask what the voters get.</p>
   </div>
 </div>
 
 <div class="char b">
   <header>
-    <div class="role">🏭 The Business</div>
+    <div class="role">Business</div>
     <h3>The Company Boss</h3>
-    <div class="sub">Group CEO, Sawit Prima</div>
+    <div class="sub">Sawit Prima Group</div>
   </header>
   <div class="body">
     <h4>Who you are</h4>
-    <p>Third generation, and you took over the family firm at 41. Forty thousand employees. You have read every major climate report of the last decade and can quote them, which surprises people who assume you haven't.</p>
-    <h4>What you believe</h4>
-    <p>You will go green the moment it is cheaper than not going green, or the moment somebody makes staying dirty more expensive. You don't think that makes you a villain. You think it makes you honest, and you're quietly irritated by people who pretend otherwise.</p>
-    <h4>What you're afraid of</h4>
-    <p>Being the chief executive who bet the company early and got it wrong.</p>
-    <h4>Your money: Company Money</h4>
-    <p>You start with <strong>5</strong>. You gain <strong>+1 every round</strong>, and +1 more when the economy is growing well, up to 12. Going clean costs 3, which is a serious bite, but it is the biggest single cut on the table. Partnership cards cost only 1, but they only work if the Government pays half.</p>
-    <h4>How to play it</h4>
-    <p>You own the emissions. You also own the jobs, the exports and most of the tax base. That gives you leverage. Use it. Never volunteer to pay for something alone if you can get it co-funded.</p>
-    <h4>Things you might say</h4>
-    <ul class="says">
-      <li>I'll do it, if the Government shares the cost.</li>
-      <li>That's a ten-year investment and I'm judged every quarter.</li>
-      <li>You want me to cut thirty percent? Fine. Who pays for the retraining?</li>
-    </ul>
-    <div class="never">You'd never say: <b>"Profit doesn't matter here."</b></div>
+    <p>The Company Boss. You own the biggest company in the country.</p>
+    <h4>What you want</h4>
+    <p>Profit, and a company that still exists in 2050.</p>
+    <h4>What you have</h4>
+    <p>Company Money: 5. You get 1 more each round. Going clean costs 3.</p>
+    <h4>How to play</h4>
+    <p>Go clean when someone helps you pay. Ask the Government to pay half. Protect your workers’ jobs.</p>
   </div>
 </div>
 
 <div class="char c">
   <header>
-    <div class="role">🏘 The Community</div>
+    <div class="role">Community</div>
     <h3>The Community Leader</h3>
-    <div class="sub">Food stall owner, head of the residents' association</div>
+    <div class="sub">Kampung Baru Jernih residents</div>
   </header>
   <div class="body">
     <h4>Who you are</h4>
-    <p>You run a stall in Kampung Baru Jernih and you chair the residents' association, which means you speak for thirty-four million people who never elected you but definitely agree with you. Your stall has flooded three times in eight years. Your child has asthma. Your electricity bill doubled last year.</p>
-    <h4>What you believe</h4>
-    <p>Clean air and affordable petrol are both perfectly reasonable things to want, and you are tired of being told to pick one. You've heard a lot of promises. You remember all of them.</p>
-    <h4>What you're afraid of</h4>
-    <p>Being asked to sacrifice again by people who won't have to.</p>
-    <h4>Your power: two vetoes</h4>
-    <p>You have no money and no laws. You hold <strong>2 vetoes</strong> for the whole game. Spend one to take somebody's worst cards off the table for a round. <em>"The public will not accept this."</em> Use them on the person who is wrecking it for everyone.</p>
-    <p><strong>Public Trust</strong> is handed out every round too: one for whoever looked after people best, one for whoever did most for the future. <strong>You do not choose who gets it.</strong> It goes to whoever earned it that round. So your real power is to make them earn it in front of you, out loud, before they pick.</p>
-    <h4>How to play it</h4>
-    <p>Make them earn it out loud. Ask what things cost. Remind people what they promised last round. You are the only player who can say "no" and make it stick.</p>
-    <h4>Things you might say</h4>
-    <ul class="says">
-      <li>Explain that to me like I have to pay for it, because I do.</li>
-      <li>You promised us this last time. What happened?</li>
-      <li>We'll accept it. But you go first.</li>
-    </ul>
-    <div class="never">You'd never say: <b>"Whatever you think is best."</b></div>
+    <p>The Community Leader. You speak for 34 million ordinary people.</p>
+    <h4>What you want</h4>
+    <p>Clean air, and prices people can afford.</p>
+    <h4>What you have</h4>
+    <p>2 vetoes. A veto takes one player’s dirty cards away for one round.</p>
+    <h4>How to play</h4>
+    <p>Ask what each plan costs ordinary people. Remind players what they promised. Use a veto when someone is about to hurt everyone.</p>
   </div>
 </div>
 
 <div class="char a">
   <header>
-    <div class="role">✊ The Activist</div>
+    <div class="role">Activist</div>
     <h3>The Youth Activist</h3>
-    <div class="sub">Founder, Bangkit Iklim (Climate Rise)</div>
+    <div class="sub">Bangkit Iklim</div>
   </header>
   <div class="body">
     <h4>Who you are</h4>
-    <p>Law degree, no job in law. You organised the first climate strike in Kota Damai when you were nineteen, and four hundred people came. Last year ninety thousand came. You have no budget, no staff worth the name, and the largest following in the country.</p>
-    <h4>What you believe</h4>
-    <p>The science isn't negotiable and the timeline isn't a preference. Everyone in this room will personally be fine whatever happens, and that is precisely the problem.</p>
-    <h4>What you're afraid of</h4>
-    <p>Becoming the person who sat in a nice room, signed something, and changed nothing.</p>
-    <h4>Your power: 3 Spotlights</h4>
-    <p>You can't build or fund anything. What you can do is make ignoring you more expensive than listening. A <strong>Spotlight</strong> names one player in public before choices lock. If they then pick their dirtiest card, it only half works and they lose Public Trust. <strong>It only fires if you also escalate with your own card that round.</strong></p>
-    <p>You only get <strong>three, for the whole game.</strong> And every time you take the seat at the table and compromise, you become slightly less potent for the rest of the game. That is not a bug. That is the job.</p>
-    <h4>How to play it</h4>
-    <p>You have three real choices every round: <strong>escalate</strong> (loud, costly, effective against bad actors), <strong>collaborate</strong> (get real influence, spend a little of your soul), or <strong>build evidence</strong> (nothing happens now, something big happens later). Pick deliberately.</p>
-    <h4>Things you might say</h4>
-    <ul class="says">
-      <li>That's not a plan, that's a press release.</li>
-      <li>I'll back you publicly if you commit to it publicly.</li>
-      <li>Everyone in this room will be fine. That's the problem.</li>
-    </ul>
-    <div class="never">You'd never say: <b>"Let's revisit this next year."</b></div>
+    <p>The Youth Activist. You lead the biggest movement in the country.</p>
+    <h4>What you want</h4>
+    <p>Real climate action, fast.</p>
+    <h4>What you have</h4>
+    <p>3 Spotlights. A Spotlight punishes a player who picks a dirty card.</p>
+    <h4>How to play</h4>
+    <p>Push everyone to pick clean cards. Offer deals: “I will support you if you go clean”. Use a Spotlight when you think someone will pick a dirty card.</p>
   </div>
 </div>
 </section>
 
-<section id="secret">
-<h2>5 · Your secret win</h2>
-<p class="lead">Your phone offers you three secret goals. <strong>Pick one. Don't show anyone.</strong></p>
-<p>Everyone can read the full list below, so that part isn't secret. What's secret is <em>which one you chose</em>. You may lie about it freely. People will ask.</p>
-<p>Some of these pull in the same direction as the country's mission. Some pull against it. That tension is the game.</p>
-
-<h3 style="color:var(--gov)">🏛 Government</h3>
-<ul class="goal-list">
-  <li><b>Landslide</b><span>Finish holding 6 or more Public Trust.</span></li>
-  <li><b>Steady Hand</b><span>Growth never falls below 4.0% in any single round.</span></li>
-  <li><b>The Legacy</b><span>Get the Clean Economy to 55% or higher.</span></li>
-</ul>
-
-<h3 style="color:var(--biz)">🏭 Business</h3>
-<ul class="goal-list">
-  <li><b>Market Dominance</b><span>Finish with 6 or more Company Money.</span></li>
-  <li><b>Green Champion</b><span>Personally deliver 33 million tonnes of cuts or more.</span></li>
-  <li><b>Licence to Operate</b><span>Finish with at least 2 Public Trust and 4 Company Money.</span></li>
-</ul>
-
-<h3 style="color:var(--com)">🏘 Community</h3>
-<ul class="goal-list">
-  <li><b>A Happy Nation</b><span>Quality of life finishes at 8.0 or above.</span></li>
-  <li><b>Nobody Left Behind</b><span>Quality of life never drops below 6.3 in any round.</span></li>
-  <li><b>Our Own Two Hands</b><span>Land 4 or more successful community-led actions.</span></li>
-</ul>
-
-<h3 style="color:var(--act)">✊ Activist</h3>
-<ul class="goal-list">
-  <li><b>No Compromise</b><span>Never once take the collaborate option, and still take the country 25 million tonnes past net zero.</span></li>
-  <li><b>The Long Game</b><span>Get the Clean Economy to 52% or higher.</span></li>
-  <li><b>Justice First</b><span>Quality of life finishes at 7.0+ and at least one Spotlight lands.</span></li>
-</ul>
-
-<div class="warn note">
-  <b>Read this twice</b>
-  <p style="margin:0">If the country misses even one of its three targets, <strong>nobody wins</strong>, including anyone who achieved their private goal. You'll get a card called Hollow Victory instead. Your secret goal is worth chasing, but not at the cost of the mission.</p>
-</div>
-</section>
-
 <section id="round">
-<h2>6 · How a round works</h2>
-<p class="lead">Six rounds. Four minutes each. Same shape every time, so you'll have it by Round 2.</p>
+<h2>4 · How a round works</h2>
+<p class="lead">Every round has the same four steps. A practice round comes first and does not count.</p>
 
-<div class="step"><div class="t">0:30</div><div class="c2">
+<div class="step"><div class="t">0:25</div><div class="c2">
   <h4>The Crisis</h4>
-  <p>The big screen reveals what's just happened: a market crash, a pandemic, a poisoned reservoir. Your phone buzzes with the same news plus one private line only you can see.</p>
+  <p>The big screen shows what just happened. Your phone shows the same news, plus one line only you can see.</p>
 </div></div>
 <div class="step"><div class="t">1:30</div><div class="c2">
   <h4>The Talk</h4>
-  <p><strong>Talk.</strong> Argue, plead, threaten, bargain, make promises. Send each other money. This is the game. Put the phone down and use your mouth.</p>
+  <p>Talk to each other. Tap SAY IT to put a promise or a deal on the big screen. Nobody has to keep a promise.</p>
+</div></div>
+<div class="step"><div class="t">0:40</div><div class="c2">
+  <h4>The Choice</h4>
+  <p>Three cards on your phone. The four arrows show what each card does to the country. Green is good. Tap one card, then tap LOCK MY CARD. If the clock runs out, the card you tapped is used.</p>
 </div></div>
 <div class="step"><div class="t">0:45</div><div class="c2">
-  <h4>The Choice</h4>
-  <p>Three cards on your phone, each showing which way it pushes the four meters. Pick one, in secret. You do not have to do what you just promised.</p>
-</div></div>
-<div class="step"><div class="t">1:15</div><div class="c2">
   <h4>The Reveal</h4>
-  <p>The four cards turn over on the big screen, one at a time. The meters move. The headlines print. Somebody usually gasps. <strong>Look up for this bit.</strong></p>
+  <p>All four cards turn over on the big screen. The meters move. If someone broke a promise, the screen says so. Look up.</p>
 </div></div>
 
-<div class="note">
-  <b>Two things that make this game different</b>
-  <p>First, <strong>promises are not enforced</strong>. If you say you'll pick the green option and then don't, the game lets you. The big screen will announce it. The room will react. That moment is worth more than any lecture.</p>
-  <p style="margin:0">Second, <strong>early rounds decide late rounds</strong>. Build coal in Round 2 and the pollution disaster in Round 5 hits roughly twice as hard. Set up a citizens' river watch in Round 5 and the flood in Round 6 does noticeably less damage. Nothing you do is forgotten.</p>
-</div>
-</section>
-
-<section id="buttons">
-<h2>7 · Reading a card, and what your buttons do</h2>
-
-<p class="lead">Every card shows four arrows. They tell you which way it pushes each of the four meters, and roughly how hard.</p>
-
-<table>
-<tr><th>On the card</th><th>What it means</th></tr>
-<tr><td><b>▼▼▼ ▼▼ ▼</b></td><td>That meter goes down. Three arrows is a big move, one is small.</td></tr>
-<tr><td><b>▲▲▲ ▲▲ ▲</b></td><td>That meter goes up.</td></tr>
-<tr><td><b>–</b></td><td>No effect on that meter.</td></tr>
-<tr><td><b>Green</b></td><td>This is the direction the country wants.</td></tr>
-<tr><td><b>Orange</b></td><td>This is not.</td></tr>
-</table>
-
-<p>So carbon going <strong>down</strong> is green, and quality of life going <strong>down</strong> is orange. The arrows never tell you the exact numbers, on purpose. This is a judgement call, not a sum.</p>
-
-<h3>Your buttons</h3>
-<p class="lead">During <strong>The Talk</strong> you get these. Everyone sees you use them.</p>
-
-<table>
-<tr><th>Button</th><th>What it does</th><th>Who has it</th></tr>
-<tr><td><b>Say it</b></td><td>Put one sentence on the big screen. Pick the shape, tap the blanks. One at a time: a second replaces the first.</td><td>Everyone</td></tr>
-<tr><td><b>Send money</b></td><td>Send money to another player. They accept or decline. It transfers immediately and permanently.</td><td>🏛 Government and 🏭 Business, the only two who hold money</td></tr>
-<tr><td><b>Spotlight</b></td><td>Name one player in public. If they pick their dirtiest card, it only half works and they lose Public Trust. Only fires if you also escalate with your own card that round. <strong>3 for the whole game.</strong></td><td>✊ Activist</td></tr>
-<tr><td><b>Say no</b></td><td>Remove a named player's worst cards from their choices this round. <strong>2 for the whole game.</strong></td><td>🏘 Community</td></tr>
-</table>
-
-<h3>The three sentences</h3>
-<p class="lead">Behind <strong>Say it</strong> there are three shapes. You never type. You tap.</p>
-
-<table>
-<tr><th>Sentence</th><th>What it is</th></tr>
-<tr><td><em>"The Business will choose Retool for the Green Market."</em></td><td>A pledge. Nothing forces you to keep it, and the big screen says whether you did.</td></tr>
-<tr><td><em>"The Business will choose Retool for the Green Market if the Government moves too."</em></td><td><b>A deal.</b> You go if they go.</td></tr>
-<tr><td><em>"The Activist wants the Business to pay its share before anyone else moves."</em></td><td>Asking, in public. Pressure, not a rule.</td></tr>
-</table>
-
-<p>The Government has a fourth: <em>"The Government will pay half of any partnership the Business signs."</em> That one stands all round, on top of whatever else you say.</p>
-
-<div class="big">
-  <h3>The deal is the best button in the game</h3>
-  <p>It resolves three ways, and only one of them can embarrass you.</p>
-  <ul>
-    <li><b>They came, you came.</b> Both kept the deal. The screen says so.</li>
-    <li><b>They came, you did not.</b> You broke it, in front of everyone.</li>
-    <li><b>They never came.</b> Nothing is held against you. The deal was simply not taken.</li>
-  </ul>
-  <p>So there is no risk in offering one. The worst that happens is nobody takes it.</p>
-</div>
-
-<h3>The one thing that makes everything easier</h3>
-<p>When <strong>three or four of you</strong> pick constructive cards in the same round, the country gets a bonus for <strong>moving together</strong>: an extra cut in carbon, a lift in quality of life, and a jump in the clean economy that <em>no player can produce alone</em>. Four is dramatically better than three.</p>
-<p>Holding someone to account counts as constructive. Regulating a polluter, or spotlighting one, is cooperation, not conflict. The only things that break it are expanding dirtily, deregulating, or demanding somebody else pay.</p>
-<p><strong>If you take one strategic idea into the room, take that one.</strong></p>
-</section>
-
-<section id="tips">
-<h2>8 · Tip offs</h2>
-<p class="lead">Every round, exactly one player gets a private tip on their phone. Nobody is told who.</p>
-<p>It is an early warning about the crisis coming next round, and it is always true.</p>
-<p>You have two choices. Keep it, and you keep a head start nobody else has. Or <strong>Tell the Room</strong>, which puts it on the big screen with your name on it: you gain Public Trust, and everybody else gets the warning too.</p>
-<p>You can also describe it wrongly. Nobody can check.</p>
-<p>Sitting on a true warning costs you nothing in the rules. It might cost you something else.</p>
-</section>
-
-<section id="winning">
-<h2>9 · Winning and losing</h2>
-
-<p class="lead">At the end, the country gets a grade of its own, before anybody's title is read out.</p>
-
-<table>
-<tr><th>Grade</th><th>What it means</th></tr>
-<tr><td><b>NET ZERO REACHED</b></td><td>All three targets.</td></tr>
-<tr><td><b>SO CLOSE</b></td><td>Missed, but every gap was narrow. The screen names each one: <em>"The economy averaged 4.7%. You needed 5.0%."</em></td></tr>
-<tr><td><b>MISSED</b></td><td>Not close on at least one, and the screen says which and by how much.</td></tr>
-</table>
-
-<p>The grade is about the <em>country</em>. Your title is about <em>you</em>. They are not the same thing, which is the whole point of the next box.</p>
-
-<div class="big">
-  <h3>If the country hits all three targets</h3>
-  <p>Everyone earns the title <strong>NATION BUILDER</strong>. Then the secret wins are revealed one at a time, and anyone who also hit theirs collects a personal title on top. Nobody is embarrassed. Everyone takes something home.</p>
-</div>
-
-<div class="big hollow">
-  <h3>If the country misses even one</h3>
-  <p>Every secret win is revealed, including the ones people achieved. Anyone who hit theirs receives this:</p>
-  <p style="font-size:21px;color:#fff;margin-top:18px"><strong>🏆 HOLLOW VICTORY</strong><br>
-  <em>You got exactly what you wanted. The country is 3.2°C warmer. Was it worth it?</em></p>
-</div>
-
-<p style="margin-top:22px">There is no partial credit and no consolation prize. That's deliberate. It is also, more or less, how the actual thing works.</p>
-</section>
-
-<section id="acting">
-<h2>10 · Playing in character</h2>
-<p class="lead">You'll get much more out of this if you commit to the role. Four things help.</p>
-
-<h4>1 · Argue from your interests, not your opinions</h4>
-<p>You may personally think the Business should just go clean immediately. The Company Boss doesn't. Play them properly. Say what they'd say, defend what they'd defend. The insight comes from holding a position you don't hold.</p>
-
-<h4>2 · Every character here is right about something</h4>
-<p>The Minister genuinely can't act without votes. The Company Boss genuinely can't outrun their shareholders. The Community Leader genuinely can't absorb another price rise. The Youth Activist genuinely is running out of time. Nobody here is the idiot. If you think one of them is, you're not listening.</p>
-
-<h4>3 · Say things out loud</h4>
-<p>Don't just pick an option. Announce what you're minded to do and ask what it's worth. Deals only happen if somebody proposes one. The most valuable sentence in this game is <em>"what if we both did it?"</em>, and your phone will say it for you: <strong>Say it</strong>, then the second shape down.</p>
-
-<h4>4 · You are allowed to break a promise</h4>
-<p>You are also allowed to be furious when someone breaks one on you. Both are part of the design. Just be ready to talk about it afterwards, because the facilitator will absolutely ask.</p>
-
-<div class="note">
-  <b>House rules</b>
-  <ul style="margin:0 0 0 20px">
-    <li>Phones face down during The Talk. Look at each other.</li>
-    <li>Don't show anyone your secret win, even at the end. Wait for the reveal.</li>
-    <li>Speak in character where you can. "I can't afford that" beats "this card costs two."</li>
-    <li>When the timer hits zero it locks whether you're ready or not. Decide early.</li>
-  </ul>
-</div>
+<p>After six rounds the country gets its result. If all three targets are met, everyone wins. If the country misses one, nobody wins. A player who reached their secret goal gets <strong>HOLLOW VICTORY</strong> instead.</p>
 </section>
 
 <section id="words">
-<h2>11 · Every word explained</h2>
+<h2>5 · Words on your screen</h2>
 <dl>
-  <dt>Carbon</dt>
-  <dd>Greenhouse gas, measured in million tonnes (Mt). Other gases are converted into the amount of carbon dioxide that would cause the same warming, so it is all one number.</dd>
-
-  <dt>Net zero</dt>
-  <dd>Putting no more greenhouse gas into the air than you take out. Semenanjara emits 300 million tonnes a year and its forests and peatlands absorb about 200, so it is 100 short of balance. Reaching net zero means closing that 100, while keeping the country working. It does not mean nobody emits anything.</dd>
-
-  <dt>Economy</dt>
-  <dd>How much bigger the economy got this year, as a percentage. More growth generally means more jobs, higher wages, and more tax money for the government to spend.</dd>
-
-  <dt>Quality of life</dt>
-  <dd>A 0 to 10 measure of how good life actually is. It covers income, health, clean air and water, safety, and whether people trust their institutions.</dd>
-
-  <dt>Clean Economy</dt>
-  <dd>How much of the economy runs on clean industry. The higher it is, the less carbon each bit of growth adds, and the better the country does on both other targets. See section 3.</dd>
-
-  <dt>Budget</dt>
-  <dd>The Government's money. What it can spend.</dd>
-
-  <dt>Company Money</dt>
-  <dd>The Business's money. What it can invest.</dd>
-
-  <dt>Public Trust</dt>
-  <dd>Public confidence. Two go out every round, one for whoever looked after people best and one for whoever did most for the future. Nobody chooses who gets it. It unlocks the Government's boldest cards and protects the Business's right to operate.</dd>
-
   <dt>Spotlight</dt>
-  <dd>The Activist's power to name someone publicly before choices lock. Three per game.</dd>
+  <dd>You name one player. If they pick a dirty card, it only half works. The Activist has 3.</dd>
 
   <dt>Veto</dt>
-  <dd>The Community's power to remove somebody's worst cards for one round. Two per game.</dd>
+  <dd>You take one player’s dirty cards away for this round. The Community has 2.</dd>
+
+  <dt>Public Trust</dt>
+  <dd>Points the people give to whoever helped them most. Some cards need them. Two go out every round.</dd>
+
+  <dt>Clean Economy</dt>
+  <dd>How much of the economy is clean. Higher means growth adds less carbon.</dd>
 
   <dt>Moving together</dt>
-  <dd>Extra progress the country gets when three or four players pick constructive cards in the same round. No player can produce it alone.</dd>
+  <dd>When 3 or 4 of you pick good cards, the country gets a bonus.</dd>
 
-  <dt>Just transition</dt>
-  <dd>Moving to a clean economy without dumping the cost on workers and poorer households. Comes up repeatedly, especially around the refinery town of Perindu.</dd>
+  <dt>Dirty card</dt>
+  <dd>A card that pollutes or makes others pay. It breaks moving together.</dd>
 
-  <dt>Subsidy</dt>
-  <dd>Government money that keeps a price artificially low, which here means mostly fuel. Popular, expensive, and it mainly benefits whoever buys the most fuel.</dd>
+  <dt>Partnership</dt>
+  <dd>A Business card that only works fully if the Government pays half.</dd>
 
-  <dt>Decoupling</dt>
-  <dd>Growing the economy without growing carbon alongside it. What the Clean Economy meter actually measures.</dd>
+  <dt>Net zero</dt>
+  <dd>Carbon at 0. The country takes out as much as it puts in.</dd>
 
-  
+  <dt>Secret goal</dt>
+  <dd>A goal only you know. It only counts if the country reaches all three targets.</dd>
+
+  <dt>Tip</dt>
+  <dd>A true warning about the next crisis. Only you can see it.</dd>
 </dl>
 </section>
 
 <div class="resume resume--end" data-resume hidden>
-  <p>That's all of it. Room <b data-resume-code></b> is waiting.</p>
-  <a data-resume-link href="/">Proceed to the game</a>
+  <p>That is all of it. Room <b data-resume-code></b> is waiting.</p>
+  <a data-resume-link href="/">Go to the game</a>
 </div>
 
 <footer>
-  <p><a href="/" style="color:var(--sys)">← Back to the game</a>. Join a session with the four-letter code on the big screen.</p>
-  <p><strong>Journey to Net Zero</strong> is a training simulation set in the fictional Republic of Semenanjara. Any resemblance to countries you know is entirely deliberate.</p>
-  <p style="margin:0">One last thing. There are no right answers in this game, and there is no path that doesn't cost somebody something. That's not a limitation of the design. That's the subject.</p>
+  <p style="margin:0"><a href="/" style="color:var(--sys)">← Back to the game</a>. Join with the four-letter code on the big screen.</p>
 </footer>
 
 </div>
@@ -597,6 +315,5 @@ footer{border-top:1px solid var(--line);padding-top:24px;color:var(--soft);font-
   }
 })();
 </script>
-
 </body>
 </html>
