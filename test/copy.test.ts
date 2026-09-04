@@ -13,9 +13,8 @@
  * held to the phone limit; the written guide in `public/` is a reference and
  * is not scanned. The engine and the transports carry no player-facing copy.
  *
- * The content pack is held to the same list, but through a ratchet: the count
- * of sentences that fail today may not grow, and WP5 of the implementation
- * plan takes both counts to zero and turns the ratchets into hard limits.
+ * The content pack is held to the same list and the phone limit, as hard
+ * limits, and its option cards to a ceiling on fragments as well.
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
@@ -269,22 +268,33 @@ describe('the words in the content pack', () => {
   })
 
   /**
-   * Ratchets. The numbers are what the pack scores today; each rewrite in
-   * WP5 lowers them and the final pass sets both to zero. A change that
-   * raises either is a change that added an idiom or a long sentence.
+   * These began as ratchets (36 banned words and 39 long sentences on the day
+   * the test was written) and WP5 took both to zero. They are hard limits
+   * now: a card that adds an idiom or a long sentence fails here.
    */
-  const BANNED_TODAY = 36
-  const LONG_TODAY = 39
-
-  it('uses no more banned words than it did', () => {
+  it('uses one name per thing, and no idiom from the review', () => {
     const hits = texts.flatMap((t) => banned(t.text).map((term) => `${t.path}: "${t.text}" (${term})`))
-    expect(hits.length, hits.join('\n')).toBeLessThanOrEqual(BANNED_TODAY)
+    expect(hits).toEqual([])
   })
 
-  it('has no more sentences over twelve words than it did', () => {
+  it('keeps every sentence to twelve words', () => {
     const hits = texts.flatMap((t) =>
       tooLong(t.text, PHONE_WORDS).map((s) => `${t.path}: "${s}" (${words(s)} words)`),
     )
-    expect(hits.length, hits.join('\n')).toBeLessThanOrEqual(LONG_TODAY)
+    expect(hits).toEqual([])
+  })
+
+  /**
+   * A fragment asks the reader to guess the missing words. Option cards are
+   * where they gathered (148 of 216 cards on the day of the review), so the
+   * share of option sentences of three words or fewer is held under five
+   * percent, the figure the implementation plan set for WP5.
+   */
+  it('keeps option card fragments under five percent', () => {
+    const pack = JSON.parse(raw) as { scenarios: { options: Record<string, { desc: string }[]> }[] }
+    const all = pack.scenarios.flatMap((s) => Object.values(s.options).flat()).flatMap((o) => sentences(o.desc))
+    const short = all.filter((s) => words(s) <= 3)
+    expect(all.length).toBeGreaterThan(200)
+    expect(short.length / all.length, short.join('\n')).toBeLessThan(0.05)
   })
 })
