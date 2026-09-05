@@ -134,7 +134,7 @@ await shot(phones.activist, 'phone-practice-talk-activist-after-spotlight', true
 // Gov: send money sheet
 await phones.government.getByRole('button', { name: 'SEND MONEY' }).click(); await wait(300)
 await shot(phones.government, 'phone-offer-sheet', true)
-await phones.government.getByRole('button', { name: /Business/ }).click(); await wait(200)
+await phones.government.getByRole('button', { name: /^Business$/ }).click(); await wait(200)
 await phones.government.getByRole('button', { name: 'SEND 1' }).click(); await wait(400)
 await shot(phones.business, 'phone-incoming-offer', true)
 await phones.business.getByRole('button', { name: 'ACCEPT' }).click(); await wait(400)
@@ -216,7 +216,7 @@ await phones.business.getByText('I will pick…', { exact: true }).click(); awai
 await shot(phones.business, 'phone-r1-promise-list', true)
 await phones.business.locator('.sheet__body .ocard:not([disabled])').first().click(); await wait(300)
 await phones.community.getByRole('button', { name: /VETO/ }).click(); await wait(200)
-await phones.community.getByRole('button', { name: /Business/ }).click(); await wait(200)
+await phones.community.getByRole('button', { name: /^Business$/ }).click(); await wait(200)
 await shot(phones.community, 'phone-veto-confirm', true)
 await phones.community.getByRole('button', { name: /YES\. VETO/ }).click(); await wait(400)
 await shot(phones.community, 'phone-r1-table-after-veto', true)

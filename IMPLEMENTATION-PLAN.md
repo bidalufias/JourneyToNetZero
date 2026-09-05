@@ -14,7 +14,7 @@ Everything below points into those documents rather than repeating them.
 When this plan and a review disagree, this plan wins, because it was
 written last.
 
-## Status: six work packages done, WP7 in progress
+## Status: seven work packages done
 
 | Package | Commit | Left out |
 |---|---|---|
@@ -24,10 +24,11 @@ written last.
 | WP4 · The onboarding screens | `5eb7f9c` | Item 6, the Reveal ending on facilitator input, was optional and was not done |
 | WP5 · The content pack in plain English | `ea89390` | Item 7, two students reading twenty cards each, is a live test still to run |
 | WP6 · The guide and the facilitator's script | `6d6b5e6` | Nothing |
-| WP7 · Play like a finished game | in progress | From the first family playtest |
+| WP7 · Play like a finished game | `c50aaff` to `3a05cb0` | Three taps per sentence, pictures on cards and a tap-a-word glossary for the news, recorded in playtest 2 for a next package |
 
-All on branch `claude/net-zero-game-review-s1qp8q`. 120 tests pass, the
-typecheck and build are clean, and the function bundle is fresh. The
+All on branch `claude/net-zero-game-review-s1qp8q`. 140 tests pass, the
+typecheck and build are clean, and the function bundle is fresh. Two
+simulated family playtests are recorded under `playtests/`. The
 acceptance test in section 8 is the next thing to run, with a real room.
 
 ---
@@ -37,7 +38,7 @@ acceptance test in section 8 is the next thing to run, with a real room.
 **Read** the three reviews in the order above. Then `README.md`, which
 explains the architecture and the three rules that hold it together.
 
-**Run** `npm install && npm test && npm run typecheck`. All 120 tests pass on
+**Run** `npm install && npm test && npm run typecheck`. All 140 tests pass on
 this branch and must still pass at the end of every change.
 
 **Rehearse** a session in the browser. `tools/drive-session.mjs` opens the
@@ -409,11 +410,42 @@ where it is given.
     what the moving together bonus added. The phone sheet no longer says
     forty seconds.
 
+The second playtest, `playtests/2026-09-05-family-2/FINDINGS.md`, produced
+none of the ten. It produced these, all verified against the code and done
+in `3a05cb0`:
+
+11. **The cards on the Talk screen.** Every seat sees its cards while it
+    talks, above the buttons. Tapping one opens SAY IT.
+12. **Where the money went.** The engine records every move of Budget and
+    Company Money as it applies it (`RoundLog.money`), and the result
+    screen lists them in order, adding up to the header: the crisis, the
+    card, paying half, the Government's rule, the cap, and when the next
+    round's money arrives. The Government's PAYING HALF line says no money
+    moves until the cards turn, on the phone and on the TV strip.
+13. **Who helped.** The HELPED badge names the seat whose card doubled the
+    Community card, on the TV and the phone; the Community's result quotes
+    the card, and the helper's result says it helped.
+14. **The tip, once.** It sits above the news under the one clock instead of
+    covering the phone with a second clock, says that one player gets one
+    each round in turn, and after SHARE IT or KEEP IT SECRET one line says
+    what that did. The trust screen tells the other three seats that
+    everyone gets a turn.
+15. **Public Trust in the header** for the three seats that can hold it.
+16. **Dirty cards marked on the Reveal.** DIRTY CARD, PROTEST CARD and
+    PARTNERSHIP on the TV card and the phone mirror, and the practice Reveal
+    says who broke moving together and how many moved.
+17. **Face-down cards say TURNING NEXT** and FACE DOWN.
+18. **Small things.** SAY NO is called the veto everywhere. The veto sheet
+    says a practice veto comes back. The power step's waiting line says you
+    are ready and how many are left. The ⋯ sheet carries the running clock.
+    Nobody Left Behind says what it checks: 6.3 or more after every round.
+
 Done when: `test/room.test.ts` covers the done command, the reveal hold,
-trust after the stake, the spotlight count and the pays-half deal; the copy
-test passes; a drive rehearsal shows the countdown, the mirror and the two
-badges; and a second four-player playtest against the same script produces
-none of the ten findings above.
+trust after the stake, the spotlight count, the pays-half deal, the money
+lines, the named helper, the dirty mark and the tip line; the copy test
+passes; a drive rehearsal runs clean; and the two playtests are recorded.
+All done. Left for a next package, from playtest 2: one-tap sentences,
+pictures on cards, and a glossary a child can tap on the news.
 
 ---
 

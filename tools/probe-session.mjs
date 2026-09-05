@@ -73,7 +73,7 @@ await next('table R1')
 // Real veto: community drags slider on Business
 const c = phones.community
 await btn(c, /VETO/).click(); await wait(300)
-await btn(c, /Business/).click(); await wait(200)
+await btn(c, /^Business$/).click(); await wait(200)
 await btn(c, /YES\. VETO/).click(); await wait(500)
 await shot(c, 'community-after-real-veto', true)
 await shot(phones.business, 'business-table-after-veto', true)
