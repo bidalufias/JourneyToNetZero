@@ -19,7 +19,7 @@ import type { Role } from '../engine/types'
 import type { DashboardView } from '../game/session'
 import { ROLE_LABEL } from '../game/session'
 import { LABEL, STEP_LABEL } from '../game/vocab'
-import { COALITION_HOLD_MS, PROMISE_STING_MS, RECKONING_FIRST_CARD_MS } from '../game/session'
+import { COALITION_HOLD_MS, PHASE_MS, PROMISE_STING_MS, RECKONING_FIRST_CARD_MS } from '../game/session'
 import { revealBadges } from '../game/reveal'
 import { serverNow } from '../net/clock'
 import { RoleGlyph } from '../ui/primitives'
@@ -50,7 +50,7 @@ import {
  * the third card and talk about it, which is the single most useful place in
  * the session to be able to stop.
  */
-function useElapsed(endsAt: number | null, pausedAt: number | null): number {
+function useElapsed(endsAt: number | null, pausedAt: number | null, total: number): number {
   // `performance.now()` rather than `Date.now()`: it only ever moves forward,
   // at one second per second, whatever the machine believes the time is.
   const [start] = useState(() => performance.now())
@@ -76,12 +76,17 @@ function useElapsed(endsAt: number | null, pausedAt: number | null): number {
   }, [paused])
 
   const local = (heldSince.current ?? performance.now()) - start - spentHeld.current
-  return revealElapsed(local, deadlineElapsed(endsAt, pausedAt ?? serverNow()))
+  return revealElapsed(local, deadlineElapsed(endsAt, pausedAt ?? serverNow(), total))
 }
 
 export function Reckoning({ view }: { view: DashboardView }) {
   const log = view.lastRound!
-  const elapsed = useElapsed(view.phaseEndsAt, view.pausedAt)
+  // Measured against this phase's own length. The practice Reveal is shorter
+  // than a round's, and reading its deadline against the round's length said
+  // the sequence was already twenty seconds in, so all four practice cards
+  // turned at once the moment the screen appeared.
+  const total = view.phase === 'practiceReveal' ? PHASE_MS.practiceReveal : PHASE_MS.reckoning
+  const elapsed = useElapsed(view.phaseEndsAt, view.pausedAt, total)
 
   const revealedCount = cardsDue(elapsed)
   const allRevealed = revealedCount >= 4
