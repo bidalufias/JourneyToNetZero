@@ -82,7 +82,7 @@ await shot(dash, 'dash-table-after-veto')
 // Business promises the card it will NOT pick (to break a promise)
 const b = phones.business
 await btn(b, 'SAY IT').click(); await wait(200); await b.getByText('I will pick…', { exact: true }).click(); await wait(200)
-const promiseBtns = b.locator('.sheet__body .btn--ghost')
+const promiseBtns = b.locator('.sheet__body .ocard:not([disabled])')
 note(`business promise options: ${await promiseBtns.count()}`)
 await promiseBtns.first().click(); await wait(300)
 // Gov turns co-funding on

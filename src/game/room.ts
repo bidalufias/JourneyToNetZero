@@ -37,6 +37,7 @@ import { costLabel, kindOfArch, optionCondition, optionImpact, optionKind } from
 import { helperCard, helperOf, revealBadges } from './reveal'
 import { BOARD_NAME, DEAL_CONDITIONS, DEMAND_PHRASES, PRACTICE_LINE, privateLine } from './copy'
 import { pick, roomCode, shuffle } from './rng'
+import { TERM } from './vocab'
 import {
   RECKONING_CARD_GAP_MS,
   RECKONING_FIRST_CARD_MS,
@@ -1444,7 +1445,8 @@ function moneyLines(
     const income = role === 'government' ? content.config.fiscal_income : 1
     lines.push(`Your ${income} more for next round arrives when its cards turn.`)
   }
-  return { label: ROLE_RESOURCE[role].label, before, after, lines }
+  // The resource label already says "Your"; the heading adds its own.
+  return { label: role === 'government' ? TERM.budget : TERM.companyMoney, before, after, lines }
 }
 
 export function phoneView(room: Room, content: Content, role: Role): PhoneView {

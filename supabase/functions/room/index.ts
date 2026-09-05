@@ -709,6 +709,55 @@ function roomCode(seed) {
   return out;
 }
 
+// src/game/vocab.ts
+var TERM = {
+  crisis: "The Crisis",
+  talk: "The Talk",
+  choice: "The Choice",
+  reveal: "The Reveal",
+  tip: "Tip",
+  secretGoal: "Secret goal",
+  budget: "Budget",
+  companyMoney: "Company Money",
+  veto: "Veto",
+  sayNo: "Veto",
+  spotlight: "Spotlight",
+  publicTrust: "Public Trust",
+  movingTogether: "Moving together",
+  dirtyCard: "Dirty card",
+  protestCard: "Protest card",
+  partnership: "Partnership",
+  carbon: "Carbon",
+  economy: "Economy",
+  qualityOfLife: "Quality of life",
+  cleanEconomy: "Clean Economy",
+  netZero: "Net zero",
+  millionTonnes: "million tonnes",
+  lock: "Lock",
+  choose: "Choose",
+  facilitator: "Facilitator"
+};
+var LABEL = Object.fromEntries(
+  Object.entries(TERM).map(([k, v]) => [k, v.toUpperCase()])
+);
+var STEP_LABEL = {
+  lobby: "THE LOBBY",
+  briefing: "THE BRIEFING",
+  practiceTalk: "PRACTICE \xB7 THE TALK",
+  practiceChoice: "PRACTICE \xB7 THE CHOICE",
+  practiceReveal: "PRACTICE \xB7 THE REVEAL",
+  power: "YOUR POWER",
+  goal: "YOUR SECRET GOAL",
+  crisis: LABEL.crisis,
+  table: LABEL.talk,
+  choice: LABEL.choice,
+  reckoning: LABEL.reveal,
+  trust: LABEL.publicTrust,
+  summary: "THE STORY SO FAR",
+  results: "THE COUNTRY\u2019S RESULT",
+  ended: "THE COUNTRY\u2019S RESULT"
+};
+
 // src/game/session.ts
 var PHASE_MS = {
   lobby: 0,
@@ -1616,7 +1665,7 @@ function moneyLines(room, content2, log, role) {
     const income = role === "government" ? content2.config.fiscal_income : 1;
     lines.push(`Your ${income} more for next round arrives when its cards turn.`);
   }
-  return { label: ROLE_RESOURCE[role].label, before, after, lines };
+  return { label: role === "government" ? TERM.budget : TERM.companyMoney, before, after, lines };
 }
 function phoneView(room, content2, role) {
   const scenario = sceneFor(room, content2);
