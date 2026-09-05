@@ -14,6 +14,21 @@ Everything below points into those documents rather than repeating them.
 When this plan and a review disagree, this plan wins, because it was
 written last.
 
+## Status: all six work packages are done
+
+| Package | Commit | Left out |
+|---|---|---|
+| WP1 · Vocabulary and the copy defects | `adfcb57` | Nothing |
+| WP2 · The role card | `fdd86de` | Nothing |
+| WP3 · Sequencing | `40c4148` | Nothing |
+| WP4 · The onboarding screens | `5eb7f9c` | Item 6, the Reveal ending on facilitator input, was optional and was not done |
+| WP5 · The content pack in plain English | `ea89390` | Item 7, two students reading twenty cards each, is a live test still to run |
+| WP6 · The guide and the facilitator's script | `6d6b5e6` | Nothing |
+
+All on branch `claude/net-zero-game-review-s1qp8q`. 120 tests pass, the
+typecheck and build are clean, and the function bundle is fresh. The
+acceptance test in section 8 is the next thing to run, with a real room.
+
 ---
 
 ## 0. Before you start
@@ -21,8 +36,8 @@ written last.
 **Read** the three reviews in the order above. Then `README.md`, which
 explains the architecture and the three rules that hold it together.
 
-**Run** `npm install && npm test && npm run typecheck`. All 98 tests pass on
-this branch and must still pass at the end of every work package.
+**Run** `npm install && npm test && npm run typecheck`. All 120 tests pass on
+this branch and must still pass at the end of every change.
 
 **Rehearse** a session in the browser. `tools/drive-session.mjs` opens the
 projector and four phones in one Chromium and walks every phase,
@@ -101,6 +116,8 @@ a day, L is two to three days.
 
 ### WP1 · Vocabulary and the copy defects (S)
 
+**Done** in `adfcb57`.
+
 No behaviour changes. Puts one vocabulary in place and fixes the sentences
 that are wrong today, so every later package writes against a fixed word list.
 
@@ -147,6 +164,8 @@ any screen.
 
 ### WP2 · The role card (M)
 
+**Done** in `fdd86de`.
+
 `ROLE-CARDS.md` in full.
 
 1. `src/game/session.ts`: replace `ROLE_CHARACTER` with `ROLE_CARD`, four
@@ -178,6 +197,8 @@ the drive script's role reveal screenshots fit above the fold at 390x844,
 and no role text over seventy words appears anywhere on a phone.
 
 ### WP3 · Sequencing (L)
+
+**Done** in `40c4148`.
 
 `FLOW-REVIEW.md` section 5 Stage A. This is the package that turns the
 session from clock-driven to table-driven. Everything in it is in
@@ -259,6 +280,8 @@ the funded partnership line and a Round 6 tip on a phone.
 
 ### WP4 · The onboarding screens (M)
 
+**Done** in `5eb7f9c`, without the optional item 6.
+
 `FLOW-REVIEW.md` section 5 Stage B, with the copy from `LANGUAGE-REVIEW.md`.
 
 1. `src/App.tsx`: remove `ScanChoice`. A scanned code lands on the seat
@@ -287,6 +310,10 @@ only the role card, the coach strip and the projector.
 
 ### WP5 · The content pack in plain English (L, writing not code)
 
+**Done** in `ea89390`. The ratchets in the copy test are hard limits now, and
+a third check holds option card fragments under five percent. Item 7, the
+reading by two students, is still to run.
+
 `LANGUAGE-REVIEW.md` 5.12, 5.13, 5.14 and 5.6.
 
 1. Replace the eighteen `situation` strings with the versions in 5.12.
@@ -311,6 +338,8 @@ measurement script (three words or fewer) is under five percent of option
 sentences.
 
 ### WP6 · The guide and the facilitator's script (S)
+
+**Done** in `6d6b5e6`. The guide is 895 words.
 
 1. `public/how-to-play.html`: cut to about 800 words in the plain standard,
    structured as `LANGUAGE-REVIEW.md` 5.15 says. Character profiles,
@@ -405,14 +434,14 @@ ship WP3 with the copy defects from WP1 folded in.
 
 ## 7. Sizing
 
-| Package | Size | Mostly |
-|---|---|---|
-| WP1 | S | String edits, one new test |
-| WP2 | M | One component, five call sites, twelve goals |
-| WP3 | L | Reducer, one new phase, eight tests, bundle |
-| WP4 | M | Four screens |
-| WP5 | L | Writing, 216 cards, two readers |
-| WP6 | S | Two documents |
+| Package | Size | Mostly | Status |
+|---|---|---|---|
+| WP1 | S | String edits, one new test | Done |
+| WP2 | M | One component, five call sites, twelve goals | Done |
+| WP3 | L | Reducer, one new phase, eight tests, bundle | Done |
+| WP4 | M | Four screens | Done |
+| WP5 | L | Writing, 216 cards, two readers | Done, readers still to run |
+| WP6 | S | Two documents | Done |
 
 About three weeks for one person, or two weeks with the content pass running
 beside the code.
