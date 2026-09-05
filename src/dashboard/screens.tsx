@@ -5,8 +5,10 @@
 import type { Role } from '../engine/types'
 import type { DashboardView } from '../game/session'
 import { ROLE_LABEL } from '../game/session'
+import { STEP_LABEL } from '../game/vocab'
 import type { Endgame } from '../game/room'
 import { RoleGlyph } from '../ui/primitives'
+import { RoleCard } from '../ui/RoleCard'
 import { JoinPanel } from './Join'
 
 /**
@@ -53,14 +55,16 @@ export function Attract({
                   FACILITATOR SCRIPT <span className="dashbtn__key">F</span>
                 </button>
               ) : null}
-              <span className="attract__hint">SPACE STARTS THE SESSION</span>
+              <span className="attract__hint">
+                {view.readyCount >= 4 ? 'ALL FOUR READY · SPACE STARTS THE SESSION' : 'SPACE STARTS THE SESSION'}
+              </span>
             </div>
           ) : null}
         </div>
 
         <div className="attract__seats">
           <p className="attract__seats-label">
-            THE FOUR SEATS · {view.seats.filter((x) => x.name).length} OF 4
+            THE FOUR SEATS · {view.seats.filter((x) => x.name).length} OF 4 · {view.readyCount} READY
           </p>
           {view.seats.map((seat) => (
             <div
@@ -71,7 +75,10 @@ export function Attract({
               <RoleGlyph role={seat.role} size={22} />
               <div>
                 <div className="seat__role">{ROLE_LABEL[seat.role].toUpperCase()}</div>
-                <div className="seat__name">{seat.name ?? 'waiting…'}</div>
+                <div className="seat__name">
+                  {seat.name ?? 'waiting…'}
+                  {seat.ready ? <span style={{ opacity: 0.6 }}> · READY</span> : null}
+                </div>
               </div>
             </div>
           ))}
@@ -81,8 +88,8 @@ export function Attract({
       <div className="briefing-strip">
         <span className="briefing-strip__label">BRIEFING</span>
         <span className="briefing-strip__text">
-          Carbon {s.emissions.toFixed(0)} Mt net · Economy {s.growth.toFixed(1)}% · Quality of life{' '}
-          {s.happiness.toFixed(1)} · Clean economy {s.greenShare.toFixed(0)}%
+          Carbon {s.emissions.toFixed(0)} million tonnes · Economy {s.growth.toFixed(1)}% · Quality of
+          life {s.happiness.toFixed(1)} · Clean Economy {s.greenShare.toFixed(0)}%
         </span>
       </div>
     </div>
@@ -106,34 +113,43 @@ export function Briefing({ view, clock }: { view: DashboardView; clock: string |
         <span className="dash__live">LIVE</span>
         <span className="dash__channel">SEMENANJARA TONIGHT</span>
         <div className="dash__masthead-right">
-          <span>THE BRIEFING</span>
+          <span>{STEP_LABEL.briefing}</span>
           {clock ? <span className="dash__clock">{clock}</span> : null}
         </div>
       </header>
 
       <div className="brief">
         <div className="brief__lead">
-          <p className="attract__cue">THE NATIONAL MISSION · 2050</p>
+          <p className="attract__cue">{STEP_LABEL.results} · 2050</p>
           <h1 className="brief__title">
             Three targets.
             <br />
-            All three, or nobody wins.
+            You must reach all three, or nobody wins.
           </h1>
           <p className="brief__body">
-            Six crises. Each one goes the same way. You talk, you each pick a card in secret, then
-            all four turn over at once. <strong>Nothing you promise is binding.</strong>
+            There are six crises. Each one works the same way. You talk. You each pick a card in
+            secret. Then all four cards are shown at once.{' '}
+            <strong>Promises are not enforced.</strong>
           </p>
           <p className="brief__body">
-            You each hold a secret win of your own. It counts for nothing unless the country hits
-            all three targets.
+            You each have a secret goal too. It only counts if the country reaches all three
+            targets.
           </p>
         </div>
 
         <div className="brief__targets">
           {[
-            { label: 'CARBON', from: `${s.emissions.toFixed(0)} Mt net today`, target: 'DOWN TO NET ZERO' },
-            { label: 'ECONOMY', from: `${s.growth.toFixed(1)}% today`, target: 'AVERAGING 5%' },
-            { label: 'QUALITY OF LIFE', from: `${s.happiness.toFixed(1)} today`, target: 'UP TO 7.0' },
+            {
+              label: 'CARBON',
+              from: `${s.emissions.toFixed(0)} million tonnes today`,
+              target: 'DOWN TO NET ZERO',
+            },
+            {
+              label: 'ECONOMY',
+              from: `${s.growth.toFixed(1)}% today`,
+              target: 'GROWING 5% A YEAR ON AVERAGE',
+            },
+            { label: 'QUALITY OF LIFE', from: `${s.happiness.toFixed(1)} today`, target: 'UP TO 7 OUT OF 10' },
           ].map((t) => (
             <div key={t.label} className="brief__target">
               <span className="brief__target-label">{t.label}</span>
@@ -147,8 +163,8 @@ export function Briefing({ view, clock }: { view: DashboardView; clock: string |
       <div className="briefing-strip">
         <span className="briefing-strip__label">ON YOUR PHONE</span>
         <span className="briefing-strip__text">
-          What you can spend is in the top corner. The country’s three numbers sit under it. Tap
-          ⋯ for what any word means, or ‹ to re-read this round.
+          Your money is in the top corner. The country’s three numbers are under it. Tap ⋯ to
+          see what a word means. Tap ‹ to read this round again.
         </span>
       </div>
     </div>
@@ -156,39 +172,41 @@ export function Briefing({ view, clock }: { view: DashboardView; clock: string |
 }
 
 /**
- * The onboarding, on the shared screen.
+ * The two onboarding steps that own the shared screen: the power and the goal.
  *
- * Every step is a single instruction, sized for the back of the room, plus one
- * line of direction for the person running it. There is always a facilitator,
- * and the board's job is to tell them what happens next without making them
- * look away from the table.
+ * Each is a single instruction, sized for the back of the room, plus one line
+ * of direction for the person running it. There is always a facilitator, and
+ * the board's job is to tell them what happens next without making them look
+ * away from the table. The practice choice is not here: it shows the same
+ * board as the practice talk, so the two halves of the practice look alike
+ * and neither looks like a live round.
  */
 export function Onboarding({ view, clock }: { view: DashboardView; clock: string | null }) {
   const steps: Record<string, { step: string; heading: string; body: string; cue: string }> = {
-    practiceChoice: {
-      step: 'PRACTICE · CHOOSING',
-      heading: 'Pick a card.',
-      body: 'Tap one, then lock it in. The arrows say which way it pushes the country. None of this counts.',
-      cue: 'Say: this one is practice. Tap a card, lock it in, then look up here.',
-    },
     power: {
-      step: 'WHAT EACH OF YOU CAN DO',
-      heading: 'One of you can do something the others cannot.',
-      body: 'Read your own phone. Nobody else has the move you are looking at.',
-      cue: 'Say: the Activist can name people in public. The Community can say no. Read your own screen.',
+      step: STEP_LABEL.power,
+      heading: 'Each of you can do one thing the others cannot.',
+      body: 'Your phone shows your own card. This screen shows all four.',
+      cue: 'Say: read your own phone. Then look up and see what the other three can do to you.',
     },
     goal: {
-      step: 'YOUR SECRET WIN',
-      heading: 'Now decide what you want.',
-      body: 'Three private goals on your phone. Pick one. Nobody sees which. It only counts if the country hits all three targets.',
-      cue: 'Say: you have seen how this country works. Now choose what you personally want out of it.',
+      step: STEP_LABEL.goal,
+      heading: 'Now choose what you want.',
+      body: 'Three secret goals on your phone. Choose one. Nobody sees which. It only counts if the country reaches all three targets.',
+      cue: 'Say: you have seen how this country works. Now choose what you want from it.',
     },
   }
   const s = steps[view.phase]
   if (!s) return null
 
-  const locked = view.seats.filter((x) => x.locked).length
-  const ready = view.phase === 'practiceChoice' ? `${locked} of 4 locked in` : null
+  // Both steps print how many of the four have done it, because both end when
+  // the fourth one does, and the clock is only the fallback.
+  const ready =
+    view.phase === 'power'
+      ? `${view.readyCount} OF 4 READY`
+      : view.phase === 'goal'
+        ? `${view.sealedCount} OF 4 CHOSEN`
+        : null
 
   return (
     <div className="dash">
@@ -208,6 +226,13 @@ export function Onboarding({ view, clock }: { view: DashboardView; clock: string
           <p className="onboard__body">{s.body}</p>
           {ready ? <p className="onboard__ready">{ready}</p> : null}
         </div>
+        {view.phase === 'power' ? (
+          <div className="onboard__cards">
+            {view.seats.map((seat) => (
+              <RoleCard key={seat.role} role={seat.role} size="tile" lines="power" name={seat.name} />
+            ))}
+          </div>
+        ) : null}
         <p className="onboard__cue">
           <span className="onboard__cue-label">SAY THIS</span>
           {s.cue}
@@ -254,13 +279,13 @@ export function CoalitionBonus({ view }: { view: DashboardView }) {
         </div>
         <div>
           <p className="coalition__effect">
-            {bonus.emissions} Mt carbon · +{bonus.green}% clean economy · +{bonus.happiness} quality of
-            life
+            {bonus.emissions} million tonnes of carbon · +{bonus.green}% Clean Economy · +
+            {bonus.happiness} quality of life
           </p>
           <p className="coalition__note">
             {aligned === 4
               ? 'No single player can do this alone.'
-              : 'No single player can do this alone. All four would have been -9.5 Mt.'}
+              : 'No single player can do this alone. With all four it would have been 9.5 million tonnes.'}
           </p>
         </div>
       </div>
@@ -295,22 +320,22 @@ export function TrustAward({ view, clock }: { view: DashboardView; clock: string
         <span className="dash__live">LIVE</span>
         <span className="dash__channel">SEMENANJARA TONIGHT</span>
         <div className="dash__masthead-right">
-          <span>PUBLIC TRUST · ROUND {log.round}</span>
+          <span>{STEP_LABEL.trust} · ROUND {log.round}</span>
           {clock ? <span className="dash__clock">{clock}</span> : null}
         </div>
       </header>
 
       <div className="trust">
         <div className="trust__lead">
-          <p className="attract__cue">WHO THE COUNTRY BACKED</p>
+          <p className="attract__cue">WHO THE PEOPLE TRUST</p>
           <h1 className="trust__title">
-            Two tokens.
+            Two points.
             <br />
             Every round.
           </h1>
           <p className="trust__body">
-            Nobody hands these out. They go to whoever the country thinks earned them, and some
-            cards will not open without them.
+            Nobody hands these out. The people give them to whoever helped them most. Some cards
+            need them.
           </p>
         </div>
 
@@ -349,7 +374,7 @@ export function RoundSummary({ view }: { view: DashboardView }) {
       decimals: 0,
     },
     {
-      label: 'ECONOMY AVG',
+      label: 'ECONOMY AVERAGE',
       value: s.averageGrowth.toFixed(1),
       gap: view.targets.growth - s.averageGrowth,
       unit: 'short',
@@ -368,7 +393,7 @@ export function RoundSummary({ view }: { view: DashboardView }) {
   return (
     <div className="summary">
       <div className="summary__story">
-        <h2 className="table__heading">THE STORY SO FAR</h2>
+        <h2 className="table__heading">{STEP_LABEL.summary}</h2>
         <ol className="summary__list">
           {view.history.map((h) => (
             <li key={h.round} className="summary__item">
@@ -380,7 +405,7 @@ export function RoundSummary({ view }: { view: DashboardView }) {
       </div>
 
       <div className="summary__standing">
-        <h2 className="table__heading">WHERE THAT LEAVES YOU</h2>
+        <h2 className="table__heading">WHERE YOU ARE NOW</h2>
         {shortfalls.map((row) => (
           <div key={row.label} className="standing">
             <span className="standing__label">{row.label}</span>
@@ -403,8 +428,8 @@ export function RoundSummary({ view }: { view: DashboardView }) {
           {roundsLeft === 0
             ? 'Six rounds gone. This is the country you built.'
             : reachable(view)
-              ? `${roundsLeft} round${roundsLeft === 1 ? '' : 's'} left. All three targets still reachable.`
-              : 'Net zero is no longer reachable.'}
+              ? `${roundsLeft} round${roundsLeft === 1 ? '' : 's'} left. All three targets can still be reached.`
+              : 'Net zero can no longer be reached.'}
         </p>
       </div>
     </div>
@@ -426,7 +451,7 @@ function roundSentence(view: DashboardView, round: number): string {
   if (gov) parts.push(gov.headline)
   if (log.alignedCount === 4) parts.push('All four moved together')
   else if (log.alignedCount === 3) parts.push('Three moved together')
-  if (log.spotlightTarget) parts.push('Someone was named publicly')
+  if (log.spotlightTarget) parts.push('The Spotlight caught someone')
   return parts.join('. ') + '.'
 }
 
@@ -443,15 +468,15 @@ function roundSentence(view: DashboardView, round: number): string {
 const GRADE_BANNER: Record<Endgame['grade'], { title: string; note: string }> = {
   REACHED: {
     title: 'NET ZERO REACHED',
-    note: 'All three targets. This is the outcome the country needed.',
+    note: 'All three targets. The country made it.',
   },
   CLOSE: {
     title: 'SO CLOSE',
-    note: 'Every target you missed, you missed narrowly. It was there to be had.',
+    note: 'You missed by a little. You nearly made it.',
   },
   MISSED: {
     title: 'MISSED',
-    note: 'Not close on at least one. Here is exactly where it went.',
+    note: 'You missed at least one target by a lot. Here is where.',
   },
 }
 
@@ -464,7 +489,7 @@ export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endga
   const heading = endgame.win ? 'NATION BUILDER' : anyGoalMet ? 'HOLLOW VICTORY' : 'THE COUNTRY MISSED'
   const grade = GRADE_BANNER[endgame.grade]
   const labels: Record<string, { name: string; unit: string; fmt: (v: number) => string }> = {
-    emissions: { name: 'CARBON', unit: 'Mt net', fmt: (v) => v.toFixed(0) },
+    emissions: { name: 'CARBON', unit: 'million tonnes', fmt: (v) => v.toFixed(0) },
     growth: { name: 'ECONOMY AVERAGE', unit: '%', fmt: (v) => v.toFixed(1) },
     happiness: { name: 'QUALITY OF LIFE', unit: '/10', fmt: (v) => v.toFixed(1) },
   }
@@ -473,7 +498,7 @@ export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endga
     <div className="dash">
       <header className="dash__masthead">
         <span className="dash__live">LIVE</span>
-        <span className="dash__channel">THE NATIONAL MISSION · 2050</span>
+        <span className="dash__channel">{STEP_LABEL.results} · 2050</span>
         <span className="dash__masthead-right">
           {endgame.win ? 'THREE TARGETS. ALL THREE.' : 'THREE TARGETS. NOT ALL THREE.'}
         </span>
@@ -509,10 +534,10 @@ export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endga
           <h1 className="ending__title">{heading}</h1>
           <p className="ending__blurb">
             {endgame.win
-              ? 'Three targets. All three. 34 million people live in a country that still works.'
+              ? 'All three targets. 34 million people live in a country that works.'
               : anyGoalMet
-                ? 'You got exactly what you wanted. The country is 3.2°C warmer. Was it worth it?'
-                : 'Nobody got what they wanted, and the country is 3.2°C warmer. Four rational actors, one dead country.'}
+                ? 'You reached your own goal. The country did not reach its targets. It is 3.2°C hotter.'
+                : 'Nobody reached their goal. The country did not reach its targets. It is 3.2°C hotter.'}
           </p>
 
           <div className="ending__players">
@@ -523,7 +548,7 @@ export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endga
                 </div>
                 <div className="ending__player-name">{p.name}</div>
                 <div className="ending__player-goal">
-                  {p.goalTitle ?? 'No secret win'} {p.goalMet ? '✓' : '✕'}
+                  {p.goalTitle ?? 'No secret goal'} {p.goalMet ? '✓' : '✕'}
                 </div>
                 <div className="ending__player-title">{p.title}</div>
               </div>
@@ -535,7 +560,7 @@ export function Endgame({ view, endgame }: { view: DashboardView; endgame: Endga
       <div className="briefing-strip">
         <span className="briefing-strip__label">DEBRIEF</span>
         <span className="briefing-strip__text">
-          Who did you need most, and did you tell them? What is the one thing you gave up?
+          Who did you need most? Did you tell them? What did you give up?
         </span>
       </div>
       <span hidden>{view.code}</span>

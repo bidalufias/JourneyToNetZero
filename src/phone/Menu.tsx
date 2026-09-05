@@ -1,8 +1,8 @@
 /**
- * The ⋯ sheet: how to play, your sealed goal, and the way out.
+ * The ⋯ sheet: how to play, your secret goal, and the way out.
  *
  * Leaving is destructive in a way nothing else on the phone is. It empties
- * your chair, drops your sealed goal, and lets somebody else sit down, so it
+ * your chair, drops your secret goal, and lets somebody else sit down, so it
  * asks twice and says plainly what it will cost. It is still worth having: a
  * player who took the wrong seat previously had no way to give it back, and the
  * whole workshop had to start a new room.
@@ -40,7 +40,7 @@ export function MenuSheet({
               every word explained. It opens in a tab of its own so a player
               who wanders into it mid-round has not left the game. */}
           <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
-            THE LONG VERSION
+            THE FULL GUIDE
           </span>
           <a className="btn btn--ghost" href={HOW_TO_PLAY_URL} target="_blank" rel="noreferrer">
             THE FULL WRITTEN GUIDE
@@ -52,11 +52,11 @@ export function MenuSheet({
           {confirming ? (
             <>
               <p className="ptext">
-                This empties your seat. Your sealed goal goes with you, somebody else can take the
-                chair, and rejoining means starting again as a new player.
+                This empties your seat. Your secret goal goes with you. Somebody else can take the
+                seat. If you come back, you start again as a new player.
               </p>
               <button className="btn btn--accent" onClick={onLeave}>
-                YES, LEAVE THE GAME
+                YES, LEAVE
               </button>
               <button className="btn btn--ghost" onClick={() => setConfirming(false)}>
                 STAY

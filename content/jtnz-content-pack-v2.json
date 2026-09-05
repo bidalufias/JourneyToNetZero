@@ -13,11 +13,11 @@
   }
  },
  "insiderTips": {
-  "rule": "One tip per round to exactly one player, delivered privately at the start of THE TABLE. No mechanical effect. The dashboard announces that a tip was delivered but never who received it.",
+  "rule": "One tip per round to one player, sent privately when the crisis appears. It has no effect on the numbers. The big screen says a tip was sent, never to whom.",
   "rotation": "shuffle the four roles for rounds 1-4, then draw two more at random for rounds 5-6; never the same role twice in a row",
   "types": {
    "forecast": {
-    "label": "WEATHER REPORT",
+    "label": "TIP",
     "rounds": [
      1,
      2,
@@ -25,10 +25,10 @@
      4,
      5
     ],
-    "desc": "Hints at the category of next round's crisis. Never the exact variant."
+    "desc": "A warning about what kind of crisis comes next. Never the exact one."
    },
    "intel": {
-    "label": "SEALED BRIEF",
+    "label": "TIP",
     "rounds": [
      1,
      2,
@@ -37,10 +37,10 @@
      5,
      6
     ],
-    "desc": "A true fact about the crisis on the table right now."
+    "desc": "A true fact about the crisis happening now."
    },
    "whisper": {
-    "label": "WHISPER",
+    "label": "RUMOUR",
     "rounds": [
      2,
      3,
@@ -48,65 +48,65 @@
      5,
      6
     ],
-    "desc": "A rumour about another player's secret goal. Right about 7 times in 10."
+    "desc": "A rumour about another player’s secret goal. Right about 7 times in 10."
    }
   },
   "whisperAccuracy": 0.7,
   "forecasts": {
    "energy": [
-    "A contact at NuriTenaga says senior staff have cancelled leave for next month. Something is coming on the power side.",
-    "Three tankers scheduled for Port Damai have been rerouted. Energy traders are nervous and nobody will say why."
+    "Power company staff cannot take leave next month, a friend says. The next crisis is about power.",
+    "Three fuel tankers due at Port Damai have been sent elsewhere. Nobody will say why. The next crisis is about power."
    ],
    "health": [
-    "The Health Ministry has quietly reactivated its emergency operations room. No announcement has been made.",
-    "Hospital procurement orders for oxygen and masks tripled last week. Someone is expecting a bad season."
+    "The Health Ministry has quietly reopened its emergency room. It has not told anyone. The next crisis is about health.",
+    "Hospitals ordered three times more oxygen and masks last week. Someone expects a bad season. The next crisis is about health."
    ],
    "election": [
-    "The Election Commission has booked printing capacity it would only need for a national ballot.",
-    "Two backbenchers have started visiting their constituencies every weekend. They think a vote is coming."
+    "The Election Commission has booked enough printing for a national vote. The next crisis is about an election.",
+    "Two MPs now visit their home areas every weekend. They think a vote is coming. The next crisis is about an election."
    ],
    "pollution": [
-    "An environment officer has been suspended for 'procedural reasons'. Colleagues say she filed a report nobody wanted.",
-    "A water treatment plant has ordered six months of filtration chemicals in a single purchase order."
+    "An environment officer has been suspended. Her colleagues say she filed a report nobody wanted. The next crisis is about pollution.",
+    "A water plant has bought six months of cleaning chemicals at once. The next crisis is about pollution."
    ],
    "disaster": [
-    "The meteorological department has revised its seasonal outlook upward twice in three weeks, and stopped publishing the revisions.",
-    "The army's disaster relief units have been placed on standby. That has happened four times in twenty years."
+    "The weather office has changed its forecast twice in three weeks. Then it stopped publishing the forecast. The next crisis is a natural disaster.",
+    "The army’s disaster teams are on standby. That has happened four times in twenty years. The next crisis is a natural disaster."
    ]
   },
   "intel": {
-   "R1A": "The export slump is expected to last eleven months, not three. The forecasts being shown in public assume three.",
-   "R1B": "The central bank has less room than it is admitting. Reserves cover about five months of imports, not the nine being quoted.",
-   "R1C": "The ratings agency has signalled privately that one credible climate commitment would stop a third downgrade.",
-   "R2A": "Gas contracts are locked at the old price until the end of next quarter. After that the real bill arrives.",
-   "R2B": "Two of the four data centres eating the grid are owned through holding companies with political connections.",
-   "R2C": "Treasury modelling shows the subsidy can survive one more year and not two. The public has been told three.",
-   "R3A": "The virus is milder than feared but far more transmissible. The economic damage will outrun the medical damage.",
-   "R3B": "Wind patterns turn in nine days. The haze will clear on its own, and whoever acts before then will get the credit.",
-   "R3C": "Hospital admissions are being recorded under old codes, so the official heat-illness numbers are roughly half the real ones.",
-   "R4A": "Internal polling shows climate ranks fourth with voters, behind cost of living, jobs and healthcare, but first with under-thirties.",
-   "R4B": "The refinery has eight years of viable life left at most. Everyone campaigning on saving it knows this.",
-   "R4C": "Two of the four defectors can be won back with a project in their constituency. The other two cannot be won back at all.",
-   "R5A": "The discharge was not a one-off. Plant logs show a pattern going back at least four years.",
-   "R5B": "The import permits were issued under a waste code written in 1994 that nobody has updated since.",
-   "R5C": "The fisheries will recover in about three years if the outfall is fixed now, and not at all if it runs another season.",
-   "R6A": "Two of the eight flooded states were flagged as high risk in a report filed three years ago and never published.",
-   "R6B": "The reservoirs have about seven weeks left at current draw. The figure being briefed to the public is fourteen.",
-   "R6C": "There are roughly eight hundred slopes in the country in the same condition as the one that failed."
+   "R1A": "The export slump will last eleven months, not three. The public forecasts assume three.",
+   "R1B": "The central bank has less money than it admits. Its savings cover five months of imports, not nine.",
+   "R1C": "The ratings agency has said something privately. One real climate promise would stop the next downgrade.",
+   "R2A": "Gas contracts stay at the old price for three more months. After that the real bill arrives.",
+   "R2B": "Two of the four big data centres have owners with political connections. The owners hide behind holding companies.",
+   "R2C": "Treasury numbers show the subsidy can survive one more year, not two. The public has been told three.",
+   "R3A": "The virus is milder than feared but spreads much faster. The damage to the economy will beat the damage to health.",
+   "R3B": "The wind changes in nine days. The haze will clear on its own. Whoever acts before then will get the credit.",
+   "R3C": "Hospitals record heat sickness under old names. The official numbers are about half the real ones.",
+   "R4A": "Private polls put climate fourth with voters, behind prices, jobs and health. With voters under thirty it is first.",
+   "R4B": "The refinery has eight years of life left at most. Everyone campaigning to save it knows this.",
+   "R4C": "A project in their area wins back two of the four rebels. The other two cannot be won back at all.",
+   "R5A": "The dumping was not a one-time event. Plant records show it going back at least four years.",
+   "R5B": "The import permits used a waste rule written in 1994. Nobody has updated it since.",
+   "R5C": "Fix the pipe now and the fish return in three years. Run it another season and they never return.",
+   "R6A": "A report three years ago named two flooded states as high risk. It was never published.",
+   "R6B": "The reservoirs have about seven weeks left at today’s use. The public has been told fourteen.",
+   "R6C": "About eight hundred slopes in this country are just like this one."
   },
   "whispers": {
-   "G-a": "Word is the Minister cares more about the next election than the next decade.",
-   "G-b": "Word is the Minister has promised the markets that growth will not dip, whatever it costs.",
-   "G-c": "Word is the Minister wants to be remembered for the transition, and is willing to lose votes over it.",
-   "B-a": "Word is the Group CEO is under board pressure to end the year with cash in hand.",
-   "B-b": "Word is the Group CEO has staked their reputation on being the one who cleaned up the industry.",
-   "B-c": "Word is the Group CEO is less worried about profit than about being allowed to keep operating.",
-   "C-a": "Word is the neighbourhood only cares whether people are actually better off at the end of this.",
-   "C-b": "Word is the neighbourhood will not accept anyone being left behind, even for a good reason.",
-   "C-c": "Word is the neighbourhood has stopped waiting for help and intends to do it themselves.",
-   "A-a": "Word is the movement will not sign anything, no matter what is offered.",
-   "A-b": "Word is the movement is playing a long game and cares only about how much of the economy turns green.",
-   "A-c": "Word is the movement wants someone held publicly accountable before this is over."
+   "G-a": "People say the Minister cares more about the next election than 2050.",
+   "G-b": "People say the Minister promised the markets that growth will never dip.",
+   "G-c": "People say the Minister wants to be remembered for going clean. Votes matter less.",
+   "B-a": "People say the CEO must end the year with spare cash.",
+   "B-b": "People say the CEO wants the credit for cleaning up the industry.",
+   "B-c": "People say the CEO cares less about profit than about staying open.",
+   "C-a": "People say the neighbourhood only cares whether families end up better off.",
+   "C-b": "People say the neighbourhood will not accept anyone being left behind.",
+   "C-c": "People say the neighbourhood has stopped waiting and will help itself.",
+   "A-a": "People say the movement will not sign anything, whatever it is offered.",
+   "A-b": "People say the movement only cares how clean the economy becomes.",
+   "A-c": "People say the movement wants someone named and blamed before this ends."
   }
  },
  "config": {
@@ -230,21 +230,21 @@
    {
     "id": "G-a",
     "title": "Landslide",
-    "desc": "End the game holding 6 or more Public Trust.",
+    "desc": "Finish with 6 or more Public Trust.",
     "check": "trust.government >= 6",
     "measured": 0.414
    },
    {
     "id": "G-b",
     "title": "Steady Hand",
-    "desc": "Growth never falls below 4.0% in any round.",
+    "desc": "The economy never grows less than 4% in any round.",
     "check": "min(gdpHistory) >= 4.0",
     "measured": 0.442
    },
    {
     "id": "G-c",
     "title": "The Legacy",
-    "desc": "Clean Economy reaches 55% or more.",
+    "desc": "Clean Economy reaches 55%. It is 10% today.",
     "check": "greenShare >= 55",
     "measured": 0.289
    }
@@ -252,22 +252,22 @@
   "business": [
    {
     "id": "B-a",
-    "title": "Market Dominance",
-    "desc": "End with 6 or more Company Money.",
+    "title": "Market Leader",
+    "desc": "Finish with 6 or more Company Money.",
     "check": "capital >= 6",
     "measured": 0.391
    },
    {
     "id": "B-b",
     "title": "Green Champion",
-    "desc": "Personally deliver 33 Mt or more of cuts.",
+    "desc": "Your own cards cut 33 million tonnes of carbon or more.",
     "check": "playerEmissions.business <= -33",
     "measured": 0.414
    },
    {
     "id": "B-c",
-    "title": "Licence to Operate",
-    "desc": "End with 2+ Public Trust and 4+ Company Money.",
+    "title": "Trusted Company",
+    "desc": "Finish with at least 2 Public Trust and 4 Company Money.",
     "check": "trust.business >= 2 && capital >= 4",
     "measured": 0.338
    }
@@ -276,21 +276,21 @@
    {
     "id": "C-a",
     "title": "A Happy Nation",
-    "desc": "Quality of life ends at 8.0 or above.",
+    "desc": "Quality of life reaches 8. It is 6 today.",
     "check": "happiness >= 8.0",
     "measured": 0.374
    },
    {
     "id": "C-b",
     "title": "Nobody Left Behind",
-    "desc": "Quality of life never drops below 6.3 in any round.",
+    "desc": "Quality of life never falls below 6.3.",
     "check": "min(happinessHistory) >= 6.3",
     "measured": 0.35
    },
    {
     "id": "C-c",
-    "title": "Our Own Two Hands",
-    "desc": "Land 4 or more successful community-led actions.",
+    "title": "Our Own Hands",
+    "desc": "4 of your community cards get help from the Government or Business.",
     "check": "selfOrganiseSucceeded >= 4",
     "measured": 0.465
    }
@@ -299,21 +299,21 @@
    {
     "id": "A-a",
     "title": "No Compromise",
-    "desc": "Never take a Collaborate card, and still take the country 25 Mt past net zero.",
+    "desc": "Never pick a “join them” card. Carbon still reaches 25 million tonnes below zero.",
     "check": "!flags.COMPROMISED && emissions <= -25",
     "measured": 0.401
    },
    {
     "id": "A-b",
     "title": "The Long Game",
-    "desc": "Clean Economy reaches 52% or more.",
+    "desc": "Clean Economy reaches 52%. It is 10% today.",
     "check": "greenShare >= 52",
     "measured": 0.439
    },
    {
     "id": "A-c",
     "title": "Justice First",
-    "desc": "Quality of life 7.0+ and at least one Spotlight lands.",
+    "desc": "Quality of life reaches 7, and one of your Spotlights catches someone.",
     "check": "happiness >= 7.0 && spotlightHits >= 1",
     "measured": 0.238
    }
@@ -325,8 +325,8 @@
    "round": 1,
    "variant": "A",
    "type": "financial",
-   "title": "The Great Contraction",
-   "situation": "Semiconductor orders from the Northern markets collapse 30% overnight. Three factories in Perindu announce layoffs before lunch. The Ringga slides.",
+   "title": "The Export Crash",
+   "situation": "Orders for computer chips from the North fall 30% in one night. Three factories in Perindu announce job cuts before lunch. The Ringga falls.",
    "shock": {
     "g": -1.45,
     "h": -0.29,
@@ -338,8 +338,8 @@
      {
       "id": "R1A-G1",
       "arch": "SPEND_STEER",
-      "title": "Green Stimulus Package",
-      "desc": "RG 3bn into rooftop solar, rail and building retrofits.",
+      "title": "Spend Big on Clean Projects",
+      "desc": "Put RG 3 billion into rooftop solar, rail and building repairs.",
       "cost": {
        "fiscal": 2
       },
@@ -350,13 +350,13 @@
       "flags": [
        "GREEN_STIMULUS"
       ],
-      "headline": "Government bets recovery on clean jobs"
+      "headline": "Government spends RG 3 billion on clean jobs"
      },
      {
       "id": "R1A-G2",
       "arch": "DEREGULATE",
-      "title": "Bail Out the Big Exporters",
-      "desc": "Rescue the giants. Cut everything else.",
+      "title": "Rescue the Big Exporters",
+      "desc": "Give money to the big companies. Cut spending on everything else.",
       "cost": {
        "fiscal": 1
       },
@@ -367,7 +367,7 @@
       "flags": [
        "BAILOUT_BIG"
       ],
-      "headline": "Rescue for the giants, belt-tightening for the rest",
+      "headline": "Big exporters rescued. Everyone else faces cuts",
       "grants": [
        "business",
        "capital",
@@ -377,8 +377,8 @@
      {
       "id": "R1A-G3",
       "arch": "DEREGULATE",
-      "title": "Hold the Line",
-      "desc": "No new spending. Protect the reserves.",
+      "title": "Spend Nothing New",
+      "desc": "The Government spends nothing new. It keeps its savings safe.",
       "cost": {
        "fiscal": -1
       },
@@ -389,15 +389,15 @@
       "flags": [
        "FISCAL_HAWK"
       ],
-      "headline": "Minister urges patience as reserves hold"
+      "headline": "Minister spends nothing and waits"
      }
     ],
     "business": [
      {
       "id": "R1A-B1",
       "arch": "TRANSITION",
-      "title": "Retool for the Green Market",
-      "desc": "Convert lines to EV and solar components. Retrain everyone.",
+      "title": "Rebuild the Factories for Clean Products",
+      "desc": "Change the factory lines to make EV and solar parts. Retrain every worker.",
       "cost": {
        "capital": 3
       },
@@ -408,13 +408,13 @@
       "flags": [
        "RETOOLED"
       ],
-      "headline": "Sawit Prima retools for the green economy"
+      "headline": "Sawit Prima rebuilds its factories for clean products"
      },
      {
       "id": "R1A-B2",
       "arch": "EXPAND",
       "title": "Cut Costs, Cut Jobs",
-      "desc": "Twelve thousand redundancies. Offshore the rest.",
+      "desc": "Cut twelve thousand jobs. Move the rest of the work abroad.",
       "cost": {
        "capital": -2
       },
@@ -430,8 +430,8 @@
      {
       "id": "R1A-B3",
       "arch": "PARTNER",
-      "title": "Ask for a Lifeline",
-      "desc": "State support in exchange for guaranteeing the jobs.",
+      "title": "Ask the Government for Help",
+      "desc": "The Government gives money. The company promises to keep the jobs.",
       "cost": {
        "capital": 0
       },
@@ -442,15 +442,15 @@
       "flags": [
        "OWES_GOV"
       ],
-      "headline": "Industry seeks state support, pledges to save jobs"
+      "headline": "Industry asks for state money and promises to keep jobs"
      }
     ],
     "community": [
      {
       "id": "R1A-C1",
       "arch": "ADAPT",
-      "title": "Tighten Belts, Buy Local",
-      "desc": "Spend less, spend closer to home, wait it out.",
+      "title": "Spend Less, Buy Local",
+      "desc": "Families spend less and buy from local shops. They wait for better times.",
       "cost": {},
       "e": -4,
       "g": -0.2,
@@ -459,13 +459,13 @@
       "flags": [
        "LOCAL_ECON"
       ],
-      "headline": "Households cut back as local markets revive"
+      "headline": "Families spend less and local markets grow"
      },
      {
       "id": "R1A-C2",
       "arch": "DEMAND_RELIEF",
       "title": "March for Jobs",
-      "desc": "Demand the government spend, and spend now.",
+      "desc": "Demand that the Government spends money now to create jobs.",
       "cost": {},
       "e": 2,
       "g": 0.4,
@@ -477,7 +477,7 @@
       "id": "R1A-C3",
       "arch": "SELF_ORGANISE",
       "title": "Community Skills Fund",
-      "desc": "Neighbourhood retraining cooperatives.",
+      "desc": "Neighbours start their own training groups for new jobs.",
       "cost": {},
       "e": -2,
       "g": 0.1,
@@ -486,27 +486,27 @@
       "flags": [
        "COMMUNITY_FUND"
       ],
-      "headline": "Laid-off workers start their own retraining scheme"
+      "headline": "Workers who lost jobs start their own training scheme"
      }
     ],
     "activist": [
      {
       "id": "R1A-A1",
       "arch": "ESCALATE",
-      "title": "No Bailouts for Polluters",
-      "desc": "Green conditions on every rescue Ringga.",
+      "title": "No Rescue Money for Polluters",
+      "desc": "Every rescue Ringga must come with green conditions.",
       "cost": {},
       "e": -4,
       "g": -0.3,
       "h": -0.1,
       "gr": 4,
-      "headline": "Campaigners demand climate conditions on bailouts"
+      "headline": "Campaigners demand climate conditions on rescue money"
      },
      {
       "id": "R1A-A2",
       "arch": "COLLABORATE",
       "title": "Join the Recovery Taskforce",
-      "desc": "Take the seat. Shape it from inside.",
+      "desc": "Take a seat on the taskforce. Change the plan from inside.",
       "cost": {},
       "e": -3,
       "g": 0.3,
@@ -522,7 +522,7 @@
       "id": "R1A-A3",
       "arch": "EDUCATE",
       "title": "Publish the Green Jobs Report",
-      "desc": "Independent modelling of a clean recovery.",
+      "desc": "Publish an independent study of a clean recovery.",
       "cost": {},
       "e": -1,
       "g": 0.0,
@@ -541,8 +541,8 @@
    "round": 1,
    "variant": "B",
    "type": "financial",
-   "title": "Currency Shock",
-   "situation": "The Ringga loses 22% in eleven days. Imported food, medicine and machinery become brutally expensive. Exporters are quietly delighted.",
+   "title": "The Ringga Falls",
+   "situation": "The Ringga loses 22% of its value in eleven days. Imported food, medicine and machines become very expensive. Exporters make more money.",
    "shock": {
     "g": -1.11,
     "h": -0.47,
@@ -553,8 +553,8 @@
      {
       "id": "R1B-G1",
       "arch": "SPEND_STEER",
-      "title": "Import Substitution Drive",
-      "desc": "Build what we keep buying: panels, batteries, food.",
+      "title": "Make It Here",
+      "desc": "Build what we keep buying from abroad: solar panels, batteries, food.",
       "cost": {
        "fiscal": 2
       },
@@ -570,8 +570,8 @@
      {
       "id": "R1B-G2",
       "arch": "REGULATE",
-      "title": "Defend the Currency",
-      "desc": "Burn reserves and raise rates to hold the line.",
+      "title": "Defend the Ringga",
+      "desc": "Spend the country’s savings and raise interest rates to stop the fall.",
       "cost": {
        "fiscal": 2
       },
@@ -582,13 +582,13 @@
       "flags": [
        "RESERVES_SPENT"
       ],
-      "headline": "Central bank burns reserves defending the Ringga"
+      "headline": "Central bank spends its savings to defend the Ringga"
      },
      {
       "id": "R1B-G3",
       "arch": "DEREGULATE",
-      "title": "Let It Float",
-      "desc": "Stop intervening. Let the market decide.",
+      "title": "Let the Ringga Fall",
+      "desc": "Stop defending the Ringga. Let the market decide its value.",
       "cost": {
        "fiscal": -1
       },
@@ -599,15 +599,15 @@
       "flags": [
        "FLOATED"
       ],
-      "headline": "Ringga left to find its own level"
+      "headline": "Government stops defending the Ringga"
      }
     ],
     "business": [
      {
       "id": "R1B-B1",
       "arch": "TRANSITION",
-      "title": "Localise the Supply Chain",
-      "desc": "Bring inputs home. Expensive now, resilient later.",
+      "title": "Buy Parts From Local Factories",
+      "desc": "Buy our parts at home. It costs more now and less later.",
       "cost": {
        "capital": 3
       },
@@ -618,13 +618,13 @@
       "flags": [
        "LOCAL_SUPPLY"
       ],
-      "headline": "Manufacturer brings its supply chain home"
+      "headline": "Manufacturer switches to local parts"
      },
      {
       "id": "R1B-B2",
       "arch": "EXPAND",
-      "title": "Reprice for the Export Boom",
-      "desc": "A cheap Ringga makes us the cheapest supplier alive.",
+      "title": "Sell More Abroad",
+      "desc": "A cheap Ringga makes our exports the cheapest in the world.",
       "cost": {
        "capital": -2
       },
@@ -635,13 +635,13 @@
       "flags": [
        "EXPORT_SURGE"
       ],
-      "headline": "Exporters post record margins as Ringga slides"
+      "headline": "Exporters make record profits as the Ringga falls"
      },
      {
       "id": "R1B-B3",
       "arch": "PARTNER",
-      "title": "Co-Fund a Local Components Plant",
-      "desc": "Split the cost of building it here.",
+      "title": "Build a Parts Factory Together",
+      "desc": "The company and the Government share the cost of a parts factory.",
       "cost": {
        "capital": 1
       },
@@ -652,7 +652,7 @@
       "flags": [
        "LOCAL_SUPPLY"
       ],
-      "headline": "Joint venture to build components at home"
+      "headline": "Company and state build a parts factory together"
      }
     ],
     "community": [
@@ -660,7 +660,7 @@
       "id": "R1B-C1",
       "arch": "ADAPT",
       "title": "Switch to Local Food",
-      "desc": "Cheaper, closer, and a lot less choice.",
+      "desc": "Buy local food. It is cheaper and closer, with less choice.",
       "cost": {},
       "e": -5,
       "g": -0.1,
@@ -675,7 +675,7 @@
       "id": "R1B-C2",
       "arch": "DEMAND_RELIEF",
       "title": "Demand Price Controls",
-      "desc": "Cap the price of the forty things that matter.",
+      "desc": "Demand a price cap on the forty things families need most.",
       "cost": {},
       "e": 2,
       "g": 0.1,
@@ -690,7 +690,7 @@
       "id": "R1B-C3",
       "arch": "SELF_ORGANISE",
       "title": "Neighbourhood Buying Groups",
-      "desc": "Buy in bulk, cut out the middleman.",
+      "desc": "Neighbours buy food in bulk together and skip the traders.",
       "cost": {},
       "e": -4,
       "g": 0.2,
@@ -706,20 +706,20 @@
      {
       "id": "R1B-A1",
       "arch": "ESCALATE",
-      "title": "Expose the Speculators",
-      "desc": "Name the funds betting against the country.",
+      "title": "Name the Funds Betting Against Us",
+      "desc": "Publish the names of the funds betting against the country.",
       "cost": {},
       "e": -2,
       "g": -0.5,
       "h": 0.1,
       "gr": 2,
-      "headline": "Investigation names the funds shorting the Ringga"
+      "headline": "Investigation names the funds betting against the Ringga"
      },
      {
       "id": "R1B-A2",
       "arch": "COLLABORATE",
       "title": "Join the Economic Council",
-      "desc": "Argue for a green industrial policy from inside.",
+      "desc": "Take a seat on the council. Argue for clean industry from inside.",
       "cost": {},
       "e": -3,
       "g": 0.3,
@@ -733,8 +733,8 @@
      {
       "id": "R1B-A3",
       "arch": "EDUCATE",
-      "title": "Map the Import Dependency",
-      "desc": "Show exactly where the country is exposed.",
+      "title": "Map What We Import",
+      "desc": "Show exactly which imports the country cannot live without.",
       "cost": {},
       "e": -1,
       "g": 0.0,
@@ -743,7 +743,7 @@
       "flags": [
        "EVIDENCE_1"
       ],
-      "headline": "Study maps Semenanjara's hidden import risk"
+      "headline": "Study shows which imports Semenanjara cannot live without"
      }
     ]
    }
@@ -753,8 +753,8 @@
    "round": 1,
    "variant": "C",
    "type": "financial",
-   "title": "The Downgrade",
-   "situation": "A ratings agency drops Semenanjara two notches. Borrowing costs jump. A lender of last resort offers a facility, and every condition attached is a headline waiting to happen.",
+   "title": "The Credit Downgrade",
+   "situation": "The country’s credit rating falls. Borrowing costs more. A big international lender offers a loan, with strict conditions.",
    "shock": {
     "g": -1.39,
     "h": -0.32,
@@ -767,7 +767,7 @@
       "id": "R1C-G1",
       "arch": "REGULATE",
       "title": "Raise Taxes on Carbon and Wealth",
-      "desc": "Fix the revenue base. Take the political damage now.",
+      "desc": "Raise new taxes to fix the budget. Voters will be angry now.",
       "cost": {
        "fiscal": -2
       },
@@ -783,8 +783,8 @@
      {
       "id": "R1C-G2",
       "arch": "DEREGULATE",
-      "title": "Accept the Facility",
-      "desc": "Take the money. Accept the austerity conditions.",
+      "title": "Accept the Loan",
+      "desc": "Take the loan and accept the spending cuts that come with it.",
       "cost": {
        "fiscal": -1
       },
@@ -795,13 +795,13 @@
       "flags": [
        "IMF_CONDITIONS"
       ],
-      "headline": "Government accepts facility, austerity begins"
+      "headline": "Government takes the loan and cuts spending"
      },
      {
       "id": "R1C-G3",
       "arch": "DEREGULATE",
-      "title": "Sell State Assets",
-      "desc": "Sell the stake in NuriTenaga and plug the hole.",
+      "title": "Sell the Power Company Shares",
+      "desc": "Sell the state’s shares in NuriTenaga to fill the gap.",
       "cost": {
        "fiscal": -2
       },
@@ -812,15 +812,15 @@
       "flags": [
        "ASSETS_SOLD"
       ],
-      "headline": "State stake in NuriTenaga put up for sale"
+      "headline": "State puts its NuriTenaga shares up for sale"
      }
     ],
     "business": [
      {
       "id": "R1C-B1",
       "arch": "TRANSITION",
-      "title": "Issue a Green Bond",
-      "desc": "Raise cheap money by promising to actually spend it green.",
+      "title": "Borrow for Green Projects",
+      "desc": "Borrow cheap money by promising to spend it on clean projects.",
       "cost": {
        "capital": 2
       },
@@ -831,13 +831,13 @@
       "flags": [
        "GREEN_BOND"
       ],
-      "headline": "RG 4bn green bond oversubscribed"
+      "headline": "Investors rush to lend RG 4bn for green projects"
      },
      {
       "id": "R1C-B2",
       "arch": "EXPAND",
-      "title": "Move Capital Offshore",
-      "desc": "Protect the balance sheet. Somewhere else.",
+      "title": "Move the Money Abroad",
+      "desc": "Move the company’s money to another country.",
       "cost": {
        "capital": -3
       },
@@ -848,13 +848,13 @@
       "flags": [
        "CAPITAL_FLIGHT"
       ],
-      "headline": "Capital leaves as confidence falls"
+      "headline": "Company money leaves the country as confidence falls"
      },
      {
       "id": "R1C-B3",
       "arch": "PARTNER",
-      "title": "Co-Invest in Public Infrastructure",
-      "desc": "Build the rail line with the state, share the risk.",
+      "title": "Build the Rail Line Together",
+      "desc": "Build the rail line with the state and share the risk.",
       "cost": {
        "capital": 1
       },
@@ -872,20 +872,20 @@
      {
       "id": "R1C-C1",
       "arch": "ADAPT",
-      "title": "Accept the Austerity",
-      "desc": "Leaner years. Nobody likes it, everyone survives it.",
+      "title": "Accept the Spending Cuts",
+      "desc": "Hard years are coming. Nobody likes them, but everyone survives them.",
       "cost": {},
       "e": -5,
       "g": -0.2,
       "h": -0.5,
       "gr": 2,
-      "headline": "Households brace for leaner years"
+      "headline": "Families prepare for hard years"
      },
      {
       "id": "R1C-C2",
       "arch": "DEMAND_RELIEF",
       "title": "General Strike",
-      "desc": "Shut the ports and the rail until they listen.",
+      "desc": "Shut the ports and the railways until the Government listens.",
       "cost": {},
       "e": 1,
       "g": -0.5,
@@ -900,7 +900,7 @@
       "id": "R1C-C3",
       "arch": "SELF_ORGANISE",
       "title": "Community Credit Unions",
-      "desc": "If the banks won't lend, we will.",
+      "desc": "If the banks will not lend, neighbours lend to each other.",
       "cost": {},
       "e": -3,
       "g": 0.3,
@@ -909,7 +909,7 @@
       "flags": [
        "CREDIT_UNIONS"
       ],
-      "headline": "Credit unions fill the lending gap"
+      "headline": "Neighbourhood credit unions lend where banks will not"
      }
     ],
     "activist": [
@@ -917,19 +917,19 @@
       "id": "R1C-A1",
       "arch": "ESCALATE",
       "title": "Reject the Conditions",
-      "desc": "Austerity by another name. Fight it publicly.",
+      "desc": "The loan conditions are spending cuts with a new name. Fight them in public.",
       "cost": {},
       "e": -2,
       "g": -0.5,
       "h": 0.2,
       "gr": 2,
-      "headline": "Movement rejects 'austerity by another name'"
+      "headline": "Movement rejects the loan conditions"
      },
      {
       "id": "R1C-A2",
       "arch": "COLLABORATE",
-      "title": "Negotiate Green Conditionality",
-      "desc": "Rewrite the loan conditions around clean investment.",
+      "title": "Rewrite the Loan Conditions",
+      "desc": "Rewrite the loan conditions so the money goes to clean projects.",
       "cost": {},
       "e": -4,
       "g": 0.2,
@@ -945,7 +945,7 @@
       "id": "R1C-A3",
       "arch": "EDUCATE",
       "title": "Publish the Debt Audit",
-      "desc": "Show the public what the debt actually bought.",
+      "desc": "Show the public what the country’s debt actually paid for.",
       "cost": {},
       "e": -1,
       "g": 0.1,
@@ -965,7 +965,7 @@
    "variant": "A",
    "type": "energy",
    "title": "The Gas Shock",
-   "situation": "Global LNG prices triple. Semenanjara exports gas and subsidises it at home, so the country is somehow both richer and poorer. The subsidy bill hits RG 52 billion.",
+   "situation": "World gas prices triple. Semenanjara sells gas abroad and keeps it cheap at home. The country earns more and pays more at the same time. The fuel subsidy now costs RG 52 billion.",
    "shock": {
     "g": -0.55,
     "h": -0.44,
@@ -977,8 +977,8 @@
      {
       "id": "R2A-G1",
       "arch": "SPEND_STEER",
-      "title": "Fast-Track Renewables and the Grid",
-      "desc": "5 GW of solar plus the transmission to carry it.",
+      "title": "Build Solar and Power Lines Fast",
+      "desc": "Build 5 gigawatts of solar, and the power lines to carry it.",
       "cost": {
        "fiscal": 2
       },
@@ -989,13 +989,13 @@
       "flags": [
        "GRID_UPGRADED"
       ],
-      "headline": "Five gigawatts of solar fast-tracked"
+      "headline": "Five gigawatts of solar approved at speed"
      },
      {
       "id": "R2A-G2",
       "arch": "DEREGULATE",
       "title": "Freeze Fuel Prices",
-      "desc": "The pump price does not move. Full stop.",
+      "desc": "The petrol price does not move. The Government pays the difference.",
       "cost": {
        "fiscal": 2
       },
@@ -1006,13 +1006,13 @@
       "flags": [
        "SUBSIDY_LOCK"
       ],
-      "headline": "Pump prices frozen as global costs soar"
+      "headline": "Petrol prices frozen as world prices rise"
      },
      {
       "id": "R2A-G3",
       "arch": "REGULATE",
-      "title": "Float Prices, Targeted Cash Aid",
-      "desc": "Painful, honest, correct.",
+      "title": "Let Prices Rise, Pay the Poor",
+      "desc": "Petrol costs the real price. Poorer families get cash to cope.",
       "cost": {
        "fiscal": 1
       },
@@ -1023,7 +1023,7 @@
       "flags": [
        "SUBSIDY_REFORM"
       ],
-      "headline": "Fuel prices float; cash aid for the bottom half"
+      "headline": "Petrol prices rise, cash aid for the poorer half"
      }
     ],
     "business": [
@@ -1031,7 +1031,7 @@
       "id": "R2A-B1",
       "arch": "TRANSITION",
       "title": "Solar and Storage on Every Roof",
-      "desc": "Generate our own. Never take this call again.",
+      "desc": "Make our own power with solar and batteries. Never depend on gas again.",
       "cost": {
        "capital": 3
       },
@@ -1042,13 +1042,13 @@
       "flags": [
        "SELF_GEN"
       ],
-      "headline": "Factories go off-grid with solar and storage"
+      "headline": "Factories make their own power with solar and batteries"
      },
      {
       "id": "R2A-B2",
       "arch": "EXPAND",
       "title": "Switch to Cheap Coal",
-      "desc": "Available, legal, filthy.",
+      "desc": "Coal is cheap and legal. It is also very dirty.",
       "cost": {
        "capital": -2
       },
@@ -1059,13 +1059,13 @@
       "flags": [
        "BUILT_COAL"
       ],
-      "headline": "Industry switches to coal as gas prices bite"
+      "headline": "Industry switches to coal as gas gets expensive"
      },
      {
       "id": "R2A-B3",
       "arch": "PARTNER",
-      "title": "Corporate Power Purchase Agreement",
-      "desc": "Twenty-year clean power deal. Needs the state to sign.",
+      "title": "Sign a Twenty-Year Clean Power Deal",
+      "desc": "Buy clean power for twenty years. The Government must sign too.",
       "cost": {
        "capital": 1
       },
@@ -1076,15 +1076,15 @@
       "flags": [
        "PPA"
       ],
-      "headline": "Landmark corporate clean power deal signed"
+      "headline": "Big twenty-year clean power deal signed"
      }
     ],
     "community": [
      {
       "id": "R2A-C1",
       "arch": "ADAPT",
-      "title": "National Energy Saving Pact",
-      "desc": "Everyone uses less. Nobody enjoys it.",
+      "title": "Everyone Uses Less Power",
+      "desc": "Everyone uses less power. Nobody likes it, but it works.",
       "cost": {},
       "e": -5,
       "g": -0.1,
@@ -1095,8 +1095,8 @@
      {
       "id": "R2A-C2",
       "arch": "DEMAND_RELIEF",
-      "title": "Protest the Tariff Hike",
-      "desc": "Electricity is not a luxury.",
+      "title": "Protest the Electricity Price Rise",
+      "desc": "March against the price rise. Electricity is not a luxury.",
       "cost": {},
       "e": 3,
       "g": 0.3,
@@ -1105,13 +1105,13 @@
       "flags": [
        "TARIFF_REVOLT"
       ],
-      "headline": "Tariff protests fill the capital"
+      "headline": "Protests against electricity prices fill the capital"
      },
      {
       "id": "R2A-C3",
       "arch": "SELF_ORGANISE",
-      "title": "Village Solar Cooperatives",
-      "desc": "Own the panels, own the savings.",
+      "title": "Kampung Solar Groups",
+      "desc": "The village owns the solar panels, so it keeps the savings.",
       "cost": {},
       "e": -4,
       "g": 0.1,
@@ -1120,33 +1120,33 @@
       "flags": [
        "ENERGY_COOP"
       ],
-      "headline": "Kampung solar cooperatives spread fast"
+      "headline": "Kampung solar groups spread fast"
      }
     ],
     "activist": [
      {
       "id": "R2A-A1",
       "arch": "ESCALATE",
-      "title": "Blockade the Coal Terminal",
-      "desc": "Make the cheap option expensive.",
+      "title": "Block the Coal Port",
+      "desc": "Stop the coal ships. Make the cheap option expensive.",
       "cost": {},
       "e": -3,
       "g": -0.5,
       "h": -0.2,
       "gr": 3,
-      "headline": "Protesters blockade the coal terminal"
+      "headline": "Protesters block the coal port"
      },
      {
       "id": "R2A-A2",
       "arch": "COLLABORATE",
-      "title": "Co-Design the Energy Roadmap",
-      "desc": "Write the plan instead of shouting at it.",
+      "title": "Help Write the Energy Plan",
+      "desc": "Write the national energy plan with the Government instead of protesting it.",
       "cost": {},
       "e": -4,
       "g": 0.2,
       "h": 0.3,
       "gr": 6,
-      "headline": "Campaigners co-write the national energy roadmap",
+      "headline": "Campaigners help write the national energy plan",
       "flags": [
        "COMPROMISED"
       ]
@@ -1154,8 +1154,8 @@
      {
       "id": "R2A-A3",
       "arch": "EDUCATE",
-      "title": "Expose the Subsidy Bill",
-      "desc": "Show the public where the subsidy really goes.",
+      "title": "Show Who Gets the Subsidy",
+      "desc": "Show the public who really gets the fuel subsidy.",
       "cost": {},
       "e": -1,
       "g": 0.1,
@@ -1175,7 +1175,7 @@
    "variant": "B",
    "type": "energy",
    "title": "Blackout Season",
-   "situation": "Peak demand beats supply six evenings running. Rolling blackouts across three states. A data centre boom nobody planned for is eating 9% of the grid.",
+   "situation": "Demand for electricity beats supply six evenings in a row. Blackouts across three states. New data centres nobody planned for use 9% of the country’s power.",
    "shock": {
     "g": -0.48,
     "h": -0.48,
@@ -1186,8 +1186,8 @@
      {
       "id": "R2B-G1",
       "arch": "SPEND_STEER",
-      "title": "Emergency Solar and Battery Rollout",
-      "desc": "Three gigawatts and storage, in eighteen months.",
+      "title": "Emergency Solar and Batteries",
+      "desc": "Build three gigawatts of solar and batteries in eighteen months.",
       "cost": {
        "fiscal": 2
       },
@@ -1198,13 +1198,13 @@
       "flags": [
        "GRID_UPGRADED"
       ],
-      "headline": "Emergency solar and storage programme launched"
+      "headline": "Emergency solar and battery programme launched"
      },
      {
       "id": "R2B-G2",
       "arch": "DEREGULATE",
-      "title": "Fire Up the Old Coal Plants",
-      "desc": "They still work. Turn them on tonight.",
+      "title": "Restart the Old Coal Plants",
+      "desc": "The old plants still work. Turn them on tonight.",
       "cost": {
        "fiscal": -1
       },
@@ -1215,13 +1215,13 @@
       "flags": [
        "BUILT_COAL"
       ],
-      "headline": "Mothballed coal plants restarted"
+      "headline": "Old coal plants restarted"
      },
      {
       "id": "R2B-G3",
       "arch": "REGULATE",
-      "title": "Ration Industrial Power",
-      "desc": "Industry cuts load 20%. Households keep the lights on.",
+      "title": "Cut Power to Factories First",
+      "desc": "Factories use 20% less power. Homes keep their lights on.",
       "cost": {
        "fiscal": 1
       },
@@ -1232,15 +1232,15 @@
       "flags": [
        "POWER_RATIONING"
       ],
-      "headline": "Industry ordered to cut load by a fifth"
+      "headline": "Factories ordered to use a fifth less power"
      }
     ],
     "business": [
      {
       "id": "R2B-B1",
       "arch": "TRANSITION",
-      "title": "Build Behind-the-Meter Renewables",
-      "desc": "Our own generation, our own certainty.",
+      "title": "Build Our Own Solar Power",
+      "desc": "Make our own power on site. Then blackouts cannot touch us.",
       "cost": {
        "capital": 3
       },
@@ -1251,13 +1251,13 @@
       "flags": [
        "SELF_GEN"
       ],
-      "headline": "Factories go off-grid with solar"
+      "headline": "Factories build their own solar power"
      },
      {
       "id": "R2B-B2",
       "arch": "EXPAND",
       "title": "Buy Diesel Generators",
-      "desc": "Loud, dirty, available on Tuesday.",
+      "desc": "Diesel generators are loud and dirty, but we can buy them today.",
       "cost": {
        "capital": -2
       },
@@ -1268,13 +1268,13 @@
       "flags": [
        "DIESEL_FLEET"
       ],
-      "headline": "Diesel imports surge as firms self-supply"
+      "headline": "Diesel imports jump as firms make their own power"
      },
      {
       "id": "R2B-B3",
       "arch": "PARTNER",
-      "title": "Demand Response Agreement",
-      "desc": "Shift our load off peak in exchange for a tariff deal.",
+      "title": "Shift Our Power Use to Night",
+      "desc": "Use power at night instead of peak hours. Get a cheaper rate.",
       "cost": {
        "capital": 1
       },
@@ -1285,15 +1285,15 @@
       "flags": [
        "DEMAND_RESPONSE"
       ],
-      "headline": "Industry agrees to shift load off peak"
+      "headline": "Industry agrees to use power outside peak hours"
      }
     ],
     "community": [
      {
       "id": "R2B-C1",
       "arch": "ADAPT",
-      "title": "Voluntary Load Shedding",
-      "desc": "Everything off at seven. It works.",
+      "title": "Switch Off at Seven",
+      "desc": "Every home switches everything off at 7pm, and the grid holds.",
       "cost": {},
       "e": -6,
       "g": -0.1,
@@ -1304,20 +1304,20 @@
      {
       "id": "R2B-C2",
       "arch": "DEMAND_RELIEF",
-      "title": "Demand Compensation",
-      "desc": "A rebate for every blackout hour.",
+      "title": "Demand Money for Every Blackout",
+      "desc": "Demand a refund for every hour without power.",
       "cost": {},
       "e": 2,
       "g": 0.2,
       "h": 0.5,
       "gr": -1,
-      "headline": "Consumers win rebate for blackout hours"
+      "headline": "Consumers win a refund for blackout hours"
      },
      {
       "id": "R2B-C3",
       "arch": "SELF_ORGANISE",
-      "title": "Neighbourhood Microgrids",
-      "desc": "One street, one battery, no blackouts.",
+      "title": "Neighbourhood Batteries",
+      "desc": "One street shares one big battery, so it has no blackouts.",
       "cost": {},
       "e": -5,
       "g": 0.1,
@@ -1326,27 +1326,27 @@
       "flags": [
        "ENERGY_COOP"
       ],
-      "headline": "Kampung microgrids keep the lights on"
+      "headline": "Kampung batteries keep the lights on"
      }
     ],
     "activist": [
      {
       "id": "R2B-A1",
       "arch": "ESCALATE",
-      "title": "Occupy the Utility HQ",
-      "desc": "Sit in the lobby until someone explains the plan.",
+      "title": "Sit In at the Power Company",
+      "desc": "Sit in the power company’s entrance hall until they explain the plan.",
       "cost": {},
       "e": -3,
       "g": -0.5,
       "h": -0.1,
       "gr": 3,
-      "headline": "Protesters occupy NuriTenaga lobby"
+      "headline": "Protesters sit in at NuriTenaga head office"
      },
      {
       "id": "R2B-A2",
       "arch": "COLLABORATE",
       "title": "Join the Grid Taskforce",
-      "desc": "Help fix it rather than film it.",
+      "desc": "Help fix the grid from inside instead of filming it.",
       "cost": {},
       "e": -4,
       "g": 0.2,
@@ -1360,8 +1360,8 @@
      {
       "id": "R2B-A3",
       "arch": "EDUCATE",
-      "title": "Publish the Data Centre Audit",
-      "desc": "Who is actually using all this power?",
+      "title": "Publish Who Uses the Power",
+      "desc": "Show who is really using all this power.",
       "cost": {},
       "e": -1,
       "g": 0.0,
@@ -1380,8 +1380,8 @@
    "round": 2,
    "variant": "C",
    "type": "energy",
-   "title": "The Subsidy Cliff",
-   "situation": "The fuel subsidy now costs more than health and education combined. The Treasury says it ends this year. Every taxi driver in Kota Damai disagrees.",
+   "title": "The Subsidy Ends",
+   "situation": "The fuel subsidy now costs more than health and education together. The Treasury says it ends this year. Every taxi driver in Kota Damai disagrees.",
    "shock": {
     "g": -0.33,
     "h": -0.55,
@@ -1393,8 +1393,8 @@
      {
       "id": "R2C-G1",
       "arch": "REGULATE",
-      "title": "Targeted Subsidy with Digital ID",
-      "desc": "Help reaches only those who need it. Everyone else pays.",
+      "title": "Cheap Fuel Only for the Needy",
+      "desc": "Only families who need help get cheap fuel. Everyone else pays the full price.",
       "cost": {
        "fiscal": 2
       },
@@ -1410,8 +1410,8 @@
      {
       "id": "R2C-G2",
       "arch": "DEREGULATE",
-      "title": "Keep the Blanket Subsidy",
-      "desc": "Another year. Another RG 52 billion.",
+      "title": "Keep Cheap Fuel for Everyone",
+      "desc": "Keep the subsidy for another year. It costs another RG 52 billion.",
       "cost": {
        "fiscal": 2
       },
@@ -1422,13 +1422,13 @@
       "flags": [
        "SUBSIDY_LOCK"
       ],
-      "headline": "Pump prices frozen for another year"
+      "headline": "Petrol prices frozen for another year"
      },
      {
       "id": "R2C-G3",
       "arch": "SPEND_STEER",
-      "title": "Redirect Subsidy into Public Transport",
-      "desc": "Stop subsidising the fuel. Subsidise the alternative.",
+      "title": "Move the Money to Public Transport",
+      "desc": "Stop paying for cheap fuel. Pay for buses and trains instead.",
       "cost": {
        "fiscal": 2
       },
@@ -1446,8 +1446,8 @@
      {
       "id": "R2C-B1",
       "arch": "TRANSITION",
-      "title": "Electrify the Fleet",
-      "desc": "Nine thousand vehicles. All of them.",
+      "title": "Switch Every Lorry to Electric",
+      "desc": "Switch all nine thousand company vehicles to electric.",
       "cost": {
        "capital": 3
       },
@@ -1458,13 +1458,13 @@
       "flags": [
        "FLEET_EV"
       ],
-      "headline": "Nation's largest logistics fleet goes electric"
+      "headline": "Country’s biggest delivery fleet goes electric"
      },
      {
       "id": "R2C-B2",
       "arch": "EXPAND",
-      "title": "Pass Costs to Consumers",
-      "desc": "Every price rises. Not our problem.",
+      "title": "Make Customers Pay More",
+      "desc": "Raise every price, so customers pay for the expensive fuel.",
       "cost": {
        "capital": -2
       },
@@ -1475,13 +1475,13 @@
       "flags": [
        "PRICE_PASS"
       ],
-      "headline": "Delivery and food prices climb"
+      "headline": "Delivery and food prices rise"
      },
      {
       "id": "R2C-B3",
       "arch": "PARTNER",
-      "title": "Fund a Transition Voucher Scheme",
-      "desc": "Help the drivers we depend on to switch.",
+      "title": "Help Drivers Switch to Electric",
+      "desc": "Pay vouchers to the drivers we depend on, so they can switch.",
       "cost": {
        "capital": 1
       },
@@ -1492,15 +1492,15 @@
       "flags": [
        "VOUCHERS"
       ],
-      "headline": "Industry co-funds transport vouchers"
+      "headline": "Industry pays for transport vouchers"
      }
     ],
     "community": [
      {
       "id": "R2C-C1",
       "arch": "ADAPT",
-      "title": "Switch to Public Transport",
-      "desc": "Slower. Cheaper. Actually fine.",
+      "title": "Take the Bus",
+      "desc": "Buses are slower and cheaper than driving, and they work.",
       "cost": {},
       "e": -6,
       "g": -0.1,
@@ -1509,13 +1509,13 @@
       "flags": [
        "TRANSIT_USE"
       ],
-      "headline": "Ridership up 30% as fuel bites"
+      "headline": "Bus and train use up 30% as petrol gets expensive"
      },
      {
       "id": "R2C-C2",
       "arch": "DEMAND_RELIEF",
-      "title": "Convoy Protest",
-      "desc": "Two thousand lorries, one ring road.",
+      "title": "Lorry Protest",
+      "desc": "Two thousand lorries drive slowly around the ring road.",
       "cost": {},
       "e": 3,
       "g": -0.2,
@@ -1529,8 +1529,8 @@
      {
       "id": "R2C-C3",
       "arch": "SELF_ORGANISE",
-      "title": "Ride-Share Cooperatives",
-      "desc": "Four to a car, run by the neighbourhood.",
+      "title": "Neighbourhood Car Sharing",
+      "desc": "Four people to a car, organised by the neighbourhood.",
       "cost": {},
       "e": -5,
       "g": 0.2,
@@ -1539,15 +1539,15 @@
       "flags": [
        "RIDESHARE_COOP"
       ],
-      "headline": "Neighbourhood car-pooling takes off"
+      "headline": "Neighbourhood car sharing grows fast"
      }
     ],
     "activist": [
      {
       "id": "R2C-A1",
       "arch": "ESCALATE",
-      "title": "Name the Biggest Beneficiaries",
-      "desc": "Publish the list. Let people see it.",
+      "title": "Name Who Gains From Cheap Fuel",
+      "desc": "Publish the list of who gains most. Let people see it.",
       "cost": {},
       "e": -3,
       "g": -0.3,
@@ -1558,8 +1558,8 @@
      {
       "id": "R2C-A2",
       "arch": "COLLABORATE",
-      "title": "Co-Design the Targeting System",
-      "desc": "Make sure it doesn't miss the people it's for.",
+      "title": "Help Design the Fuel Aid System",
+      "desc": "Help design the aid system. Make sure it reaches the right people.",
       "cost": {},
       "e": -4,
       "g": 0.3,
@@ -1573,8 +1573,8 @@
      {
       "id": "R2C-A3",
       "arch": "EDUCATE",
-      "title": "Publish the Distributional Study",
-      "desc": "Who really gains from cheap fuel?",
+      "title": "Publish Who Really Gains",
+      "desc": "Publish a study of who really gains from cheap fuel.",
       "cost": {},
       "e": -1,
       "g": 0.0,
@@ -1594,7 +1594,7 @@
    "variant": "A",
    "type": "health",
    "title": "Wabak-24",
-   "situation": "A new respiratory virus reaches Semenanjara in nine days. Hospitals hit capacity. Borders close. The economy stops.",
+   "situation": "A new virus reaches Semenanjara in nine days. Hospitals are full. Borders close. The economy stops.",
    "shock": {
     "g": -1.38,
     "h": -0.42,
@@ -1605,8 +1605,8 @@
      {
       "id": "R3A-G1",
       "arch": "SPEND_STEER",
-      "title": "Green Strings on Every Recovery Ringga",
-      "desc": "Aid, but only to those who cut emissions.",
+      "title": "Recovery Money With Green Conditions",
+      "desc": "Give aid, but only to companies that cut carbon.",
       "cost": {
        "fiscal": 2
       },
@@ -1617,13 +1617,13 @@
       "flags": [
        "GREEN_RECOVERY"
       ],
-      "headline": "Recovery aid tied to emissions cuts"
+      "headline": "Recovery aid only for companies that cut carbon"
      },
      {
       "id": "R3A-G2",
       "arch": "DEREGULATE",
       "title": "Cash for Everyone, Immediately",
-      "desc": "Money in accounts by Friday. No conditions.",
+      "desc": "Put cash in every bank account by Friday, with no conditions.",
       "cost": {
        "fiscal": 3
       },
@@ -1634,13 +1634,13 @@
       "flags": [
        "BIG_HANDOUT"
       ],
-      "headline": "Cash lands in every account by Friday"
+      "headline": "Cash reaches every bank account by Friday"
      },
      {
       "id": "R3A-G3",
       "arch": "REGULATE",
       "title": "Hard Lockdown, Health First",
-      "desc": "Everything stops. Lives over ledgers.",
+      "desc": "Everything stops for months. People come first, money second.",
       "cost": {
        "fiscal": 1
       },
@@ -1658,8 +1658,8 @@
      {
       "id": "R3A-B1",
       "arch": "TRANSITION",
-      "title": "Keep Everyone on Payroll",
-      "desc": "Nobody loses a job on our watch.",
+      "title": "Keep Paying Every Worker",
+      "desc": "Nobody loses a job while the company can pay them.",
       "cost": {
        "capital": 3
       },
@@ -1670,13 +1670,13 @@
       "flags": [
        "LOYAL_EMPLOYER"
       ],
-      "headline": "Group pledges no layoffs through the crisis"
+      "headline": "Group promises no job cuts during the crisis"
      },
      {
       "id": "R3A-B2",
       "arch": "EXPAND",
-      "title": "Pivot to Essentials, Raise Prices",
-      "desc": "Demand is inelastic. So is our pricing.",
+      "title": "Sell Essentials at High Prices",
+      "desc": "People must buy food and medicine. So the company doubles the prices.",
       "cost": {
        "capital": -3
       },
@@ -1692,8 +1692,8 @@
      {
       "id": "R3A-B3",
       "arch": "PARTNER",
-      "title": "Convert Plants to Medical Supplies",
-      "desc": "Masks, oxygen, ventilators. At cost.",
+      "title": "Make Masks and Oxygen",
+      "desc": "Factories make masks, oxygen and ventilators. The company makes no profit.",
       "cost": {
        "capital": 1
       },
@@ -1704,27 +1704,27 @@
       "flags": [
        "NATIONAL_SERVICE"
       ],
-      "headline": "Factories retooled for medical supplies"
+      "headline": "Factories switch to making medical supplies"
      }
     ],
     "community": [
      {
       "id": "R3A-C1",
       "arch": "ADAPT",
-      "title": "Full Compliance, Stay Home",
-      "desc": "Everyone indoors. For months.",
+      "title": "Stay Home",
+      "desc": "Everyone stays indoors for months, and follows every rule.",
       "cost": {},
       "e": -7,
       "g": -0.4,
       "h": -0.3,
       "gr": 2,
-      "headline": "Streets empty as compliance holds"
+      "headline": "Streets empty as everyone stays home"
      },
      {
       "id": "R3A-C2",
       "arch": "DEMAND_RELIEF",
       "title": "Demand Reopening",
-      "desc": "We cannot eat a lockdown.",
+      "desc": "Demand that shops and work open again. Families cannot eat a lockdown.",
       "cost": {},
       "e": 4,
       "g": 0.6,
@@ -1733,13 +1733,13 @@
       "flags": [
        "REOPEN_PRESSURE"
       ],
-      "headline": "Pressure mounts to reopen the economy"
+      "headline": "Pressure grows to reopen the economy"
      },
      {
       "id": "R3A-C3",
       "arch": "SELF_ORGANISE",
-      "title": "Mutual Aid Networks",
-      "desc": "A white flag on the gate, and a neighbour who answers.",
+      "title": "Neighbours Help Neighbours",
+      "desc": "Families who need food hang a flag on the gate. Neighbours bring food.",
       "cost": {},
       "e": -3,
       "g": 0.1,
@@ -1755,20 +1755,20 @@
      {
       "id": "R3A-A1",
       "arch": "ESCALATE",
-      "title": "Name the Price Gougers",
-      "desc": "Publish every doubled price.",
+      "title": "Name the Price Cheats",
+      "desc": "Publish every company that doubled its prices.",
       "cost": {},
       "e": -2,
       "g": -0.2,
       "h": 0.2,
       "gr": 2,
-      "headline": "Campaign names the price gougers"
+      "headline": "Campaign names every company that doubled prices"
      },
      {
       "id": "R3A-A2",
       "arch": "COLLABORATE",
       "title": "Join the National Recovery Council",
-      "desc": "Fight for a green recovery from inside the room.",
+      "desc": "Take a seat on the council. Fight for a clean recovery from inside.",
       "cost": {},
       "e": -3,
       "g": 0.3,
@@ -1782,8 +1782,8 @@
      {
       "id": "R3A-A3",
       "arch": "EDUCATE",
-      "title": "Map Clean Air and Health Data",
-      "desc": "Prove what clean air is worth in lives.",
+      "title": "Publish the Clean Air Study",
+      "desc": "Prove how many lives clean air saves every year.",
       "cost": {},
       "e": -1,
       "g": 0.0,
@@ -1803,7 +1803,7 @@
    "variant": "B",
    "type": "health",
    "title": "The Long Haze",
-   "situation": "Peat and plantation fires push the air pollution index past 300 for eleven straight days. Schools shut. Respiratory admissions triple. Half the smoke comes from across the border, and half of it does not.",
+   "situation": "Fires on peat land and plantations burn for eleven days. The air pollution index passes 300. Schools close. Hospital visits for breathing problems triple. Half the smoke comes from across the border. Half of it is ours.",
    "shock": {
     "g": -0.66,
     "h": -0.77,
@@ -1814,8 +1814,8 @@
      {
       "id": "R3B-G1",
       "arch": "REGULATE",
-      "title": "Transboundary Haze Act",
-      "desc": "Our companies, liable for fires anywhere.",
+      "title": "Haze Law for Our Companies Abroad",
+      "desc": "Our companies pay for fires they cause, in any country.",
       "cost": {
        "fiscal": 1
       },
@@ -1826,13 +1826,13 @@
       "flags": [
        "HAZE_ACT"
       ],
-      "headline": "Companies made liable for fires abroad"
+      "headline": "Companies made to pay for fires abroad"
      },
      {
       "id": "R3B-G2",
       "arch": "DEREGULATE",
-      "title": "Diplomatic Protest Only",
-      "desc": "A strongly worded note. Nothing else.",
+      "title": "Send a Complaint Letter Only",
+      "desc": "Send a strong letter to the neighbours and do nothing else.",
       "cost": {
        "fiscal": -1
       },
@@ -1843,13 +1843,13 @@
       "flags": [
        "DIPLOMACY_ONLY"
       ],
-      "headline": "Foreign ministry issues strongly worded note"
+      "headline": "Foreign ministry sends a strong letter"
      },
      {
       "id": "R3B-G3",
       "arch": "SPEND_STEER",
-      "title": "Ban Open Burning and Enforce It",
-      "desc": "Satellites, inspectors, and real prosecutions.",
+      "title": "Ban Open Burning, Catch Burners",
+      "desc": "Use satellites and inspectors to find fires. Take burners to court.",
       "cost": {
        "fiscal": 2
       },
@@ -1860,15 +1860,15 @@
       "flags": [
        "BURN_BAN"
       ],
-      "headline": "Satellite enforcement of burning ban begins"
+      "headline": "Satellites used to catch illegal burning"
      }
     ],
     "business": [
      {
       "id": "R3B-B1",
       "arch": "TRANSITION",
-      "title": "Audit the Whole Supply Chain",
-      "desc": "Every concession, every supplier, published.",
+      "title": "Check and Publish Every Supplier",
+      "desc": "Check every plantation and every supplier. Publish what we find.",
       "cost": {
        "capital": 3
       },
@@ -1879,13 +1879,13 @@
       "flags": [
        "SUPPLY_AUDIT"
       ],
-      "headline": "Group publishes concession-level audit"
+      "headline": "Group publishes a check of every plantation it buys from"
      },
      {
       "id": "R3B-B2",
       "arch": "EXPAND",
       "title": "Deny Any Link",
-      "desc": "Our concessions are clean. Prove otherwise.",
+      "desc": "Say our plantations are clean. Tell them to prove otherwise.",
       "cost": {
        "capital": -2
       },
@@ -1901,8 +1901,8 @@
      {
       "id": "R3B-B3",
       "arch": "PARTNER",
-      "title": "Fund Peatland Restoration",
-      "desc": "Rewet the peat. It stops burning when it's wet.",
+      "title": "Pay to Wet the Peat Again",
+      "desc": "Flood the peat land again. Wet peat does not burn.",
       "cost": {
        "capital": 2
       },
@@ -1913,15 +1913,15 @@
       "flags": [
        "PEAT_RESTORED"
       ],
-      "headline": "RG 800m peatland restoration fund launched"
+      "headline": "RG 800m fund launched to wet the peat land again"
      }
     ],
     "community": [
      {
       "id": "R3B-C1",
       "arch": "ADAPT",
-      "title": "Buy Purifiers and Cope",
-      "desc": "Seal the windows and wait for the wind.",
+      "title": "Buy Air Purifiers and Wait",
+      "desc": "Close the windows, buy purifiers and wait for the wind.",
       "cost": {},
       "e": -2,
       "g": 0.2,
@@ -1932,8 +1932,8 @@
      {
       "id": "R3B-C2",
       "arch": "DEMAND_RELIEF",
-      "title": "Demand School Compensation",
-      "desc": "Eleven days of lost schooling has a price.",
+      "title": "Demand Money for Lost School Days",
+      "desc": "Eleven days of lost school has a price, and parents demand it.",
       "cost": {},
       "e": 1,
       "g": 0.1,
@@ -1945,7 +1945,7 @@
       "id": "R3B-C3",
       "arch": "SELF_ORGANISE",
       "title": "Neighbourhood Clean Air Shelters",
-      "desc": "Community halls, filters, open to everyone.",
+      "desc": "Put air filters in community halls. Open them to everyone.",
       "cost": {},
       "e": -3,
       "g": 0.1,
@@ -1954,33 +1954,33 @@
       "flags": [
        "CLEAN_AIR_SHELTERS"
       ],
-      "headline": "Community halls become clean air refuges"
+      "headline": "Community halls become clean air shelters"
      }
     ],
     "activist": [
      {
       "id": "R3B-A1",
       "arch": "ESCALATE",
-      "title": "Publish the Concession Maps",
-      "desc": "Overlay the fires on the ownership records.",
+      "title": "Publish Who Owns the Burning Land",
+      "desc": "Put the fire map on top of the land ownership map.",
       "cost": {},
       "e": -4,
       "g": -0.3,
       "h": 0.3,
       "gr": 4,
-      "headline": "Maps link burning to named concessions"
+      "headline": "Maps link the fires to named landowners"
      },
      {
       "id": "R3B-A2",
       "arch": "COLLABORATE",
       "title": "Join the Regional Haze Panel",
-      "desc": "Slow, diplomatic, and the only thing that crosses borders.",
+      "desc": "The panel is slow. But it is the only body that crosses borders.",
       "cost": {},
       "e": -4,
       "g": 0.2,
       "h": 0.4,
       "gr": 6,
-      "headline": "Activist appointed to regional haze panel",
+      "headline": "Activist joins regional haze panel",
       "flags": [
        "COMPROMISED"
       ]
@@ -1988,8 +1988,8 @@
      {
       "id": "R3B-A3",
       "arch": "EDUCATE",
-      "title": "Citizen Air Sensor Network",
-      "desc": "Two thousand sensors nobody can argue with.",
+      "title": "Put Up Two Thousand Air Sensors",
+      "desc": "Two thousand sensors give numbers nobody can argue with.",
       "cost": {},
       "e": -1,
       "g": 0.0,
@@ -2010,7 +2010,7 @@
    "variant": "C",
    "type": "health",
    "title": "Fever Season",
-   "situation": "A record dengue and heat-illness year. Hospitals overwhelmed in the same weeks as a 38-degree heatwave. Outdoor workers are dying and nobody is counting them properly.",
+   "situation": "A record year for dengue and heat sickness. Hospitals are full during a 38-degree heatwave. Outdoor workers are dying, and nobody is counting them properly.",
    "shock": {
     "g": -0.65,
     "h": -0.78,
@@ -2022,7 +2022,7 @@
       "id": "R3C-G1",
       "arch": "SPEND_STEER",
       "title": "National Heat and Health Plan",
-      "desc": "Cooling centres, warning system, hospital surge capacity.",
+      "desc": "Build cooling centres, a warning system and extra hospital beds.",
       "cost": {
        "fiscal": 2
       },
@@ -2039,7 +2039,7 @@
       "id": "R3C-G2",
       "arch": "DEREGULATE",
       "title": "Emergency Hospital Funding Only",
-      "desc": "Treat the sick. Leave the causes for later.",
+      "desc": "Pay for treating the sick. Leave the causes for later.",
       "cost": {
        "fiscal": 1
       },
@@ -2052,8 +2052,8 @@
      {
       "id": "R3C-G3",
       "arch": "REGULATE",
-      "title": "Mandatory Outdoor Work Rules",
-      "desc": "No outdoor work above 36 degrees. Enforced.",
+      "title": "Ban Outdoor Work in Extreme Heat",
+      "desc": "No outdoor work above 36 degrees. Inspectors check every site.",
       "cost": {
        "fiscal": 1
       },
@@ -2071,8 +2071,8 @@
      {
       "id": "R3C-B1",
       "arch": "TRANSITION",
-      "title": "Shade, Water and Shifted Hours",
-      "desc": "Rebuild every site around the heat.",
+      "title": "Shade, Water and Early Shifts",
+      "desc": "Rebuild every work site around the heat. Start work at dawn.",
       "cost": {
        "capital": 2
       },
@@ -2088,8 +2088,8 @@
      {
       "id": "R3C-B2",
       "arch": "EXPAND",
-      "title": "Push Back on Work Rules",
-      "desc": "Warn that the rules will cost jobs.",
+      "title": "Fight the Work Rules",
+      "desc": "Warn the Government that the heat rules will cost jobs.",
       "cost": {
        "capital": -2
       },
@@ -2105,8 +2105,8 @@
      {
       "id": "R3C-B3",
       "arch": "PARTNER",
-      "title": "Fund the Urban Cooling Programme",
-      "desc": "Trees, white roofs, shaded walkways.",
+      "title": "Pay to Cool the City",
+      "desc": "Pay for trees, white roofs and shaded walkways in the city.",
       "cost": {
        "capital": 2
       },
@@ -2117,7 +2117,7 @@
       "flags": [
        "URBAN_COOLING"
       ],
-      "headline": "Corporate fund to cool the city centre"
+      "headline": "Companies pay to cool the city centre"
      }
     ],
     "community": [
@@ -2125,31 +2125,31 @@
       "id": "R3C-C1",
       "arch": "ADAPT",
       "title": "Community Fogging and Clean-Up",
-      "desc": "Every weekend, every drain.",
+      "desc": "Neighbours fog for mosquitoes and clean every drain, every weekend.",
       "cost": {},
       "e": -4,
       "g": -0.1,
       "h": -0.1,
       "gr": 2,
-      "headline": "Weekend clean-ups cut breeding sites"
+      "headline": "Weekend clean-ups cut mosquito breeding sites"
      },
      {
       "id": "R3C-C2",
       "arch": "DEMAND_RELIEF",
-      "title": "Demand Free Healthcare Expansion",
-      "desc": "Nobody should pay to survive a heatwave.",
+      "title": "Demand Free Treatment",
+      "desc": "Nobody should pay to survive a heatwave. Demand free treatment.",
       "cost": {},
       "e": 2,
       "g": 0.1,
       "h": 0.6,
       "gr": -1,
-      "headline": "Public demands universal free treatment"
+      "headline": "Public demands free treatment for everyone"
      },
      {
       "id": "R3C-C3",
       "arch": "SELF_ORGANISE",
-      "title": "Plant the Neighbourhood Canopy",
-      "desc": "Three hundred thousand trees, street by street.",
+      "title": "Plant Trees on Every Street",
+      "desc": "Plant three hundred thousand trees, street by street.",
       "cost": {},
       "e": -5,
       "g": 0.1,
@@ -2166,7 +2166,7 @@
       "id": "R3C-A1",
       "arch": "ESCALATE",
       "title": "Publish the Heat Death Count",
-      "desc": "Six hundred deaths nobody recorded.",
+      "desc": "Six hundred people died of heat and nobody recorded them. Publish the count.",
       "cost": {},
       "e": -3,
       "g": -0.3,
@@ -2177,14 +2177,14 @@
      {
       "id": "R3C-A2",
       "arch": "COLLABORATE",
-      "title": "Join the Health Adaptation Board",
-      "desc": "Write the standards instead of protesting them.",
+      "title": "Join the Heat Health Board",
+      "desc": "Write the heat rules from inside instead of protesting them.",
       "cost": {},
       "e": -4,
       "g": 0.2,
       "h": 0.4,
       "gr": 6,
-      "headline": "Campaigner joins health adaptation board",
+      "headline": "Campaigner joins the heat health board",
       "flags": [
        "COMPROMISED"
       ]
@@ -2193,7 +2193,7 @@
       "id": "R3C-A3",
       "arch": "EDUCATE",
       "title": "Train Community Health Volunteers",
-      "desc": "Five thousand people who know the warning signs.",
+      "desc": "Train five thousand people to spot the warning signs of heat sickness.",
       "cost": {},
       "e": -1,
       "g": 0.1,
@@ -2214,7 +2214,7 @@
    "variant": "A",
    "type": "election",
    "title": "The General Election",
-   "situation": "Parliament dissolves. Eleven days of campaigning. Every choice made in the last three rounds is now a poster, a meme, or a scandal.",
+   "situation": "Parliament is dissolved. Eleven days of campaigning. Every choice you made in the last three rounds is now public. It is a poster, a meme, or a scandal.",
    "shock": {
     "g": -0.09,
     "h": -0.17,
@@ -2225,8 +2225,8 @@
      {
       "id": "R4A-G1",
       "arch": "SPEND_STEER",
-      "title": "Run on the Green Manifesto",
-      "desc": "Stake the whole campaign on the transition.",
+      "title": "Campaign on the Clean Plan",
+      "desc": "Put the whole campaign on the switch to a clean economy.",
       "cost": {
        "fiscal": 2
       },
@@ -2237,14 +2237,14 @@
       "flags": [
        "GREEN_MANDATE"
       ],
-      "headline": "Minister stakes election on green manifesto",
+      "headline": "Minister bets the election on the clean plan",
       "gate_trust": 3
      },
      {
       "id": "R4A-G2",
       "arch": "DEREGULATE",
       "title": "Promise Cheap Everything",
-      "desc": "Fuel, food, electricity. Frozen. Guaranteed.",
+      "desc": "Promise that fuel, food and electricity prices will never rise.",
       "cost": {
        "fiscal": 3
       },
@@ -2260,8 +2260,8 @@
      {
       "id": "R4A-G3",
       "arch": "DEREGULATE",
-      "title": "Quiet Campaign, Keep the Lights On",
-      "desc": "Promise nothing. Survive.",
+      "title": "Quiet Campaign, Promise Nothing",
+      "desc": "The Government promises nothing and tries to survive the election.",
       "cost": {
        "fiscal": 1
       },
@@ -2276,8 +2276,8 @@
      {
       "id": "R4A-B1",
       "arch": "PARTNER",
-      "title": "Fund the Green Coalition",
-      "desc": "Put our money behind the transition candidates.",
+      "title": "Give Money to the Clean Candidates",
+      "desc": "Put company money behind the candidates who back the clean switch.",
       "cost": {
        "capital": 2
       },
@@ -2288,13 +2288,13 @@
       "flags": [
        "POLITICAL_ALLY"
       ],
-      "headline": "Business backs the green coalition"
+      "headline": "Business gives money to the clean candidates"
      },
      {
       "id": "R4A-B2",
       "arch": "EXPAND",
-      "title": "Fund Whoever Protects Us",
-      "desc": "Buy the policy environment we need.",
+      "title": "Give Money to Whoever Protects Us",
+      "desc": "Pay the candidates who promise fewer rules for business.",
       "cost": {
        "capital": -2
       },
@@ -2305,13 +2305,13 @@
       "flags": [
        "REGULATORY_CAPTURE"
       ],
-      "headline": "Donations flow to the anti-regulation bloc"
+      "headline": "Donations flow to candidates against business rules"
      },
      {
       "id": "R4A-B3",
       "arch": "TRANSITION",
-      "title": "Stay Neutral, Publish the Transition Plan",
-      "desc": "No donations. Just a credible plan, in public.",
+      "title": "No Donations, Publish Our Plan",
+      "desc": "Give no money to anyone. Publish the company’s clean plan instead.",
       "cost": {
        "capital": 1
       },
@@ -2322,7 +2322,7 @@
       "flags": [
        "TRANSPARENT"
       ],
-      "headline": "Group publishes its full transition plan"
+      "headline": "Group publishes its full clean plan"
      }
     ],
     "community": [
@@ -2330,7 +2330,7 @@
       "id": "R4A-C1",
       "arch": "ADAPT",
       "title": "Vote for the Long Term",
-      "desc": "Accept short-term cost for a liveable country.",
+      "desc": "Accept higher costs today for a country you can live in.",
       "cost": {},
       "e": -5,
       "g": -0.2,
@@ -2339,13 +2339,13 @@
       "flags": [
        "LONGTERM_MANDATE"
       ],
-      "headline": "Voters choose the long game"
+      "headline": "Voters choose the long-term plan"
      },
      {
       "id": "R4A-C2",
       "arch": "DEMAND_RELIEF",
       "title": "Vote for My Wallet",
-      "desc": "The bills are due now. The sea level is not.",
+      "desc": "Vote for cheap prices today, not for the climate.",
       "cost": {},
       "e": 3,
       "g": 0.5,
@@ -2359,8 +2359,8 @@
      {
       "id": "R4A-C3",
       "arch": "SELF_ORGANISE",
-      "title": "Field Independent Local Candidates",
-      "desc": "If none of them represent us, we'll stand ourselves.",
+      "title": "Stand Our Own Candidates",
+      "desc": "None of the parties speak for us, so we stand ourselves.",
       "cost": {},
       "e": -3,
       "g": 0.0,
@@ -2376,8 +2376,8 @@
      {
       "id": "R4A-A1",
       "arch": "ESCALATE",
-      "title": "Score Every Candidate, Name and Shame",
-      "desc": "A climate scorecard for all 222 seats.",
+      "title": "Give Every Candidate a Climate Score",
+      "desc": "Publish a climate score for every one of the 222 seats.",
       "cost": {},
       "e": -3,
       "g": -0.2,
@@ -2388,8 +2388,8 @@
      {
       "id": "R4A-A2",
       "arch": "COLLABORATE",
-      "title": "Negotiate Manifesto Commitments",
-      "desc": "Trade our endorsement for binding pledges.",
+      "title": "Trade Our Support for Promises",
+      "desc": "Support a party only if it writes climate promises into its manifesto.",
       "cost": {},
       "e": -5,
       "g": 0.2,
@@ -2399,13 +2399,13 @@
        "MANIFESTO_DEAL",
        "COMPROMISED"
       ],
-      "headline": "Endorsement traded for binding climate pledges"
+      "headline": "Movement backs a party in return for written climate promises"
      },
      {
       "id": "R4A-A3",
       "arch": "EDUCATE",
-      "title": "Get Out the Youth Vote",
-      "desc": "Register everyone under thirty.",
+      "title": "Register Every Young Voter",
+      "desc": "Register every person under thirty to vote.",
       "cost": {},
       "e": -2,
       "g": 0.1,
@@ -2425,7 +2425,7 @@
    "variant": "B",
    "type": "election",
    "title": "The Perindu By-Election",
-   "situation": "One industrial seat. A refinery town where 8,000 jobs depend on the thing everyone says must close. The whole country is watching a constituency of 41,000 people.",
+   "situation": "One by-election in Perindu, a refinery town. 8,000 jobs depend on the refinery. Everyone says the refinery must close. The whole country is watching 41,000 voters.",
    "shock": {
     "g": -0.09,
     "h": -0.17,
@@ -2436,8 +2436,8 @@
      {
       "id": "R4B-G1",
       "arch": "SPEND_STEER",
-      "title": "Announce a Just Transition Fund",
-      "desc": "RG 2bn. No worker left behind, in writing.",
+      "title": "Announce a Fund for the Workers",
+      "desc": "RG 2 billion, in writing, so no worker is left behind.",
       "cost": {
        "fiscal": 2
       },
@@ -2455,7 +2455,7 @@
      {
       "id": "R4B-G2",
       "arch": "DEREGULATE",
-      "title": "Guarantee the Refinery Stays Open",
+      "title": "Promise the Refinery Stays Open",
       "desc": "Say the words the town wants to hear.",
       "cost": {
        "fiscal": 2
@@ -2473,7 +2473,7 @@
       "id": "R4B-G3",
       "arch": "DEREGULATE",
       "title": "Say Nothing and Hope",
-      "desc": "Let the local candidate carry it.",
+      "desc": "Say nothing, and let the local candidate face the town alone.",
       "cost": {
        "fiscal": -1
       },
@@ -2488,8 +2488,8 @@
      {
       "id": "R4B-B1",
       "arch": "TRANSITION",
-      "title": "Commit to Retraining Every Worker",
-      "desc": "Eight thousand people, guaranteed a next job.",
+      "title": "Promise to Retrain Every Worker",
+      "desc": "Promise all eight thousand workers a new job.",
       "cost": {
        "capital": 3
       },
@@ -2505,8 +2505,8 @@
      {
       "id": "R4B-B2",
       "arch": "EXPAND",
-      "title": "Threaten Closure If Regulated",
-      "desc": "Make the cost of regulating us politically fatal.",
+      "title": "Threaten to Leave",
+      "desc": "Tell the Government we will leave if it makes new rules.",
       "cost": {
        "capital": -2
       },
@@ -2517,13 +2517,13 @@
       "flags": [
        "REGULATORY_CAPTURE"
       ],
-      "headline": "Group warns: regulate us and we leave"
+      "headline": "Group warns: give us new rules and we leave"
      },
      {
       "id": "R4B-B3",
       "arch": "PARTNER",
-      "title": "Announce a Green Industrial Park",
-      "desc": "Same site, same workers, different century.",
+      "title": "Announce a Clean Industry Park",
+      "desc": "The same site and the same workers, making clean products.",
       "cost": {
        "capital": 2
       },
@@ -2535,15 +2535,15 @@
        "GREEN_PARK",
        "TRANSPARENT"
       ],
-      "headline": "Perindu to host the region's first green park"
+      "headline": "Perindu to host the region’s first clean industry park"
      }
     ],
     "community": [
      {
       "id": "R4B-C1",
       "arch": "ADAPT",
-      "title": "Vote on the Climate Issue",
-      "desc": "The refinery poisoned this town for forty years.",
+      "title": "Vote for the Climate",
+      "desc": "The refinery has poisoned this town for forty years. Vote to close it.",
       "cost": {},
       "e": -5,
       "g": -0.2,
@@ -2557,8 +2557,8 @@
      {
       "id": "R4B-C2",
       "arch": "DEMAND_RELIEF",
-      "title": "Vote on Jobs",
-      "desc": "Eight thousand paycheques beat any manifesto.",
+      "title": "Vote for Jobs",
+      "desc": "Eight thousand pay cheques matter more than any manifesto.",
       "cost": {},
       "e": 3,
       "g": 0.5,
@@ -2572,8 +2572,8 @@
      {
       "id": "R4B-C3",
       "arch": "SELF_ORGANISE",
-      "title": "Organise a Workers' Assembly",
-      "desc": "The workers write the transition plan themselves.",
+      "title": "Let the Workers Write the Plan",
+      "desc": "The workers write the plan for their own future.",
       "cost": {},
       "e": -3,
       "g": 0.1,
@@ -2583,15 +2583,15 @@
        "WORKER_POWER",
        "LOCAL_POWER"
       ],
-      "headline": "Workers write their own transition plan"
+      "headline": "Workers write their own plan for the refinery"
      }
     ],
     "activist": [
      {
       "id": "R4B-A1",
       "arch": "ESCALATE",
-      "title": "Campaign on the Ground",
-      "desc": "Twenty thousand doors in eleven days.",
+      "title": "Knock on Every Door",
+      "desc": "Knock on twenty thousand doors in eleven days.",
       "cost": {},
       "e": -3,
       "g": -0.2,
@@ -2602,8 +2602,8 @@
      {
       "id": "R4B-A2",
       "arch": "COLLABORATE",
-      "title": "Broker a Worker-Green Alliance",
-      "desc": "Unions and greens, in one room, finally.",
+      "title": "Bring Unions and Greens Together",
+      "desc": "Put the unions and the climate groups in one room. Agree one plan together.",
       "cost": {},
       "e": -6,
       "g": 0.2,
@@ -2613,13 +2613,13 @@
        "MANIFESTO_DEAL",
        "COMPROMISED"
       ],
-      "headline": "Unions and greens sign historic pact"
+      "headline": "Unions and climate groups sign a joint plan"
      },
      {
       "id": "R4B-A3",
       "arch": "EDUCATE",
-      "title": "Publish the Just Transition Costing",
-      "desc": "Show that keeping it open costs more.",
+      "title": "Publish the Real Cost",
+      "desc": "Show that keeping the refinery open costs more than closing it.",
       "cost": {},
       "e": -2,
       "g": 0.1,
@@ -2628,7 +2628,7 @@
       "flags": [
        "YOUTH_WAVE"
       ],
-      "headline": "Costing: transition cheaper than closure"
+      "headline": "Study: closing the refinery costs less than keeping it"
      }
     ]
    }
@@ -2638,8 +2638,8 @@
    "round": 4,
    "variant": "C",
    "type": "election",
-   "title": "The Coalition Wobble",
-   "situation": "Four MPs cross the floor at 11pm. The government survives by two votes. Nothing can pass without buying somebody, and everyone knows it.",
+   "title": "Four MPs Change Party",
+   "situation": "Four MPs change party at 11pm. The government survives by two votes. Now nothing can pass without a deal, and everyone knows it.",
    "shock": {
     "g": -0.14,
     "h": -0.14,
@@ -2650,8 +2650,8 @@
      {
       "id": "R4C-G1",
       "arch": "SPEND_STEER",
-      "title": "Buy Support with Green Investment",
-      "desc": "Win the rebels back with clean projects in their seats.",
+      "title": "Win the Rebels With Clean Projects",
+      "desc": "Win the rebel MPs back with clean projects in their areas.",
       "cost": {
        "fiscal": 3
       },
@@ -2662,14 +2662,14 @@
       "flags": [
        "GREEN_MANDATE"
       ],
-      "headline": "Rebels won over with clean investment",
+      "headline": "Rebel MPs won back with clean projects",
       "gate_trust": 3
      },
      {
       "id": "R4C-G2",
       "arch": "DEREGULATE",
-      "title": "Buy Support with Contracts",
-      "desc": "The old way. It works.",
+      "title": "Win the Rebels With Contracts",
+      "desc": "Give contracts to the rebel MPs’ areas. It has always worked.",
       "cost": {
        "fiscal": 3
       },
@@ -2681,13 +2681,13 @@
        "POPULIST_PLEDGE",
        "PATRONAGE"
       ],
-      "headline": "Contracts flow to the seats that mattered"
+      "headline": "Contracts flow to the rebel MPs’ areas"
      },
      {
       "id": "R4C-G3",
       "arch": "DEREGULATE",
       "title": "Call a Confidence Vote",
-      "desc": "Gamble everything on one afternoon.",
+      "desc": "Ask Parliament to vote on the Government. Risk everything in one afternoon.",
       "cost": {
        "fiscal": -1
       },
@@ -2695,15 +2695,15 @@
       "g": -0.3,
       "h": 0.2,
       "gr": 1,
-      "headline": "Minister gambles on a confidence vote"
+      "headline": "Minister risks everything on a confidence vote"
      }
     ],
     "business": [
      {
       "id": "R4C-B1",
       "arch": "PARTNER",
-      "title": "Publicly Demand Policy Certainty",
-      "desc": "Tell them plainly: we cannot invest in chaos.",
+      "title": "Demand Clear Rules in Public",
+      "desc": "Tell them plainly: we cannot invest when the rules keep changing.",
       "cost": {
        "capital": 1
       },
@@ -2719,8 +2719,8 @@
      {
       "id": "R4C-B2",
       "arch": "EXPAND",
-      "title": "Back Stability at Any Price",
-      "desc": "Whoever governs, we fund.",
+      "title": "Back Whoever Governs",
+      "desc": "Whoever governs, the company gives them money.",
       "cost": {
        "capital": -2
       },
@@ -2736,8 +2736,8 @@
      {
       "id": "R4C-B3",
       "arch": "EXPAND",
-      "title": "Lobby the Defectors",
-      "desc": "Four people. Four conversations.",
+      "title": "Talk to the Four Rebel MPs",
+      "desc": "Talk to the four rebel MPs one by one.",
       "cost": {
        "capital": -1
       },
@@ -2748,15 +2748,15 @@
       "flags": [
        "LOBBY_SCANDAL"
       ],
-      "headline": "Leaked messages show lobbying of defectors"
+      "headline": "Leaked messages show company talks with rebel MPs"
      }
     ],
     "community": [
      {
       "id": "R4C-C1",
       "arch": "ADAPT",
-      "title": "Accept the Deal for Stability",
-      "desc": "Just let them govern.",
+      "title": "Accept the Deal",
+      "desc": "Let them make their deal and govern.",
       "cost": {},
       "e": -4,
       "g": 0.3,
@@ -2767,20 +2767,20 @@
      {
       "id": "R4C-C2",
       "arch": "DEMAND_RELIEF",
-      "title": "Demand a Fresh Election",
-      "desc": "A million signatures in nine days.",
+      "title": "Demand a New Election",
+      "desc": "Collect a million signatures in nine days.",
       "cost": {},
       "e": 1,
       "g": -0.3,
       "h": 0.4,
       "gr": 0,
-      "headline": "Petition for fresh elections passes a million"
+      "headline": "Petition for a new election passes a million"
      },
      {
       "id": "R4C-C3",
       "arch": "SELF_ORGANISE",
-      "title": "Petition for a Fixed Climate Law",
-      "desc": "Something no coalition can undo.",
+      "title": "Petition for a Climate Law",
+      "desc": "Demand a climate law that no future government can undo.",
       "cost": {},
       "e": -5,
       "g": 0.0,
@@ -2790,15 +2790,15 @@
        "LOCAL_POWER",
        "CLIMATE_LAW_PUSH"
       ],
-      "headline": "Citizens' petition demands a binding climate act"
+      "headline": "Citizens’ petition demands a permanent climate law"
      }
     ],
     "activist": [
      {
       "id": "R4C-A1",
       "arch": "ESCALATE",
-      "title": "Occupy Parliament Square",
-      "desc": "Tents until they commit.",
+      "title": "Camp Outside Parliament",
+      "desc": "Put up tents outside Parliament until they agree to a climate law.",
       "cost": {},
       "e": -3,
       "g": -0.4,
@@ -2809,8 +2809,8 @@
      {
       "id": "R4C-A2",
       "arch": "COLLABORATE",
-      "title": "Extract Cross-Party Commitments",
-      "desc": "Every faction signs, or none of them govern.",
+      "title": "Make Every Party Sign",
+      "desc": "Every party signs a climate promise, or none of them governs.",
       "cost": {},
       "e": -6,
       "g": 0.2,
@@ -2820,13 +2820,13 @@
        "MANIFESTO_DEAL",
        "COMPROMISED"
       ],
-      "headline": "All sides sign a climate commitment"
+      "headline": "All parties sign a climate promise"
      },
      {
       "id": "R4C-A3",
       "arch": "EDUCATE",
-      "title": "Publish the Lobbying Register",
-      "desc": "Who met whom, and when.",
+      "title": "Publish Who Met Whom",
+      "desc": "Publish who met which MP, and when.",
       "cost": {},
       "e": -2,
       "g": 0.0,
@@ -2845,8 +2845,8 @@
    "round": 5,
    "variant": "A",
    "type": "pollution",
-   "title": "The Poisoned Reservoir",
-   "situation": "At 3am a tanker discharges solvent waste into Sungai Jernih. By dawn the treatment plants are shut. Four million people have no water for six days.",
+   "title": "The Poisoned River",
+   "situation": "At 3am a lorry dumps chemical waste into Sungai Jernih. By morning the water treatment plants shut. Four million people have no water for six days.",
    "shock": {
     "g": -0.34,
     "h": -0.59,
@@ -2857,8 +2857,8 @@
      {
       "id": "R5A-G1",
       "arch": "SPEND_STEER",
-      "title": "Emergency Clean-Up plus a New Water Act",
-      "desc": "Fix the river and change the law in the same week.",
+      "title": "Clean-Up and a New Water Law",
+      "desc": "Clean the river and change the law in the same week.",
       "cost": {
        "fiscal": 2
       },
@@ -2869,14 +2869,14 @@
       "flags": [
        "WATER_LAW"
       ],
-      "headline": "Emergency clean-up and landmark Water Act",
+      "headline": "Emergency clean-up and a new Water Law",
       "block_flag": "POPULIST_PLEDGE"
      },
      {
       "id": "R5A-G2",
       "arch": "DEREGULATE",
       "title": "Blame, Fine, Move On",
-      "desc": "Name a company. Issue a fine. Change the subject.",
+      "desc": "Name one company and fine it. Then change the subject.",
       "cost": {
        "fiscal": 0
       },
@@ -2892,8 +2892,8 @@
      {
       "id": "R5A-G3",
       "arch": "REGULATE",
-      "title": "Nationalise the Water Utility",
-      "desc": "Water is not a business.",
+      "title": "Take Back the Water Company",
+      "desc": "The state takes over the water company. Water is not a business.",
       "cost": {
        "fiscal": 3
       },
@@ -2905,15 +2905,15 @@
        "WATER_PUBLIC",
        "WATER_LAW"
       ],
-      "headline": "State takes back the water utility"
+      "headline": "State takes back the water company"
      }
     ],
     "business": [
      {
       "id": "R5A-B1",
       "arch": "TRANSITION",
-      "title": "Own It and Pay for Full Restoration",
-      "desc": "Before anyone asks. Every Ringga of it.",
+      "title": "Admit It and Pay for Everything",
+      "desc": "Admit it before anyone asks. Pay every Ringga of the clean-up.",
       "cost": {
        "capital": 3
       },
@@ -2929,8 +2929,8 @@
      {
       "id": "R5A-B2",
       "arch": "EXPAND",
-      "title": "Deny and Litigate",
-      "desc": "Our discharge was within permit. See you in court.",
+      "title": "Deny It and Go to Court",
+      "desc": "Say we broke no rules. Fight it in court.",
       "cost": {
        "capital": -1
       },
@@ -2941,13 +2941,13 @@
       "flags": [
        "DENIAL"
       ],
-      "headline": "Firm denies liability, heads to court"
+      "headline": "Firm denies blame and goes to court"
      },
      {
       "id": "R5A-B3",
       "arch": "PARTNER",
-      "title": "Lead an Industry-Wide Discharge Standard",
-      "desc": "Every plant on the river, one standard, monitored.",
+      "title": "One Waste Rule for Every Plant",
+      "desc": "Every plant on the river follows one waste rule, and is checked.",
       "cost": {
        "capital": 2
       },
@@ -2958,15 +2958,15 @@
       "flags": [
        "INDUSTRY_PACT"
       ],
-      "headline": "Industry adopts a shared discharge standard"
+      "headline": "Industry agrees one waste rule for every plant"
      }
     ],
     "community": [
      {
       "id": "R5A-C1",
       "arch": "ADAPT",
-      "title": "Ration and Endure",
-      "desc": "Buckets, tankers, and six days of queuing.",
+      "title": "Queue for Water and Wait",
+      "desc": "Families queue at water lorries with buckets for six days.",
       "cost": {},
       "e": -3,
       "g": -0.1,
@@ -2977,8 +2977,8 @@
      {
       "id": "R5A-C2",
       "arch": "DEMAND_RELIEF",
-      "title": "Class Action and Street Protest",
-      "desc": "Four million plaintiffs.",
+      "title": "Sue Them Together and March",
+      "desc": "Four million people sue the company together, and march.",
       "cost": {},
       "e": -1,
       "g": -0.3,
@@ -2987,13 +2987,13 @@
       "flags": [
        "LAWSUIT"
       ],
-      "headline": "Four million join the class action"
+      "headline": "Four million join one court case"
      },
      {
       "id": "R5A-C3",
       "arch": "SELF_ORGANISE",
       "title": "Citizen River Watch",
-      "desc": "Two thousand volunteers. Every outfall photographed.",
+      "desc": "Two thousand volunteers photograph every pipe into the river.",
       "cost": {},
       "e": -4,
       "g": 0.0,
@@ -3002,34 +3002,34 @@
       "flags": [
        "RIVER_WATCH"
       ],
-      "headline": "Volunteers begin watching every outfall"
+      "headline": "Volunteers begin watching every pipe into the river"
      }
     ],
     "activist": [
      {
       "id": "R5A-A1",
       "arch": "ESCALATE",
-      "title": "Leak the Discharge Records",
-      "desc": "Eight years of records nobody was meant to see.",
+      "title": "Leak the Waste Records",
+      "desc": "Publish eight years of records nobody was meant to see.",
       "cost": {},
       "e": -5,
       "g": -0.4,
       "h": 0.2,
       "gr": 5,
-      "headline": "Leaked records show years of illegal discharge",
+      "headline": "Leaked records show years of illegal dumping",
       "boost_flag": "EVIDENCE_3"
      },
      {
       "id": "R5A-A2",
       "arch": "COLLABORATE",
-      "title": "Broker the Clean Water Accord",
-      "desc": "Get everyone in a room and don't leave until it's signed.",
+      "title": "Sign a Clean Water Deal",
+      "desc": "Put everyone in one room. Do not leave until they sign.",
       "cost": {},
       "e": -6,
       "g": 0.1,
       "h": 0.5,
       "gr": 7,
-      "headline": "Clean Water Accord signed by all parties",
+      "headline": "Clean water deal signed by everyone",
       "flags": [
        "COMPROMISED"
       ]
@@ -3037,7 +3037,7 @@
      {
       "id": "R5A-A3",
       "arch": "EDUCATE",
-      "title": "Train Citizen Scientists",
+      "title": "Teach People to Test Their Water",
       "desc": "Give people the kit to test their own water.",
       "cost": {},
       "e": -2,
@@ -3057,8 +3057,8 @@
    "round": 5,
    "variant": "B",
    "type": "pollution",
-   "title": "The Landfill Fire",
-   "situation": "An illegal plastic and e-waste dump burns for nine days. Dioxin readings beside a primary school. The containers were imported legally, under a code nobody bothered to read.",
+   "title": "The Rubbish Dump Fire",
+   "situation": "An illegal dump of plastic and electronic waste burns for nine days. Poison is in the air beside a primary school. The waste came in legally, under an old rule nobody checked.",
    "shock": {
     "g": -0.31,
     "h": -0.61,
@@ -3069,8 +3069,8 @@
      {
       "id": "R5B-G1",
       "arch": "REGULATE",
-      "title": "Ban Waste Imports and Enforce",
-      "desc": "Close the border to other countries' rubbish.",
+      "title": "Ban Waste Imports",
+      "desc": "Close the border to other countries’ rubbish, and check every container.",
       "cost": {
        "fiscal": 1
       },
@@ -3087,8 +3087,8 @@
      {
       "id": "R5B-G2",
       "arch": "DEREGULATE",
-      "title": "Fine the Operator Only",
-      "desc": "One company, one fine, done.",
+      "title": "Fine the Dump Owner Only",
+      "desc": "Fine one company and close the case.",
       "cost": {
        "fiscal": 0
       },
@@ -3099,13 +3099,13 @@
       "flags": [
        "COVER_UP"
       ],
-      "headline": "Operator fined, case closed"
+      "headline": "Dump owner fined, case closed"
      },
      {
       "id": "R5B-G3",
       "arch": "SPEND_STEER",
-      "title": "National Recycling Infrastructure",
-      "desc": "Twelve regional plants. Build the thing we lack.",
+      "title": "Build Twelve Recycling Plants",
+      "desc": "Build twelve regional recycling plants. The country has none today.",
       "cost": {
        "fiscal": 2
       },
@@ -3124,7 +3124,7 @@
       "id": "R5B-B1",
       "arch": "TRANSITION",
       "title": "Take Back Our Own Packaging",
-      "desc": "We made it. We collect it.",
+      "desc": "We made the packaging, so we collect it back.",
       "cost": {
        "capital": 3
       },
@@ -3135,13 +3135,13 @@
       "flags": [
        "ACCOUNTABLE"
       ],
-      "headline": "Producer take-back scheme launched"
+      "headline": "Companies start collecting their own packaging"
      },
      {
       "id": "R5B-B2",
       "arch": "EXPAND",
       "title": "Blame the Importers",
-      "desc": "Not our waste. Not our problem.",
+      "desc": "Say it is not our waste, so it is not our job.",
       "cost": {
        "capital": -1
       },
@@ -3152,13 +3152,13 @@
       "flags": [
        "DENIAL"
       ],
-      "headline": "Industry: 'Not our waste, not our problem'"
+      "headline": "Industry: ‘It is not our waste’"
      },
      {
       "id": "R5B-B3",
       "arch": "PARTNER",
-      "title": "Build a Domestic Recycling Plant",
-      "desc": "Turn the problem into a business.",
+      "title": "Build Our Own Recycling Plant",
+      "desc": "Turn the waste problem into a business.",
       "cost": {
        "capital": 2
       },
@@ -3169,27 +3169,27 @@
       "flags": [
        "INDUSTRY_PACT"
       ],
-      "headline": "First large-scale domestic recycler breaks ground"
+      "headline": "Building starts on the first big local recycling plant"
      }
     ],
     "community": [
      {
       "id": "R5B-C1",
       "arch": "ADAPT",
-      "title": "Separate Waste at Source",
-      "desc": "Three bins in every kitchen.",
+      "title": "Sort the Rubbish at Home",
+      "desc": "Every kitchen has three bins and sorts its waste.",
       "cost": {},
       "e": -4,
       "g": -0.1,
       "h": -0.2,
       "gr": 3,
-      "headline": "Household separation becomes the norm"
+      "headline": "Most families now sort their rubbish"
      },
      {
       "id": "R5B-C2",
       "arch": "DEMAND_RELIEF",
-      "title": "Blockade the Landfill Road",
-      "desc": "Not one more lorry.",
+      "title": "Block the Road to the Dump",
+      "desc": "Stand on the road. Not one more lorry gets in.",
       "cost": {},
       "e": -1,
       "g": -0.3,
@@ -3203,8 +3203,8 @@
      {
       "id": "R5B-C3",
       "arch": "SELF_ORGANISE",
-      "title": "Neighbourhood Zero-Waste Scheme",
-      "desc": "Cut what we send by seventy percent.",
+      "title": "Neighbourhood Zero Waste",
+      "desc": "The neighbourhood cuts what it sends to the dump by seventy percent.",
       "cost": {},
       "e": -5,
       "g": 0.0,
@@ -3221,7 +3221,7 @@
       "id": "R5B-A1",
       "arch": "ESCALATE",
       "title": "Trace the Containers",
-      "desc": "Follow every container back to its port of origin.",
+      "desc": "Follow every container back to the port it came from.",
       "cost": {},
       "e": -5,
       "g": -0.4,
@@ -3233,14 +3233,14 @@
      {
       "id": "R5B-A2",
       "arch": "COLLABORATE",
-      "title": "Join the Waste Policy Review",
-      "desc": "Co-chair the review that rewrites the code.",
+      "title": "Help Rewrite the Waste Rules",
+      "desc": "Help lead the review that rewrites the waste import rules.",
       "cost": {},
       "e": -6,
       "g": 0.1,
       "h": 0.5,
       "gr": 7,
-      "headline": "Campaigner co-chairs waste policy review",
+      "headline": "Campaigner helps lead the waste rules review",
       "flags": [
        "COMPROMISED"
       ]
@@ -3248,8 +3248,8 @@
      {
       "id": "R5B-A3",
       "arch": "EDUCATE",
-      "title": "Run School Air Quality Testing",
-      "desc": "Children's data is hard to ignore.",
+      "title": "Test the Air at the School",
+      "desc": "Test the air at the school. Data about children is hard to ignore.",
       "cost": {},
       "e": -2,
       "g": 0.0,
@@ -3269,7 +3269,7 @@
    "variant": "C",
    "type": "pollution",
    "title": "The Dead Coast",
-   "situation": "An effluent plume kills the fisheries off Pulau Manis. Twelve resorts cancel their season. Three thousand fishing families have no income and no proof of who did it.",
+   "situation": "Factory waste in the sea kills the fish off Pulau Manis. Twelve resorts close for the season. Three thousand fishing families have no income. Nobody can prove who did it.",
    "shock": {
     "g": -0.4,
     "h": -0.56,
@@ -3280,8 +3280,8 @@
      {
       "id": "R5C-G1",
       "arch": "SPEND_STEER",
-      "title": "Marine Protection Zone and Compensation",
-      "desc": "A new marine park and RG 400m for the families.",
+      "title": "Marine Park and Money for Families",
+      "desc": "Create a new marine park. Pay RG 400 million to the families.",
       "cost": {
        "fiscal": 2
       },
@@ -3292,14 +3292,14 @@
       "flags": [
        "MARINE_LAW"
       ],
-      "headline": "New marine park and RG 400m in compensation",
+      "headline": "New marine park and RG 400m for the fishing families",
       "block_flag": "POPULIST_PLEDGE"
      },
      {
       "id": "R5C-G2",
       "arch": "DEREGULATE",
       "title": "Reopen the Beaches Quickly",
-      "desc": "The season is worth more than the argument.",
+      "desc": "The tourist season is worth more than the argument, so reopen now.",
       "cost": {
        "fiscal": -1
       },
@@ -3310,13 +3310,13 @@
       "flags": [
        "COVER_UP"
       ],
-      "headline": "Beaches declared safe; scientists disagree"
+      "headline": "Beaches declared safe, but scientists disagree"
      },
      {
       "id": "R5C-G3",
       "arch": "REGULATE",
-      "title": "Mandatory Effluent Monitoring for All",
-      "desc": "Every coastal outfall, live, public.",
+      "title": "Check Every Pipe Into the Sea",
+      "desc": "Every pipe into the sea is measured live. The numbers are public.",
       "cost": {
        "fiscal": 1
       },
@@ -3327,15 +3327,15 @@
       "flags": [
        "MONITORING_LAW"
       ],
-      "headline": "Every coastal outfall to be monitored live"
+      "headline": "Every pipe into the sea to be measured live"
      }
     ],
     "business": [
      {
       "id": "R5C-B1",
       "arch": "TRANSITION",
-      "title": "Fund the Fishermen and Fix the Outfall",
-      "desc": "Pay first, argue never.",
+      "title": "Pay the Fishermen, Fix the Pipe",
+      "desc": "Pay the families first and fix the pipe, without arguing.",
       "cost": {
        "capital": 3
       },
@@ -3351,7 +3351,7 @@
      {
       "id": "R5C-B2",
       "arch": "EXPAND",
-      "title": "Dispute the Science",
+      "title": "Argue With the Science",
       "desc": "Our experts disagree with their experts.",
       "cost": {
        "capital": -1
@@ -3363,13 +3363,13 @@
       "flags": [
        "DENIAL"
       ],
-      "headline": "Firm's experts dispute the plume findings"
+      "headline": "Company experts say the science is wrong"
      },
      {
       "id": "R5C-B3",
       "arch": "PARTNER",
-      "title": "Finance a Coastal Restoration Bond",
-      "desc": "RG 1bn, repaid by the tourism that comes back.",
+      "title": "Borrow to Fix the Coast",
+      "desc": "Borrow RG 1 billion. The tourists who come back repay it.",
       "cost": {
        "capital": 2
       },
@@ -3380,27 +3380,27 @@
       "flags": [
        "INDUSTRY_PACT"
       ],
-      "headline": "RG 1bn coastal restoration bond issued"
+      "headline": "Company borrows RG 1bn to restore the coast"
      }
     ],
     "community": [
      {
       "id": "R5C-C1",
       "arch": "ADAPT",
-      "title": "Accept Compensation and Move On",
-      "desc": "Take the payout. Find other work.",
+      "title": "Take the Money and Move On",
+      "desc": "Take the payment and find other work.",
       "cost": {},
       "e": -3,
       "g": 0.1,
       "h": -0.3,
       "gr": 1,
-      "headline": "Families take the payout and go quiet"
+      "headline": "Families take the money and stop protesting"
      },
      {
       "id": "R5C-C2",
       "arch": "DEMAND_RELIEF",
-      "title": "Occupy the Jetty",
-      "desc": "Three hundred boats across the shipping lane.",
+      "title": "Block the Jetty With Boats",
+      "desc": "Three hundred fishing boats block the shipping lane.",
       "cost": {},
       "e": -1,
       "g": -0.4,
@@ -3409,13 +3409,13 @@
       "flags": [
        "LAWSUIT"
       ],
-      "headline": "Fishing boats blockade the industrial jetty"
+      "headline": "Fishing boats block the factory jetty"
      },
      {
       "id": "R5C-C3",
       "arch": "SELF_ORGANISE",
-      "title": "Community-Run Marine Monitoring",
-      "desc": "The fishermen become the early warning system.",
+      "title": "Fishermen Watch the Sea",
+      "desc": "The fishermen become the early warning system for the coast.",
       "cost": {},
       "e": -4,
       "g": 0.0,
@@ -3431,27 +3431,27 @@
      {
       "id": "R5C-A1",
       "arch": "ESCALATE",
-      "title": "Publish the Plume Modelling",
-      "desc": "Independent science, pinpointing the outfall.",
+      "title": "Name the Pipe With Science",
+      "desc": "Independent scientists show exactly which pipe killed the fish.",
       "cost": {},
       "e": -5,
       "g": -0.4,
       "h": 0.2,
       "gr": 5,
-      "headline": "Independent model pinpoints the source",
+      "headline": "Independent scientists name the pipe that killed the fish",
       "boost_flag": "EVIDENCE_3"
      },
      {
       "id": "R5C-A2",
       "arch": "COLLABORATE",
-      "title": "Negotiate the Coastal Accord",
-      "desc": "Industry, villages, and the state, on one page.",
+      "title": "Sign a Coast Deal",
+      "desc": "Industry, the villages and the state agree one plan for the coast.",
       "cost": {},
       "e": -6,
       "g": 0.1,
       "h": 0.5,
       "gr": 7,
-      "headline": "Coastal accord signed by industry and villages",
+      "headline": "Coast deal signed by industry and villages",
       "flags": [
        "COMPROMISED"
       ]
@@ -3459,7 +3459,7 @@
      {
       "id": "R5C-A3",
       "arch": "EDUCATE",
-      "title": "Train the Fishing Communities",
+      "title": "Teach Fishermen to Test Water",
       "desc": "Teach three thousand people to test their own water.",
       "cost": {},
       "e": -2,
@@ -3479,8 +3479,8 @@
    "round": 6,
    "variant": "A",
    "type": "disaster",
-   "title": "The Great Monsoon Flood",
-   "situation": "Four days of continuous rain. Eight states under water. 90,000 displaced, 43 dead, RG 12 billion in damage. The rescue boats are mostly private, mostly volunteer, mostly late.",
+   "title": "The Monsoon Flood",
+   "situation": "Four days of non-stop rain. Eight states under water. 90,000 people lose their homes, 43 die, RG 12 billion in damage. Most rescue boats are private, run by volunteers, and late.",
    "shock": {
     "g": -1.16,
     "h": -0.77,
@@ -3491,8 +3491,8 @@
      {
       "id": "R6A-G1",
       "arch": "SPEND_STEER",
-      "title": "National Resilience Plan",
-      "desc": "Flood defences, early warning, rebuilt drainage.",
+      "title": "National Flood Plan",
+      "desc": "Build flood walls, early warnings and better drains.",
       "cost": {
        "fiscal": 2
       },
@@ -3500,13 +3500,13 @@
       "g": 0.4,
       "h": 0.8,
       "gr": 9,
-      "headline": "National resilience plan announced"
+      "headline": "National flood plan announced"
      },
      {
       "id": "R6A-G2",
       "arch": "DEREGULATE",
-      "title": "Emergency Payouts Only",
-      "desc": "Money now. Questions never.",
+      "title": "Pay the Victims Only",
+      "desc": "Pay the victims now, and do not ask what went wrong.",
       "cost": {
        "fiscal": 2
       },
@@ -3514,13 +3514,13 @@
       "g": 0.5,
       "h": 0.5,
       "gr": -2,
-      "headline": "Emergency payouts reach flood victims"
+      "headline": "Emergency payments reach flood victims"
      },
      {
       "id": "R6A-G3",
       "arch": "REGULATE",
       "title": "Declare a Climate Emergency",
-      "desc": "A binding 2050 law, passed in a week.",
+      "desc": "Pass a 2050 net zero law in one week.",
       "cost": {
        "fiscal": 3
       },
@@ -3540,8 +3540,8 @@
      {
       "id": "R6A-B1",
       "arch": "TRANSITION",
-      "title": "Fund the Rebuild, Build Back Green",
-      "desc": "Rebuild it better than it was.",
+      "title": "Pay to Rebuild It Better",
+      "desc": "Pay to rebuild the towns, better and cleaner than before.",
       "cost": {
        "capital": 3
       },
@@ -3549,13 +3549,13 @@
       "g": 0.3,
       "h": 0.8,
       "gr": 10,
-      "headline": "Industry funds a green rebuild"
+      "headline": "Industry pays for a cleaner rebuild"
      },
      {
       "id": "R6A-B2",
       "arch": "EXPAND",
-      "title": "Claim the Insurance and Relocate",
-      "desc": "This country is becoming uninsurable.",
+      "title": "Claim the Insurance and Leave",
+      "desc": "This country is becoming impossible to insure. Move the company abroad.",
       "cost": {
        "capital": -2
       },
@@ -3563,13 +3563,13 @@
       "g": -0.6,
       "h": -0.7,
       "gr": -4,
-      "headline": "Major employer announces offshore move"
+      "headline": "Major employer announces move abroad"
      },
      {
       "id": "R6A-B3",
       "arch": "PARTNER",
-      "title": "Restore the Mangroves and Catchment",
-      "desc": "Nature does flood defence cheaper than concrete.",
+      "title": "Replant the Mangroves",
+      "desc": "Mangroves and forests stop floods, and cost less than concrete.",
       "cost": {
        "capital": 2
       },
@@ -3577,15 +3577,15 @@
       "g": 0.1,
       "h": 0.6,
       "gr": 8,
-      "headline": "Mangrove and catchment restoration funded"
+      "headline": "Mangrove and forest replanting funded"
      }
     ],
     "community": [
      {
       "id": "R6A-C1",
       "arch": "ADAPT",
-      "title": "Rebuild Exactly Where We Were",
-      "desc": "This is home. It has always flooded.",
+      "title": "Rebuild in the Same Place",
+      "desc": "This place is our home. It has always flooded, and we stay.",
       "cost": {},
       "e": 2,
       "g": 0.3,
@@ -3596,52 +3596,52 @@
      {
       "id": "R6A-C2",
       "arch": "DEMAND_RELIEF",
-      "title": "Managed Relocation to Safer Ground",
-      "desc": "Leave the floodplain. It will not stop.",
+      "title": "Move to Higher Ground",
+      "desc": "Leave the flood plain for good. The floods will not stop.",
       "cost": {},
       "e": -5,
       "g": -0.3,
       "h": -0.2,
       "gr": 5,
-      "headline": "Twelve villages agree to relocate"
+      "headline": "Twelve villages agree to move"
      },
      {
       "id": "R6A-C3",
       "arch": "SELF_ORGANISE",
-      "title": "The Community Flood Corps",
-      "desc": "Trained volunteers, boats, radios, in every district.",
+      "title": "Community Flood Rescue Team",
+      "desc": "Every district trains volunteers with boats and radios.",
       "cost": {},
       "e": -4,
       "g": 0.2,
       "h": 0.8,
       "gr": 5,
-      "headline": "Volunteer flood corps rescues 4,000"
+      "headline": "Volunteer flood teams rescue 4,000"
      }
     ],
     "activist": [
      {
       "id": "R6A-A1",
       "arch": "ESCALATE",
-      "title": "Sue the State for Climate Negligence",
-      "desc": "Make the failure legally binding.",
+      "title": "Sue the Government",
+      "desc": "Take the Government to court for failing to prepare.",
       "cost": {},
       "e": -6,
       "g": -0.5,
       "h": -0.1,
       "gr": 6,
-      "headline": "Landmark climate negligence case filed"
+      "headline": "Court case filed against the Government over the floods"
      },
      {
       "id": "R6A-A2",
       "arch": "COLLABORATE",
-      "title": "Sign the 2050 National Accord",
-      "desc": "Everyone at one table, one signature.",
+      "title": "Sign the 2050 National Deal",
+      "desc": "Everyone signs one national plan for 2050.",
       "cost": {},
       "e": -8,
       "g": 0.3,
       "h": 0.6,
       "gr": 9,
-      "headline": "2050 National Accord signed",
+      "headline": "2050 national deal signed",
       "flags": [
        "COMPROMISED"
       ]
@@ -3649,14 +3649,14 @@
      {
       "id": "R6A-A3",
       "arch": "EDUCATE",
-      "title": "Hand Over the Roadmap",
-      "desc": "Ten years of work, given away for free.",
+      "title": "Give the Government Our Plan",
+      "desc": "Ten years of the movement’s work, given to the Government for free.",
       "cost": {},
       "e": -4,
       "g": 0.2,
       "h": 0.4,
       "gr": 7,
-      "headline": "Movement hands its roadmap to government",
+      "headline": "Movement hands its plan to the Government",
       "boost_evidence": true
      }
     ]
@@ -3667,8 +3667,8 @@
    "round": 6,
    "variant": "B",
    "type": "disaster",
-   "title": "The Long Dry",
-   "situation": "Nine months without meaningful rain. Reservoirs at 21%. Rationing in four states, hydro output halved, and a rice harvest that simply did not happen.",
+   "title": "The Long Drought",
+   "situation": "Nine months with almost no rain. Reservoirs are at 21%. Water rationing in four states. Half the hydro power is gone. There is no rice harvest at all.",
    "shock": {
     "g": -1.16,
     "h": -0.77,
@@ -3679,8 +3679,8 @@
      {
       "id": "R6B-G1",
       "arch": "SPEND_STEER",
-      "title": "National Water Security Programme",
-      "desc": "Pipes, storage, leak repair, and a plan that lasts.",
+      "title": "National Water Programme",
+      "desc": "Fix the pipes, build storage, repair leaks. Make a plan that lasts.",
       "cost": {
        "fiscal": 2
       },
@@ -3688,13 +3688,13 @@
       "g": 0.4,
       "h": 0.8,
       "gr": 9,
-      "headline": "Nationwide water security programme begins"
+      "headline": "Nationwide water programme begins"
      },
      {
       "id": "R6B-G2",
       "arch": "DEREGULATE",
-      "title": "Cloud Seeding and Emergency Imports",
-      "desc": "Fly the planes. Buy the rice.",
+      "title": "Make Rain and Import Rice",
+      "desc": "Fly planes to seed the clouds. Buy rice from abroad.",
       "cost": {
        "fiscal": 2
       },
@@ -3707,8 +3707,8 @@
      {
       "id": "R6B-G3",
       "arch": "REGULATE",
-      "title": "Permanent Water Pricing Reform",
-      "desc": "Price water like it matters. Because it does.",
+      "title": "Charge the Real Price for Water",
+      "desc": "Charge everyone the real price of water, from now on.",
       "cost": {
        "fiscal": 3
       },
@@ -3719,7 +3719,7 @@
       "flags": [
        "CLIMATE_LAW"
       ],
-      "headline": "Water priced properly for the first time",
+      "headline": "Water charged at its real price for the first time",
       "gate_trust": 2,
       "boost_flag": "GREEN_MANDATE"
      }
@@ -3728,8 +3728,8 @@
      {
       "id": "R6B-B1",
       "arch": "TRANSITION",
-      "title": "Cut Industrial Water Use by Half",
-      "desc": "Nine weeks. Every plant.",
+      "title": "Cut Factory Water Use by Half",
+      "desc": "Every plant halves its water use in nine weeks.",
       "cost": {
        "capital": 3
       },
@@ -3737,13 +3737,13 @@
       "g": 0.2,
       "h": 0.8,
       "gr": 10,
-      "headline": "Industry halves its water draw in nine weeks"
+      "headline": "Industry halves its water use in nine weeks"
      },
      {
       "id": "R6B-B2",
       "arch": "EXPAND",
-      "title": "Buy Priority Water Access",
-      "desc": "We can outbid a rice farmer.",
+      "title": "Buy the Water First",
+      "desc": "Pay more for water than the farmers can.",
       "cost": {
        "capital": -2
       },
@@ -3751,13 +3751,13 @@
       "g": -0.5,
       "h": -0.8,
       "gr": -4,
-      "headline": "Firms outbid farmers for what's left"
+      "headline": "Firms pay more than farmers for the water that is left"
      },
      {
       "id": "R6B-B3",
       "arch": "PARTNER",
-      "title": "Fund Catchment Reforestation",
-      "desc": "Half a million hectares. It rains where forests are.",
+      "title": "Pay to Replant the Forests",
+      "desc": "Replant half a million hectares. Rain falls where forests are.",
       "cost": {
        "capital": 2
       },
@@ -3772,8 +3772,8 @@
      {
       "id": "R6B-C1",
       "arch": "ADAPT",
-      "title": "Strict Household Rationing",
-      "desc": "Two hours of water a day, and no complaints.",
+      "title": "Strict Water Rationing",
+      "desc": "Two hours of water a day, and nobody complains.",
       "cost": {},
       "e": -4,
       "g": -0.3,
@@ -3784,20 +3784,20 @@
      {
       "id": "R6B-C2",
       "arch": "DEMAND_RELIEF",
-      "title": "Protest the Industrial Allocation",
-      "desc": "Why do they have water and we don't?",
+      "title": "Protest the Factories’ Water",
+      "desc": "Why do the factories have water when we do not?",
       "cost": {},
       "e": 1,
       "g": -0.3,
       "h": 0.4,
       "gr": 2,
-      "headline": "Farmers march on the water authority"
+      "headline": "Farmers march on the water office"
      },
      {
       "id": "R6B-C3",
       "arch": "SELF_ORGANISE",
-      "title": "Rainwater Harvesting Everywhere",
-      "desc": "A tank on every roof in ninety days.",
+      "title": "A Rain Tank on Every Roof",
+      "desc": "Put a rain tank on every roof in ninety days.",
       "cost": {},
       "e": -4,
       "g": 0.2,
@@ -3810,8 +3810,8 @@
      {
       "id": "R6B-A1",
       "arch": "ESCALATE",
-      "title": "Expose Who Gets the Water",
-      "desc": "Forty percent goes to twelve companies.",
+      "title": "Show Who Gets the Water",
+      "desc": "Forty percent of the water goes to twelve companies. Publish that fact.",
       "cost": {},
       "e": -6,
       "g": -0.5,
@@ -3822,14 +3822,14 @@
      {
       "id": "R6B-A2",
       "arch": "COLLABORATE",
-      "title": "Join the Water Allocation Council",
-      "desc": "Rewrite the rules from inside.",
+      "title": "Join the Water Council",
+      "desc": "Rewrite the water rules from inside the council.",
       "cost": {},
       "e": -8,
       "g": 0.3,
       "h": 0.6,
       "gr": 9,
-      "headline": "Allocation council rewrites the rules",
+      "headline": "Water council rewrites the rules",
       "flags": [
        "COMPROMISED"
       ]
@@ -3837,14 +3837,14 @@
      {
       "id": "R6B-A3",
       "arch": "EDUCATE",
-      "title": "Publish the Basin Recovery Plan",
-      "desc": "A way back, costed and ready.",
+      "title": "Publish the River Recovery Plan",
+      "desc": "Publish a way back, with the costs worked out.",
       "cost": {},
       "e": -4,
       "g": 0.2,
       "h": 0.4,
       "gr": 7,
-      "headline": "Basin recovery plan offers a way back",
+      "headline": "River recovery plan offers a way back",
       "boost_evidence": true
      }
     ]
@@ -3855,8 +3855,8 @@
    "round": 6,
    "variant": "C",
    "type": "disaster",
-   "title": "The Hillside",
-   "situation": "After three days of rain, a hillside above a new township gives way. Thirty-one dead. The development approval was signed four years ago by someone who is in this room.",
+   "title": "The Landslide",
+   "situation": "Three days of rain. A hillside above a new housing estate collapses. Thirty-one people die. The building approval was signed four years ago. Someone in this room signed it.",
    "shock": {
     "g": -1.16,
     "h": -0.77,
@@ -3867,8 +3867,8 @@
      {
       "id": "R6C-G1",
       "arch": "SPEND_STEER",
-      "title": "Halt Hillside Development and Review",
-      "desc": "Every approval frozen. Every slope re-surveyed.",
+      "title": "Stop All Hillside Building",
+      "desc": "Freeze every hillside approval. Survey every slope again.",
       "cost": {
        "fiscal": 2
       },
@@ -3881,8 +3881,8 @@
      {
       "id": "R6C-G2",
       "arch": "DEREGULATE",
-      "title": "Compensate Victims and Continue",
-      "desc": "Pay the families. Keep building.",
+      "title": "Pay the Families and Keep Building",
+      "desc": "Pay the families and keep building.",
       "cost": {
        "fiscal": 2
       },
@@ -3890,13 +3890,13 @@
       "g": 0.5,
       "h": 0.5,
       "gr": -2,
-      "headline": "Compensation paid, projects continue"
+      "headline": "Families paid, building continues"
      },
      {
       "id": "R6C-G3",
       "arch": "REGULATE",
-      "title": "National Land Use and Slope Law",
-      "desc": "The law we should have passed a decade ago.",
+      "title": "Pass a Slope Safety Law",
+      "desc": "Pass the law the country should have passed ten years ago.",
       "cost": {
        "fiscal": 3
       },
@@ -3907,7 +3907,7 @@
       "flags": [
        "CLIMATE_LAW"
       ],
-      "headline": "Landmark land use act passes in a week",
+      "headline": "Slope safety law passes in a week",
       "gate_trust": 2,
       "boost_flag": "GREEN_MANDATE"
      }
@@ -3916,8 +3916,8 @@
      {
       "id": "R6C-B1",
       "arch": "TRANSITION",
-      "title": "Full Compensation and Independent Audit",
-      "desc": "Open the books. All of them.",
+      "title": "Pay in Full and Open the Books",
+      "desc": "Pay the families in full. Let outside experts check every record.",
       "cost": {
        "capital": 3
       },
@@ -3925,13 +3925,13 @@
       "g": 0.3,
       "h": 0.8,
       "gr": 10,
-      "headline": "Developer opens its books to independent audit"
+      "headline": "Developer opens its records to outside experts"
      },
      {
       "id": "R6C-B2",
       "arch": "EXPAND",
-      "title": "Defend the Approval Process",
-      "desc": "Every approval was lawful.",
+      "title": "Defend the Approval",
+      "desc": "Say every approval was lawful, and stop there.",
       "cost": {
        "capital": -2
       },
@@ -3944,8 +3944,8 @@
      {
       "id": "R6C-B3",
       "arch": "PARTNER",
-      "title": "Fund Nationwide Slope Stabilisation",
-      "desc": "Fix the eight hundred slopes like this one.",
+      "title": "Pay to Fix Every Slope",
+      "desc": "Fix the eight hundred slopes like this one, across the country.",
       "cost": {
        "capital": 2
       },
@@ -3953,15 +3953,15 @@
       "g": 0.1,
       "h": 0.6,
       "gr": 8,
-      "headline": "Industry funds slope works across eight states"
+      "headline": "Industry pays for slope repairs across eight states"
      }
     ],
     "community": [
      {
       "id": "R6C-C1",
       "arch": "ADAPT",
-      "title": "Accept Resettlement",
-      "desc": "New homes, flat ground, no view.",
+      "title": "Accept New Homes",
+      "desc": "Accept new homes on flat ground, with no view.",
       "cost": {},
       "e": -5,
       "g": -0.3,
@@ -3972,20 +3972,20 @@
      {
       "id": "R6C-C2",
       "arch": "DEMAND_RELIEF",
-      "title": "Occupy the Development Site",
-      "desc": "Nobody builds above us again.",
+      "title": "Camp on the Building Site",
+      "desc": "Camp on the site so nobody builds above us again.",
       "cost": {},
       "e": 1,
       "g": -0.3,
       "h": 0.4,
       "gr": 1,
-      "headline": "Residents occupy the site above their homes"
+      "headline": "Residents camp on the site above their homes"
      },
      {
       "id": "R6C-C3",
       "arch": "SELF_ORGANISE",
-      "title": "Community Hazard Mapping",
-      "desc": "Map every dangerous slope in the country.",
+      "title": "Map the Dangerous Slopes",
+      "desc": "Volunteers map every dangerous slope in the country.",
       "cost": {},
       "e": -4,
       "g": 0.2,
@@ -3999,7 +3999,7 @@
       "id": "R6C-A1",
       "arch": "ESCALATE",
       "title": "Publish the Approval Documents",
-      "desc": "Every signature, every date.",
+      "desc": "Publish every signature and every date on the approval.",
       "cost": {},
       "e": -6,
       "g": -0.5,
@@ -4010,14 +4010,14 @@
      {
       "id": "R6C-A2",
       "arch": "COLLABORATE",
-      "title": "Co-Write the New Planning Code",
-      "desc": "Build the rules that stop the next one.",
+      "title": "Help Write the New Building Rules",
+      "desc": "Help write the rules that stop the next landslide.",
       "cost": {},
       "e": -8,
       "g": 0.3,
       "h": 0.6,
       "gr": 9,
-      "headline": "New planning code written with civil society",
+      "headline": "New building rules written with citizens’ groups",
       "flags": [
        "COMPROMISED"
       ]
@@ -4025,14 +4025,14 @@
      {
       "id": "R6C-A3",
       "arch": "EDUCATE",
-      "title": "Train Community Slope Monitors",
-      "desc": "People who can see it coming.",
+      "title": "Train Slope Watchers",
+      "desc": "Train local people to see a landslide coming.",
       "cost": {},
       "e": -4,
       "g": 0.2,
       "h": 0.4,
       "gr": 7,
-      "headline": "Communities trained to monitor their own slopes",
+      "headline": "Communities trained to watch their own slopes",
       "boost_evidence": true
      }
     ]
@@ -4041,14 +4041,14 @@
  ],
  "tutorial": {
   "title": "A Practice Round",
-  "situation": "Nothing has happened yet. This one is for practice, and none of it counts. Pick a card so you know how it works when it does.",
+  "situation": "This round is for practice. Nothing you pick counts. Pick a card to learn how the game works.",
   "options": {
    "government": [
     {
      "id": "T-G1",
      "arch": "SPEND_STEER",
      "title": "Fund the Bus Network",
-     "desc": "Cleaner buses, and more of them.",
+     "desc": "Buy cleaner buses, and more of them.",
      "cost": {
       "fiscal": 2
      },
@@ -4063,7 +4063,7 @@
      "id": "T-G2",
      "arch": "DEREGULATE",
      "title": "Do Nothing This Year",
-     "desc": "Save the money. See what happens.",
+     "desc": "Save the money and see what happens.",
      "cost": {
       "fiscal": -1
      },
@@ -4080,7 +4080,7 @@
      "id": "T-B1",
      "arch": "TRANSITION",
      "title": "Switch the Factory to Solar",
-     "desc": "Costly now. Cheaper every year after.",
+     "desc": "It costs a lot now. It saves money every year after.",
      "cost": {
       "capital": 3
      },
@@ -4095,7 +4095,7 @@
      "id": "T-B2",
      "arch": "EXPAND",
      "title": "Run the Old Plant Harder",
-     "desc": "More output. More smoke.",
+     "desc": "The factory makes more, and makes more smoke.",
      "cost": {
       "capital": -2
      },
@@ -4112,7 +4112,7 @@
      "id": "T-C1",
      "arch": "SELF_ORGANISE",
      "title": "Start a Car Pool",
-     "desc": "Cheap, small, and it adds up.",
+     "desc": "It is cheap and small, and it adds up.",
      "cost": {},
      "e": -4,
      "g": 0.1,
@@ -4125,7 +4125,7 @@
      "id": "T-C2",
      "arch": "DEMAND_RELIEF",
      "title": "Demand Cheaper Fuel",
-     "desc": "Popular today. Someone else pays.",
+     "desc": "People like it today. Someone else pays for it.",
      "cost": {},
      "e": 2,
      "g": 0.2,
@@ -4140,7 +4140,7 @@
      "id": "T-A1",
      "arch": "ESCALATE",
      "title": "March on the Ministry",
-     "desc": "Loud. It makes enemies and it works.",
+     "desc": "A loud march makes enemies, and it works.",
      "cost": {},
      "e": -3,
      "g": -0.4,
@@ -4153,7 +4153,7 @@
      "id": "T-A2",
      "arch": "EDUCATE",
      "title": "Publish the Numbers",
-     "desc": "Nothing today. Something later.",
+     "desc": "It changes nothing today and something later.",
      "cost": {},
      "e": -1,
      "g": 0.0,

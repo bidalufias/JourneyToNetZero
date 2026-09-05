@@ -14,10 +14,11 @@
  * history: it cannot change anything, it cannot reach another round, and it can
  * never show you a card you have not been dealt. It exists because the crisis
  * brief scrolled past in twenty-five seconds and there was no way to read it
- * again, and because "LOCKED IN" would not tell you what you had locked in.
+ * again, and because "LOCKED" would not tell you what you had locked.
  */
 import type { PhoneView } from '../game/session'
-import { ROLE_CHARACTER, ROLE_LABEL } from '../game/session'
+import { ROLE_CARD, ROLE_LABEL, phaseMs } from '../game/session'
+import { STEP_LABEL } from '../game/vocab'
 import { RoleGlyph, formatClock } from '../ui/primitives'
 
 /** The screens of one round, in the order they happen. */
@@ -26,15 +27,15 @@ export type Screen = 'crisis' | 'table' | 'choice'
 export const SCREEN_ORDER: Screen[] = ['crisis', 'table', 'choice']
 
 export const SCREEN_LABEL: Record<Screen, string> = {
-  crisis: 'THE CRISIS',
-  table: 'THE TALK',
-  choice: 'THE CHOICE',
+  crisis: STEP_LABEL.crisis,
+  table: STEP_LABEL.table,
+  choice: STEP_LABEL.choice,
 }
 
 /**
  * How far back this player may look right now.
  *
- * Only within the live round: from the Reckoning onward the phone is handed the
+ * Only within the live round: from the Reveal onward the phone is handed the
  * *next* round's scenario, so letting the history reach that far would show
  * somebody a crisis that has not broken yet.
  */
@@ -56,13 +57,28 @@ export function PhoneHeader({
   onBack: (() => void) | null
   onMenu: () => void
 }) {
-  const character = ROLE_CHARACTER[view.role]
+  const character = ROLE_CARD[view.role]
   const clock = formatClock(remaining)
   // A stopped clock never nags. The pause banner above the header is already
   // saying what is happening; a flashing red countdown under it would say the
   // opposite.
   const urgent = !view.paused && (remaining ?? 1e9) < 10_000
-  const pct = view.phaseEndsAt && remaining !== null ? Math.max(0, Math.min(100, (remaining / 90_000) * 100)) : 0
+  // Divided by this phase's own length. A fixed ninety seconds meant the bar
+  // started a third full on a forty-second phase and never emptied on a
+  // two-minute one.
+  const length = phaseMs(view.phase, view.round)
+  const pct =
+    view.phaseEndsAt && remaining !== null && length > 0
+      ? Math.max(0, Math.min(100, (remaining / length) * 100))
+      : 0
+  // Before the first crisis there is no round to number. The practice says so;
+  // the steps either side of it are the table getting ready.
+  const where =
+    view.round > 0
+      ? `Round ${view.round}`
+      : view.phase === 'practiceTalk' || view.phase === 'practiceChoice' || view.phase === 'practiceReveal'
+        ? 'Practice'
+        : 'Getting ready'
 
   return (
     <>
@@ -77,7 +93,7 @@ export function PhoneHeader({
         <div className="phead__org">
           <div>{character.org.toUpperCase()}</div>
           <div className="phead__title">
-            {ROLE_LABEL[view.role]} · Round {view.round}
+            {ROLE_LABEL[view.role]} · {where}
           </div>
         </div>
         <Resource view={view} />
@@ -126,8 +142,13 @@ function Nation({ view }: { view: PhoneView }) {
     { label: 'ECONOMY', value: `${n.economy.toFixed(1)}%`, met: n.economy >= n.targets.economy },
     { label: 'QUALITY OF LIFE', value: n.life.toFixed(1), met: n.life >= n.targets.life },
   ]
+  // Folded to one line while a card is being chosen. Three cards and the lock
+  // button have to fit above the fold on a small phone, and the arrows on the
+  // cards are saying what the numbers say here, so the bar gives up its height
+  // for those forty seconds and keeps its three numbers.
+  const folded = view.phase === 'choice' || view.phase === 'practiceChoice'
   return (
-    <div className="nation">
+    <div className={`nation${folded ? ' nation--folded' : ''}`}>
       {cells.map((c) => (
         <div key={c.label} className="nation__cell">
           <span className="nation__label">{c.label}</span>
@@ -142,9 +163,9 @@ function Nation({ view }: { view: PhoneView }) {
 export function ReviewBar({ screen, onNow }: { screen: Screen; onNow: () => void }) {
   return (
     <div className="review">
-      <span className="review__label">LOOKING BACK · {SCREEN_LABEL[screen]}</span>
+      <span className="review__label">EARLIER THIS ROUND · {SCREEN_LABEL[screen]}</span>
       <button className="review__now" onClick={onNow}>
-        BACK TO NOW
+        BACK TO THE GAME
       </button>
     </div>
   )

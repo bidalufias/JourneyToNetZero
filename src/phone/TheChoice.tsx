@@ -5,7 +5,7 @@
  * bottom third, so nobody scrolls to find the thing they must do.
  *
  * Selecting and committing are two separate acts, and the gap between them is
- * the point. A tap only moves the tick; LOCK IT IN is the door that shuts.
+ * the point. A tap only moves the tick; LOCK MY CARD is the door that shuts.
  */
 import type { Command } from '../game/room'
 import { arrows } from '../game/impact'
@@ -33,13 +33,13 @@ export function TheChoice({
   return (
     <div className="pbody">
       <span className="plabel">
-        ROUND {view.round} · {committed ? 'LOCKED IN' : 'YOUR CHOICE'}
+        {view.round > 0 ? `ROUND ${view.round}` : 'PRACTICE'} · {committed ? 'LOCKED' : 'YOUR CHOICE'}
       </span>
-      <h1 className="pheading">{committed ? 'Locked in.' : 'Pick one card.'}</h1>
+      <h1 className="pheading">{committed ? 'Locked.' : 'Pick one card.'}</h1>
       {urgent ? (
         <p className="pnote pnote--urgent">
           {seconds} seconds left.{' '}
-          {selected ? 'Your card locks by itself.' : 'The clock will pick for you.'}
+          {selected ? 'Your card will lock by itself.' : 'If you pick nothing, the game picks for you.'}
         </p>
       ) : null}
 
@@ -56,8 +56,8 @@ export function TheChoice({
       {committed ? (
         <p className="pnote">
           {readOnly && !view.locked
-            ? 'You can still change this. Tap BACK TO NOW.'
-            : 'This is final. The cards turn over on the big screen.'}
+            ? 'You can still change this. Tap BACK TO THE GAME.'
+            : 'Your card is locked. Look up at the big screen.'}
         </p>
       ) : (
         <>
@@ -66,10 +66,10 @@ export function TheChoice({
             disabled={!selected}
             onClick={() => selected && send({ t: 'lock', role: view.role })}
           >
-            {selected ? 'LOCK IT IN' : 'TAP A CARD FIRST'}
+            {selected ? 'LOCK MY CARD' : 'TAP A CARD FIRST'}
           </button>
           <p className="pnote">
-            {selected ? 'You can still change your mind.' : 'Tapping a card only selects it.'}
+            {selected ? 'You can still change your card.' : 'Tapping a card does not lock it.'}
           </p>
         </>
       )}
@@ -104,9 +104,9 @@ export function OptionCard({
 
   const flag =
     option.disabled === 'afford'
-      ? 'YOU CANNOT AFFORD THIS'
+      ? 'NOT ENOUGH MONEY'
       : option.disabled === 'veto'
-        ? 'THE PUBLIC SAID NO'
+        ? 'THE COMMUNITY SAID NO'
         : option.disabled === 'gate'
           ? 'LOCKED'
           : null

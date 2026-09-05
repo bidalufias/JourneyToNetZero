@@ -1,0 +1,77 @@
+/* ── The role card ───────────────────────────────────────────────────
+   The same card on the phone and the projector. The role colour comes from
+   the `data-role` skin variables, so the card is in its seat's colour
+   wherever it is drawn, including the join page before a seat is taken. */
+
+.rolecard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  background: #fff;
+  color: var(--color-text);
+  border-left: 6px solid var(--skin-base);
+  padding: var(--space-3) var(--space-4);
+}
+
+.rolecard__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--skin-base);
+  font: 800 15px/1.15 var(--font-heading);
+}
+
+.rolecard__name {
+  margin-left: auto;
+  color: var(--color-text);
+  font: 400 14px/1.15 var(--font-body);
+}
+
+.rolecard__key {
+  display: block;
+  margin-bottom: 4px;
+  font: 800 11px/1 var(--font-heading);
+  letter-spacing: 0.14em;
+  color: var(--skin-base);
+}
+
+.rolecard__line { margin: 0; font: 400 15px/1.45 var(--font-body); }
+
+.rolecard__row--goal {
+  border-top: var(--rule) solid var(--color-neutral-400);
+  padding-top: var(--space-3);
+}
+
+.rolecard__say { margin: var(--space-2) 0 0; font: 500 15px/1.4 var(--font-body); }
+
+.rolecard__more {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--skin-base);
+  font: 800 12px/1 var(--font-heading);
+  letter-spacing: 0.12em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  min-height: 32px;
+}
+
+/* The power step: two lines, large, and nothing else on the screen. */
+.rolecard--big .rolecard__line { font: 500 19px/1.4 var(--font-body); }
+.rolecard--big .rolecard__key { font-size: 12px; }
+
+/* One of four on the projector, read from the back of the room. */
+.rolecard--tile {
+  background: color-mix(in srgb, #fff 8%, transparent);
+  color: inherit;
+  border-left: none;
+  border-top: 6px solid var(--skin-mark);
+  padding: clamp(10px, 1.2vw, 22px) clamp(12px, 1.4vw, 26px);
+  gap: clamp(8px, 1vw, 18px);
+}
+
+.rolecard--tile .rolecard__head { color: var(--skin-mark); font-size: clamp(14px, 1.3vw, 24px); }
+.rolecard--tile .rolecard__key { color: var(--skin-mark); font-size: clamp(9px, 0.8vw, 14px); }
+.rolecard--tile .rolecard__line { font-size: clamp(13px, 1.15vw, 21px); line-height: 1.35; }

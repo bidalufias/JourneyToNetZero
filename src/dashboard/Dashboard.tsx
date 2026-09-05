@@ -17,6 +17,7 @@ import { serverNow } from '../net/clock'
 import type { DashboardView } from '../game/session'
 import type { Endgame } from '../game/room'
 import { ROLE_LABEL } from '../game/session'
+import { STEP_LABEL } from '../game/vocab'
 import { Meter, RoleGlyph, Sparkline, formatClock } from '../ui/primitives'
 import {
   driftSentence,
@@ -38,20 +39,6 @@ import {
 import './dashboard.css'
 import './screens.css'
 
-const PHASE_LABEL: Record<string, string> = {
-  briefing: 'THE BRIEFING',
-  practiceTalk: 'PRACTICE · TALKING',
-  practiceChoice: 'PRACTICE · CHOOSING',
-  power: 'WHAT EACH OF YOU CAN DO',
-  goal: 'YOUR SECRET WIN',
-  crisis: 'THE CRISIS',
-  table: 'THE TALK',
-  choice: 'THE CHOICE',
-  reckoning: 'THE REVEAL',
-  trust: 'PUBLIC TRUST',
-  summary: 'THE STORY SO FAR',
-  results: 'THE NATIONAL MISSION',
-}
 
 /**
  * Ticks locally between server snapshots so the countdown stays smooth.
@@ -100,10 +87,12 @@ export function Dashboard({
     return <Attract view={view} onShowQr={onShowQr} onOpenScript={onOpenScript} />
   }
   if (view.phase === 'briefing') return <Briefing view={view} clock={clock} />
-  // The onboarding owns the whole screen, the way the briefing does. Rendered
-  // inside the meters column it overflowed, and put the one line the person
-  // running the room needs to read behind the pause and next buttons.
-  if (view.phase === 'practiceChoice' || view.phase === 'power' || view.phase === 'goal') {
+  // The power and goal steps own the whole screen, the way the briefing does.
+  // Rendered inside the meters column they overflowed, and put the one line
+  // the person running the room needs to read behind the pause and next
+  // buttons. The practice choice stays on the board below, because it is the
+  // second half of the practice and should look like the first.
+  if (view.phase === 'power' || view.phase === 'goal') {
     return <Onboarding view={view} clock={clock} />
   }
   // Two names, fifteen seconds, its own screen. Rendered beside the meters it
@@ -118,7 +107,10 @@ export function Dashboard({
       <Masthead view={view} clock={clock} urgent={!view.paused && (remaining ?? 1e9) < 10_000} />
       <div className="dash__body">
         <TheNation view={view} />
-        {view.phase === 'table' || view.phase === 'choice' || view.phase === 'practiceTalk' ? (
+        {view.phase === 'table' ||
+        view.phase === 'choice' ||
+        view.phase === 'practiceTalk' ||
+        view.phase === 'practiceChoice' ? (
           <TheTable view={view} />
         ) : null}
 
@@ -128,12 +120,12 @@ export function Dashboard({
       <Ticker headlines={view.headlines} />
 
       {view.phase === 'crisis' && view.scenario ? <CrisisSting view={view} clock={clock} /> : null}
-      {/* The Reckoning owns its own beats, including when the Coalition Bonus
+      {/* The Reveal owns its own beats, including when the moving together bonus
           is allowed to interrupt. It must land after the meters settle. */}
-      {/* Keyed on the round so every Reckoning starts its own stopwatch, even
+      {/* Keyed on the round so every Reveal starts its own stopwatch, even
           in the case where one follows another without the screen unmounting. */}
-      {view.phase === 'reckoning' && view.lastRound ? (
-        <Reckoning key={view.lastRound.round} view={view} />
+      {(view.phase === 'reckoning' || view.phase === 'practiceReveal') && view.lastRound ? (
+        <Reckoning key={view.phase === 'practiceReveal' ? 'practice' : view.lastRound.round} view={view} />
       ) : null}
     </div>
   )
@@ -153,10 +145,14 @@ function Masthead({
       <span className="dash__live">LIVE</span>
       <span className="dash__channel">SEMENANJARA TONIGHT</span>
       <div className="dash__masthead-right">
-        <span>
-          ROUND {view.round} OF 6
-        </span>
-        <span>{PHASE_LABEL[view.phase] ?? ''}</span>
+        {/* No round before the first crisis. The step name carries the line. */}
+        {view.round > 0 ? <span>ROUND {view.round} OF 6</span> : null}
+        {/* The practice choice ends on the fourth lock, so the count is the
+            one number the facilitator is watching. */}
+        {view.phase === 'practiceChoice' ? (
+          <span>{view.seats.filter((x) => x.locked).length} OF 4 LOCKED</span>
+        ) : null}
+        <span>{STEP_LABEL[view.phase] ?? ''}</span>
         {clock ? (
           <span
             className={`dash__clock${urgent ? ' dash__clock--urgent' : ''}${
@@ -211,7 +207,7 @@ function TheNation({ view }: { view: DashboardView }) {
         </div>
 
         <div className="proj">
-          <span className="proj__label">ON CURRENT PATH, 2050</span>
+          <span className="proj__label">IF NOTHING CHANGES, IN 2050</span>
           <div className="proj__row">
             <span className="proj__value" data-on-track={projection.onTrack}>
               {s.projection2050.toFixed(0)}
@@ -227,7 +223,7 @@ function TheNation({ view }: { view: DashboardView }) {
 }
 
 function LockRow({ view }: { view: DashboardView }) {
-  const showLocks = view.phase === 'choice' || view.phase === 'table'
+  const showLocks = view.phase === 'choice' || view.phase === 'table' || view.phase === 'practiceChoice'
   return (
     <div className="locks">
       {view.seats.map((seat) => {
@@ -253,8 +249,8 @@ function LockRow({ view }: { view: DashboardView }) {
                     : seat.locked
                       ? 'LOCKED'
                       : seat.lastToLock
-                        ? 'LAST ONE'
-                        : 'THINKING'}
+                        ? 'LAST TO LOCK'
+                        : 'STILL CHOOSING'}
               </div>
             </div>
           </div>
@@ -300,7 +296,7 @@ function CrisisSting({ view, clock }: { view: DashboardView; clock: string | nul
     health: 'THE PEOPLE',
     election: 'THE ELECTION',
     pollution: 'THE DAMAGE',
-    disaster: 'THE RECKONING',
+    disaster: 'THE DISASTER',
   }
   return (
     <div className="sting">
@@ -327,7 +323,7 @@ function CrisisSting({ view, clock }: { view: DashboardView; clock: string | nul
         </div>
         {clock ? (
           <div className="sting__countdown">
-            <div className="sting__countdown-label">THE TABLE OPENS IN</div>
+            <div className="sting__countdown-label">THE TALK STARTS IN</div>
             <div className="sting__countdown-value">{clock}</div>
           </div>
         ) : null}

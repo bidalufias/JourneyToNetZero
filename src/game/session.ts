@@ -13,6 +13,7 @@ export type Phase =
   | 'briefing'
   | 'practiceTalk'
   | 'practiceChoice'
+  | 'practiceReveal'
   | 'power'
   | 'goal'
   | 'crisis'
@@ -38,6 +39,11 @@ export type Phase =
  * that picking is the simpler verb; teaching the sequence backwards to save one
  * step of difficulty is a poor trade.
  *
+ * The practice reveal is short because it is the third time the table has seen
+ * the shape of the beat and the first time it has seen the payoff: the four
+ * cards flip, the promise is judged, the meters move, and then all of it is
+ * thrown away. Twenty seconds is the flip sequence and a breath.
+ *
  * The round is built around a fixed budget rather than around what each beat
  * could justify on its own. The Reveal used to run 75 seconds, six times, which
  * is seven and a half minutes of the session spent watching rather than
@@ -52,6 +58,7 @@ export const PHASE_MS: Record<Phase, number> = {
   briefing: 45_000,
   practiceTalk: 75_000,
   practiceChoice: 60_000,
+  practiceReveal: 20_000,
   power: 30_000,
   goal: 45_000,
   crisis: 25_000,
@@ -94,6 +101,13 @@ export interface Player {
   role: Role
   name: string
   connected: boolean
+  /**
+   * Has pressed the one button the current onboarding step offers: I AM READY
+   * on the role card, GOT IT on the power step. A room fact rather than a
+   * phone fact, so the projector can count it and the step can end on four.
+   * Cleared whenever an onboarding step opens, so the same flag serves each.
+   */
+  ready: boolean
   /** Set once during setup, never revealed until the endgame. */
   goalId: string | null
   /**
@@ -219,6 +233,14 @@ export interface Room {
   /** Populated at the Reckoning and read by both surfaces. */
   lastRound: RoundLog | null
   history: RoundLog[]
+  /**
+   * The practice round, resolved against a scratch copy of the country.
+   *
+   * Held only for the length of the practice reveal, so the projector can run
+   * the real flip sequence on it, and then discarded with everything else the
+   * practice touched. It never enters `history` and never moves `game`.
+   */
+  practiceLog: RoundLog | null
 
   /** Roles that have already received a tip, for the rotation rule. */
   tipRotation: Role[]
@@ -257,7 +279,15 @@ export interface DashboardView {
     locked: boolean
     /** True for the one player everybody is waiting on. */
     lastToLock: boolean
+    /** Has pressed the current onboarding step's button. */
+    ready: boolean
+    /** Has chosen a secret goal. Never which one. */
+    sealed: boolean
   }[]
+  /** Held seats that have pressed the current step's button. */
+  readyCount: number
+  /** Held seats that have chosen a secret goal. */
+  sealedCount: number
   promises: Promise_[]
   offersInFlight: Offer[]
   /** Announced, but never who received it. */
@@ -318,6 +348,10 @@ export interface PhoneView {
   spotlightCalled: boolean
   /** The Government has agreed to co-fund the Business's partnership option. */
   coFund: boolean
+  /** You have pressed the current onboarding step's button. */
+  ready: boolean
+  /** The Community's veto is on you this round. Your dirty cards are gone. */
+  vetoed: boolean
   goalId: string | null
   /** Your own sealed goal, so the phone can remind you what you are chasing. */
   goalTitle: string | null
@@ -327,7 +361,7 @@ export interface PhoneView {
   promises: Promise_[]
   incomingOffers: Offer[]
   sentOffers: Offer[]
-  seats: { role: Role; name: string | null; connected: boolean; locked: boolean }[]
+  seats: { role: Role; name: string | null; connected: boolean; locked: boolean; ready: boolean }[]
   /** The three national targets and where the country stands, for the header. */
   nation: {
     carbon: number
@@ -383,126 +417,132 @@ export const ROLE_LABEL: Record<Role, string> = {
  *
  * Nothing here is gendered. The archetype is played by whoever takes it.
  */
-export interface RoleCharacter {
+export interface RoleCard {
   /** The archetype, without its article. */
   title: string
   org: string
-  post: string
-  /** One line, for the places that only have room for one. */
-  blurb: string
 
-  /* The three lines. Everything a player needs to open their mouth in Round 1. */
-  youAre: string
-  youWant: string
-  yourMove: string
-
-  /* The full profile, behind a tap. Nobody has to read this to play. */
-  whoYouAre: string
-  believe: string
-  afraidOf: string
-  /** What this seat actually does with the one thing it holds. */
-  resourcePower: string
-  /** Three things this character would say at the table. */
-  says: string[]
-  /** And the one they never would. */
-  neverSay: string
+  /*
+   * The card. Four lines under four fixed headings, in this order, on every
+   * surface: who you are, what you want, what you have, how to play. Seventy
+   * words or fewer between them, and the same words wherever the card shows.
+   */
+  who: string
+  wants: string
+  /** The seat's money or power, with the number. */
+  has: string
+  /** Three short instructions. The line the old role screens never had. */
+  howToPlay: string
+  /** Two lines a shy player can open their mouth with. Behind a tap, never on the card. */
+  says: [string, string]
 }
 
 /**
- * The role screen used to stack nine labelled sections and about 450 words, in
- * front of a player who had ninety seconds and had never seen the game. Now the
- * first three lines are the whole brief and the rest is optional.
- *
- * Nothing here is gendered. The archetype is played by whoever takes it.
+ * A player used to learn their role from five screens, at five moments, under
+ * five sets of headings, and around 250 words. Now it is one card of about
+ * sixty words, shown in the same shape at every moment the player needs it.
  */
-export const ROLE_CHARACTER: Record<Role, RoleCharacter> = {
+export const ROLE_CARD: Record<Role, RoleCard> = {
   government: {
     title: 'Minister',
     org: 'Ministry of Energy and Climate',
-    post: 'Minister for Energy and Climate',
-    blurb: 'You hold the country’s money and the power to make law.',
-    youAre: 'The Minister. You hold the national Budget and the power to make law.',
-    youWant: 'Growth, and to still be in office in 2050.',
-    yourMove: 'Spend Budget to change the country. Or give Budget away so someone else can act.',
-    whoYouAre:
-      'Twenty-four years in the civil service, then politics. Half your voters work on plantations. The other half commute into the city.',
-    believe:
-      'The change has to happen, and you are the only one who can pay for it. But a government that loses an election changes nothing.',
-    afraidOf: 'Being the minister who made petrol expensive.',
-    resourcePower:
-      'You start with 4 Budget. From Round 2 you get 2 more each round, and 1 extra when the economy is strong, up to 8. Big moves cost 2 or 3, so it often pays to save a round and then spend properly. You can also give Budget to another player, or pay half of a Business partnership so it works at full strength instead of half.',
+    who: 'The Minister. You run the government.',
+    wants: 'A growing economy, and to stay in power.',
+    has: 'Budget: 4. You get 2 more each round. Cards cost 1 to 3 Budget.',
+    howToPlay:
+      'Spend on big changes. Give Budget to the Business when a deal is worth it. Always ask what the voters get.',
     says: [
-      'I can fund that. What do I tell the people who voted for me?',
-      'Give me a public reason to spend this and I will spend it.',
-      'If I do that I lose the seat, and then none of this happens.',
+      'I can pay for that. What do I tell the voters?',
+      'If I do that, I lose the election. Then nothing happens.',
     ],
-    neverSay: 'Money is no object.',
   },
   business: {
     title: 'Company Boss',
     org: 'Sawit Prima Group',
-    post: 'Group CEO, Sawit Prima',
-    blurb: 'You own most of the pollution. You also own most of the jobs.',
-    youAre: 'The Company Boss. You own most of the country’s pollution, and most of its jobs.',
-    youWant: 'Profit, and not to bet the company on the wrong decade.',
-    yourMove: 'Spend Company Money to go clean. Or get someone else to pay half.',
-    whoYouAre:
-      'Third generation. You took over at 41. Forty thousand staff. You have read every big climate report and can quote them.',
-    believe:
-      'You will go clean when it is cheaper than staying dirty, or when someone makes staying dirty expensive. You think that is honest, not villainous.',
-    afraidOf: 'Being the boss who moved early and got it wrong.',
-    resourcePower:
-      'You start with 5 Company Money and gain 1 each round, 2 when the economy is booming, up to 12. Going clean costs 3 and hurts, but it is the biggest single cut on the table and it earns you Public Trust. Partnerships cost only 1, but they work only if the Government pays too, so agree that during the talk. Sitting on your money keeps you safe, and is also how the country misses.',
-    says: [
-      'I will do it, if the Government shares the cost.',
-      'That is a ten-year investment and I am judged every quarter.',
-      'You want me to cut thirty percent? Fine. Who pays for the retraining?',
-    ],
-    neverSay: 'Profit does not matter here.',
+    who: 'The Company Boss. You own the biggest company in the country.',
+    wants: 'Profit, and a company that still exists in 2050.',
+    has: 'Company Money: 5. You get 1 more each round. Going clean costs 3.',
+    howToPlay:
+      'Go clean when someone helps you pay. Ask the Government to pay half. Protect your workers’ jobs.',
+    says: ['I will do it if the Government pays half.', 'Who pays to retrain my workers?'],
   },
   community: {
     title: 'Community Leader',
     org: 'Kampung Baru Jernih residents',
-    post: 'Food stall owner, head of the residents’ association',
-    blurb: '34 million people who want clean air, a job, and petrol they can afford.',
-    youAre: 'The Community Leader. You speak for 34 million people.',
-    youWant: 'Clean air and prices people can afford. You are tired of being told to pick one.',
-    yourMove: 'Make them earn your support out loud. Twice a game you can say no and mean it.',
-    whoYouAre:
-      'You run a food stall and head the residents’ association. Your stall has flooded three times in eight years. Your child has asthma.',
-    believe:
-      'Clean air and affordable petrol are both reasonable things to want. You have heard a lot of promises and you remember all of them.',
-    afraidOf: 'Being asked to sacrifice again by people who will not have to.',
-    resourcePower:
-      'You hold no money and no laws. You hold two vetoes for the whole game. Each one takes a player’s dirtiest cards away for a single round, and everyone is told it was you. Public Trust is handed out every round too, one for whoever looked after people best and one for whoever did most for the future. You do not choose who gets it. It goes to whoever earned it, so your job is to make them earn it in front of you.',
+    who: 'The Community Leader. You speak for 34 million ordinary people.',
+    wants: 'Clean air, and prices people can afford.',
+    has: '2 vetoes. A veto takes one player’s dirty cards away for one round.',
+    howToPlay:
+      'Ask what each plan costs ordinary people. Remind players what they promised. Use a veto when someone is about to hurt everyone.',
     says: [
-      'Explain that to me like I have to pay for it, because I do.',
-      'You promised us this last time. What happened?',
-      'We will accept it. But you go first.',
+      'Explain it to me like I have to pay for it. Because I do.',
+      'You promised this last time. What happened?',
     ],
-    neverSay: 'Whatever you think is best.',
   },
   activist: {
     title: 'Youth Activist',
     org: 'Bangkit Iklim',
-    post: 'Founder, Bangkit Iklim',
-    blurb: 'You can make ignoring you expensive. Three times, and only three.',
-    youAre: 'The Youth Activist. You have no money and the largest following in the country.',
-    youWant: 'Real change, fast. And not to become the person who signed something and changed nothing.',
-    yourMove: 'Name someone in public. Three times a game, and only if you push hard yourself.',
-    whoYouAre:
-      'Law degree, no job in law. You ran the first climate strike here at nineteen and four hundred people came. Last year ninety thousand came.',
-    believe:
-      'The science is not negotiable and the timeline is not a preference. Everyone in this room will be fine whatever happens. That is the problem.',
-    afraidOf: 'Sitting in a nice room, signing something, and changing nothing.',
-    resourcePower:
-      'You cannot build or buy anything. You have three Spotlights for the whole game. A Spotlight names one player before everyone locks in. If that player then takes their dirtiest card, it only half works, they lose Public Trust, and the country feels better for the accountability. It only fires if you also escalate with your own card that round, so save it for a round when you expect someone to cave. Every time you sit down and compromise instead, the next one bites a little less.',
+    who: 'The Youth Activist. You lead the biggest movement in the country.',
+    wants: 'Real climate action, fast.',
+    has: '3 Spotlights. A Spotlight punishes a player who picks a dirty card.',
+    howToPlay:
+      'Push everyone to pick clean cards. Offer deals: “I will support you if you go clean”. Use a Spotlight when you think someone will pick a dirty card.',
     says: [
-      'That is not a plan, that is a press release.',
-      'I will back you in public if you commit to it in public.',
-      'Everyone in this room will be fine. That is the problem.',
+      'That is not a plan. That is a press release.',
+      'I will support you in public if you promise in public.',
     ],
-    neverSay: 'Let us look at this again next year.',
+  },
+}
+
+/**
+ * Everything the card does not carry. Read by the facilitator's script and
+ * nowhere else: a host can read it aloud when a table wants colour, and a
+ * player never has to.
+ */
+export interface Backstory {
+  post: string
+  whoYouAre: string
+  believe: string
+  afraidOf: string
+  neverSay: string
+}
+
+export const BACKSTORY: Record<Role, Backstory> = {
+  government: {
+    post: 'Minister for Energy and Climate',
+    whoYouAre:
+      'Twenty-four years in the civil service, then politics. Half your voters work on plantations. The other half commute into the city.',
+    believe:
+      'The change has to happen. Only you can pay for it. But a government that loses an election changes nothing.',
+    afraidOf: 'Being the Minister who made petrol expensive.',
+    neverSay: 'Money does not matter.',
+  },
+  business: {
+    post: 'Group CEO, Sawit Prima',
+    whoYouAre:
+      'Third generation. You took over at 41. Forty thousand staff. You have read every big climate report.',
+    believe:
+      'You will go clean when it is cheaper than staying dirty. Or when someone makes dirty expensive. You think that is honest, not evil.',
+    afraidOf: 'Being the boss who went clean too early and lost money.',
+    neverSay: 'Profit does not matter here.',
+  },
+  community: {
+    post: 'Food stall owner, head of the residents’ association',
+    whoYouAre:
+      'You run a food stall and head the residents’ association. Your stall has flooded three times in eight years. Your child has asthma.',
+    believe:
+      'Clean air and affordable petrol are both reasonable things to want. You have heard many promises. You remember all of them.',
+    afraidOf: 'Being asked to sacrifice again by people who will not have to.',
+    neverSay: 'Whatever you think is best.',
+  },
+  activist: {
+    post: 'Founder, Bangkit Iklim',
+    whoYouAre:
+      'Law degree, no job in law. You ran the first climate strike here at nineteen. Four hundred people came. Last year ninety thousand came.',
+    believe:
+      'The science is not up for debate. The deadline is not a preference. Everyone in this room will be fine. That is the problem.',
+    afraidOf: 'Sitting in a nice room, signing something, and changing nothing.',
+    neverSay: 'Let us talk about it next year.',
   },
 }
 

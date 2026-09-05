@@ -11,11 +11,12 @@
  */
 import type { DashboardView, SayShape } from '../game/session'
 import { ROLE_LABEL } from '../game/session'
+import { LABEL } from '../game/vocab'
 import { RoleGlyph } from '../ui/primitives'
 
 /** A DEAL is called out because it is the one the room should be watching. */
 const PLEDGE_LABEL: Record<SayShape, string> = {
-  promise: 'PLEDGED',
+  promise: 'PROMISED',
   demand: 'ASKED FOR',
   deal: 'A DEAL',
   cofund: 'PAYING HALF',
@@ -26,9 +27,9 @@ export function TheTable({ view }: { view: DashboardView }) {
   return (
     <div className="table">
       <section className="table__record">
-        <h2 className="table__heading">ON THE RECORD</h2>
+        <h2 className="table__heading">WHAT PEOPLE SAID</h2>
         {promises.length === 0 ? (
-          <p className="table__empty">Nothing has been said out loud yet.</p>
+          <p className="table__empty">Nobody has said anything yet.</p>
         ) : (
           <ul className="table__promises">
             {promises.map((p) => (
@@ -42,10 +43,10 @@ export function TheTable({ view }: { view: DashboardView }) {
         )}
 
         <h2 className="table__heading" style={{ marginTop: 'var(--space-6)' }}>
-          IN FLIGHT
+          MONEY BEING SENT
         </h2>
         {view.offersInFlight.length === 0 ? (
-          <p className="table__empty">No offers on the table.</p>
+          <p className="table__empty">No money is being sent.</p>
         ) : (
           <ul className="table__offers">
             {view.offersInFlight.map((o) => (
@@ -71,18 +72,18 @@ export function TheTable({ view }: { view: DashboardView }) {
       <aside className="table__side">
         {view.spotlight ? (
           <div className="spotlight-panel">
-            <h3 className="spotlight-panel__title">SPOTLIGHT</h3>
+            <h3 className="spotlight-panel__title">{LABEL.spotlight}</h3>
             <p className="spotlight-panel__body">
               {view.spotlight.target ? (
                 <>
-                  The Activist named the <strong>{ROLE_LABEL[view.spotlight.target]}</strong>.
+                  The Spotlight caught the <strong>{ROLE_LABEL[view.spotlight.target]}</strong>.
                 </>
               ) : (
-                <>The Activist has called a Spotlight.</>
+                <>The Activist is using a Spotlight.</>
               )}
             </p>
             <p className="spotlight-panel__rule">
-              It hits whoever takes the dirtiest card. For them, it only half works.
+              If a player picks a dirty card, that card only half works.
             </p>
             <div className="spotlight-panel__pips">
               {[0, 1, 2].map((i) => (
@@ -94,9 +95,9 @@ export function TheTable({ view }: { view: DashboardView }) {
 
         {view.veto ? (
           <div className="veto-panel">
-            <h3 className="veto-panel__title">THE PUBLIC SAID NO</h3>
+            <h3 className="veto-panel__title">THE COMMUNITY SAID NO</h3>
             <p className="veto-panel__body">
-              The Community has removed{' '}
+              The Community took{' '}
               {view.veto.removed.length === 0 ? (
                 <em>an option</em>
               ) : (
@@ -107,7 +108,7 @@ export function TheTable({ view }: { view: DashboardView }) {
                   </span>
                 ))
               )}{' '}
-              from the {ROLE_LABEL[view.veto.target]}'s choices.
+              away from the {ROLE_LABEL[view.veto.target]} this round.
             </p>
             <p className="veto-panel__count">
               {view.veto.remaining} VETO{view.veto.remaining === 1 ? '' : 'ES'} LEFT
@@ -117,15 +118,17 @@ export function TheTable({ view }: { view: DashboardView }) {
 
         {view.publishedTip ? (
           <div className="tip-panel">
-            <h3 className="tip-panel__title">TOLD THE ROOM</h3>
+            <h3 className="tip-panel__title">SHARED WITH EVERYONE</h3>
             <p className="tip-panel__from">{ROLE_LABEL[view.publishedTip.from]} · {view.publishedTip.source}</p>
             <p className="tip-panel__body">{view.publishedTip.text}</p>
           </div>
         ) : null}
 
-        {view.tipDealtThisRound ? (
+        {/* Once the tip is shared, everyone knows who had it, so the line
+            saying they do not would be false. */}
+        {view.tipDealtThisRound && !view.publishedTip ? (
           <p className="table__tipline">
-            Someone got a tip off this round. Nobody is told who.
+            Someone got a tip this round. The others do not know who.
           </p>
         ) : null}
       </aside>

@@ -454,7 +454,7 @@
  */
 .faccon {
   position: fixed;
-  left: var(--space-6);
+  right: var(--space-6);
   bottom: var(--space-6);
   z-index: 70;
   display: flex;

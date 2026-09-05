@@ -1,5 +1,5 @@
 /**
- * THE RECKONING: the drama.
+ * THE REVEAL: the drama.
  *
  * Cards flip one at a time, three seconds apart, meters travelling between
  * them. Never all four at once: the gap is where the drama lives, and a room
@@ -18,6 +18,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Role } from '../engine/types'
 import type { DashboardView } from '../game/session'
 import { ROLE_LABEL } from '../game/session'
+import { LABEL, STEP_LABEL } from '../game/vocab'
 import { COALITION_HOLD_MS, PROMISE_STING_MS } from '../game/session'
 import { serverNow } from '../net/clock'
 import { RoleGlyph } from '../ui/primitives'
@@ -31,7 +32,7 @@ import {
 } from './reckoning-clock'
 
 /**
- * Milliseconds since the Reckoning began.
+ * Milliseconds since the Reveal began.
  *
  * Two sources, because neither is enough on its own. The server's deadline
  * knows how far in the room really is, but reading it means subtracting this
@@ -112,7 +113,9 @@ export function Reckoning({ view }: { view: DashboardView }) {
     <div className="reckoning">
       <header className="reckoning__bar">
         <span className="dash__live">LIVE</span>
-        <span className="dash__channel">THE REVEAL · ROUND {log.round}</span>
+        <span className="dash__channel">
+          {view.round > 0 ? `${LABEL.reveal} · ROUND ${log.round}` : STEP_LABEL.practiceReveal}
+        </span>
         <span className="reckoning__emissions">
           <span className="reckoning__emissions-label">CARBON</span>
           <span className="reckoning__emissions-value">{log.state.emissions.toFixed(0)}</span>
@@ -163,15 +166,15 @@ export function Reckoning({ view }: { view: DashboardView }) {
                               : 'BROKE THE PROMISE ✕'}
                       </div>
                     ) : reveal.spotlit ? (
-                      <div className="rcard__promise rcard__promise--broken">SPOTLIT ✕</div>
+                      <div className="rcard__promise rcard__promise--broken">THE SPOTLIGHT CAUGHT THEM ✕</div>
                     ) : reveal.selfOrganiseSupported ? (
-                      <div className="rcard__promise rcard__promise--kept">BACKED · DOUBLED</div>
+                      <div className="rcard__promise rcard__promise--kept">HELPED · WORKED TWICE AS WELL</div>
                     ) : reveal.partnerUnfunded ? (
                       <div className="rcard__promise rcard__promise--broken">NOBODY PAID HALF</div>
-                    ) : (
-                      <div className="rcard__promise rcard__promise--none">ON THE RECORD</div>
-                    )}
-                    <p className="rcard__headline">“{reveal.headline}”</p>
+                    ) : null}
+                    {/* The practice cards carry no headline. An empty pair of
+                        quotes is not a headline either. */}
+                    {reveal.headline ? <p className="rcard__headline">“{reveal.headline}”</p> : null}
                   </div>
                 </>
               ) : (

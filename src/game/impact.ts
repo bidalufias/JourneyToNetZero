@@ -58,9 +58,9 @@ export function optionImpact(option: Option): Impact[] {
   })
 }
 
-/** "▼▼▼", "▲", or "–". The only thing a player reads off a card. */
+/** "▼▼▼", "▲", or "-". The only thing a player reads off a card. */
 export function arrows(dir: number): string {
-  if (dir === 0) return '–'
+  if (dir === 0) return '-'
   return (dir < 0 ? '▼' : '▲').repeat(Math.abs(dir))
 }
 
@@ -69,17 +69,24 @@ export function arrows(dir: number): string {
  * Everything else about an option is now in the chips, so this is empty far more
  * often than not, and an empty line is the correct outcome.
  */
-export function optionCondition(option: Option): string | null {
+export function optionCondition(option: Option, coFund = false): string | null {
   // Breaking the coalition is material and it is not visible in the arrows. A
   // recession genuinely cuts carbon, so a card like "Cut Costs, Cut Jobs" shows
   // a green carbon arrow and is still the card that costs the table its bonus.
   // That trade is the whole lesson, and a player can only weigh it if they are
   // told which side of it they are standing on.
-  if (BREAKS_COALITION.has(option.arch)) return 'The table will not count this as moving together.'
-  if (option.arch === 'PARTNER') return 'Only half works unless the Government pays too.'
-  if (option.arch === 'SELF_ORGANISE') return 'Twice as strong if the Government or Business helps.'
-  if (option.arch === 'COLLABORATE') return 'You gain influence. You lose some support.'
-  if ((option.flags ?? []).some((f) => f.startsWith('EVIDENCE'))) return 'Nothing now. It pays off every round after.'
+  if (BREAKS_COALITION.has(option.arch)) return 'Dirty card. It breaks moving together.'
+  // Once the Government has said it will pay, the card must say so too. A
+  // partnership still warning that it only half works after the money was
+  // pledged out loud tells the Business the sentence on the board meant nothing.
+  if (option.arch === 'PARTNER') {
+    return coFund
+      ? 'Partnership. The Government pays half. It works in full.'
+      : 'Partnership. Only half works unless the Government pays half.'
+  }
+  if (option.arch === 'SELF_ORGANISE') return 'Works twice as well if the Government or Business helps.'
+  if (option.arch === 'COLLABORATE') return 'You work with them. You gain power. Some supporters leave you.'
+  if ((option.flags ?? []).some((f) => f.startsWith('EVIDENCE'))) return 'Does nothing now. Helps every round after this.'
   return null
 }
 

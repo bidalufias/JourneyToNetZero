@@ -500,12 +500,14 @@ function optionImpact(option) {
     };
   });
 }
-function optionCondition(option) {
-  if (BREAKS_COALITION.has(option.arch)) return "The table will not count this as moving together.";
-  if (option.arch === "PARTNER") return "Only half works unless the Government pays too.";
-  if (option.arch === "SELF_ORGANISE") return "Twice as strong if the Government or Business helps.";
-  if (option.arch === "COLLABORATE") return "You gain influence. You lose some support.";
-  if ((option.flags ?? []).some((f) => f.startsWith("EVIDENCE"))) return "Nothing now. It pays off every round after.";
+function optionCondition(option, coFund = false) {
+  if (BREAKS_COALITION.has(option.arch)) return "Dirty card. It breaks moving together.";
+  if (option.arch === "PARTNER") {
+    return coFund ? "Partnership. The Government pays half. It works in full." : "Partnership. Only half works unless the Government pays half.";
+  }
+  if (option.arch === "SELF_ORGANISE") return "Works twice as well if the Government or Business helps.";
+  if (option.arch === "COLLABORATE") return "You work with them. You gain power. Some supporters leave you.";
+  if ((option.flags ?? []).some((f) => f.startsWith("EVIDENCE"))) return "Does nothing now. Helps every round after this.";
   return null;
 }
 var BREAKS_COALITION = /* @__PURE__ */ new Set([
@@ -527,63 +529,85 @@ var PRIVATE_LINE = {
     government: "Your finance team wants one answer. Your own party wants another.",
     business: "The board meets in an hour. They want to know what this costs.",
     community: "Three people on your street lost their jobs before lunch.",
-    activist: "Every rescue is a chance to attach a condition. Or to be ignored."
+    activist: "Every rescue is a chance to ask for something in return."
   },
   energy: {
-    government: "Fuel subsidies are now the biggest line in your budget. Everyone knows it.",
-    business: "Your energy costs just became your biggest risk, and your biggest opportunity.",
+    government: "Fuel subsidies are now the biggest cost in your Budget. Everyone knows it.",
+    business: "Your energy bill is now your biggest risk, and your biggest chance.",
     community: "The bill arrived this morning. People are talking about nothing else.",
     activist: "This round decides the country\u2019s power supply for thirty years."
   },
   health: {
     government: "Hospitals are calling your office directly. So are the employers.",
-    business: "Your workforce is the exposure here, not your plant.",
-    community: "People are frightened. They are looking to each other, not upward.",
+    business: "Your workers are the ones at risk here, not your factory.",
+    community: "People are frightened. They are helping each other, not waiting for you.",
     activist: "Clean air just became real to people. Use that now or lose it."
   },
   election: {
-    government: "Every choice you made so far is now a poster or a scandal.",
-    business: "Whoever wins writes your rules. Money talks, and it is on the record.",
-    community: "You are the only one in this room who actually casts a vote.",
-    activist: "Your backing is all you have to give. Spend it once, spend it well."
+    government: "Every choice you made is now a poster or a scandal.",
+    business: "Whoever wins writes your rules. Everyone can see who you paid.",
+    community: "You are the only one in this room who actually votes.",
+    activist: "Your support is all you have to give. Give it once, and wisely."
   },
   pollution: {
     government: "Somebody will be blamed. You decide if it is a company or a law.",
-    business: "Your permit may be legal. That is not the same as defensible.",
-    community: "This happened to your neighbourhood, not to a statistic.",
-    activist: "The evidence exists. The question is whether anyone has to look."
+    business: "Your permit may be legal. People will still blame you.",
+    community: "This happened to your neighbourhood, not to a number on a screen.",
+    activist: "The evidence exists. The question is whether anyone has to look at it."
   },
   disaster: {
-    government: "Last round. Whatever you do now is what you are remembered for.",
+    government: "Last round. Whatever you do now is what people will remember.",
     business: "The rebuild is a contract. It is also your last chance to be right.",
-    community: "Your people are in the water and the boats are mostly volunteers.",
-    activist: "Ten years of work, and one afternoon to decide what it was for."
+    community: "Your people are in the water. Most of the boats are volunteers.",
+    activist: "Ten years of work. This afternoon decides what it was for."
   }
 };
 function privateLine(type, role) {
   return PRIVATE_LINE[type]?.[role] ?? "The room is waiting for you.";
 }
+var PRACTICE_LINE = {
+  government: "This is practice. Say anything. Try offering the Business some Budget.",
+  business: "This is practice. Say anything. Try asking the Government to pay half.",
+  community: "This is practice. Say anything. Try telling one player no.",
+  activist: "This is practice. Say anything. Try a deal: I will support you if you go clean."
+};
 var DEMAND_PHRASES = [
-  { id: "pay-first", text: (t) => `the ${t} pays its share before anyone else moves` },
-  { id: "no-dirty", text: (t) => `the ${t} does not take the cheap card this round` },
-  { id: "go-public", text: (t) => `the ${t} says out loud what it is about to pick` },
-  { id: "co-fund", text: (t) => `the ${t} pays half of the partnership` },
-  { id: "protect-jobs", text: (t) => `the ${t} promises nobody loses a job over this` },
-  { id: "no-more-delay", text: (t) => `the ${t} stops asking everyone else to go first` }
+  { id: "pay-first", you: "I want you to pay first.", text: (t) => `the ${t} to pay first` },
+  {
+    id: "no-dirty",
+    you: "I want you not to pick a dirty card.",
+    text: (t) => `the ${t} not to pick a dirty card`
+  },
+  { id: "go-public", you: "I want you to tell us your card.", text: (t) => `the ${t} to tell us its card` },
+  {
+    id: "co-fund",
+    you: "I want you to pay half of the partnership.",
+    text: (t) => `the ${t} to pay half of the partnership`
+  },
+  {
+    id: "protect-jobs",
+    you: "I want you to promise no job cuts.",
+    text: (t) => `the ${t} to promise no job cuts`
+  },
+  {
+    id: "no-more-delay",
+    you: "I want you to stop waiting for others.",
+    text: (t) => `the ${t} to stop waiting for others`
+  }
 ];
 var DEAL_CONDITIONS = [
   {
     id: "moves-with-me",
-    text: (t) => `the ${t} moves too`,
+    text: (t) => `the ${t} also picks a good card`,
     met: (them) => them.aligned
   },
   {
     // Weaker than moving together, and deliberately so: a seat that spends the
-    // round asking somebody else to pay has not taken a cheap card, and it has
+    // round asking somebody else to pay has not picked a dirty card, and it has
     // not moved with you either. A table that learns the difference has learned
-    // most of what the coalition bonus is for.
+    // most of what the moving together bonus is for.
     id: "no-cheap-card",
-    text: (t) => `the ${t} does not take the cheap card`,
+    text: (t) => `the ${t} does not pick a dirty card`,
     met: (them) => !DIRTY.has(them.arch)
   }
 ];
@@ -632,6 +656,7 @@ var PHASE_MS = {
   briefing: 45e3,
   practiceTalk: 75e3,
   practiceChoice: 6e4,
+  practiceReveal: 2e4,
   power: 3e4,
   goal: 45e3,
   crisis: 25e3,
@@ -681,6 +706,7 @@ function createRoom(content2, seed, now) {
         role,
         name: "",
         connected: false,
+        ready: false,
         goalId: null,
         choiceId: null,
         locked: false,
@@ -706,6 +732,7 @@ function createRoom(content2, seed, now) {
     spotlightCalled: false,
     lastRound: null,
     history: [],
+    practiceLog: null,
     tipRotation: [],
     seed,
     rngCursor: cursor
@@ -715,16 +742,50 @@ function currentScenario(room, content2) {
   const id = room.game.path[room.game.round];
   return id ? content2.scenarios[id] ?? null : null;
 }
+var PRACTISING = /* @__PURE__ */ new Set(["practiceTalk", "practiceChoice", "practiceReveal"]);
+var BEFORE_FIRST_CRISIS = /* @__PURE__ */ new Set([
+  "lobby",
+  "briefing",
+  "practiceTalk",
+  "practiceChoice",
+  "practiceReveal",
+  "power",
+  "goal"
+]);
+var PRACTICE_ID = "T";
+function practiceScenario(content2) {
+  return {
+    id: PRACTICE_ID,
+    round: 0,
+    variant: "practice",
+    type: "practice",
+    title: content2.tutorial.title,
+    situation: content2.tutorial.situation,
+    shock: { g: 0, h: 0, e: 0 },
+    options: content2.tutorial.options
+  };
+}
+function practiceContent(content2) {
+  return { ...content2, scenarios: { ...content2.scenarios, [PRACTICE_ID]: practiceScenario(content2) } };
+}
+function sceneFor(room, content2) {
+  return PRACTISING.has(room.phase) ? practiceScenario(content2) : currentScenario(room, content2);
+}
 function roundNumber(room) {
   return Math.min(room.game.round + 1, 6);
 }
 var NARRATING = /* @__PURE__ */ new Set(["reckoning", "trust", "summary"]);
-function displayRound(room) {
+function boardRound(room) {
   if (NARRATING.has(room.phase) && room.lastRound) return room.lastRound.round;
   return roundNumber(room);
 }
+function displayRound(room) {
+  if (BEFORE_FIRST_CRISIS.has(room.phase)) return 0;
+  return boardRound(room);
+}
 function setPhase(room, phase, now) {
   room.phase = phase;
+  if (phase !== "briefing") for (const role of ROLES) room.players[role].ready = false;
   const ms = phaseMs(phase, roundNumber(room));
   room.phaseEndsAt = ms > 0 ? now + ms : null;
 }
@@ -735,9 +796,18 @@ function clockNow(room, now) {
   return room.pausedAt ?? now;
 }
 function everyoneLocked(room) {
+  return everyHeldSeat(room, (p) => p.locked);
+}
+function everyoneAcked(room) {
+  return everyHeldSeat(room, (p) => p.ready);
+}
+function everyoneSealed(room) {
+  return everyHeldSeat(room, (p) => p.goalId !== null);
+}
+function everyHeldSeat(room, test) {
   const held = ROLES.filter((r) => room.players[r].name);
   if (!held.length) return false;
-  return held.every((r) => room.players[r].locked);
+  return held.every((r) => test(room.players[r]));
 }
 function vetoesRemaining(room) {
   return Math.max(0, room.game.vetoes - (room.vetoTarget ? 1 : 0));
@@ -750,8 +820,9 @@ function canReceive(role) {
   return kind === "fiscal" || kind === "capital";
 }
 function choosableOptions(room, content2, role) {
-  if (room.phase === "practiceTalk" || room.phase === "practiceChoice") {
-    return content2.tutorial.options[role];
+  if (PRACTISING.has(room.phase)) {
+    const deck = content2.tutorial.options[role];
+    return role === room.vetoTarget ? applyVeto(deck) : deck;
   }
   const scenario = currentScenario(room, content2);
   if (!scenario) return [];
@@ -767,6 +838,7 @@ function authorise(seat, cmd) {
     case "reconnect":
     case "leave":
     case "pickGoal":
+    case "ack":
     case "say":
     case "respondOffer":
     case "spotlight":
@@ -798,6 +870,7 @@ function apply(room, cmd, content2, now) {
     case "join": {
       const p = room.players[cmd.role];
       if (p.name && p.name !== cmd.name) return room;
+      if (!p.name) p.ready = false;
       p.name = cmd.name;
       p.connected = true;
       return room;
@@ -817,6 +890,7 @@ function apply(room, cmd, content2, now) {
       const p = room.players[cmd.role];
       p.name = "";
       p.connected = false;
+      p.ready = false;
       p.goalId = null;
       p.choiceId = null;
       p.locked = false;
@@ -828,6 +902,22 @@ function apply(room, cmd, content2, now) {
     case "pickGoal": {
       if (room.players[cmd.role].goalId) return room;
       room.players[cmd.role].goalId = cmd.goalId;
+      if (room.phase === "goal" && everyoneSealed(room)) return openRound(room, content2, at);
+      return room;
+    }
+    /**
+     * The one button an onboarding step offers, pressed.
+     *
+     * In the lobby it is I AM READY under the role card, and it is what lets the
+     * phone keep the card up until this player, not the facilitator, has
+     * finished with it. On the power step it is GOT IT, and the step ends the
+     * moment the fourth one arrives, with the clock as the fallback.
+     */
+    case "ack": {
+      const p = room.players[cmd.role];
+      if (!p.name) return room;
+      p.ready = true;
+      if (room.phase === "power" && everyoneAcked(room)) return advance(room, content2, at);
       return room;
     }
     case "start": {
@@ -963,9 +1053,8 @@ function apply(room, cmd, content2, now) {
       p.autoLocked = false;
       p.defaulted = false;
       p.lockedAt = at;
-      if (room.phase === "practiceChoice") return room;
-      if (everyoneLocked(room)) return resolveRound(room, content2, at);
-      return room;
+      if (!everyoneLocked(room)) return room;
+      return room.phase === "practiceChoice" ? startPracticeReveal(room, content2, at) : resolveRound(room, content2, at);
     }
     default:
       return room;
@@ -985,7 +1074,7 @@ function say(room, cmd, content2) {
         round,
         from: "government",
         kind: "cofund",
-        text: "The Government will pay half of any partnership the Business signs.",
+        text: "The Government will pay half of any partnership the Business picks.",
         optionId: null,
         ifRole: null,
         ifConditionId: null,
@@ -1004,7 +1093,7 @@ function say(room, cmd, content2) {
       round,
       from: cmd.role,
       kind: "promise",
-      text: `${me} will choose \u201C${option2.title}\u201D.`,
+      text: `${me} will pick \u201C${option2.title}\u201D.`,
       optionId: option2.id,
       ifRole: null,
       ifConditionId: null,
@@ -1038,7 +1127,7 @@ function say(room, cmd, content2) {
     round,
     from: cmd.role,
     kind: "deal",
-    text: `${me} will choose \u201C${option.title}\u201D if ${condition.text(ROLE_LABEL[cmd.target])}.`,
+    text: `${me} will pick \u201C${option.title}\u201D if ${condition.text(ROLE_LABEL[cmd.target])}.`,
     optionId: option.id,
     ifRole: cmd.target,
     ifConditionId: condition.id,
@@ -1070,6 +1159,8 @@ function advance(room, content2, now) {
       setPhase(room, "practiceChoice", now);
       return room;
     case "practiceChoice":
+      return startPracticeReveal(room, content2, now);
+    case "practiceReveal":
       return endPractice(room, content2, now);
     case "power":
       setPhase(room, "goal", now);
@@ -1117,6 +1208,7 @@ function endPractice(room, content2, now) {
   room.vetoTarget = null;
   room.coFund = false;
   room.spotlightCalled = false;
+  room.practiceLog = null;
   const start = content2.config.start;
   room.game.fiscal = start.fiscal;
   room.game.capital = start.capital;
@@ -1140,39 +1232,76 @@ function openRound(room, content2, now) {
   setPhase(room, "crisis", now);
   return room;
 }
-function resolveRound(room, content2, now) {
+function quietest(opts) {
+  const loudness = (o) => optionImpact(o).reduce((n, i) => n + Math.abs(i.dir), 0);
+  let best = opts[0];
+  for (const o of opts) if (loudness(o) < loudness(best)) best = o;
+  return best;
+}
+function fillChoices(room, content2, now) {
   for (const role of ROLES) {
     const p = room.players[role];
     if (p.locked) continue;
     if (p.choiceId === null) {
       const opts = choosableOptions(room, content2, role);
       if (!opts.length) continue;
-      p.choiceId = opts[0].id;
+      p.choiceId = quietest(opts).id;
       p.defaulted = true;
     }
     p.locked = true;
     p.autoLocked = true;
     p.lockedAt = now;
   }
-  const choices = Object.fromEntries(
-    ROLES.map((r) => [r, room.players[r].choiceId])
-  );
+  return Object.fromEntries(ROLES.map((r) => [r, room.players[r].choiceId]));
+}
+function runEngine(game, content2, room, choices) {
+  const input = { choices, vetoTarget: room.vetoTarget, coFund: room.coFund };
   if (!room.spotlightCalled) {
-    const activistOption = content2.scenarios[room.game.path[room.game.round]].options.activist.find(
+    const activistOption = content2.scenarios[game.path[game.round]].options.activist.find(
       (o) => o.id === choices.activist
     );
     if (activistOption?.arch === "ESCALATE") {
-      const held = room.game.spotlights;
-      room.game.spotlights = 0;
-      const log2 = playRound(room.game, { choices, vetoTarget: room.vetoTarget, coFund: room.coFund }, content2);
-      room.game.spotlights = held;
-      return finishRound(room, log2, choices, content2, now);
+      const held = game.spotlights;
+      game.spotlights = 0;
+      const log = playRound(game, input, content2);
+      game.spotlights = held;
+      return log;
     }
   }
-  const log = playRound(room.game, { choices, vetoTarget: room.vetoTarget, coFund: room.coFund }, content2);
+  return playRound(game, input, content2);
+}
+function resolveRound(room, content2, now) {
+  const choices = fillChoices(room, content2, now);
+  const log = runEngine(room.game, content2, room, choices);
   return finishRound(room, log, choices, content2, now);
 }
+function startPracticeReveal(room, content2, now) {
+  const choices = fillChoices(room, content2, now);
+  const scratchContent = practiceContent(content2);
+  const scratch = createGame([PRACTICE_ID], scratchContent);
+  const log = runEngine(scratch, scratchContent, room, choices);
+  judgePromises(room, log, choices);
+  room.practiceLog = log;
+  setPhase(room, "practiceReveal", now);
+  return room;
+}
 function finishRound(room, log, choices, content2, now) {
+  judgePromises(room, log, choices);
+  const tip = room.tips.find((t) => t.round === log.round);
+  if (tip?.published) {
+    tip.revealed = true;
+    applyTipStake(room, tip);
+  }
+  for (const o of room.offers) {
+    if (o.round === log.round && o.status === "pending") o.status = "expired";
+  }
+  room.lastRound = log;
+  room.history.push(log);
+  void content2;
+  setPhase(room, "reckoning", now);
+  return room;
+}
+function judgePromises(room, log, choices) {
   for (const p of room.promises) {
     if (p.round !== log.round) continue;
     const didIt = p.optionId !== null && choices[p.from] === p.optionId;
@@ -1187,19 +1316,6 @@ function finishRound(room, log, choices, content2, now) {
       p.outcome = !theyDid ? "void" : didIt ? "kept" : "broken";
     }
   }
-  const tip = room.tips.find((t) => t.round === log.round);
-  if (tip?.published) {
-    tip.revealed = true;
-    applyTipStake(room, tip);
-  }
-  for (const o of room.offers) {
-    if (o.round === log.round && o.status === "pending") o.status = "expired";
-  }
-  room.lastRound = log;
-  room.history.push(log);
-  void content2;
-  setPhase(room, "reckoning", now);
-  return room;
 }
 function applyTipStake(room, tip) {
   if (tip.to === "community") {
@@ -1259,7 +1375,7 @@ function buildTip(room, content2, to, round, cursorIn) {
       id: `tip-${round}`,
       round,
       to,
-      source: "A sealed brief",
+      source: "A leaked report",
       text: tips.intel[scenarioId] ?? "The official figures are not the real ones.",
       published: false,
       revealed: false
@@ -1268,17 +1384,20 @@ function buildTip(room, content2, to, round, cursorIn) {
   };
 }
 function dashboardView(room, content2) {
-  const scenario = currentScenario(room, content2);
+  const scenario = sceneFor(room, content2);
+  const practising = PRACTISING.has(room.phase);
   const held = ROLES.filter((r) => room.players[r].name);
   const waiting = held.filter((r) => !room.players[r].locked);
   const lastLock = held.length > 1 && waiting.length === 1 ? waiting[0] : null;
-  const tip = room.tips.find((t) => t.round === displayRound(room));
+  const tip = room.tips.find((t) => t.round === boardRound(room));
   const published = tip?.published && tip ? { from: tip.to, text: tip.text, source: tip.source } : null;
   const veto = room.vetoTarget ? {
     target: room.vetoTarget,
-    removed: scenario ? availableOptions(room.game, scenario, room.vetoTarget, content2).filter((o) => DIRTY.has(o.arch)).map((o) => o.title) : [],
+    removed: scenario ? (practising ? scenario.options[room.vetoTarget] : availableOptions(room.game, scenario, room.vetoTarget, content2)).filter((o) => DIRTY.has(o.arch)).map((o) => o.title) : [],
     remaining: vetoesRemaining(room)
   } : null;
+  const practice = room.phase === "practiceReveal" ? room.practiceLog : null;
+  const shown = practice ?? room.lastRound;
   return {
     code: room.code,
     phase: room.phase,
@@ -1287,27 +1406,31 @@ function dashboardView(room, content2) {
     pausedAt: room.pausedAt ?? null,
     round: displayRound(room),
     scenario: scenario ? { id: scenario.id, title: scenario.title, type: scenario.type, situation: scenario.situation } : null,
-    state: publicState(room.game, content2),
+    state: practice ? practice.state : publicState(room.game, content2),
     seats: ROLES.map((role) => ({
       role,
       name: room.players[role].name || null,
       connected: room.players[role].connected,
       locked: room.players[role].locked,
-      lastToLock: lastLock === role
+      lastToLock: lastLock === role,
+      ready: room.players[role].ready,
+      sealed: room.players[role].goalId !== null
     })),
-    promises: room.promises.filter((p) => p.round === displayRound(room)),
-    offersInFlight: room.offers.filter((o) => o.round === displayRound(room) && o.status === "pending"),
+    readyCount: held.filter((r) => room.players[r].ready).length,
+    sealedCount: held.filter((r) => room.players[r].goalId !== null).length,
+    promises: room.promises.filter((p) => p.round === boardRound(room)),
+    offersInFlight: room.offers.filter((o) => o.round === boardRound(room) && o.status === "pending"),
     tipDealtThisRound: Boolean(tip),
     publishedTip: published,
     spotlight: room.spotlightCalled ? {
       by: "activist",
       // Whoever takes the dirtiest option this round wears it. Nobody
       // knows who that is until the choices lock, so do not pretend to.
-      target: room.lastRound?.spotlightTarget ?? null,
+      target: shown?.spotlightTarget ?? null,
       remaining: spotlightsRemaining(room)
     } : null,
     veto,
-    lastRound: room.lastRound,
+    lastRound: shown,
     history: room.history,
     headlines: room.history.flatMap((h) => h.reveals.map((r) => r.headline)).slice(-12),
     targets: {
@@ -1319,25 +1442,13 @@ function dashboardView(room, content2) {
   };
 }
 function phoneView(room, content2, role) {
-  const scenario = currentScenario(room, content2);
+  const scenario = sceneFor(room, content2);
   const player = room.players[role];
-  const showOptions = room.phase === "table" || room.phase === "choice";
-  const practising = room.phase === "practiceTalk" || room.phase === "practiceChoice";
+  const practising = PRACTISING.has(room.phase);
+  const showOptions = room.phase === "table" || room.phase === "choice" || room.phase === "practiceTalk" || room.phase === "practiceChoice";
   let options = [];
-  if (practising) {
-    options = content2.tutorial.options[role].map((o) => ({
-      id: o.id,
-      title: o.title,
-      desc: o.desc,
-      cost: costLabel(o),
-      impact: optionImpact(o),
-      condition: optionCondition(o),
-      available: true,
-      disabled: null,
-      disabledNote: null
-    }));
-  } else if (scenario && showOptions) {
-    const affordableAndOpen = availableOptions(room.game, scenario, role, content2);
+  if (scenario && showOptions) {
+    const affordableAndOpen = practising ? scenario.options[role] : availableOptions(room.game, scenario, role, content2);
     const afterVeto = role === room.vetoTarget ? applyVeto(affordableAndOpen) : affordableAndOpen;
     options = scenario.options[role].map((o) => {
       const open = affordableAndOpen.some((a) => a.id === o.id);
@@ -1347,19 +1458,19 @@ function phoneView(room, content2, role) {
       if (!open) {
         if (o.gate_trust && room.game.trust.government < o.gate_trust) {
           disabled = "gate";
-          note = `Needs ${o.gate_trust} Trust. The country has not backed you.`;
+          note = `Needs ${o.gate_trust} Public Trust. You have ${room.game.trust.government}.`;
         } else if (o.block_flag && room.game.flags.has(String(o.block_flag))) {
           disabled = "gate";
-          note = "A promise you made earlier closed this door.";
+          note = "A promise you made in an earlier round blocks this.";
         } else {
           disabled = "afford";
           const need = o.cost?.fiscal ?? o.cost?.capital ?? 0;
           const have = o.cost?.fiscal ? room.game.fiscal : room.game.capital;
-          note = `You have ${have} of ${need}.`;
+          note = `You have ${have}. It costs ${need}.`;
         }
       } else if (!choosable) {
         disabled = "veto";
-        note = "\u201CThe public will simply not accept this.\u201D Removed by the Community, this round only.";
+        note = "The Community took this card away for this round.";
       }
       return {
         id: o.id,
@@ -1367,7 +1478,7 @@ function phoneView(room, content2, role) {
         desc: o.desc,
         cost: costLabel(o),
         impact: optionImpact(o),
-        condition: optionCondition(o),
+        condition: optionCondition(o, room.coFund),
         available: choosable,
         disabled,
         disabledNote: note
@@ -1376,7 +1487,7 @@ function phoneView(room, content2, role) {
   }
   const resourceKind = ROLE_RESOURCE[role].kind;
   const resourceValue = resourceKind === "fiscal" ? room.game.fiscal : resourceKind === "capital" ? room.game.capital : resourceKind === "spotlights" ? room.game.spotlights : vetoesRemaining(room);
-  const beforeGoals = room.phase === "lobby" || room.phase === "briefing" || room.phase === "practiceTalk" || room.phase === "practiceChoice" || room.phase === "power";
+  const beforeGoals = room.phase === "lobby" || room.phase === "briefing" || room.phase === "practiceTalk" || room.phase === "practiceChoice" || room.phase === "practiceReveal" || room.phase === "power";
   const goalChoices = player.goalId === null && !beforeGoals ? content2.privateGoals[role].map((g) => ({ id: g.id, title: g.title, desc: g.desc })) : null;
   const ownGoal = player.goalId ? content2.privateGoals[role].find((g) => g.id === player.goalId) ?? null : null;
   const narrating = NARRATING.has(room.phase);
@@ -1402,7 +1513,9 @@ function phoneView(room, content2, role) {
     pausedAt: room.pausedAt ?? null,
     round: displayRound(room),
     scenario: scenario && !narrating ? { id: scenario.id, title: scenario.title, situation: scenario.situation, type: scenario.type } : null,
-    privateLine: scenario && !narrating ? privateLine(scenario.type, role) : null,
+    // The practice line, not the live one: the Round 1 brief used to show up a
+    // step early, on the screen that said nothing here counts.
+    privateLine: practising ? PRACTICE_LINE[role] : scenario && !narrating ? privateLine(scenario.type, role) : null,
     options,
     choiceId: player.choiceId,
     locked: player.locked,
@@ -1412,20 +1525,23 @@ function phoneView(room, content2, role) {
     spotlightsRemaining: spotlightsRemaining(room),
     spotlightCalled: room.spotlightCalled,
     coFund: room.coFund,
+    ready: player.ready,
+    vetoed: room.vetoTarget === role,
     goalId: player.goalId,
     goalTitle: ownGoal?.title ?? null,
     goalDesc: ownGoal?.desc ?? null,
     goalChoices,
     // Only ever your own tip, and only while it is yours to act on.
-    tip: room.tips.find((t) => t.to === role && t.round === displayRound(room)) ?? null,
-    promises: room.promises.filter((p) => p.round === displayRound(room)),
+    tip: room.tips.find((t) => t.to === role && t.round === boardRound(room)) ?? null,
+    promises: room.promises.filter((p) => p.round === boardRound(room)),
     incomingOffers: room.offers.filter((o) => o.to === role && o.status === "pending"),
-    sentOffers: room.offers.filter((o) => o.from === role && o.round === displayRound(room)),
+    sentOffers: room.offers.filter((o) => o.from === role && o.round === boardRound(room)),
     seats: ROLES.map((r) => ({
       role: r,
       name: room.players[r].name || null,
       connected: room.players[r].connected,
-      locked: room.players[r].locked
+      locked: room.players[r].locked,
+      ready: room.players[r].ready
     })),
     roundResult: roundResultCopy(room, content2, role),
     trustAward: narrating && room.lastRound ? room.lastRound.trustAwarded : null,
@@ -1438,25 +1554,31 @@ function roundResultCopy(room, content2, role) {
   const mine = log.reveals.find((r) => r.role === role);
   if (!mine) return null;
   const player = room.players[role];
-  const didWhat = player.defaulted ? `You ran out of time. The clock picked \u201C${mine.title}\u201D.` : player.autoLocked ? `You had \u201C${mine.title}\u201D selected, and the clock locked it in.` : `You chose \u201C${mine.title}\u201D.`;
+  const didWhat = player.defaulted ? `Time ran out and you had no card. The game picked \u201C${mine.title}\u201D.` : player.autoLocked ? `Time ran out. Your card \u201C${mine.title}\u201D was locked for you.` : `You picked \u201C${mine.title}\u201D.`;
   const costBits = [];
-  if (mine.partnerUnfunded) costBits.push("Nobody co-funded it, so it landed at half strength.");
-  if (mine.spotlit) costBits.push("You were named publicly, and it cost you.");
-  if (mine.selfOrganiseSupported) costBits.push("Real backing arrived, and it counted double.");
+  if (mine.partnerUnfunded) costBits.push("The Government did not pay half, so it only half worked.");
+  if (mine.spotlit) costBits.push("The Activist\u2019s Spotlight caught you. Your card only half worked.");
+  if (mine.selfOrganiseSupported) costBits.push("The Government or Business helped, so it worked twice as well.");
   if (log.govIsolated && role === "government") {
-    costBits.push("You moved alone, and the country only half-followed.");
+    costBits.push("You acted alone. The country only half followed.");
   }
-  if (!costBits.length) costBits.push("It landed as you intended.");
+  if (!costBits.length) {
+    costBits.push(
+      player.defaulted ? "You did not pick this card. It still counted." : player.autoLocked ? "You did not lock this card yourself. It still counted." : "It worked as planned."
+    );
+  }
   const others = [];
   if (log.alignedCount >= 3) {
     others.push(
-      log.alignedCount === 4 ? "All four of you moved together, and the coalition held." : "Three of you moved together, and the coalition held."
+      log.alignedCount === 4 ? "All four of you picked good cards. You got the moving together bonus." : "Three of you picked good cards. You got the moving together bonus."
     );
   } else {
-    others.push("The table did not move together this round.");
+    others.push("Fewer than three of you picked good cards. No bonus this round.");
   }
   const broken = room.promises.filter((p) => p.round === log.round && p.outcome === "broken");
-  if (broken.length) others.push(`${broken.map((b) => BOARD_NAME[b.from]).join(" and ")} broke a promise.`);
+  for (const b of broken) {
+    others.push(b.from === role ? "You broke your promise." : `${BOARD_NAME[b.from]} broke a promise.`);
+  }
   const card = content2.scenarios[log.scenarioId]?.options[role]?.find((o) => o.id === mine.optionId);
   return {
     didWhat,
@@ -1474,11 +1596,11 @@ function comparison(log, role) {
   if (!mine) return null;
   const cuts = log.reveals.filter((r) => r.emissions < -0.05);
   if (mine.emissions < -0.05 && cuts.length && mine.emissions <= Math.min(...cuts.map((r) => r.emissions))) {
-    return cuts.length === 1 ? "The only cut anyone made this round." : "The biggest cut anyone made this round.";
+    return cuts.length === 1 ? "The only carbon cut this round." : "The biggest carbon cut this round.";
   }
-  if (mine.emissions > 0.05) return "This added carbon rather than cutting it.";
-  if (mine.multiplier >= 1.5) return "Something else at the table made this land harder than it should have.";
-  if (mine.multiplier <= 0.75) return "It landed at less than full strength.";
+  if (mine.emissions > 0.05) return "This card added carbon. It did not cut it.";
+  if (mine.multiplier >= 1.5) return "Another player\u2019s card made yours work better.";
+  if (mine.multiplier <= 0.75) return "Your card did not work at full strength.";
   return null;
 }
 var CLOSE_ENOUGH = { emissions: 10, growth: 0.5, happiness: 0.5 };
@@ -1492,7 +1614,7 @@ function endgame(room, content2) {
       target: c.tgt_e,
       met: res.pe,
       gap: Math.max(0, res.e - c.tgt_e),
-      verdict: res.pe ? res.e < -0.5 ? `Carbon went past net zero, to \u2212${Math.abs(res.e).toFixed(0)} Mt.` : "Carbon reached net zero." : `Carbon finished at ${res.e.toFixed(0)} Mt. It had to reach zero.`
+      verdict: res.pe ? res.e < -0.5 ? `Carbon went below zero, to \u2212${Math.abs(res.e).toFixed(0)} million tonnes.` : "Carbon reached net zero." : `Carbon finished at ${res.e.toFixed(0)} million tonnes. It had to reach zero.`
     },
     {
       key: "growth",

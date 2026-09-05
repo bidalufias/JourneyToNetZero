@@ -23,7 +23,18 @@ import {
   type FacilitatorMessage,
   type FacilitatorState,
 } from './channel'
-import { BEATS, CONTROLS, DEBRIEF, MOMENTS, SETUP, TROUBLE } from './script'
+import {
+  BEATS,
+  CHARACTERS,
+  CONTROLS,
+  DEBRIEF,
+  HOUSE_RULES,
+  IN_CHARACTER,
+  MOMENTS,
+  SETUP,
+  STRATEGY,
+  TROUBLE,
+} from './script'
 import './facilitator.css'
 
 /** What the buttons do next, given where the room is. */
@@ -80,7 +91,11 @@ export function Facilitator({
         <div className="fac__head-main">
           <p className="fac__kicker">FACILITATOR · JOURNEY TO NET ZERO</p>
           <h1 className="fac__title">
-            {live ? `ROUND ${Math.max(round, 1)} OF 6 · ${beatFor(phase!).label}` : 'THE RUN OF SHOW'}
+            {live
+              ? round > 0
+                ? `ROUND ${round} OF 6 · ${beatFor(phase!).label}`
+                : beatFor(phase!).label
+              : 'THE RUN OF SHOW'}
           </h1>
           <p className="fac__status">
             {live
@@ -210,9 +225,63 @@ export function Facilitator({
           </section>
         ))}
 
+        <h2 className="fac__h2">The four characters</h2>
+        <p className="fac__lead">
+          The card on each phone is sixty words: who you are, what you want, what you have, how
+          to play. This is the rest. Read it aloud when a table wants colour. Nobody has to.
+        </p>
+        {CHARACTERS.map((c) => (
+          <section key={c.role} className="fac__card">
+            <p className="fac__label">
+              {ROLE_LABEL[c.role].toUpperCase()} · {c.title.toUpperCase()}
+            </p>
+            <p className="fac__card-text">
+              <strong>{c.post}</strong>, {c.org}. {c.whoYouAre}
+            </p>
+            <p className="fac__card-text">
+              <strong>Believes:</strong> {c.believe}
+            </p>
+            <p className="fac__card-text">
+              <strong>Afraid of:</strong> {c.afraidOf}
+            </p>
+            <p className="fac__card-text">
+              <strong>Would never say:</strong> “{c.neverSay}”
+            </p>
+          </section>
+        ))}
+
+        <h2 className="fac__h2">Playing in character</h2>
+        <p className="fac__lead">
+          Four points and four house rules. Say one when a room needs it: in the welcome, in a
+          quiet Talk, or in the debrief.
+        </p>
+        {IN_CHARACTER.map((c) => (
+          <section key={c.title} className="fac__card">
+            <p className="fac__label">{c.title.toUpperCase()}</p>
+            <p className="fac__card-text">{c.text}</p>
+          </section>
+        ))}
+        <ul className="fac__list">
+          {HOUSE_RULES.map((r) => (
+            <li key={r}>{r}</li>
+          ))}
+        </ul>
+
+        <h2 className="fac__h2">What the game rewards</h2>
+        <p className="fac__lead">
+          The strategy the written guide used to teach. Nobody needs it to play, and a room that
+          works it out for itself learns more, so keep it for the debrief unless a room is stuck.
+        </p>
+        {STRATEGY.map((c) => (
+          <section key={c.title} className="fac__card">
+            <p className="fac__label">{c.title.toUpperCase()}</p>
+            <p className="fac__card-text">{c.text}</p>
+          </section>
+        ))}
+
         <h2 className="fac__h2">The debrief</h2>
         <p className="fac__lead">
-          Ten minutes, five questions, in this order. Ask them of the table, not of individuals.
+          Ten minutes, five questions, in this order. Ask them of the room, not of individuals.
         </p>
         <ol className="fac__debrief">
           {DEBRIEF.map((q) => (
@@ -256,8 +325,8 @@ export function Facilitator({
             <a href={HOW_TO_PLAY_URL} target="_blank" rel="noreferrer">
               /how-to-play.html
             </a>
-            . It has the characters, the goals and every word explained. Players do not need
-            it to play.
+            . It is short: the country, the three targets, the four role cards, how a round
+            works, and the words on the screen. Players do not need it to play.
           </p>
         </footer>
       </div>

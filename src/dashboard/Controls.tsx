@@ -21,10 +21,17 @@
 import { useEffect, useState } from 'react'
 import type { Phase } from '../game/session'
 
-/** What Next does from here, or null where there is nothing after this. */
-export function nextStep(phase: Phase): { cmd: 'start' | 'advance'; label: string } | null {
+/**
+ * What Next does from here.
+ *
+ * After the ending it opens a new room. It used to do nothing, and the script
+ * said to reload, which rejoined the room that had just ended: the URL carries
+ * the code so that a reload mid-session finds its way back, and that is the
+ * wrong instinct once the session is over.
+ */
+export function nextStep(phase: Phase): { cmd: 'start' | 'advance' | 'new'; label: string } | null {
   if (phase === 'lobby') return { cmd: 'start', label: 'START' }
-  if (phase === 'ended') return null
+  if (phase === 'ended') return { cmd: 'new', label: 'NEW SESSION' }
   return { cmd: 'advance', label: 'NEXT' }
 }
 
@@ -50,18 +57,33 @@ export function nextStep(phase: Phase): { cmd: 'start' | 'advance'; label: strin
  * they name the seat everybody is waiting on, and a control panel parked on
  * top of the Government's card is worse than no control panel at all.
  *
+ * The bar sits at the bottom right. The left used to be its corner, and the
+ * left is where every screen puts its text column: the briefing's paragraph,
+ * the Talk's promise board and the onboarding's line for the facilitator all
+ * ran under it. The onboarding's line is not measured: it is a block on the
+ * left, not a strip, and measuring it lifted the bar onto the fourth role card.
+ *
  * Re-measured when the phase changes, because that is when this furniture is
  * swapped for different furniture, and on resize, because that is when it
  * changes height. Nothing else moves it.
  */
 const BOTTOM_FURNITURE = '.dash .ticker, .dash .briefing-strip, .dash .locks'
 
+/**
+ * The Reveal covers the whole broadcast, lock row included, so while it is up
+ * the only furniture that counts is its own strip of meters. Measuring the
+ * hidden lock row lifted the bar onto the fourth card.
+ */
+const REVEAL_FURNITURE = '.dash .reckoning__meters'
+
 function useBottomInset(phase: Phase): number {
   const [inset, setInset] = useState(0)
   useEffect(() => {
     const measure = () => {
       let top = window.innerHeight
-      for (const el of document.querySelectorAll(BOTTOM_FURNITURE)) {
+      // The strip of meters exists only while the Reveal overlay is up.
+      const revealUp = document.querySelector(REVEAL_FURNITURE) !== null
+      for (const el of document.querySelectorAll(revealUp ? REVEAL_FURNITURE : BOTTOM_FURNITURE)) {
         const box = el.getBoundingClientRect()
         if (box.height > 0) top = Math.min(top, box.top)
       }

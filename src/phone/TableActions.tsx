@@ -22,6 +22,7 @@ import type { Command } from '../game/room'
 import type { PhoneView, SayShape } from '../game/session'
 import { ROLE_LABEL, ROLE_RESOURCE } from '../game/session'
 import { BOARD_NAME, DEAL_CONDITIONS, DEMAND_PHRASES } from '../game/copy'
+import { LABEL, STEP_LABEL } from '../game/vocab'
 import { RoleGlyph } from '../ui/primitives'
 
 type Sheet = 'say' | 'offer' | 'spotlight' | 'veto' | null
@@ -45,18 +46,23 @@ export function TableActions({
 
   return (
     <div className="pbody">
-      <span className="plabel">ROUND {view.round} · THE TALK</span>
+      <span className="plabel">
+        {view.round > 0 ? `ROUND ${view.round} · ${STEP_LABEL.table}` : STEP_LABEL.practiceTalk}
+      </span>
       <h1 className="pheading">Talk to each other.</h1>
       <p className="ptext">{view.privateLine}</p>
+      {/* The one player the veto is on used to find out at the choice, from a
+          greyed-out card. They should hear it while they can still argue. */}
+      {view.vetoed ? <p className="pnote">The Community took your dirty cards away this round.</p> : null}
 
-      {/* An incoming offer is the only interrupt allowed during THE TALK. */}
+      {/* An incoming offer is the only interrupt allowed during the Talk. */}
       {view.incomingOffers.map((o) => (
         <div key={o.id} className="bubble bubble--them">
           <div className="bubble__label">INCOMING OFFER</div>
           <div className="bubble__lead">
             {ROLE_LABEL[o.from]} sends you {o.amount} {o.resource === 'fiscal' ? 'Budget' : 'Company Money'}.
           </div>
-          <p className="bubble__text">It ends when the round does. You owe nothing in return.</p>
+          <p className="bubble__text">The offer ends when the round ends. You owe nothing back.</p>
           <div className="btn-row" style={{ marginTop: 'var(--space-3)' }}>
             <button
               className="btn btn--ghost"
@@ -71,7 +77,7 @@ export function TableActions({
               disabled={readOnly}
               onClick={() => send({ t: 'respondOffer', role: view.role, offerId: o.id, accept: false })}
             >
-              DECLINE
+              REFUSE
             </button>
           </div>
         </div>
@@ -88,19 +94,19 @@ export function TableActions({
             {o.status === 'pending'
               ? 'waiting for them to accept.'
               : o.status === 'accepted'
-                ? 'accepted, and gone.'
+                ? 'accepted. The money is theirs now.'
                 : o.status === 'declined'
-                  ? 'declined.'
+                  ? 'refused.'
                   : 'nobody answered.'}
           </p>
         </div>
       ))}
 
       <span className="plabel" style={{ marginTop: 'var(--space-2)' }}>
-        ON THE BOARD
+        ON THE BIG SCREEN
       </span>
       {view.promises.length === 0 ? (
-        <p className="pmono">Nothing said out loud yet.</p>
+        <p className="pmono">Nobody has said anything yet.</p>
       ) : (
         view.promises.map((p) => (
           <div key={p.id} className={`bubble${p.from === view.role ? '' : ' bubble--them'}`}>
@@ -114,17 +120,17 @@ export function TableActions({
       )}
 
       {view.role === 'community' && view.vetoesRemaining < 2 ? (
-        <p className="pnote">You used a veto this round. The big screen named you.</p>
+        <p className="pnote">You used a veto this round. Everyone knows it was you.</p>
       ) : null}
       {view.role === 'activist' && view.spotlightCalled ? (
         <p className="pnote">
-          Spotlight called. It only lands if you also escalate with your own card this round.
+          Spotlight is on. It only works if you also pick a protest card this round.
         </p>
       ) : null}
 
       <div className="btn-row" style={{ marginTop: 'auto' }}>
         <button className="btn btn--accent" disabled={readOnly} onClick={() => setSheet('say')}>
-          {spoke ? 'SAY SOMETHING ELSE' : 'SAY IT'}
+          {spoke ? 'SAY IT AGAIN' : 'SAY IT'}
         </button>
         <button
           className="btn btn--ghost"
@@ -139,7 +145,7 @@ export function TableActions({
             disabled={readOnly || view.spotlightsRemaining <= 0 || view.spotlightCalled}
             onClick={() => setSheet('spotlight')}
           >
-            SPOTLIGHT · {view.spotlightsRemaining}
+            {LABEL.spotlight} · {view.spotlightsRemaining} LEFT
           </button>
         ) : null}
         {view.role === 'community' ? (
@@ -148,7 +154,7 @@ export function TableActions({
             disabled={readOnly || view.vetoesRemaining <= 0}
             onClick={() => setSheet('veto')}
           >
-            SAY NO · {view.vetoesRemaining}
+            {LABEL.sayNo} · {view.vetoesRemaining} LEFT
           </button>
         ) : null}
       </div>
@@ -160,7 +166,7 @@ export function TableActions({
 
 /** How each shape reads on the board. The deal is the one worth naming loudly. */
 const SAID_LABEL: Record<SayShape, string> = {
-  promise: 'PLEDGED',
+  promise: 'PROMISED',
   demand: 'ASKED FOR',
   deal: 'OFFERED A DEAL',
   cofund: 'PAYING HALF',
@@ -180,8 +186,8 @@ function ActionSheet({
   const titles: Record<Exclude<Sheet, null>, string> = {
     say: 'SAY IT',
     offer: 'SEND MONEY',
-    spotlight: 'CALL A SPOTLIGHT',
-    veto: 'THE PUBLIC SAYS NO',
+    spotlight: 'USE A SPOTLIGHT',
+    veto: 'SAY NO TO ONE PLAYER',
   }
 
   return (
@@ -201,12 +207,12 @@ function ActionSheet({
           {kind === 'spotlight' ? (
             <>
               <p className="ptext">
-                It hits whoever takes the dirtiest card this round. Their card only half works and
-                they lose Public Trust.
+                If a player picks a dirty card, that card only half works. They also lose Public
+                Trust.
               </p>
               <p className="pnote">
-                It only fires if you also escalate with your own card this round. If nobody goes
-                dirty, it costs you nothing.
+                It only works if you also pick a protest card. If nobody picks a dirty card, you
+                keep the Spotlight.
               </p>
               <p className="pnote">
                 Three for the whole game. You have {view.spotlightsRemaining} left.
@@ -218,10 +224,10 @@ function ActionSheet({
                   onClose()
                 }}
               >
-                CALL IT
+                USE SPOTLIGHT
               </button>
               <button className="btn" onClick={onClose}>
-                NOT THIS TIME
+                CANCEL
               </button>
             </>
           ) : null}
@@ -240,6 +246,11 @@ function ActionSheet({
  * position, then trade, then push. The deal is second rather than last because
  * it is the sentence the whole game is built to provoke, and a player scrolling
  * for it will not find it in ninety seconds.
+ *
+ * The request is built the same way as the deal: the sentence first, then who
+ * it is for. Six buttons and then three. It used to be one list of eighteen,
+ * every sentence repeated for each of the other three players, and a player
+ * with seventy-five seconds could not read it.
  */
 function SaySheet({
   view,
@@ -251,25 +262,27 @@ function SaySheet({
   onClose: () => void
 }) {
   const [shape, setShape] = useState<SayShape | null>(null)
+  const [phraseId, setPhraseId] = useState<string | null>(null)
   const others = ROLES.filter((r) => r !== view.role)
+  const phrase = DEMAND_PHRASES.find((p) => p.id === phraseId)
 
   if (shape === null) {
     return (
       <>
         <p className="pnote">
-          One thing at a time. The big screen shows it to everyone. Nothing makes you keep it.
+          One sentence at a time. Everyone sees it on the big screen. You do not have to keep it.
         </p>
         <button className="btn btn--ghost say__shape" onClick={() => setShape('promise')}>
-          <span className="say__lead">I will choose…</span>
-          <span className="say__hint">Say what you are about to do.</span>
+          <span className="say__lead">I will pick…</span>
+          <span className="say__hint">Tell everyone your card.</span>
         </button>
         <button className="btn btn--ghost say__shape" onClick={() => setShape('deal')}>
-          <span className="say__lead">I will choose… if you…</span>
-          <span className="say__hint">A deal. You go if they go.</span>
+          <span className="say__lead">I will pick… if you…</span>
+          <span className="say__hint">A deal. You do it if they do it.</span>
         </button>
         <button className="btn btn--ghost say__shape" onClick={() => setShape('demand')}>
-          <span className="say__lead">I want someone to…</span>
-          <span className="say__hint">Ask for something, in public.</span>
+          <span className="say__lead">I want you to…</span>
+          <span className="say__hint">Ask another player for something.</span>
         </button>
         {view.role === 'government' ? (
           <button
@@ -280,12 +293,12 @@ function SaySheet({
             }}
           >
             <span className="say__lead">
-              {view.coFund ? 'Stop paying half.' : 'I will pay half of any partnership.'}
+              {view.coFund ? 'Stop paying half.' : 'I will pay half of a Business partnership.'}
             </span>
             <span className="say__hint">
               {view.coFund
-                ? 'You are paying half. It costs 1 Budget if the Business signs one.'
-                : 'A partnership only half works unless you do. Costs 1 Budget.'}
+                ? 'You are paying half. It costs 1 Budget if the Business picks a partnership.'
+                : 'Costs 1 Budget. Without it the partnership only half works.'}
             </span>
           </button>
         ) : null}
@@ -296,7 +309,7 @@ function SaySheet({
   if (shape === 'promise') {
     return (
       <>
-        <p className="pnote">Pick the card you are pledging to.</p>
+        <p className="pnote">Pick the card you will promise.</p>
         {view.options.map((o) => (
           <button
             key={o.id}
@@ -306,7 +319,7 @@ function SaySheet({
               onClose()
             }}
           >
-            {BOARD_NAME[view.role]} will choose “{o.title}”.
+            {BOARD_NAME[view.role]} will pick “{o.title}”.
           </button>
         ))}
         <button className="btn" onClick={() => setShape(null)}>
@@ -318,29 +331,42 @@ function SaySheet({
 
   if (shape === 'deal') return <DealSheet view={view} send={send} onClose={onClose} onBack={() => setShape(null)} />
 
+  if (!phrase) {
+    return (
+      <>
+        <p className="pnote">
+          This is a request. They do not have to do it. Everyone sees you ask.
+        </p>
+        <span className="plabel">WHAT DO YOU WANT</span>
+        {DEMAND_PHRASES.map((p) => (
+          <button key={p.id} className="btn btn--ghost" onClick={() => setPhraseId(p.id)}>
+            {p.you}
+          </button>
+        ))}
+        <button className="btn" onClick={() => setShape(null)}>
+          BACK
+        </button>
+      </>
+    )
+  }
+
   return (
     <>
-      <p className="pnote">
-        This is pressure, not a rule. Nothing makes them do it, and everyone sees you ask.
-      </p>
+      <p className="ptext">“{phrase.you}”</p>
+      <span className="plabel">SAY IT TO</span>
       {others.map((target) => (
-        <div key={target}>
-          <span className="plabel">{ROLE_LABEL[target].toUpperCase()}</span>
-          {DEMAND_PHRASES.map((phrase) => (
-            <button
-              key={`${target}-${phrase.id}`}
-              className="btn btn--ghost"
-              onClick={() => {
-                send({ t: 'say', role: view.role, shape: 'demand', target, phraseId: phrase.id })
-                onClose()
-              }}
-            >
-              {phrase.text(ROLE_LABEL[target])}
-            </button>
-          ))}
-        </div>
+        <button
+          key={target}
+          className="btn btn--ghost"
+          onClick={() => {
+            send({ t: 'say', role: view.role, shape: 'demand', target, phraseId: phrase.id })
+            onClose()
+          }}
+        >
+          <RoleGlyph role={target} size={14} /> {ROLE_LABEL[target]}
+        </button>
       ))}
-      <button className="btn" onClick={() => setShape(null)}>
+      <button className="btn" onClick={() => setPhraseId(null)}>
         BACK
       </button>
     </>
@@ -372,7 +398,7 @@ function DealSheet({
   if (!card) {
     return (
       <>
-        <p className="pnote">First: what will you do, if they come with you?</p>
+        <p className="pnote">First: what will you pick, if they do their part?</p>
         {view.options.map((o) => (
           <button key={o.id} className="btn btn--ghost" onClick={() => setOptionId(o.id)}>
             {o.title}
@@ -388,7 +414,7 @@ function DealSheet({
   return (
     <>
       <p className="ptext">
-        “{BOARD_NAME[view.role]} will choose <strong>{card.title}</strong> if…”
+        “{BOARD_NAME[view.role]} will pick <strong>{card.title}</strong> if…”
       </p>
       {ROLES.filter((r) => r !== view.role).map((target) => (
         <div key={target}>
@@ -415,8 +441,8 @@ function DealSheet({
         </div>
       ))}
       <p className="pnote">
-        If they do their part and you do not, the big screen says you broke it. If they never do
-        theirs, nothing is held against you.
+        If they keep their part and you do not, everyone sees it. If they do not keep their part,
+        you are free.
       </p>
       <button className="btn" onClick={() => setOptionId(null)}>
         BACK
@@ -441,7 +467,10 @@ function OfferSheet({
 
   if (!canSend) {
     return (
-      <p className="ptext">You have no money to send. Your power is saying no.</p>
+      <p className="ptext">
+        You have no money to send. Your power is the{' '}
+        {view.resource.kind === 'vetoes' ? 'veto' : 'Spotlight'}.
+      </p>
     )
   }
 
@@ -457,9 +486,9 @@ function OfferSheet({
   return (
     <>
       <span className="plabel">
-        YOU HOLD {view.resource.value} {unit.toUpperCase()}
+        YOU HAVE {view.resource.value} {unit.toUpperCase()}
       </span>
-      <span className="plabel">TO WHOM</span>
+      <span className="plabel">SEND TO</span>
       {recipients.map((r) => (
         <button
           key={r}
@@ -469,10 +498,8 @@ function OfferSheet({
           <RoleGlyph role={r} size={14} /> {ROLE_LABEL[r]}
         </button>
       ))}
-      <p className="pnote">
-        Only the Government and the Business hold money. The others cannot be paid.
-      </p>
-      <span className="plabel">HOW MANY</span>
+      <p className="pnote">Only the Government and the Business can hold money.</p>
+      <span className="plabel">HOW MUCH</span>
       <div className="btn-row">
         {[1, 2].map((n) => (
           <button
@@ -490,7 +517,7 @@ function OfferSheet({
         ))}
       </div>
       <p className="pnote">
-        They have to accept. Once they do it is gone, and nothing makes them repay it.
+        They must accept it. Once they do, the money is theirs. They do not have to pay it back.
       </p>
     </>
   )
@@ -515,8 +542,8 @@ function VetoSheet({
 
   return (
     <>
-      <p className="ptext">You are about to take a choice away.</p>
-      <span className="plabel">TAKE IT FROM</span>
+      <p className="ptext">You will take away one player’s dirty cards.</p>
+      <span className="plabel">WHICH PLAYER</span>
       {ROLES.filter((r) => r !== 'community').map((r) => (
         <button
           key={r}
@@ -527,15 +554,15 @@ function VetoSheet({
         </button>
       ))}
       <p className="pnote">
-        This round only. Everyone will be told it was you. You will have{' '}
-        {view.vetoesRemaining - 1} left.
+        This round only. Everyone will know it was you. You will have{' '}
+        {view.vetoesRemaining - 1} {view.vetoesRemaining - 1 === 1 ? 'veto' : 'vetoes'} left.
       </p>
       <p className="pnote" style={{ color: 'var(--jtnz-com-deep)' }}>
-        “The public will not accept this.”
+        “The people will not accept this.”
       </p>
 
       <label className="plabel" htmlFor="veto-slide">
-        HOLD AND SLIDE TO SAY NO →
+        SLIDE ALL THE WAY TO SAY NO
       </label>
       <input
         id="veto-slide"
@@ -556,7 +583,7 @@ function VetoSheet({
         style={{ width: '100%', height: 48 }}
       />
       <button className="btn" onClick={onClose}>
-        NOT THIS TIME
+        CANCEL
       </button>
     </>
   )
