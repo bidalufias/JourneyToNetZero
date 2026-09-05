@@ -24,7 +24,7 @@ export const TERM = {
   budget: 'Budget',
   companyMoney: 'Company Money',
   veto: 'Veto',
-  sayNo: 'Say no',
+  sayNo: 'Veto',
   spotlight: 'Spotlight',
   publicTrust: 'Public Trust',
   movingTogether: 'Moving together',
@@ -65,7 +65,7 @@ export const DEFINE: Partial<Record<Term, string>> = {
   netZero: 'Carbon at 0. The country takes out as much as it puts in.',
   millionTonnes: 'Million tonnes of carbon.',
   secretGoal: 'A goal only you know. It only counts if the country reaches all three targets.',
-  tip: 'A true warning about the next crisis. Only you can see it.',
+  tip: 'A true warning about the next crisis. Only you can see it. One player gets one each round, in turn.',
 }
 
 /** What each step of the session is called, on every surface. */

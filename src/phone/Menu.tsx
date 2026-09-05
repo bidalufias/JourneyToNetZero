@@ -10,18 +10,24 @@
 import { useState } from 'react'
 import type { PhoneView } from '../game/session'
 import { HOW_TO_PLAY_URL } from '../ui/links'
+import { formatClock } from '../ui/primitives'
 import { HowToPlay } from './guide'
 
 export function MenuSheet({
   view,
+  remaining,
   onClose,
   onLeave,
 }: {
   view: PhoneView
+  remaining: number | null
   onClose: () => void
   onLeave: () => void
 }) {
   const [confirming, setConfirming] = useState(false)
+  // The practice Talk ran out under the word list. The sheet covers the
+  // header, so it carries the header's clock.
+  const clock = view.paused ? null : formatClock(remaining)
 
   return (
     <>
@@ -29,6 +35,7 @@ export function MenuSheet({
       <div className="sheet" role="dialog" aria-label="How to play">
         <div className="sheet__head">
           <span className="sheet__title">HOW TO PLAY</span>
+          {clock ? <span className="sheet__clock">{clock} · CLOCK RUNNING</span> : null}
           <button className="sheet__close" onClick={onClose} aria-label="Close">
             ✕
           </button>

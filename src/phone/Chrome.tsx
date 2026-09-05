@@ -16,6 +16,7 @@
  * brief scrolled past in twenty-five seconds and there was no way to read it
  * again, and because "LOCKED" would not tell you what you had locked.
  */
+import type { TrustRole } from '../engine/types'
 import type { PhoneView } from '../game/session'
 import { ROLE_CARD, ROLE_LABEL, phaseMs } from '../game/session'
 import { STEP_LABEL } from '../game/vocab'
@@ -97,6 +98,7 @@ export function PhoneHeader({
           </div>
         </div>
         <Resource view={view} />
+        <Trust view={view} />
         {clock ? <span className={`phead__clock${urgent ? ' phead__clock--urgent' : ''}`}>{clock}</span> : null}
         <button className="phead__btn" onClick={onMenu} aria-label="How to play, and leave the game">
           ⋯
@@ -123,6 +125,24 @@ function Resource({ view }: { view: PhoneView }) {
     <span className="phead__res" title={view.resource.label}>
       <span className="phead__res-unit">{RESOURCE_CHIP[view.resource.kind]}</span>
       <span className="phead__res-value">{view.resource.value}</span>
+    </span>
+  )
+}
+
+/**
+ * Public Trust, on the three phones that can hold it.
+ *
+ * The score existed only on the projector's trust screen, so a boy who had
+ * just been given three points asked where to look, and his sister found out
+ * the game had a score when he won it.
+ */
+function Trust({ view }: { view: PhoneView }) {
+  if (view.role === 'community') return null
+  const role: TrustRole = view.role
+  return (
+    <span className="phead__res" title="Public Trust">
+      <span className="phead__res-unit">TRUST</span>
+      <span className="phead__res-value">{view.trust[role]}</span>
     </span>
   )
 }

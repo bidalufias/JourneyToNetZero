@@ -278,7 +278,36 @@ export interface RoundLog {
   /** Emissions added by growth-carbon drift. */
   drift: number
   driftK: number
+  /**
+   * Every change to the Government's Budget and the Business's Company
+   * Money this round, in the order it happened, as actually applied: a cost
+   * the floor at zero swallowed is recorded as what it took, not what it
+   * asked. A father watched his Budget say 4 before the round and 4 after,
+   * with a card that said +2 and a deal that said it cost 1, and nothing
+   * on any screen could tell him the crisis had taken the other one.
+   */
+  money: MoneyEntry[]
   state: PublicState
+}
+
+/** Why a resource moved. The room turns each into a sentence. */
+export type MoneyReason =
+  | 'income'
+  | 'growthBonus'
+  | 'subsidyLock'
+  | 'shock'
+  | 'cap'
+  | 'card'
+  | 'coFund'
+  | 'grant'
+  | 'relief'
+  | 'regulated'
+
+export interface MoneyEntry {
+  role: 'government' | 'business'
+  reason: MoneyReason
+  /** Signed, as applied. Never zero. */
+  amount: number
 }
 
 export interface RoundReveal {

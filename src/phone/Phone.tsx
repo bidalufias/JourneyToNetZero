@@ -22,7 +22,18 @@ import { PhoneHeader, ReviewBar, SCREEN_ORDER, reviewableUpTo, type Screen } fro
 import { MenuSheet } from './Menu'
 import { TheChoice } from './TheChoice'
 import { TableActions } from './TableActions'
-import { Crisis, GoalChosen, GoalPicker, Lobby, LookUp, RevealScreen, RoleReveal, RoundResult, TipCard } from './screens'
+import {
+  Crisis,
+  GoalChosen,
+  GoalPicker,
+  Lobby,
+  LookUp,
+  RevealScreen,
+  RoleReveal,
+  RoundResult,
+  TipAnswered,
+  TipCard,
+} from './screens'
 import { PracticeChoice, PracticeReveal, PracticeTalk, RoundOneCoach, YourPower } from './onboarding'
 import './phone.css'
 
@@ -142,8 +153,8 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
           Under the tip it goes: "nothing to tap yet" over two buttons is a
           strip and a screen disagreeing. */}
       {!screen && !tipOpen ? <RoundOneCoach view={view} /> : null}
-      {body}
-
+      {/* The tip sits above the news, under the one clock, until it is
+          answered. Then one line says what the answer did. */}
       {tipOpen && view.tip ? (
         <TipCard
           tip={view.tip}
@@ -153,9 +164,17 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
           onClose={() => setDismissedTip(view.tip!.id)}
         />
       ) : null}
+      {!screen &&
+      view.tip &&
+      !tipOpen &&
+      (view.phase === 'crisis' || view.phase === 'table') &&
+      (view.tip.published || view.tip.id === dismissedTip) ? (
+        <TipAnswered published={view.tip.published} role={view.role} />
+      ) : null}
+      {body}
 
       {menuOpen ? (
-        <MenuSheet view={view} onClose={() => setMenuOpen(false)} onLeave={onLeave} />
+        <MenuSheet view={view} remaining={remaining} onClose={() => setMenuOpen(false)} onLeave={onLeave} />
       ) : null}
 
       {connection !== 'live' ? (

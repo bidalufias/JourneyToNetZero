@@ -28,6 +28,8 @@ import {
   type Content,
   type GameState,
   type GameResult,
+  type MoneyEntry,
+  type MoneyReason,
   type Option,
   type PublicState,
   type Role,
@@ -211,17 +213,29 @@ export function playRound(state: GameState, input: RoundInput, content: Content)
   if (!scenario) throw new Error(`unknown scenario ${state.path[i]} for round ${i + 1}`)
   const rnd = i + 1
 
+  // Every move of Budget or Company Money goes through here, so the round
+  // can say afterwards where the money went. The arithmetic is unchanged:
+  // add, floor at zero, and the entry records what the floor let through.
+  const money: MoneyEntry[] = []
+  const pay = (role: MoneyEntry['role'], reason: MoneyReason, amount: number): void => {
+    const key = role === 'government' ? 'fiscal' : 'capital'
+    const before = state[key]
+    state[key] = Math.max(0, before + amount)
+    const applied = state[key] - before
+    if (applied !== 0) money.push({ role, reason, amount: applied })
+  }
+
   // 1. Treasury and corporate income. The economy pays for the transition.
   if (rnd >= 2) {
-    state.fiscal += cfg.fiscal_income
-    if (state.growth >= cfg.fiscal_bonus_at) state.fiscal += 1
-    state.capital += 1
-    if (state.growth >= cfg.capital_income_at) state.capital += 1
+    pay('government', 'income', cfg.fiscal_income)
+    if (state.growth >= cfg.fiscal_bonus_at) pay('government', 'growthBonus', 1)
+    pay('business', 'income', 1)
+    if (state.growth >= cfg.capital_income_at) pay('business', 'growthBonus', 1)
   }
 
   // Legacy: a frozen pump price drains the treasury in Rounds 4 and 5.
   if (state.flags.has('SUBSIDY_LOCK') && (rnd === 4 || rnd === 5)) {
-    state.fiscal = Math.max(0, state.fiscal - 1)
+    pay('government', 'subsidyLock', -1)
   }
 
   // 2. Scenario shock, scaled by legacy flags and Round 6 modifiers.
@@ -242,10 +256,10 @@ export function playRound(state: GameState, input: RoundInput, content: Content)
   // The emissions component of a shock is never scaled.
   const shE = sh.e ?? 0
 
-  state.fiscal = Math.max(0, state.fiscal + (sh.fiscal ?? 0))
-  state.capital = Math.max(0, state.capital + (sh.capital ?? 0))
-  state.fiscal = Math.min(state.fiscal, cfg.fiscal_cap)
-  state.capital = Math.min(state.capital, cfg.capital_cap)
+  pay('government', 'shock', sh.fiscal ?? 0)
+  pay('business', 'shock', sh.capital ?? 0)
+  pay('government', 'cap', Math.min(0, cfg.fiscal_cap - state.fiscal))
+  pay('business', 'cap', Math.min(0, cfg.capital_cap - state.capital))
 
   // 3. The Community may spend a Public Mandate veto.
   let vetoTarget: Role | null = null
@@ -310,7 +324,7 @@ export function playRound(state: GameState, input: RoundInput, content: Content)
     if (o.arch === 'PARTNER') {
       const cofunded = (input.coFund ?? false) && state.fiscal >= 1
       if (cofunded) {
-        state.fiscal -= 1
+        pay('government', 'coFund', -1)
       } else {
         m *= cfg.partner_unfunded
         partnerUnfunded = true
@@ -360,16 +374,16 @@ export function playRound(state: GameState, input: RoundInput, content: Content)
         if (c[k] > 0) c[k] = Math.max(0, c[k] - 1)
       }
     }
-    state.fiscal = Math.max(0, state.fiscal - (c.fiscal ?? 0))
-    state.capital = Math.max(0, state.capital - (c.capital ?? 0))
+    pay('government', 'card', -(c.fiscal ?? 0))
+    pay('business', 'card', -(c.capital ?? 0))
 
     if (o.grants) {
       const [, resource, amount] = o.grants
-      if (resource === 'capital') state.capital += amount
+      if (resource === 'capital') pay('business', 'grant', amount)
     }
     if (o.arch === 'DEMAND_RELIEF') {
       // The Government pays, or loses standing for failing to.
-      if (state.fiscal >= 2) state.fiscal -= 1
+      if (state.fiscal >= 2) pay('government', 'relief', -1)
       else state.trust.government = Math.max(0, state.trust.government - 1)
     }
 
@@ -416,7 +430,7 @@ export function playRound(state: GameState, input: RoundInput, content: Content)
     forcedAbatement = cfg.regulate_abate * macNow * (DIRTY.has(chosen.business.arch) ? 1.0 : 0.45)
     de -= forcedAbatement
     state.roleEmissions.government -= forcedAbatement
-    state.capital = Math.max(0, state.capital - 1)
+    pay('business', 'regulated', -1)
   }
 
   if (govIsolated) {
@@ -504,6 +518,7 @@ export function playRound(state: GameState, input: RoundInput, content: Content)
     trustAwarded: awarded,
     drift,
     driftK: k,
+    money,
     state: publicState(state, content),
   }
 }

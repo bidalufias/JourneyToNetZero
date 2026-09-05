@@ -5,12 +5,14 @@
 import { useState } from 'react'
 import type { Role } from '../engine/types'
 import type { Command } from '../game/room'
-import type { InsiderTip, PhoneView } from '../game/session'
+import type { InsiderTip, PhoneView, RevealMirror } from '../game/session'
 import { RECKONING_CARD_GAP_MS, RECKONING_FIRST_CARD_MS, ROLE_CARD, ROLE_LABEL, phaseMs } from '../game/session'
 import { arrows } from '../game/impact'
+import { KIND_CHIP } from '../game/reveal'
+import { BOARD_NAME } from '../game/copy'
 import { LABEL, STEP_LABEL, TERM } from '../game/vocab'
 import { revealedCount } from '../dashboard/reckoning-clock'
-import { RoleGlyph, formatClock } from '../ui/primitives'
+import { RoleGlyph } from '../ui/primitives'
 import { RoleCard } from '../ui/RoleCard'
 import { DoneButton } from './TableActions'
 
@@ -258,6 +260,7 @@ export function RevealScreen({
             {up ? (
               <>
                 <div className="mirror__title">{c.title}</div>
+                {KIND_CHIP[c.kind] ? <div className={`mirror__kind mirror__kind--${c.kind}`}>{KIND_CHIP[c.kind]}</div> : null}
                 {c.badges.map((b) => (
                   <div key={b.text} className={`mirror__badge mirror__badge--${b.tone}`}>
                     {b.text}
@@ -272,6 +275,9 @@ export function RevealScreen({
       })}
       {practice && seen ? (
         <div style={{ marginTop: 'var(--space-3)' }}>
+          {/* The one lesson the practice is for, said to the player who
+              picked the dirty card, and to the three who did not. */}
+          <p className="ptext">{practiceLesson(mirror, view.role)}</p>
           <p className="ptext">Nothing here counted. The country goes back to the start.</p>
           <DoneButton
             view={view}
@@ -311,18 +317,18 @@ export function TipCard({
   onClose: () => void
 }) {
   const stake = role === 'community' ? '1 veto' : `1 ${TERM.publicTrust}`
-  const clock = formatClock(remaining)
+  void remaining
 
+  // It used to cover the whole phone and carry its own copy of the clock, so
+  // a boy saw two clocks and three buttons at once and tapped SHARE IT
+  // without reading. It sits above the news now, under the one clock.
   return (
-    <div className="tip" role="dialog" aria-label="A tip">
+    <div className="tip" role="region" aria-label="A tip">
       <span className="tip__label">A {LABEL.tip}</span>
       <span className="tip__eyes">ONLY YOU CAN SEE THIS</span>
-      {/* This is the only overlay that covers the whole phone, so it has to
-          carry the clock it is hiding, because otherwise it is a timed decision with
-          the timer behind it. */}
-      {clock ? <span className="tip__clock">{clock}</span> : null}
 
       <span className="tip__chip tip__chip--confirmed">THIS IS TRUE</span>
+      <p className="tip__reminder">One player gets a tip each round. This round it is you.</p>
 
       <p className="tip__source">{tip.source}</p>
       <p className="tip__body">{tip.text}</p>
@@ -345,6 +351,39 @@ export function TipCard({
       </div>
     </div>
   )
+}
+
+/**
+ * The tip, answered. SHARE IT used to close the card and say nothing until
+ * the end of the round, and the player who tapped it checked the projector
+ * to find out whether anything had happened.
+ */
+export function TipAnswered({ published, role }: { published: boolean; role: Role }) {
+  const stake = role === 'community' ? '1 veto' : `1 ${TERM.publicTrust}`
+  return (
+    <div className="tip tip--answered" role="status">
+      <span className="tip__label">{published ? 'YOU SHARED YOUR TIP' : 'YOU KEPT YOUR TIP SECRET'}</span>
+      <p className="tip__reminder">
+        {published
+          ? `Everyone saw the warning. You get ${stake} when the cards turn.`
+          : 'Only you know it. You can use it first.'}
+      </p>
+    </div>
+  )
+}
+
+/**
+ * What the practice cards taught, in one line for this seat. A boy picked
+ * the dirty card on purpose, watched carbon fall to 80 anyway, and learned
+ * that dirty was fine; his parents corrected him from the projector.
+ */
+function practiceLesson(mirror: RevealMirror, role: Role): string {
+  const dirty = mirror.cards.filter((c) => c.kind === 'dirty')
+  if (dirty.some((c) => c.role === role)) return 'Your card was a dirty card. It broke moving together.'
+  if (!dirty.length) return 'All four picked good cards. That is moving together.'
+  const moved = ['Nobody', 'One', 'Two', 'Three'][4 - dirty.length]
+  const who = dirty.map((c) => BOARD_NAME[c.role]).join(' and ')
+  return `${who} picked a dirty card. ${moved} moved together, not four.`
 }
 
 /** P-10: locked. The phone gets out of the way. */
@@ -453,6 +492,22 @@ export function RoundResult({ view }: { view: PhoneView }) {
           <div className="bubble__label">AND THE OTHERS</div>
           <p className="bubble__text">{r.others}</p>
         </div>
+        {/* Every move of this seat's money, in order, adding up to the number
+            in the header. Two players argued for two minutes over a Budget
+            that had not moved and a Company Money that had dropped two. */}
+        {r.money ? (
+          <div className="bubble">
+            <div className="bubble__label">YOUR {r.money.label.toUpperCase()}</div>
+            <div className="bubble__lead">
+              {r.money.before} before. {r.money.after} now.
+            </div>
+            {r.money.lines.map((line) => (
+              <p key={line} className="bubble__text">
+                {line}
+              </p>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {view.trustAward ? (

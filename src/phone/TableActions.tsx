@@ -65,6 +65,28 @@ export function TableActions({
           greyed-out card. They should hear it while they can still argue. */}
       {view.vetoed ? <p className="pnote">The Community took your dirty cards away this round.</p> : null}
 
+      {/* The cards, on the Talk screen, for every seat. They were inside SAY
+          IT only, and the one player who never opened I will pick negotiated a
+          whole round without seeing what she could pick. */}
+      {view.options.length ? (
+        <>
+          <span className="plabel" style={{ marginTop: 'var(--space-2)' }}>
+            YOUR CARDS THIS ROUND
+          </span>
+          <p className="pnote">Read them, then talk. Tap one to promise it.</p>
+          {view.options.map((o) => (
+            <OptionCard
+              key={o.id}
+              option={o}
+              selected={false}
+              onPick={() => {
+                if (!readOnly) setSheet('say')
+              }}
+            />
+          ))}
+        </>
+      ) : null}
+
       {/* An incoming offer is the only interrupt allowed during the Talk. */}
       {view.incomingOffers.map((o) => (
         <div key={o.id} className="bubble bubble--them">
@@ -125,6 +147,11 @@ export function TableActions({
               {SAID_LABEL[p.kind]}
             </div>
             <p className="bubble__text">{p.text}</p>
+            {/* No money moves when the Government says it. A father watched
+                his Budget stay at 4 and could not tell whether he had paid. */}
+            {p.kind === 'cofund' && p.from === view.role ? (
+              <p className="bubble__text">No money moves now. 1 Budget goes when the cards turn.</p>
+            ) : null}
           </div>
         ))
       )}
@@ -252,7 +279,7 @@ function ActionSheet({
     say: 'SAY IT',
     offer: 'SEND MONEY',
     spotlight: 'USE A SPOTLIGHT',
-    veto: 'SAY NO TO ONE PLAYER',
+    veto: 'VETO ONE PLAYER',
   }
 
   return (
@@ -641,7 +668,7 @@ function VetoSheet({
             onClose()
           }}
         >
-          YES. SAY NO TO THE {ROLE_LABEL[target].toUpperCase()}
+          YES. VETO THE {ROLE_LABEL[target].toUpperCase()}
         </button>
         <button className="btn" onClick={() => setTarget(null)}>
           BACK
@@ -653,6 +680,11 @@ function VetoSheet({
   return (
     <>
       <p className="ptext">{DEFINE.veto}</p>
+      {/* She cancelled in the practice to be safe, because the sheet said
+          two for the whole game and the banner said this does not count. */}
+      {view.phase === 'practiceTalk' ? (
+        <p className="pnote">Practice. This veto comes back after the practice.</p>
+      ) : null}
       <span className="plabel">WHICH PLAYER</span>
       {ROLES.filter((r) => r !== 'community').map((r) => (
         <button key={r} className="btn btn--ghost" onClick={() => setTarget(r)}>

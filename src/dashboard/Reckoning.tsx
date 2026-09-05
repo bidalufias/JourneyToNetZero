@@ -20,7 +20,8 @@ import type { DashboardView } from '../game/session'
 import { ROLE_LABEL } from '../game/session'
 import { LABEL, STEP_LABEL } from '../game/vocab'
 import { COALITION_HOLD_MS, PHASE_MS, PROMISE_STING_MS, RECKONING_FIRST_CARD_MS } from '../game/session'
-import { revealBadges } from '../game/reveal'
+import { KIND_CHIP, revealBadges } from '../game/reveal'
+import { kindOfArch } from '../game/impact'
 import { serverNow } from '../net/clock'
 import { RoleGlyph } from '../ui/primitives'
 import { CoalitionBonus } from './screens'
@@ -151,7 +152,8 @@ export function Reckoning({ view }: { view: DashboardView }) {
         {log.reveals.map((reveal, i) => {
           const shown = i < revealedCount
           const promise = promiseFor(reveal.role)
-          const badges = revealBadges(reveal, promise)
+          const badges = revealBadges(reveal, promise, log)
+          const kind = kindOfArch(reveal.arch)
           return (
             <article
               key={reveal.role}
@@ -166,6 +168,11 @@ export function Reckoning({ view }: { view: DashboardView }) {
                     <span>{ROLE_LABEL[reveal.role].toUpperCase()}</span>
                   </div>
                   <h2 className="rcard__title">{reveal.title}</h2>
+                  {/* The mark the Choice put on the card, kept on the Reveal. A
+                      boy who picked the dirty card on purpose watched carbon
+                      fall anyway and nothing on the projector said his card
+                      was the dirty one. */}
+                  {KIND_CHIP[kind] ? <span className={`rcard__kind rcard__kind--${kind}`}>{KIND_CHIP[kind]}</span> : null}
                   <p className="rcard__desc">{reveal.desc}</p>
 
                   <div className="rcard__foot">
@@ -195,6 +202,9 @@ export function Reckoning({ view }: { view: DashboardView }) {
                     <span>{ROLE_LABEL[reveal.role].toUpperCase()}</span>
                   </div>
                   <div className="rcard__back-mark" aria-hidden="true" />
+                  {/* An eleven-year-old read a face-down card as a black box
+                      and asked where her card was. */}
+                  <p className="rcard__back-note">{i === revealedCount ? 'TURNING NEXT' : 'FACE DOWN'}</p>
                 </>
               )}
             </article>

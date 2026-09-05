@@ -157,14 +157,22 @@ function playRound(state, input, content2) {
   const scenario = content2.scenarios[state.path[i]];
   if (!scenario) throw new Error(`unknown scenario ${state.path[i]} for round ${i + 1}`);
   const rnd = i + 1;
+  const money = [];
+  const pay = (role, reason, amount) => {
+    const key = role === "government" ? "fiscal" : "capital";
+    const before = state[key];
+    state[key] = Math.max(0, before + amount);
+    const applied = state[key] - before;
+    if (applied !== 0) money.push({ role, reason, amount: applied });
+  };
   if (rnd >= 2) {
-    state.fiscal += cfg.fiscal_income;
-    if (state.growth >= cfg.fiscal_bonus_at) state.fiscal += 1;
-    state.capital += 1;
-    if (state.growth >= cfg.capital_income_at) state.capital += 1;
+    pay("government", "income", cfg.fiscal_income);
+    if (state.growth >= cfg.fiscal_bonus_at) pay("government", "growthBonus", 1);
+    pay("business", "income", 1);
+    if (state.growth >= cfg.capital_income_at) pay("business", "growthBonus", 1);
   }
   if (state.flags.has("SUBSIDY_LOCK") && (rnd === 4 || rnd === 5)) {
-    state.fiscal = Math.max(0, state.fiscal - 1);
+    pay("government", "subsidyLock", -1);
   }
   const sh = scenario.shock;
   let mult = 1;
@@ -181,10 +189,10 @@ function playRound(state, input, content2) {
   const shG = sh.g * mult;
   const shH = sh.h * mult;
   const shE = sh.e ?? 0;
-  state.fiscal = Math.max(0, state.fiscal + (sh.fiscal ?? 0));
-  state.capital = Math.max(0, state.capital + (sh.capital ?? 0));
-  state.fiscal = Math.min(state.fiscal, cfg.fiscal_cap);
-  state.capital = Math.min(state.capital, cfg.capital_cap);
+  pay("government", "shock", sh.fiscal ?? 0);
+  pay("business", "shock", sh.capital ?? 0);
+  pay("government", "cap", Math.min(0, cfg.fiscal_cap - state.fiscal));
+  pay("business", "cap", Math.min(0, cfg.capital_cap - state.capital));
   let vetoTarget = null;
   if (input.vetoTarget && state.vetoes > 0) {
     vetoTarget = input.vetoTarget;
@@ -234,7 +242,7 @@ function playRound(state, input, content2) {
     if (o.arch === "PARTNER") {
       const cofunded = (input.coFund ?? false) && state.fiscal >= 1;
       if (cofunded) {
-        state.fiscal -= 1;
+        pay("government", "coFund", -1);
       } else {
         m *= cfg.partner_unfunded;
         partnerUnfunded = true;
@@ -274,14 +282,14 @@ function playRound(state, input, content2) {
         if (c[k2] > 0) c[k2] = Math.max(0, c[k2] - 1);
       }
     }
-    state.fiscal = Math.max(0, state.fiscal - (c.fiscal ?? 0));
-    state.capital = Math.max(0, state.capital - (c.capital ?? 0));
+    pay("government", "card", -(c.fiscal ?? 0));
+    pay("business", "card", -(c.capital ?? 0));
     if (o.grants) {
       const [, resource, amount] = o.grants;
-      if (resource === "capital") state.capital += amount;
+      if (resource === "capital") pay("business", "grant", amount);
     }
     if (o.arch === "DEMAND_RELIEF") {
-      if (state.fiscal >= 2) state.fiscal -= 1;
+      if (state.fiscal >= 2) pay("government", "relief", -1);
       else state.trust.government = Math.max(0, state.trust.government - 1);
     }
     const flagsSet = o.flags ?? [];
@@ -320,7 +328,7 @@ function playRound(state, input, content2) {
     forcedAbatement = cfg.regulate_abate * macNow * (DIRTY.has(chosen.business.arch) ? 1 : 0.45);
     de -= forcedAbatement;
     state.roleEmissions.government -= forcedAbatement;
-    state.capital = Math.max(0, state.capital - 1);
+    pay("business", "regulated", -1);
   }
   if (govIsolated) {
     state.trust.government = Math.max(0, state.trust.government - 1);
@@ -387,6 +395,7 @@ function playRound(state, input, content2) {
     trustAwarded: awarded,
     drift,
     driftK: k,
+    money,
     state: publicState(state, content2)
   };
 }
@@ -517,9 +526,12 @@ var BREAKS_COALITION = /* @__PURE__ */ new Set([
   "DEMAND_RELIEF"
 ]);
 function optionKind(option) {
-  if (BREAKS_COALITION.has(option.arch)) return "dirty";
-  if (option.arch === "ESCALATE") return "protest";
-  if (option.arch === "PARTNER") return "partnership";
+  return kindOfArch(option.arch);
+}
+function kindOfArch(arch) {
+  if (BREAKS_COALITION.has(arch)) return "dirty";
+  if (arch === "ESCALATE") return "protest";
+  if (arch === "PARTNER") return "partnership";
   return "good";
 }
 function costLabel(option) {
@@ -528,25 +540,6 @@ function costLabel(option) {
   if (c.fiscal) parts.push(c.fiscal > 0 ? `${c.fiscal} Budget` : `+${-c.fiscal} Budget`);
   if (c.capital) parts.push(c.capital > 0 ? `${c.capital} Company Money` : `+${-c.capital} Company Money`);
   return parts.length ? parts.join(" \xB7 ") : "Free";
-}
-
-// src/game/reveal.ts
-function promiseBadge(promise) {
-  if (!promise || promise.outcome === "unresolved") return null;
-  if (promise.outcome === "void") return { text: "THE DEAL WAS NOT TAKEN", tone: "void" };
-  if (promise.outcome === "kept") {
-    return { text: promise.kind === "deal" ? "BOTH KEPT THE DEAL \u2713" : "KEPT THE PROMISE \u2713", tone: "kept" };
-  }
-  return { text: promise.kind === "deal" ? "BROKE THE DEAL \u2715" : "BROKE THE PROMISE \u2715", tone: "broken" };
-}
-function effectBadge(reveal) {
-  if (reveal.spotlit) return { text: "THE SPOTLIGHT CAUGHT THEM \u2715", tone: "broken" };
-  if (reveal.selfOrganiseSupported) return { text: "HELPED \xB7 WORKED TWICE AS WELL", tone: "kept" };
-  if (reveal.partnerUnfunded) return { text: "NOBODY PAID HALF", tone: "broken" };
-  return null;
-}
-function revealBadges(reveal, promise) {
-  return [promiseBadge(promise), effectBadge(reveal)].filter((b) => b !== null);
 }
 
 // src/game/copy.ts
@@ -650,6 +643,40 @@ var BOARD_NAME = {
   community: "The Community",
   activist: "The Activist"
 };
+
+// src/game/reveal.ts
+function helperOf(log, reveal) {
+  if (!reveal.selfOrganiseSupported) return null;
+  const gov = log.reveals.find((r) => r.role === "government");
+  const biz = log.reveals.find((r) => r.role === "business");
+  if (gov && SUPPORTIVE.has(gov.arch)) return "government";
+  if (biz && SUPPORTIVE.has(biz.arch)) return "business";
+  return "network";
+}
+function helperCard(log, reveal) {
+  const who = helperOf(log, reveal);
+  if (!who || who === "network") return null;
+  return log.reveals.find((r) => r.role === who) ?? null;
+}
+function promiseBadge(promise) {
+  if (!promise || promise.outcome === "unresolved") return null;
+  if (promise.outcome === "void") return { text: "THE DEAL WAS NOT TAKEN", tone: "void" };
+  if (promise.outcome === "kept") {
+    return { text: promise.kind === "deal" ? "BOTH KEPT THE DEAL \u2713" : "KEPT THE PROMISE \u2713", tone: "kept" };
+  }
+  return { text: promise.kind === "deal" ? "BROKE THE DEAL \u2715" : "BROKE THE PROMISE \u2715", tone: "broken" };
+}
+function effectBadge(reveal, log) {
+  if (reveal.spotlit) return { text: "THE SPOTLIGHT CAUGHT THEM \u2715", tone: "broken" };
+  const helper = helperOf(log, reveal);
+  if (helper === "network") return { text: "MUTUAL AID HELPED \xB7 WORKED TWICE AS WELL", tone: "kept" };
+  if (helper) return { text: `${BOARD_NAME[helper].toUpperCase()}\u2019S CARD HELPED \xB7 TWICE AS WELL`, tone: "kept" };
+  if (reveal.partnerUnfunded) return { text: "NOBODY PAID HALF", tone: "broken" };
+  return null;
+}
+function revealBadges(reveal, promise, log) {
+  return [promiseBadge(promise), effectBadge(reveal, log)].filter((b) => b !== null);
+}
 
 // src/game/rng.ts
 function mulberry32(seed) {
@@ -1509,6 +1536,7 @@ function dashboardView(room, content2) {
     },
     trustAward: NARRATING.has(room.phase) ? room.lastRound?.trustAwarded ?? null : null,
     trustHeld: { ...room.game.trust },
+    coFund: room.coFund,
     tipStake: tipStake(room)
   };
 }
@@ -1532,7 +1560,8 @@ function revealMirror(room) {
       role: r.role,
       title: r.title,
       desc: r.desc,
-      badges: revealBadges(r, promiseFor(r.role))
+      kind: kindOfArch(r.arch),
+      badges: revealBadges(r, promiseFor(r.role), log)
     }))
   };
 }
@@ -1547,8 +1576,47 @@ function trustLines(room, role) {
     lines.push(
       tip.to === role ? `You got ${paid} for sharing your tip.` : `${BOARD_NAME[tip.to]} got ${paid} for sharing a tip.`
     );
+    if (tip.to !== role) lines.push("One player gets a tip each round. Everyone gets a turn.");
   }
   return lines;
+}
+function moneyLines(room, content2, log, role) {
+  if (role !== "government" && role !== "business") return null;
+  const entries = log.money.filter((m) => m.role === role);
+  const after = role === "government" ? log.state.fiscal : log.state.capital;
+  const before = after - entries.reduce((sum, m) => sum + m.amount, 0);
+  const signed = (n) => n > 0 ? `+${n}` : `${n}`;
+  const lines = entries.map((m) => {
+    const n = signed(m.amount);
+    switch (m.reason) {
+      case "income":
+        return `${n} for the new round.`;
+      case "growthBonus":
+        return `${n} more because the economy grew well.`;
+      case "subsidyLock":
+        return `${n}. The frozen fuel price drained it.`;
+      case "shock":
+        return m.amount < 0 ? `${n}. The crisis took it.` : `${n}. The crisis brought it.`;
+      case "cap":
+        return `${n}. That is the most you can hold.`;
+      case "card":
+        return m.amount < 0 ? `${n} for your card.` : `${n} from your card.`;
+      case "coFund":
+        return `${n}. You paid half of the Business\u2019s partnership.`;
+      case "grant":
+        return `${n}. The Government\u2019s card gave it to you.`;
+      case "relief":
+        return `${n}. You paid for the relief the Community demanded.`;
+      case "regulated":
+        return `${n}. The Government\u2019s new rule cost you.`;
+    }
+  });
+  if (!entries.length) lines.push("Nothing moved this round.");
+  if (log.round < room.game.path.length) {
+    const income = role === "government" ? content2.config.fiscal_income : 1;
+    lines.push(`Your ${income} more for next round arrives when its cards turn.`);
+  }
+  return { label: ROLE_RESOURCE[role].label, before, after, lines };
 }
 function phoneView(room, content2, role) {
   const scenario = sceneFor(room, content2);
@@ -1672,7 +1740,12 @@ function roundResultCopy(room, content2, role) {
   const costBits = [];
   if (mine.partnerUnfunded) costBits.push("The Government did not pay half, so it only half worked.");
   if (mine.spotlit) costBits.push("The Activist\u2019s Spotlight caught you. Your card only half worked.");
-  if (mine.selfOrganiseSupported) costBits.push("The Government or Business helped, so it worked twice as well.");
+  if (mine.selfOrganiseSupported) {
+    const h = helperCard(log, mine);
+    costBits.push(
+      h ? `${BOARD_NAME[h.role]}\u2019s card \u201C${h.title}\u201D helped. Yours worked twice as well.` : "Your Mutual Aid network helped. Your card worked twice as well."
+    );
+  }
   if (log.govIsolated && role === "government") {
     costBits.push("You acted alone. The country only half followed.");
   }
@@ -1691,6 +1764,10 @@ function roundResultCopy(room, content2, role) {
     );
   }
   const others = [];
+  const community = log.reveals.find((r) => r.role === "community");
+  if (community && (role === "government" || role === "business") && helperOf(log, community) === role) {
+    others.push(`Your card helped the Community\u2019s \u201C${community.title}\u201D. It worked twice as well.`);
+  }
   if (log.alignedCount >= 3) {
     others.push(
       log.alignedCount === 4 ? "All four of you picked good cards. You got the moving together bonus." : "Three of you picked good cards. You got the moving together bonus."
@@ -1714,7 +1791,8 @@ function roundResultCopy(room, content2, role) {
     impact: card ? optionImpact(card) : [],
     costLabel: card ? costLabel(card) : "Free",
     carbon: mine.emissions,
-    note: comparison(log, role)
+    note: comparison(log, role),
+    money: moneyLines(room, content2, log, role)
   };
 }
 function comparison(log, role) {

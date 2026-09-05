@@ -420,6 +420,18 @@ export interface Trouble {
 
 export const TROUBLE: Trouble[] = [
   {
+    problem: 'Somebody says their money is wrong.',
+    fix: 'It is not. Their result screen lists every move: the crisis, the card, paying half, the Government rule. Have them read it out. The 2 more each round arrives when the next cards turn, not at the news.',
+  },
+  {
+    problem: 'Somebody asks who helped the Community.',
+    fix: 'A card did, not money. The Reveal names the seat whose card doubled the Community card, and the Community phone quotes the card.',
+  },
+  {
+    problem: 'Somebody asks why they never get a tip.',
+    fix: 'One player gets one each round, in turn. Over four rounds everyone has had one. The phone says so on the trust screen.',
+  },
+  {
     problem: 'A player says their seat is taken but nobody is in it.',
     fix: 'Their old tab still holds it. On the phone that has it, the ⋯ menu frees the seat; otherwise pick a different seat and carry on. The game does not care which chair which person is in.',
   },

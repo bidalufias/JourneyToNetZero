@@ -111,7 +111,7 @@ export function YourPower({ view, onAck }: { view: PhoneView; onAck: () => void 
           reader waits with the card rather than with a blank screen. */}
       {view.ready ? (
         <p className="pnote" style={{ marginTop: 'auto' }}>
-          {ready} OF 4 READY. The game moves on when everyone has read theirs.
+          You are ready. Waiting for {4 - ready} more. Their powers are on the big screen.
         </p>
       ) : (
         <button className="btn" style={{ marginTop: 'auto' }} onClick={onAck}>

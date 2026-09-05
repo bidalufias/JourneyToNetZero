@@ -72,9 +72,9 @@ note(`R1 tip -> ${tipped1}, said nothing`)
 await next('table R1')
 // Real veto: community drags slider on Business
 const c = phones.community
-await btn(c, /SAY NO/).click(); await wait(300)
+await btn(c, /VETO/).click(); await wait(300)
 await btn(c, /Business/).click(); await wait(200)
-await btn(c, /YES\. SAY NO/).click(); await wait(500)
+await btn(c, /YES\. VETO/).click(); await wait(500)
 await shot(c, 'community-after-real-veto', true)
 await shot(phones.business, 'business-table-after-veto', true)
 note('business told of the veto: ' + (await bodyText(phones.business)).includes('took your dirty cards away'))

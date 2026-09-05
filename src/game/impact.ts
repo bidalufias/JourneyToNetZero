@@ -111,9 +111,14 @@ const BREAKS_COALITION: ReadonlySet<Archetype> = new Set<Archetype>([
  * is dirty in one place if and only if it is dirty in the other.
  */
 export function optionKind(option: Option): OptionKind {
-  if (BREAKS_COALITION.has(option.arch)) return 'dirty'
-  if (option.arch === 'ESCALATE') return 'protest'
-  if (option.arch === 'PARTNER') return 'partnership'
+  return kindOfArch(option.arch)
+}
+
+/** The same four words from the archetype alone, for a card the engine has already resolved. */
+export function kindOfArch(arch: Archetype): OptionKind {
+  if (BREAKS_COALITION.has(arch)) return 'dirty'
+  if (arch === 'ESCALATE') return 'protest'
+  if (arch === 'PARTNER') return 'partnership'
   return 'good'
 }
 

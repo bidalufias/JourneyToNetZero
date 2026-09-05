@@ -46,7 +46,13 @@ export function TheTable({ view }: { view: DashboardView }) {
           MONEY BEING SENT
         </h2>
         {view.offersInFlight.length === 0 ? (
-          <p className="table__empty">No money is being sent.</p>
+          <p className="table__empty">
+            {/* PAYING HALF above and "no money is being sent" below read as
+                a contradiction to a boy waiting to be paid. */}
+            {view.coFund
+              ? 'No money is being sent. Paying half costs 1 Budget when the cards turn.'
+              : 'No money is being sent.'}
+          </p>
         ) : (
           <ul className="table__offers">
             {view.offersInFlight.map((o) => (

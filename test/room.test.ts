@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 import { loadContent } from '../src/engine/content'
-import { DIRTY, ROLES, type Role } from '../src/engine/types'
+import { DIRTY, ROLES, SUPPORTIVE, type Role } from '../src/engine/types'
 import { optionCondition } from '../src/game/impact'
 import {
   apply,
@@ -1360,7 +1360,7 @@ describe('the Reveal, on the phone', () => {
     expect(mirror.practice).toBe(false)
     expect(mirror.cards.map((c) => c.role)).toEqual(room.lastRound!.reveals.map((r) => r.role))
     for (const card of mirror.cards) {
-      expect(Object.keys(card).sort()).toEqual(['badges', 'desc', 'role', 'title'])
+      expect(Object.keys(card).sort()).toEqual(['badges', 'desc', 'kind', 'role', 'title'])
     }
     const gov = mirror.cards.find((c) => c.role === 'government')!
     expect(gov.badges.map((b) => b.text)).toContain('KEPT THE PROMISE ✓')
@@ -1499,5 +1499,97 @@ describe('the Business can say "if the Government pays half"', () => {
       for (const role of ['government', 'community', 'activist'] as const) lockIn(room, role, firstAvailable(room, role))
       expect(room.promises.find((p) => p.kind === 'deal')!.outcome).toBe(paid ? 'kept' : 'void')
     }
+  })
+})
+
+describe('the money, and who helped, said on the phone', () => {
+  it('lists every move of the money, and the lines add up to the header', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'choice')
+    const before = { government: room.game.fiscal, business: room.game.capital }
+    advanceTo(room, 'trust')
+    const log = room.lastRound!
+
+    for (const role of ['government', 'business'] as const) {
+      const money = phoneView(room, content, role).roundResult!.money!
+      expect(money).not.toBeNull()
+      expect(money.before).toBe(before[role])
+      expect(money.after).toBe(role === 'government' ? log.state.fiscal : log.state.capital)
+      const entries = log.money.filter((m) => m.role === role)
+      const moved = entries.reduce((sum, m) => sum + m.amount, 0)
+      expect(money.before + moved).toBe(money.after)
+      // One line per move, and one saying when the next round's money comes.
+      expect(money.lines).toHaveLength(Math.max(entries.length, 1) + 1)
+      expect(money.lines.at(-1)).toMatch(/more for next round arrives when its cards turn/)
+    }
+    // The two seats without money get no money lines.
+    expect(phoneView(room, content, 'community').roundResult!.money).toBeNull()
+    expect(phoneView(room, content, 'activist').roundResult!.money).toBeNull()
+  })
+
+  it('names the card that helped a community card work twice as well', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'choice')
+    const scenario = content.scenarios[room.game.path[room.game.round]]
+    const selfOrg = scenario.options.community.find((o) => o.arch === 'SELF_ORGANISE')
+    const supportive = scenario.options.government.find((o) => SUPPORTIVE.has(o.arch))
+    const govOptions = phoneView(room, content, 'government').options
+    if (!selfOrg || !supportive || !govOptions.find((o) => o.id === supportive.id)?.available) return
+
+    lockIn(room, 'community', selfOrg.id)
+    lockIn(room, 'government', supportive.id)
+    for (const role of ['business', 'activist'] as const) lockIn(room, role, firstAvailable(room, role))
+    expect(room.phase).toBe('reckoning')
+
+    const community = room.lastRound!.reveals.find((r) => r.role === 'community')!
+    expect(community.selfOrganiseSupported).toBe(true)
+    const card = phoneView(room, content, 'community').reveal!.cards.find((c) => c.role === 'community')!
+    expect(card.badges.map((b) => b.text)).toContain('THE GOVERNMENT’S CARD HELPED · TWICE AS WELL')
+
+    advanceTo(room, 'trust')
+    expect(phoneView(room, content, 'community').roundResult!.cost).toContain(
+      `The Government’s card “${supportive.title}” helped. Yours worked twice as well.`,
+    )
+    expect(phoneView(room, content, 'government').roundResult!.others).toContain(
+      `Your card helped the Community’s “${selfOrg.title}”. It worked twice as well.`,
+    )
+  })
+
+  it('marks a dirty card as dirty on the Reveal, on every phone', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'choice')
+    const dirty = phoneView(room, content, 'business').options.find((o) => o.kind === 'dirty' && o.available)
+    if (!dirty) return
+    lockIn(room, 'business', dirty.id)
+    for (const role of ['government', 'community', 'activist'] as const) lockIn(room, role, firstAvailable(room, role))
+    for (const role of ROLES) {
+      const card = phoneView(room, content, role).reveal!.cards.find((c) => c.role === 'business')!
+      expect(card.kind).toBe('dirty')
+    }
+  })
+
+  it('tells the three seats without a tip that everyone gets a turn', () => {
+    const room = seated()
+    startPlaying(room)
+    const tip = room.tips[0]
+    run(room, { t: 'publishTip', role: tip.to })
+    advanceTo(room, 'trust')
+    for (const role of ROLES) {
+      const lines = phoneView(room, content, role).trustLines
+      if (role === tip.to) expect(lines).not.toContain('One player gets a tip each round. Everyone gets a turn.')
+      else expect(lines).toContain('One player gets a tip each round. Everyone gets a turn.')
+    }
+  })
+
+  it('tells the projector when the Government is paying half', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'table')
+    expect(dashboardView(room, content).coFund).toBe(false)
+    run(room, { t: 'say', role: 'government', shape: 'cofund', on: true })
+    expect(dashboardView(room, content).coFund).toBe(true)
   })
 })

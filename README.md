@@ -211,7 +211,16 @@ never waits for it, and nobody waits for the laptop.
 The Reveal holds four seconds of ALL FOUR LOCKED · LOOK UP with a countdown
 before the first card turns, and every phone mirrors the cards as the big
 screen turns them, with the same two lines under each: the promise verdict
-and what another seat did to the card.
+and what another seat did to the card, naming the seat. A dirty card is
+marked DIRTY CARD on both, and a face-down card says TURNING NEXT.
+
+Nothing about a seat's own money is hidden from it. The cards are on the
+Talk screen for every seat, the header carries Public Trust for the three
+seats that can hold it, and the result screen lists every move of the
+Budget or Company Money in the order the engine made it: the crisis, the
+card, paying half, the Government's rule. The tip sits above the news under
+the one clock, says that one player gets one each round in turn, and says
+what sharing it did.
 
 The seat list is the only thing a scanned phone sees. Nothing on the join path
 points at the written guide; it is under the ⋯ menu once a player has sat

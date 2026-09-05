@@ -404,6 +404,25 @@
   background: var(--jtnz-broadcast-line);
 }
 
+.rcard__back-note {
+  margin-top: var(--space-4);
+  font: 800 clamp(11px, 1.1cqw, 20px) / 1 var(--font-heading);
+  letter-spacing: 0.16em;
+  color: var(--jtnz-glare);
+}
+
+/* The mark the Choice put on the card, kept through the Reveal. */
+.rcard__kind {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  font: 800 clamp(10px, 1cqw, 18px) / 1 var(--font-heading);
+  letter-spacing: 0.14em;
+  padding: 4px 8px;
+  border: 2px solid currentColor;
+  color: var(--jtnz-glare);
+}
+.rcard__kind--dirty { color: var(--color-accent); }
+
 /* 400ms rotateY from 88°. One card at a time, because the gap is the design. */
 .rcard--in {
   animation: jtnz-flip var(--jtnz-flip-ms) var(--jtnz-ease) both;

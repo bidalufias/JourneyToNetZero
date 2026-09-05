@@ -33,8 +33,8 @@ import {
   type RoundLog,
   type Scenario,
 } from '../engine/types'
-import { costLabel, optionCondition, optionImpact, optionKind } from './impact'
-import { revealBadges } from './reveal'
+import { costLabel, kindOfArch, optionCondition, optionImpact, optionKind } from './impact'
+import { helperCard, helperOf, revealBadges } from './reveal'
 import { BOARD_NAME, DEAL_CONDITIONS, DEMAND_PHRASES, PRACTICE_LINE, privateLine } from './copy'
 import { pick, roomCode, shuffle } from './rng'
 import {
@@ -1320,6 +1320,7 @@ export function dashboardView(room: Room, content: Content): DashboardView {
     },
     trustAward: NARRATING.has(room.phase) ? (room.lastRound?.trustAwarded ?? null) : null,
     trustHeld: { ...room.game.trust },
+    coFund: room.coFund,
     tipStake: tipStake(room),
   }
 }
@@ -1358,7 +1359,8 @@ function revealMirror(room: Room): RevealMirror | null {
       role: r.role,
       title: r.title,
       desc: r.desc,
-      badges: revealBadges(r, promiseFor(r.role)),
+      kind: kindOfArch(r.arch),
+      badges: revealBadges(r, promiseFor(r.role), log),
     })),
   }
 }
@@ -1384,8 +1386,65 @@ function trustLines(room: Room, role: Role): string[] {
         ? `You got ${paid} for sharing your tip.`
         : `${BOARD_NAME[tip.to]} got ${paid} for sharing a tip.`,
     )
+    // Two players asked how to share a tip and were told nobody knew. One
+    // seat gets one each round, in turn, and nothing said so.
+    if (tip.to !== role) lines.push('One player gets a tip each round. Everyone gets a turn.')
   }
   return lines
+}
+
+/**
+ * Where this seat's money went, line by line, for the two seats that have any.
+ *
+ * The engine records every change as it applies it, so the lines add up to
+ * the difference between the number before the round and the number now,
+ * whatever the floor at zero swallowed. The last line says when the next
+ * round's money arrives, because the role card says "you get 2 more each
+ * round" and the header does not move until the next cards turn.
+ */
+function moneyLines(
+  room: Room,
+  content: Content,
+  log: RoundLog,
+  role: Role,
+): NonNullable<PhoneView['roundResult']>['money'] {
+  if (role !== 'government' && role !== 'business') return null
+  const entries = log.money.filter((m) => m.role === role)
+  const after = role === 'government' ? log.state.fiscal : log.state.capital
+  const before = after - entries.reduce((sum, m) => sum + m.amount, 0)
+  const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`)
+  const lines = entries.map((m) => {
+    const n = signed(m.amount)
+    switch (m.reason) {
+      case 'income':
+        return `${n} for the new round.`
+      case 'growthBonus':
+        return `${n} more because the economy grew well.`
+      case 'subsidyLock':
+        return `${n}. The frozen fuel price drained it.`
+      case 'shock':
+        return m.amount < 0 ? `${n}. The crisis took it.` : `${n}. The crisis brought it.`
+      case 'cap':
+        return `${n}. That is the most you can hold.`
+      case 'card':
+        return m.amount < 0 ? `${n} for your card.` : `${n} from your card.`
+      case 'coFund':
+        return `${n}. You paid half of the Business’s partnership.`
+      case 'grant':
+        return `${n}. The Government’s card gave it to you.`
+      case 'relief':
+        return `${n}. You paid for the relief the Community demanded.`
+      case 'regulated':
+        return `${n}. The Government’s new rule cost you.`
+    }
+  })
+  if (!entries.length) lines.push('Nothing moved this round.')
+  if (log.round < room.game.path.length) {
+    // The Business's 1 is a literal in the engine, not a config number.
+    const income = role === 'government' ? content.config.fiscal_income : 1
+    lines.push(`Your ${income} more for next round arrives when its cards turn.`)
+  }
+  return { label: ROLE_RESOURCE[role].label, before, after, lines }
 }
 
 export function phoneView(room: Room, content: Content, role: Role): PhoneView {
@@ -1601,7 +1660,16 @@ function roundResultCopy(room: Room, content: Content, role: Role): PhoneView['r
   const costBits: string[] = []
   if (mine.partnerUnfunded) costBits.push('The Government did not pay half, so it only half worked.')
   if (mine.spotlit) costBits.push('The Activist’s Spotlight caught you. Your card only half worked.')
-  if (mine.selfOrganiseSupported) costBits.push('The Government or Business helped, so it worked twice as well.')
+  // Named, with the card. "The Government or Business helped" sent a whole
+  // family looking for money that had never been sent.
+  if (mine.selfOrganiseSupported) {
+    const h = helperCard(log, mine)
+    costBits.push(
+      h
+        ? `${BOARD_NAME[h.role]}’s card “${h.title}” helped. Yours worked twice as well.`
+        : 'Your Mutual Aid network helped. Your card worked twice as well.',
+    )
+  }
   if (log.govIsolated && role === 'government') {
     costBits.push('You acted alone. The country only half followed.')
   }
@@ -1629,6 +1697,12 @@ function roundResultCopy(room: Room, content: Content, role: Role): PhoneView['r
   }
 
   const others: string[] = []
+  // The helper hears it too. A Minister who funded the buses never learned
+  // that the car pool had doubled because of him.
+  const community = log.reveals.find((r) => r.role === 'community')
+  if (community && (role === 'government' || role === 'business') && helperOf(log, community) === role) {
+    others.push(`Your card helped the Community’s “${community.title}”. It worked twice as well.`)
+  }
   if (log.alignedCount >= 3) {
     others.push(
       log.alignedCount === 4
@@ -1664,6 +1738,7 @@ function roundResultCopy(room: Room, content: Content, role: Role): PhoneView['r
     costLabel: card ? costLabel(card) : 'Free',
     carbon: mine.emissions,
     note: comparison(log, role),
+    money: moneyLines(room, content, log, role),
   }
 }
 

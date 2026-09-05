@@ -283,7 +283,7 @@
    {
     "id": "C-b",
     "title": "Nobody Left Behind",
-    "desc": "Quality of life never falls below 6.3.",
+    "desc": "Quality of life is 6.3 or more after every round.",
     "check": "min(happinessHistory) >= 6.3",
     "measured": 0.35
    },

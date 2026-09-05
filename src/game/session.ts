@@ -338,6 +338,8 @@ export interface DashboardView {
    * the screen say 0.
    */
   trustHeld: Record<TrustRole, number>
+  /** The Government has said it will pay half. Said next to the money strip. */
+  coFund: boolean
   /** A tip shared this round, and what it paid. Said on the trust screen. */
   tipStake: { role: Role; text: string } | null
 }
@@ -352,6 +354,8 @@ export interface RevealCard {
   role: Role
   title: string
   desc: string
+  /** Dirty, protest, partnership or plain, marked the same way the Choice marked it. */
+  kind: OptionKind
   badges: RevealBadge[]
 }
 
@@ -453,6 +457,14 @@ export interface PhoneView {
     carbon: number
     /** One line of comparison against the rest of the table, or nothing. */
     note: string | null
+    /**
+     * Where this seat's money went, for the two seats that have any. The
+     * number before the round, the number now, and one line for every
+     * change between them, in order. A father and a son argued for two
+     * minutes about whether he had paid; both numbers were right and
+     * nothing said why.
+     */
+    money: { label: string; before: number; after: number; lines: string[] } | null
   } | null
   /** Where the two Public Trust tokens went this round, and why. */
   trustAward: { care: Role; future: Role } | null
