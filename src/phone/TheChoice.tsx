@@ -10,6 +10,7 @@
 import type { Command } from '../game/room'
 import { arrows } from '../game/impact'
 import type { PhoneOption, PhoneView } from '../game/session'
+import { ROLE_LABEL } from '../game/session'
 
 export function TheChoice({
   view,
@@ -42,6 +43,35 @@ export function TheChoice({
           {selected ? 'Your card will lock by itself.' : 'If you pick nothing, the game picks for you.'}
         </p>
       ) : null}
+
+      {/* Money sent in the last seconds of the Talk. The room can end the
+          Talk on four I AM DONEs before the offer is answered, and an offer
+          that could only be answered on the Talk screen was simply lost. */}
+      {!readOnly
+        ? view.incomingOffers.map((o) => (
+            <div key={o.id} className="bubble bubble--them">
+              <div className="bubble__label">INCOMING OFFER</div>
+              <div className="bubble__lead">
+                {ROLE_LABEL[o.from]} sends you {o.amount} {o.resource === 'fiscal' ? 'Budget' : 'Company Money'}.
+              </div>
+              <div className="btn-row" style={{ marginTop: 'var(--space-3)' }}>
+                <button
+                  className="btn btn--ghost"
+                  style={{ color: 'var(--color-text)' }}
+                  onClick={() => send({ t: 'respondOffer', role: view.role, offerId: o.id, accept: true })}
+                >
+                  ACCEPT
+                </button>
+                <button
+                  className="btn"
+                  onClick={() => send({ t: 'respondOffer', role: view.role, offerId: o.id, accept: false })}
+                >
+                  REFUSE
+                </button>
+              </div>
+            </div>
+          ))
+        : null}
 
       {view.options.map((o) => (
         <OptionCard

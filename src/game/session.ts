@@ -45,7 +45,9 @@ export type Phase =
  * missed it, because the last to lock was still reading "look up" when the
  * cards were already turning. It now holds a LOOK UP countdown before the
  * first card, mirrors the cards on every phone, and ends when all four have
- * pressed GOT IT, with twenty-five seconds as the fallback.
+ * pressed GOT IT, with forty seconds as the fallback. The practice Talk
+ * gave up fifteen seconds for it: the Talk ends on four I AM DONEs anyway,
+ * and a slow player losing their own card in the Reveal costs more.
  *
  * The round is built around a fixed budget rather than around what each beat
  * could justify on its own. The Reveal used to run 75 seconds, six times, which
@@ -59,9 +61,9 @@ export type Phase =
 export const PHASE_MS: Record<Phase, number> = {
   lobby: 0, // ends when the facilitator starts
   briefing: 45_000,
-  practiceTalk: 75_000,
+  practiceTalk: 60_000,
   practiceChoice: 60_000,
-  practiceReveal: 25_000,
+  practiceReveal: 40_000,
   power: 30_000,
   goal: 45_000,
   crisis: 25_000,

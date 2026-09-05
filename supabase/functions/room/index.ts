@@ -687,9 +687,9 @@ var PHASE_MS = {
   lobby: 0,
   // ends when the facilitator starts
   briefing: 45e3,
-  practiceTalk: 75e3,
+  practiceTalk: 6e4,
   practiceChoice: 6e4,
-  practiceReveal: 25e3,
+  practiceReveal: 4e4,
   power: 3e4,
   goal: 45e3,
   crisis: 25e3,
