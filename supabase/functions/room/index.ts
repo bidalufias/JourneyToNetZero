@@ -505,6 +505,7 @@ function optionCondition(option, coFund = false) {
   if (option.arch === "PARTNER") {
     return coFund ? "Partnership. The Government pays half. It works in full." : "Partnership. Only half works unless the Government pays half.";
   }
+  if (option.arch === "ESCALATE") return "Protest card. Your Spotlight only works with this.";
   if (option.arch === "SELF_ORGANISE") return "Works twice as well if the Government or Business helps.";
   if (option.arch === "COLLABORATE") return "You work with them. You gain power. Some supporters leave you.";
   if ((option.flags ?? []).some((f) => f.startsWith("EVIDENCE"))) return "Does nothing now. Helps every round after this.";
@@ -515,12 +516,37 @@ var BREAKS_COALITION = /* @__PURE__ */ new Set([
   "DEREGULATE",
   "DEMAND_RELIEF"
 ]);
+function optionKind(option) {
+  if (BREAKS_COALITION.has(option.arch)) return "dirty";
+  if (option.arch === "ESCALATE") return "protest";
+  if (option.arch === "PARTNER") return "partnership";
+  return "good";
+}
 function costLabel(option) {
   const c = option.cost ?? {};
   const parts = [];
   if (c.fiscal) parts.push(c.fiscal > 0 ? `${c.fiscal} Budget` : `+${-c.fiscal} Budget`);
   if (c.capital) parts.push(c.capital > 0 ? `${c.capital} Company Money` : `+${-c.capital} Company Money`);
   return parts.length ? parts.join(" \xB7 ") : "Free";
+}
+
+// src/game/reveal.ts
+function promiseBadge(promise) {
+  if (!promise || promise.outcome === "unresolved") return null;
+  if (promise.outcome === "void") return { text: "THE DEAL WAS NOT TAKEN", tone: "void" };
+  if (promise.outcome === "kept") {
+    return { text: promise.kind === "deal" ? "BOTH KEPT THE DEAL \u2713" : "KEPT THE PROMISE \u2713", tone: "kept" };
+  }
+  return { text: promise.kind === "deal" ? "BROKE THE DEAL \u2715" : "BROKE THE PROMISE \u2715", tone: "broken" };
+}
+function effectBadge(reveal) {
+  if (reveal.spotlit) return { text: "THE SPOTLIGHT CAUGHT THEM \u2715", tone: "broken" };
+  if (reveal.selfOrganiseSupported) return { text: "HELPED \xB7 WORKED TWICE AS WELL", tone: "kept" };
+  if (reveal.partnerUnfunded) return { text: "NOBODY PAID HALF", tone: "broken" };
+  return null;
+}
+function revealBadges(reveal, promise) {
+  return [promiseBadge(promise), effectBadge(reveal)].filter((b) => b !== null);
 }
 
 // src/game/copy.ts
@@ -609,6 +635,13 @@ var DEAL_CONDITIONS = [
     id: "no-cheap-card",
     text: (t) => `the ${t} does not pick a dirty card`,
     met: (them) => !DIRTY.has(them.arch)
+  },
+  {
+    id: "pays-half",
+    text: (t) => `the ${t} pays half`,
+    met: (_them, round) => round.coFund,
+    onlyFor: "government",
+    needsPartnership: true
   }
 ];
 var BOARD_NAME = {
@@ -656,7 +689,7 @@ var PHASE_MS = {
   briefing: 45e3,
   practiceTalk: 75e3,
   practiceChoice: 6e4,
-  practiceReveal: 2e4,
+  practiceReveal: 25e3,
   power: 3e4,
   goal: 45e3,
   crisis: 25e3,
@@ -677,6 +710,8 @@ var ROUND_ONE_MS = {
 function phaseMs(phase, round) {
   return (round <= 1 ? ROUND_ONE_MS[phase] : void 0) ?? PHASE_MS[phase];
 }
+var RECKONING_CARD_GAP_MS = 3e3;
+var RECKONING_FIRST_CARD_MS = 4e3;
 var ROLE_LABEL = {
   government: "Government",
   business: "Business",
@@ -707,6 +742,7 @@ function createRoom(content2, seed, now) {
         name: "",
         connected: false,
         ready: false,
+        done: false,
         goalId: null,
         choiceId: null,
         locked: false,
@@ -786,6 +822,7 @@ function displayRound(room) {
 function setPhase(room, phase, now) {
   room.phase = phase;
   if (phase !== "briefing") for (const role of ROLES) room.players[role].ready = false;
+  for (const role of ROLES) room.players[role].done = false;
   const ms = phaseMs(phase, roundNumber(room));
   room.phaseEndsAt = ms > 0 ? now + ms : null;
 }
@@ -801,6 +838,9 @@ function everyoneLocked(room) {
 function everyoneAcked(room) {
   return everyHeldSeat(room, (p) => p.ready);
 }
+function everyoneDone(room) {
+  return everyHeldSeat(room, (p) => p.done);
+}
 function everyoneSealed(room) {
   return everyHeldSeat(room, (p) => p.goalId !== null);
 }
@@ -813,7 +853,13 @@ function vetoesRemaining(room) {
   return Math.max(0, room.game.vetoes - (room.vetoTarget ? 1 : 0));
 }
 function spotlightsRemaining(room) {
-  return Math.max(0, room.game.spotlights - (room.spotlightCalled ? 1 : 0));
+  return room.game.spotlights;
+}
+var DONE_ENDS = /* @__PURE__ */ new Set(["crisis", "table", "practiceTalk", "practiceReveal"]);
+var REVEAL_SEEN_MS = RECKONING_FIRST_CARD_MS + 4 * RECKONING_CARD_GAP_MS;
+function phaseElapsed(room, now) {
+  if (room.phaseEndsAt === null) return Number.POSITIVE_INFINITY;
+  return phaseMs(room.phase, roundNumber(room)) - (room.phaseEndsAt - now);
 }
 function canReceive(role) {
   const kind = ROLE_RESOURCE[role].kind;
@@ -839,6 +885,7 @@ function authorise(seat, cmd) {
     case "leave":
     case "pickGoal":
     case "ack":
+    case "done":
     case "say":
     case "respondOffer":
     case "spotlight":
@@ -854,6 +901,7 @@ function authorise(seat, cmd) {
   }
 }
 var FROZEN_WHILE_PAUSED = /* @__PURE__ */ new Set([
+  "done",
   "say",
   "offer",
   "respondOffer",
@@ -891,6 +939,7 @@ function apply(room, cmd, content2, now) {
       p.name = "";
       p.connected = false;
       p.ready = false;
+      p.done = false;
       p.goalId = null;
       p.choiceId = null;
       p.locked = false;
@@ -918,6 +967,22 @@ function apply(room, cmd, content2, now) {
       if (!p.name) return room;
       p.ready = true;
       if (room.phase === "power" && everyoneAcked(room)) return advance(room, content2, at);
+      return room;
+    }
+    /**
+     * The room ends the step, and the clock is only the fallback.
+     *
+     * GOT IT on the crisis, I AM DONE on the Talk, GOT IT on the practice
+     * Reveal once the cards have turned. Four first-time players had said
+     * everything they had to say fifty seconds into a two-minute Talk and sat
+     * looking at the countdown, and only the laptop could end it.
+     */
+    case "done": {
+      const p = room.players[cmd.role];
+      if (!p.name || !DONE_ENDS.has(room.phase)) return room;
+      if (room.phase === "practiceReveal" && phaseElapsed(room, at) < REVEAL_SEEN_MS) return room;
+      p.done = true;
+      if (everyoneDone(room)) return advance(room, content2, at);
       return room;
     }
     case "start": {
@@ -1121,6 +1186,8 @@ function say(room, cmd, content2) {
   const option = choosableOptions(room, content2, cmd.role).find((o) => o.id === cmd.optionId);
   const condition = DEAL_CONDITIONS.find((c) => c.id === cmd.conditionId);
   if (!option || !condition || !cmd.target || cmd.target === cmd.role) return room;
+  if (condition.onlyFor && condition.onlyFor !== cmd.target) return room;
+  if (condition.needsPartnership && optionKind(option) !== "partnership") return room;
   room.promises = room.promises.filter(drop);
   room.promises.push({
     id: `${cmd.role}-${round}-s`,
@@ -1312,7 +1379,7 @@ function judgePromises(room, log, choices) {
     if (p.kind === "deal" && p.ifRole && p.ifConditionId) {
       const them = log.reveals.find((r) => r.role === p.ifRole);
       const condition = DEAL_CONDITIONS.find((c) => c.id === p.ifConditionId);
-      const theyDid = Boolean(them && condition?.met(them));
+      const theyDid = Boolean(them && condition?.met(them, { coFund: room.coFund }));
       p.outcome = !theyDid ? "void" : didIt ? "kept" : "broken";
     }
   }
@@ -1414,9 +1481,11 @@ function dashboardView(room, content2) {
       locked: room.players[role].locked,
       lastToLock: lastLock === role,
       ready: room.players[role].ready,
-      sealed: room.players[role].goalId !== null
+      sealed: room.players[role].goalId !== null,
+      done: room.players[role].done
     })),
     readyCount: held.filter((r) => room.players[r].ready).length,
+    doneCount: held.filter((r) => room.players[r].done).length,
     sealedCount: held.filter((r) => room.players[r].goalId !== null).length,
     promises: room.promises.filter((p) => p.round === boardRound(room)),
     offersInFlight: room.offers.filter((o) => o.round === boardRound(room) && o.status === "pending"),
@@ -1438,8 +1507,48 @@ function dashboardView(room, content2) {
       growth: content2.config.tgt_g,
       happiness: content2.config.tgt_h
     },
-    trustAward: NARRATING.has(room.phase) ? room.lastRound?.trustAwarded ?? null : null
+    trustAward: NARRATING.has(room.phase) ? room.lastRound?.trustAwarded ?? null : null,
+    trustHeld: { ...room.game.trust },
+    tipStake: tipStake(room)
   };
+}
+function tipStake(room) {
+  if (!NARRATING.has(room.phase) || !room.lastRound) return null;
+  const tip = room.tips.find((t) => t.round === room.lastRound.round && t.revealed);
+  if (!tip) return null;
+  const paid = tip.to === "community" ? "1 veto" : "1 Public Trust";
+  return { role: tip.to, text: `${BOARD_NAME[tip.to]} shared a tip. That is worth ${paid}.` };
+}
+function revealMirror(room) {
+  const practice = room.phase === "practiceReveal";
+  const log = practice ? room.practiceLog : room.phase === "reckoning" ? room.lastRound : null;
+  if (!log) return null;
+  const promiseFor = (role) => room.promises.find(
+    (p) => p.from === role && p.round === log.round && (p.kind === "promise" || p.kind === "deal") && p.outcome !== "unresolved"
+  );
+  return {
+    practice,
+    cards: log.reveals.map((r) => ({
+      role: r.role,
+      title: r.title,
+      desc: r.desc,
+      badges: revealBadges(r, promiseFor(r.role))
+    }))
+  };
+}
+function trustLines(room, role) {
+  const log = room.lastRound;
+  if (!log || !NARRATING.has(room.phase)) return [];
+  const lines = ["Promises do not count here. Only what the cards did."];
+  if (role === "community") lines.push("The Community cannot hold Public Trust. Your power is the veto.");
+  const tip = room.tips.find((t) => t.round === log.round && t.revealed);
+  if (tip) {
+    const paid = tip.to === "community" ? "1 veto" : "1 Public Trust";
+    lines.push(
+      tip.to === role ? `You got ${paid} for sharing your tip.` : `${BOARD_NAME[tip.to]} got ${paid} for sharing a tip.`
+    );
+  }
+  return lines;
 }
 function phoneView(room, content2, role) {
   const scenario = sceneFor(room, content2);
@@ -1479,6 +1588,7 @@ function phoneView(room, content2, role) {
         cost: costLabel(o),
         impact: optionImpact(o),
         condition: optionCondition(o, room.coFund),
+        kind: optionKind(o),
         available: choosable,
         disabled,
         disabledNote: note
@@ -1526,6 +1636,9 @@ function phoneView(room, content2, role) {
     spotlightCalled: room.spotlightCalled,
     coFund: room.coFund,
     ready: player.ready,
+    done: player.done,
+    doneCount: ROLES.filter((r) => room.players[r].name && room.players[r].done).length,
+    reveal: revealMirror(room),
     vetoed: room.vetoTarget === role,
     goalId: player.goalId,
     goalTitle: ownGoal?.title ?? null,
@@ -1545,6 +1658,7 @@ function phoneView(room, content2, role) {
     })),
     roundResult: roundResultCopy(room, content2, role),
     trustAward: narrating && room.lastRound ? room.lastRound.trustAwarded : null,
+    trustLines: trustLines(room, role),
     waitingOn: ROLES.filter((r) => room.players[r].name && !room.players[r].locked).length
   };
 }
@@ -1562,6 +1676,15 @@ function roundResultCopy(room, content2, role) {
   if (log.govIsolated && role === "government") {
     costBits.push("You acted alone. The country only half followed.");
   }
+  if (role === "activist" && room.spotlightCalled) {
+    if (log.spotlightTarget) {
+      costBits.push(`Your Spotlight caught ${BOARD_NAME[log.spotlightTarget]}. Their card only half worked.`);
+    } else if (mine.arch !== "ESCALATE") {
+      costBits.push("Your Spotlight did nothing. You did not pick a protest card. You keep it.");
+    } else {
+      costBits.push("Nobody picked a dirty card, so your Spotlight was not needed. You keep it.");
+    }
+  }
   if (!costBits.length) {
     costBits.push(
       player.defaulted ? "You did not pick this card. It still counted." : player.autoLocked ? "You did not lock this card yourself. It still counted." : "It worked as planned."
@@ -1572,6 +1695,9 @@ function roundResultCopy(room, content2, role) {
     others.push(
       log.alignedCount === 4 ? "All four of you picked good cards. You got the moving together bonus." : "Three of you picked good cards. You got the moving together bonus."
     );
+    if (log.coalitionBonus && log.coalitionBonus.emissions < -0.05) {
+      others.push(`Moving together cut another ${Math.abs(log.coalitionBonus.emissions).toFixed(1)} million tonnes.`);
+    }
   } else {
     others.push("Fewer than three of you picked good cards. No bonus this round.");
   }

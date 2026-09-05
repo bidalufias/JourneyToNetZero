@@ -22,20 +22,24 @@ import {
   revealElapsed,
   revealedCount,
 } from '../src/dashboard/reckoning-clock'
-import { PROMISE_STING_MS } from '../src/game/session'
+import { PROMISE_STING_MS, RECKONING_CARD_GAP_MS as GAP, RECKONING_FIRST_CARD_MS as FIRST } from '../src/game/session'
 
 describe('which cards are due', () => {
-  it('holds every card back until the first is due', () => {
+  it('holds every card back through the LOOK UP countdown', () => {
+    // Four seconds of ALL FOUR LOCKED · LOOK UP before the first card, on
+    // the projector and on every phone, because the fourth lock used to turn
+    // the first card before the player who locked it had looked up.
+    expect(FIRST).toBeGreaterThanOrEqual(3_000)
     expect(revealedCount(0)).toBe(0)
-    expect(revealedCount(599)).toBe(0)
+    expect(revealedCount(FIRST - 1)).toBe(0)
   })
 
   it('turns them one at a time, three seconds apart', () => {
-    expect(revealedCount(600)).toBe(1)
-    expect(revealedCount(3_500)).toBe(1)
-    expect(revealedCount(3_600)).toBe(2)
-    expect(revealedCount(6_600)).toBe(3)
-    expect(revealedCount(9_600)).toBe(4)
+    expect(revealedCount(FIRST)).toBe(1)
+    expect(revealedCount(FIRST + GAP - 100)).toBe(1)
+    expect(revealedCount(FIRST + GAP)).toBe(2)
+    expect(revealedCount(FIRST + 2 * GAP)).toBe(3)
+    expect(revealedCount(FIRST + 3 * GAP)).toBe(4)
   })
 
   it('never turns a fifth card', () => {
@@ -87,7 +91,7 @@ describe('the elapsed time the sequence runs on', () => {
     // unreadable, and the sequence has to carry on regardless.
     const skewed = deadlineElapsed(1_000_000 + RECKONING_TOTAL_MS + 120_000, 1_000_000)
     expect(skewed).toBeNull()
-    expect(revealedCount(revealElapsed(9_600, skewed))).toBe(4)
+    expect(revealedCount(revealElapsed(FIRST + 3 * GAP, skewed))).toBe(4)
   })
 
   it('catches a late dashboard up instead of replaying the round', () => {
@@ -106,7 +110,7 @@ describe('the elapsed time the sequence runs on', () => {
 
 describe('the beats after the cards', () => {
   it('holds the sting until the fourth card has landed', () => {
-    expect(STING_START_MS).toBeGreaterThan(9_600)
+    expect(STING_START_MS).toBeGreaterThan(FIRST + 3 * GAP)
     expect(revealedCount(STING_START_MS)).toBe(4)
   })
 

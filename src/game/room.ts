@@ -33,10 +33,13 @@ import {
   type RoundLog,
   type Scenario,
 } from '../engine/types'
-import { costLabel, optionCondition, optionImpact } from './impact'
+import { costLabel, optionCondition, optionImpact, optionKind } from './impact'
+import { revealBadges } from './reveal'
 import { BOARD_NAME, DEAL_CONDITIONS, DEMAND_PHRASES, PRACTICE_LINE, privateLine } from './copy'
 import { pick, roomCode, shuffle } from './rng'
 import {
+  RECKONING_CARD_GAP_MS,
+  RECKONING_FIRST_CARD_MS,
   ROLE_LABEL,
   ROLE_RESOURCE,
   phaseMs,
@@ -47,6 +50,7 @@ import {
   type PhoneView,
   type Player,
   type Promise_,
+  type RevealMirror,
   type Room,
   type SayShape,
 } from './session'
@@ -73,6 +77,7 @@ export function createRoom(content: Content, seed: number, now: number): Room {
         name: '',
         connected: false,
         ready: false,
+        done: false,
         goalId: null,
         choiceId: null,
         locked: false,
@@ -207,6 +212,8 @@ function setPhase(room: Room, phase: Phase, now: number): void {
   // player who pressed I AM READY in the lobby is still ready when the
   // facilitator starts, and a player who had not is still reading their card.
   if (phase !== 'briefing') for (const role of ROLES) room.players[role].ready = false
+  // GOT IT and I AM DONE belong to one step each.
+  for (const role of ROLES) room.players[role].done = false
   // Round 1 gets longer beats, so the length is asked for by round rather than
   // read off a flat table. `roundNumber` and not `displayRound`: a phase is
   // being opened, so the round it belongs to is the one about to be played.
@@ -253,6 +260,11 @@ function everyoneAcked(room: Room): boolean {
   return everyHeldSeat(room, (p) => p.ready)
 }
 
+/** Every occupied seat has pressed GOT IT or I AM DONE on this step. */
+function everyoneDone(room: Room): boolean {
+  return everyHeldSeat(room, (p) => p.done)
+}
+
 /** Every occupied seat has chosen a secret goal. */
 function everyoneSealed(room: Room): boolean {
   return everyHeldSeat(room, (p) => p.goalId !== null)
@@ -277,12 +289,27 @@ function vetoesRemaining(room: Room): number {
 }
 
 /**
- * The same courtesy for Spotlights, which the engine also only spends at
- * resolution. A counter that does not move when you spend it reads as a
- * broken button, and the Activist has no other confirmation that it landed.
+ * Spotlights are different: calling one spends nothing. The engine spends it
+ * at resolution, and only if the Activist picked a protest card and somebody
+ * picked a dirty card. So the count changes only when one is really gone.
+ * It used to drop the moment the button was pressed and come back a round
+ * later, and a fifteen-year-old read the two numbers on his phone as a bug.
+ * The confirmation that a Spotlight is on is the button itself, which says so.
  */
 function spotlightsRemaining(room: Room): number {
-  return Math.max(0, room.game.spotlights - (room.spotlightCalled ? 1 : 0))
+  return room.game.spotlights
+}
+
+/** The steps a seat ends with GOT IT or I AM DONE. */
+const DONE_ENDS: ReadonlySet<Phase> = new Set<Phase>(['crisis', 'table', 'practiceTalk', 'practiceReveal'])
+
+/** The practice Reveal has been seen once the fourth card has turned. */
+const REVEAL_SEEN_MS = RECKONING_FIRST_CARD_MS + 4 * RECKONING_CARD_GAP_MS
+
+/** How far into the current phase the room is. Infinite when nothing ticks. */
+function phaseElapsed(room: Room, now: number): number {
+  if (room.phaseEndsAt === null) return Number.POSITIVE_INFINITY
+  return phaseMs(room.phase, roundNumber(room)) - (room.phaseEndsAt - now)
 }
 
 /** Seats that can hold a transferable resource at all. */
@@ -351,6 +378,8 @@ export type Command =
   | { t: 'pickGoal'; role: Role; goalId: string }
   /** I AM READY, GOT IT: the one button the current onboarding step offers. */
   | { t: 'ack'; role: Role }
+  /** GOT IT on the crisis, I AM DONE on the Talk: four of them end the step. */
+  | { t: 'done'; role: Role }
   | { t: 'start' }
   | { t: 'advance' }
   | { t: 'pause' }
@@ -388,6 +417,7 @@ export function authorise(seat: Role | 'dashboard', cmd: Command): Command | nul
     case 'leave':
     case 'pickGoal':
     case 'ack':
+    case 'done':
     case 'say':
     case 'respondOffer':
     case 'spotlight':
@@ -414,6 +444,7 @@ export function authorise(seat: Role | 'dashboard', cmd: Command): Command | nul
  * surface: the phones are not the only thing that could send these.
  */
 const FROZEN_WHILE_PAUSED: ReadonlySet<Command['t']> = new Set<Command['t']>([
+  'done',
   'say',
   'offer',
   'respondOffer',
@@ -459,6 +490,7 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
       p.name = ''
       p.connected = false
       p.ready = false
+      p.done = false
       p.goalId = null
       p.choiceId = null
       p.locked = false
@@ -493,6 +525,26 @@ export function apply(room: Room, cmd: Command, content: Content, now: number): 
       if (!p.name) return room
       p.ready = true
       if (room.phase === 'power' && everyoneAcked(room)) return advance(room, content, at)
+      return room
+    }
+
+    /**
+     * The room ends the step, and the clock is only the fallback.
+     *
+     * GOT IT on the crisis, I AM DONE on the Talk, GOT IT on the practice
+     * Reveal once the cards have turned. Four first-time players had said
+     * everything they had to say fifty seconds into a two-minute Talk and sat
+     * looking at the countdown, and only the laptop could end it.
+     */
+    case 'done': {
+      const p = room.players[cmd.role]
+      if (!p.name || !DONE_ENDS.has(room.phase)) return room
+      // The practice Reveal cannot be skipped before it has been seen. A phone
+      // that is ahead of the projector, or a player pressing everything, would
+      // otherwise end the one screen the practice exists to show.
+      if (room.phase === 'practiceReveal' && phaseElapsed(room, at) < REVEAL_SEEN_MS) return room
+      p.done = true
+      if (everyoneDone(room)) return advance(room, content, at)
       return room
     }
 
@@ -748,6 +800,9 @@ function say(room: Room, cmd: SayCommand, content: Content): Room {
   const option = choosableOptions(room, content, cmd.role).find((o) => o.id === cmd.optionId)
   const condition = DEAL_CONDITIONS.find((c) => c.id === cmd.conditionId)
   if (!option || !condition || !cmd.target || cmd.target === cmd.role) return room
+  // "If the Government pays half" is only a deal a partnership can make.
+  if (condition.onlyFor && condition.onlyFor !== cmd.target) return room
+  if (condition.needsPartnership && optionKind(option) !== 'partnership') return room
   room.promises = room.promises.filter(drop)
   room.promises.push({
     id: `${cmd.role}-${round}-s`,
@@ -1059,7 +1114,7 @@ function judgePromises(room: Room, log: RoundLog, choices: Record<Role, string>)
     if (p.kind === 'deal' && p.ifRole && p.ifConditionId) {
       const them = log.reveals.find((r) => r.role === p.ifRole)
       const condition = DEAL_CONDITIONS.find((c) => c.id === p.ifConditionId)
-      const theyDid = Boolean(them && condition?.met(them))
+      const theyDid = Boolean(them && condition?.met(them, { coFund: room.coFund }))
       p.outcome = !theyDid ? 'void' : didIt ? 'kept' : 'broken'
     }
   }
@@ -1236,8 +1291,10 @@ export function dashboardView(room: Room, content: Content): DashboardView {
       lastToLock: lastLock === role,
       ready: room.players[role].ready,
       sealed: room.players[role].goalId !== null,
+      done: room.players[role].done,
     })),
     readyCount: held.filter((r) => room.players[r].ready).length,
+    doneCount: held.filter((r) => room.players[r].done).length,
     sealedCount: held.filter((r) => room.players[r].goalId !== null).length,
     promises: room.promises.filter((p) => p.round === boardRound(room)),
     offersInFlight: room.offers.filter((o) => o.round === boardRound(room) && o.status === 'pending'),
@@ -1262,7 +1319,73 @@ export function dashboardView(room: Room, content: Content): DashboardView {
       happiness: content.config.tgt_h,
     },
     trustAward: NARRATING.has(room.phase) ? (room.lastRound?.trustAwarded ?? null) : null,
+    trustHeld: { ...room.game.trust },
+    tipStake: tipStake(room),
   }
+}
+
+/** The tip shared this round, once it has paid, and what it paid. */
+function tipStake(room: Room): DashboardView['tipStake'] {
+  if (!NARRATING.has(room.phase) || !room.lastRound) return null
+  const tip = room.tips.find((t) => t.round === room.lastRound!.round && t.revealed)
+  if (!tip) return null
+  const paid = tip.to === 'community' ? '1 veto' : '1 Public Trust'
+  return { role: tip.to, text: `${BOARD_NAME[tip.to]} shared a tip. That is worth ${paid}.` }
+}
+
+/**
+ * The Reveal, for a phone.
+ *
+ * The four cards the projector is turning, in the projector's order, with the
+ * two lines it draws under each. The phone runs the same clock the projector
+ * does, so the cards turn together. Titles and verdicts only.
+ */
+function revealMirror(room: Room): RevealMirror | null {
+  const practice = room.phase === 'practiceReveal'
+  const log = practice ? room.practiceLog : room.phase === 'reckoning' ? room.lastRound : null
+  if (!log) return null
+  const promiseFor = (role: Role) =>
+    room.promises.find(
+      (p) =>
+        p.from === role &&
+        p.round === log.round &&
+        (p.kind === 'promise' || p.kind === 'deal') &&
+        p.outcome !== 'unresolved',
+    )
+  return {
+    practice,
+    cards: log.reveals.map((r) => ({
+      role: r.role,
+      title: r.title,
+      desc: r.desc,
+      badges: revealBadges(r, promiseFor(r.role)),
+    })),
+  }
+}
+
+/**
+ * What the trust screen says, in this seat's terms.
+ *
+ * Promises do not move Public Trust and nothing said so, so a room watched
+ * both points go to a Minister marked BROKE THE PROMISE and decided the game
+ * was rigged. The Community cannot hold it at all, and the one player who
+ * shared a tip for a point watched the screen show 0.
+ */
+function trustLines(room: Room, role: Role): string[] {
+  const log = room.lastRound
+  if (!log || !NARRATING.has(room.phase)) return []
+  const lines = ['Promises do not count here. Only what the cards did.']
+  if (role === 'community') lines.push('The Community cannot hold Public Trust. Your power is the veto.')
+  const tip = room.tips.find((t) => t.round === log.round && t.revealed)
+  if (tip) {
+    const paid = tip.to === 'community' ? '1 veto' : '1 Public Trust'
+    lines.push(
+      tip.to === role
+        ? `You got ${paid} for sharing your tip.`
+        : `${BOARD_NAME[tip.to]} got ${paid} for sharing a tip.`,
+    )
+  }
+  return lines
 }
 
 export function phoneView(room: Room, content: Content, role: Role): PhoneView {
@@ -1320,6 +1443,7 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
         cost: costLabel(o),
         impact: optionImpact(o),
         condition: optionCondition(o, room.coFund),
+        kind: optionKind(o),
         available: choosable,
         disabled,
         disabledNote: note,
@@ -1418,6 +1542,9 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
     spotlightCalled: room.spotlightCalled,
     coFund: room.coFund,
     ready: player.ready,
+    done: player.done,
+    doneCount: ROLES.filter((r) => room.players[r].name && room.players[r].done).length,
+    reveal: revealMirror(room),
     vetoed: room.vetoTarget === role,
     goalId: player.goalId,
     goalTitle: ownGoal?.title ?? null,
@@ -1437,6 +1564,7 @@ export function phoneView(room: Room, content: Content, role: Role): PhoneView {
     })),
     roundResult: roundResultCopy(room, content, role),
     trustAward: narrating && room.lastRound ? room.lastRound.trustAwarded : null,
+    trustLines: trustLines(room, role),
     waitingOn: ROLES.filter((r) => room.players[r].name && !room.players[r].locked).length,
   }
 }
@@ -1477,6 +1605,17 @@ function roundResultCopy(room: Room, content: Content, role: Role): PhoneView['r
   if (log.govIsolated && role === 'government') {
     costBits.push('You acted alone. The country only half followed.')
   }
+  // The Activist's Spotlight, answered. Whether it caught anyone, and if not,
+  // why not, in the one place the player is looking for the answer.
+  if (role === 'activist' && room.spotlightCalled) {
+    if (log.spotlightTarget) {
+      costBits.push(`Your Spotlight caught ${BOARD_NAME[log.spotlightTarget]}. Their card only half worked.`)
+    } else if (mine.arch !== 'ESCALATE') {
+      costBits.push('Your Spotlight did nothing. You did not pick a protest card. You keep it.')
+    } else {
+      costBits.push('Nobody picked a dirty card, so your Spotlight was not needed. You keep it.')
+    }
+  }
   // Never "as planned" on a card the clock picked: that sentence would be
   // flatly untrue, and it is the one a player who froze reads most closely.
   if (!costBits.length) {
@@ -1496,6 +1635,12 @@ function roundResultCopy(room: Room, content: Content, role: Role): PhoneView['r
         ? 'All four of you picked good cards. You got the moving together bonus.'
         : 'Three of you picked good cards. You got the moving together bonus.',
     )
+    // The bonus is the gap between what the four cards did and what the
+    // meter did. A family added up the four phones, got 33, and saw 42 on
+    // the big screen.
+    if (log.coalitionBonus && log.coalitionBonus.emissions < -0.05) {
+      others.push(`Moving together cut another ${Math.abs(log.coalitionBonus.emissions).toFixed(1)} million tonnes.`)
+    }
   } else {
     others.push('Fewer than three of you picked good cards. No bonus this round.')
   }

@@ -202,9 +202,16 @@ practice Reveal, each seat's own power, and then the secret goal. Then six
 rounds of Crisis, Talk, Choice, Reveal, Public Trust and the story so far, the
 country's result, and an end screen that holds. Every onboarding step teaches
 one verb and makes the room use it. Nothing from the practice reaches the
-engine. The practice Choice resolves when the fourth seat locks, the power and
-goal steps when the fourth phone confirms, and a round's Choice when all four
-lock, so a room that is ready never waits for a clock.
+engine. Every step the room can finish, the room finishes: the crisis on four
+GOT ITs, the Talk on four I AM DONEs, the practice Reveal on four GOT ITs once
+the cards have turned, the power and goal steps on four confirmations, and a
+Choice on four locks. The clock is only the fallback, so a room that is ready
+never waits for it, and nobody waits for the laptop.
+
+The Reveal holds four seconds of ALL FOUR LOCKED · LOOK UP with a countdown
+before the first card turns, and every phone mirrors the cards as the big
+screen turns them, with the same two lines under each: the promise verdict
+and what another seat did to the card.
 
 The seat list is the only thing a scanned phone sees. Nothing on the join path
 points at the written guide; it is under the ⋯ menu once a player has sat

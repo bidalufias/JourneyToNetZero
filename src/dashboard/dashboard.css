@@ -572,3 +572,6 @@
   letter-spacing: 0.06em;
   opacity: 0.9;
 }
+
+/* The lobby, naming who the room is waiting for. */
+.attract__reading { margin-top: var(--space-2); color: var(--color-accent); }

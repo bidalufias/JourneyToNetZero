@@ -19,7 +19,8 @@ import type { Role } from '../engine/types'
 import type { DashboardView } from '../game/session'
 import { ROLE_LABEL } from '../game/session'
 import { LABEL, STEP_LABEL } from '../game/vocab'
-import { COALITION_HOLD_MS, PROMISE_STING_MS } from '../game/session'
+import { COALITION_HOLD_MS, PROMISE_STING_MS, RECKONING_FIRST_CARD_MS } from '../game/session'
+import { revealBadges } from '../game/reveal'
 import { serverNow } from '../net/clock'
 import { RoleGlyph } from '../ui/primitives'
 import { CoalitionBonus } from './screens'
@@ -128,10 +129,24 @@ export function Reckoning({ view }: { view: DashboardView }) {
         </span>
       </header>
 
+      {/* Four seconds of ALL FOUR LOCKED · LOOK UP before the first card,
+          counted down, because the fourth lock used to turn the first card
+          before the player who locked it had lifted their eyes. */}
+      {revealedCount === 0 ? (
+        <div className="reckoning__cue" role="status">
+          <span className="reckoning__cue-label">ALL FOUR LOCKED</span>
+          <span className="reckoning__cue-big">LOOK UP</span>
+          <span className="reckoning__cue-count">
+            {Math.max(1, Math.ceil((RECKONING_FIRST_CARD_MS - elapsed) / 1000))}
+          </span>
+        </div>
+      ) : null}
+
       <div className="reckoning__cards">
         {log.reveals.map((reveal, i) => {
           const shown = i < revealedCount
           const promise = promiseFor(reveal.role)
+          const badges = revealBadges(reveal, promise)
           return (
             <article
               key={reveal.role}
@@ -149,29 +164,16 @@ export function Reckoning({ view }: { view: DashboardView }) {
                   <p className="rcard__desc">{reveal.desc}</p>
 
                   <div className="rcard__foot">
-                    {promise ? (
-                      <div className={`rcard__promise rcard__promise--${promise.outcome}`}>
-                        {/* A deal that was never called in is neither kept nor
-                            broken, and saying so is what makes the deal worth
-                            offering: the risk of proposing one is that nobody
-                            takes it, not that you get named a liar for it. */}
-                        {promise.outcome === 'void'
-                          ? 'THE DEAL WAS NOT TAKEN'
-                          : promise.outcome === 'kept'
-                            ? promise.kind === 'deal'
-                              ? 'BOTH KEPT THE DEAL ✓'
-                              : 'KEPT THE PROMISE ✓'
-                            : promise.kind === 'deal'
-                              ? 'BROKE THE DEAL ✕'
-                              : 'BROKE THE PROMISE ✕'}
+                    {/* Both lines, promise first: a card that broke a promise
+                        and was also helped says both, because the phone in
+                        that player's hand says both, and the room reads the
+                        projector. A deal nobody took is neither kept nor
+                        broken, and saying so is what makes offering one safe. */}
+                    {badges.map((b) => (
+                      <div key={b.text} className={`rcard__promise rcard__promise--${b.tone}`}>
+                        {b.text}
                       </div>
-                    ) : reveal.spotlit ? (
-                      <div className="rcard__promise rcard__promise--broken">THE SPOTLIGHT CAUGHT THEM ✕</div>
-                    ) : reveal.selfOrganiseSupported ? (
-                      <div className="rcard__promise rcard__promise--kept">HELPED · WORKED TWICE AS WELL</div>
-                    ) : reveal.partnerUnfunded ? (
-                      <div className="rcard__promise rcard__promise--broken">NOBODY PAID HALF</div>
-                    ) : null}
+                    ))}
                     {/* The practice cards carry no headline. An empty pair of
                         quotes is not a headline either. */}
                     {reveal.headline ? <p className="rcard__headline">“{reveal.headline}”</p> : null}

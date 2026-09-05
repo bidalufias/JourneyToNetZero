@@ -14,7 +14,7 @@ import type { Role } from '../engine/types'
 import { driftK } from '../engine/engine'
 import { localContent } from '../net/local'
 import { serverNow } from '../net/clock'
-import type { DashboardView } from '../game/session'
+import type { DashboardView, Phase } from '../game/session'
 import type { Endgame } from '../game/room'
 import { ROLE_LABEL } from '../game/session'
 import { STEP_LABEL } from '../game/vocab'
@@ -152,6 +152,9 @@ function Masthead({
         {view.phase === 'practiceChoice' ? (
           <span>{view.seats.filter((x) => x.locked).length} OF 4 LOCKED</span>
         ) : null}
+        {/* The Talk ends on the fourth I AM DONE, so the count is the one
+            number the room is watching. */}
+        {DONE_PHASES.has(view.phase) ? <span>{view.doneCount} OF 4 DONE</span> : null}
         <span>{STEP_LABEL[view.phase] ?? ''}</span>
         {clock ? (
           <span
@@ -222,15 +225,20 @@ function TheNation({ view }: { view: DashboardView }) {
   )
 }
 
+/** The steps a seat ends with GOT IT or I AM DONE. */
+const DONE_PHASES: ReadonlySet<Phase> = new Set<Phase>(['crisis', 'table', 'practiceTalk'])
+
 function LockRow({ view }: { view: DashboardView }) {
-  const showLocks = view.phase === 'choice' || view.phase === 'table' || view.phase === 'practiceChoice'
+  const showLocks = view.phase === 'choice' || view.phase === 'practiceChoice'
+  const showDone = DONE_PHASES.has(view.phase)
   return (
     <div className="locks">
       {view.seats.map((seat) => {
         const empty = !seat.name
+        const settled = showDone ? seat.done : seat.locked
         const cls = empty
           ? 'lock lock--empty'
-          : `lock${seat.locked ? '' : ' lock--waiting'}${seat.lastToLock ? ' lock--last' : ''}`
+          : `lock${settled ? '' : ' lock--waiting'}${showLocks && seat.lastToLock ? ' lock--last' : ''}`
         return (
           <div key={seat.role} className={cls} data-role={seat.role}>
             <RoleGlyph role={seat.role} size={20} className="lock__glyph" />
@@ -242,15 +250,21 @@ function LockRow({ view }: { view: DashboardView }) {
               <div className="lock__state">
                 {empty
                   ? 'WAITING…'
-                  : !showLocks
-                    ? seat.connected
-                      ? 'IN'
-                      : 'RECONNECTING'
-                    : seat.locked
-                      ? 'LOCKED'
-                      : seat.lastToLock
-                        ? 'LAST TO LOCK'
-                        : 'STILL CHOOSING'}
+                  : !seat.connected
+                    ? 'RECONNECTING'
+                    : showDone
+                      ? seat.done
+                        ? 'DONE'
+                        : view.phase === 'crisis'
+                          ? 'READING'
+                          : 'TALKING'
+                      : !showLocks
+                        ? 'IN'
+                        : seat.locked
+                          ? 'LOCKED'
+                          : seat.lastToLock
+                            ? 'LAST TO LOCK'
+                            : 'STILL CHOOSING'}
               </div>
             </div>
           </div>
@@ -325,6 +339,9 @@ function CrisisSting({ view, clock }: { view: DashboardView; clock: string | nul
           <div className="sting__countdown">
             <div className="sting__countdown-label">THE TALK STARTS IN</div>
             <div className="sting__countdown-value">{clock}</div>
+            {/* Or sooner: four GOT ITs open the Talk, and the count says how
+                many the room is waiting for. */}
+            <div className="sting__countdown-label">OR WHEN ALL FOUR TAP GOT IT · {view.doneCount} OF 4</div>
           </div>
         ) : null}
       </div>

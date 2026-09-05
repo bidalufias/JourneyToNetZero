@@ -17,6 +17,7 @@
  * tidy.
  */
 import type { Archetype, Option } from '../engine/types'
+import type { OptionKind } from './session'
 
 export type Meter = 'carbon' | 'economy' | 'life' | 'clean'
 
@@ -84,6 +85,9 @@ export function optionCondition(option: Option, coFund = false): string | null {
       ? 'Partnership. The Government pays half. It works in full.'
       : 'Partnership. Only half works unless the Government pays half.'
   }
+  // The Spotlight only works with one of these, and until the card said so
+  // the Activist was guessing which of three cards counted as a protest.
+  if (option.arch === 'ESCALATE') return 'Protest card. Your Spotlight only works with this.'
   if (option.arch === 'SELF_ORGANISE') return 'Works twice as well if the Government or Business helps.'
   if (option.arch === 'COLLABORATE') return 'You work with them. You gain power. Some supporters leave you.'
   if ((option.flags ?? []).some((f) => f.startsWith('EVIDENCE'))) return 'Does nothing now. Helps every round after this.'
@@ -100,6 +104,18 @@ const BREAKS_COALITION: ReadonlySet<Archetype> = new Set<Archetype>([
   'DEREGULATE',
   'DEMAND_RELIEF',
 ])
+
+/**
+ * What kind of card this is, in the four words the screens use. The promise
+ * sheet and the choice screen read this rather than the archetype, so a card
+ * is dirty in one place if and only if it is dirty in the other.
+ */
+export function optionKind(option: Option): OptionKind {
+  if (BREAKS_COALITION.has(option.arch)) return 'dirty'
+  if (option.arch === 'ESCALATE') return 'protest'
+  if (option.arch === 'PARTNER') return 'partnership'
+  return 'good'
+}
 
 /** "2 Budget", "3 Company Money", "+1 Budget" or "Free". A chip, never an effect. */
 export function costLabel(option: Option): string {

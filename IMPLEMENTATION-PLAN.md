@@ -14,7 +14,7 @@ Everything below points into those documents rather than repeating them.
 When this plan and a review disagree, this plan wins, because it was
 written last.
 
-## Status: all six work packages are done
+## Status: six work packages done, WP7 in progress
 
 | Package | Commit | Left out |
 |---|---|---|
@@ -24,6 +24,7 @@ written last.
 | WP4 · The onboarding screens | `5eb7f9c` | Item 6, the Reveal ending on facilitator input, was optional and was not done |
 | WP5 · The content pack in plain English | `ea89390` | Item 7, two students reading twenty cards each, is a live test still to run |
 | WP6 · The guide and the facilitator's script | `6d6b5e6` | Nothing |
+| WP7 · Play like a finished game | in progress | From the first family playtest |
 
 All on branch `claude/net-zero-game-review-s1qp8q`. 120 tests pass, the
 typecheck and build are clean, and the function bundle is fresh. The
@@ -355,6 +356,64 @@ sentences.
 
 Done when: the guide is under 900 words, and the script has no hit on the
 banned list except inside quoted character lines.
+
+---
+
+### WP7 · Play like a finished game (L)
+
+From `playtests/2026-09-05-family/FINDINGS.md`: four first-time players,
+one round, no rules, no script. Every item below was verified against the
+code. The rule that ties them together: nothing on a screen may contradict
+another screen, nobody waits on the laptop, and every reward is explained
+where it is given.
+
+1. **Promise with the card in view.** The promise and deal lists in the SAY
+   IT sheet draw the same option card the Choice draws: title, cost, four
+   arrows, and the Dirty card, Protest card or Partnership line. A player
+   never promises a card they have not seen.
+2. **The room ends the Crisis and the Talk.** A `done` command: GOT IT on
+   the crisis screen, I AM DONE on the Talk. Four of them end the step, the
+   clock is the fallback. The TV counts them in the masthead and the seat
+   row. The practice Talk ends the same way, and the practice Reveal ends on
+   four GOT ITs once the cards have turned.
+3. **Hold the Reveal.** Four seconds of ALL FOUR LOCKED · LOOK UP with a
+   countdown on the TV and on every phone before the first card turns. The
+   phone then mirrors the four cards as they flip, with the same badges as
+   the TV, so nobody plays the Reveal blind again. The practice Reveal runs
+   forty seconds.
+4. **Two badges on a Reveal card.** The promise verdict and the effect line
+   (helped, spotlit, nobody paid half) both show, on the TV and on the phone.
+5. **Public Trust, explained where it is given.** The trust screen reads
+   the trust the room holds after a shared tip has paid, says that promises
+   do not count there, names the tip stake, and lists the Community as
+   holding vetoes, not trust. The phone's result says the same in the
+   player's own terms.
+6. **One number per power.** The Spotlight count changes only when a
+   Spotlight is spent, on the TV and on the phone. A called Spotlight reads
+   SPOTLIGHT IS ON. In the practice, a used veto or Spotlight says it comes
+   back. The power step says the country is back at the start.
+7. **The Spotlight tells the truth.** The definition, the role card, the
+   sheet and the note all say the same thing: pick a protest card, and any
+   dirty card the Government or Business picks only half works. Protest
+   cards carry a Protest card line the way dirty cards carry Dirty card. The
+   Activist's result says whether the Spotlight caught anyone.
+8. **The Business can say "if the Government pays half".** A third deal
+   condition, offered when the card is a partnership and the target is the
+   Government, judged on whether the Government paid.
+9. **The ⋯ sheet starts with the words.** Words on your screen first, then
+   how a round goes, then the card and the full guide. LEAVE THE GAME is a
+   small line at the end and still asks twice.
+10. **Small things.** The veto is two taps and a confirm, not a slider. SEND
+    MONEY is not shown to seats with no money. The only possible recipient
+    is preselected. The lobby names who is still reading. The result says
+    what the moving together bonus added. The phone sheet no longer says
+    forty seconds.
+
+Done when: `test/room.test.ts` covers the done command, the reveal hold,
+trust after the stake, the spotlight count and the pays-half deal; the copy
+test passes; a drive rehearsal shows the countdown, the mirror and the two
+badges; and a second four-player playtest against the same script produces
+none of the ten findings above.
 
 ---
 

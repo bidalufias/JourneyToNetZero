@@ -39,10 +39,13 @@ export type Phase =
  * that picking is the simpler verb; teaching the sequence backwards to save one
  * step of difficulty is a poor trade.
  *
- * The practice reveal is short because it is the third time the table has seen
- * the shape of the beat and the first time it has seen the payoff: the four
+ * The practice reveal is the first time the table sees the payoff: the four
  * cards flip, the promise is judged, the meters move, and then all of it is
- * thrown away. Twenty seconds is the flip sequence and a breath.
+ * thrown away. It ran twenty seconds and three of four first-time players
+ * missed it, because the last to lock was still reading "look up" when the
+ * cards were already turning. It now holds a LOOK UP countdown before the
+ * first card, mirrors the cards on every phone, and ends when all four have
+ * pressed GOT IT, with twenty-five seconds as the fallback.
  *
  * The round is built around a fixed budget rather than around what each beat
  * could justify on its own. The Reveal used to run 75 seconds, six times, which
@@ -58,7 +61,7 @@ export const PHASE_MS: Record<Phase, number> = {
   briefing: 45_000,
   practiceTalk: 75_000,
   practiceChoice: 60_000,
-  practiceReveal: 20_000,
+  practiceReveal: 25_000,
   power: 30_000,
   goal: 45_000,
   crisis: 25_000,
@@ -93,7 +96,13 @@ export function phaseMs(phase: Phase, round: number): number {
 
 /** The Reckoning flips one card at a time, ~3s apart. Never all four at once. */
 export const RECKONING_CARD_GAP_MS = 3_000
-export const RECKONING_FIRST_CARD_MS = 600
+/**
+ * Four seconds of ALL FOUR LOCKED · LOOK UP before the first card turns, on
+ * the projector and on every phone. The fourth lock used to flip the first
+ * card six hundred milliseconds later, which is faster than the player who
+ * locked it can lift their eyes.
+ */
+export const RECKONING_FIRST_CARD_MS = 4_000
 export const COALITION_HOLD_MS = 4_000
 export const PROMISE_STING_MS = 2_500
 
@@ -108,6 +117,13 @@ export interface Player {
    * Cleared whenever an onboarding step opens, so the same flag serves each.
    */
   ready: boolean
+  /**
+   * Has pressed the button that ends the current step for this seat: GOT IT
+   * on the crisis, I AM DONE on the Talk, GOT IT on the practice Reveal. Four
+   * of them end the step; the clock is only the fallback. Cleared whenever a
+   * phase opens.
+   */
+  done: boolean
   /** Set once during setup, never revealed until the endgame. */
   goalId: string | null
   /**
@@ -283,9 +299,13 @@ export interface DashboardView {
     ready: boolean
     /** Has chosen a secret goal. Never which one. */
     sealed: boolean
+    /** Has pressed GOT IT or I AM DONE on the current step. */
+    done: boolean
   }[]
   /** Held seats that have pressed the current step's button. */
   readyCount: number
+  /** Held seats that have pressed GOT IT or I AM DONE on the current step. */
+  doneCount: number
   /** Held seats that have chosen a secret goal. */
   sealedCount: number
   promises: Promise_[]
@@ -308,6 +328,41 @@ export interface DashboardView {
    * game told them about and then never showed them using.
    */
   trustAward: { care: TrustRole; future: TrustRole } | null
+  /**
+   * The Public Trust the room holds now, after a shared tip has paid.
+   *
+   * The trust screen used to read the engine's snapshot, taken before the
+   * tip's point was added, so a player told "you get 1 Public Trust" watched
+   * the screen say 0.
+   */
+  trustHeld: Record<TrustRole, number>
+  /** A tip shared this round, and what it paid. Said on the trust screen. */
+  tipStake: { role: Role; text: string } | null
+}
+
+/** One line under a Reveal card, and the colour it takes. */
+export interface RevealBadge {
+  text: string
+  tone: 'kept' | 'broken' | 'void'
+}
+
+export interface RevealCard {
+  role: Role
+  title: string
+  desc: string
+  badges: RevealBadge[]
+}
+
+/**
+ * The Reveal, on the phone.
+ *
+ * The four cards as the projector turns them, on the same clock, with the
+ * same two lines under each. Titles and verdicts only: nothing here is a
+ * number the player could not read off the big screen.
+ */
+export interface RevealMirror {
+  practice: boolean
+  cards: RevealCard[]
 }
 
 /**
@@ -350,6 +405,12 @@ export interface PhoneView {
   coFund: boolean
   /** You have pressed the current onboarding step's button. */
   ready: boolean
+  /** You have pressed GOT IT or I AM DONE on this step. */
+  done: boolean
+  /** Held seats that have. Four ends the step. */
+  doneCount: number
+  /** The four cards turning over, while the Reveal is on the big screen. */
+  reveal: RevealMirror | null
   /** The Community's veto is on you this round. Your dirty cards are gone. */
   vetoed: boolean
   goalId: string | null
@@ -393,6 +454,8 @@ export interface PhoneView {
   } | null
   /** Where the two Public Trust tokens went this round, and why. */
   trustAward: { care: Role; future: Role } | null
+  /** The rest of what the trust screen says, in this seat's own terms. */
+  trustLines: string[]
   waitingOn: number
 }
 
@@ -484,7 +547,7 @@ export const ROLE_CARD: Record<Role, RoleCard> = {
     org: 'Bangkit Iklim',
     who: 'The Youth Activist. You lead the biggest movement in the country.',
     wants: 'Real climate action, fast.',
-    has: '3 Spotlights. A Spotlight punishes a player who picks a dirty card.',
+    has: '3 Spotlights. With a protest card, others’ dirty cards only half work.',
     howToPlay:
       'Push everyone to pick clean cards. Offer deals: “I will support you if you go clean”. Use a Spotlight when you think someone will pick a dirty card.',
     says: [
@@ -554,6 +617,8 @@ export const ROLE_RESOURCE: Record<Role, { kind: PhoneView['resource']['kind']; 
   activist: { kind: 'spotlights', label: 'Your Spotlights' },
 }
 
+export type OptionKind = 'good' | 'dirty' | 'protest' | 'partnership'
+
 export interface PhoneOption {
   id: string
   title: string
@@ -564,6 +629,11 @@ export interface PhoneOption {
   impact: Impact[]
   /** Set only when the card's value depends on somebody else. Usually null. */
   condition: string | null
+  /**
+   * What kind of card this is, so the sheet that promises it and the screen
+   * that picks it can label it the same way. Never an effect.
+   */
+  kind: OptionKind
   available: boolean
   /** Why it cannot be chosen. The three disabled states get three edges. */
   disabled: 'afford' | 'veto' | 'gate' | null

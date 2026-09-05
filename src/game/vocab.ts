@@ -29,6 +29,7 @@ export const TERM = {
   publicTrust: 'Public Trust',
   movingTogether: 'Moving together',
   dirtyCard: 'Dirty card',
+  protestCard: 'Protest card',
   partnership: 'Partnership',
   carbon: 'Carbon',
   economy: 'Economy',
@@ -53,12 +54,13 @@ export const LABEL: Record<Term, string> = Object.fromEntries(
  * A player learns the word here, not in a guide.
  */
 export const DEFINE: Partial<Record<Term, string>> = {
-  spotlight: 'You name one player. If they pick a dirty card, it only half works.',
+  spotlight: 'Pick a protest card. Then any dirty card the Government or Business picks only half works.',
   veto: 'You take one player’s dirty cards away for this round.',
   publicTrust: 'Points the people give to whoever helped them most. Some cards need them.',
   cleanEconomy: 'How much of the economy is clean. Higher means growth adds less carbon.',
   movingTogether: 'Three or four good cards together earn the country a bonus.',
   dirtyCard: 'A card that pollutes or makes others pay. It breaks moving together.',
+  protestCard: 'A loud card. The Spotlight only works with one of these.',
   partnership: 'A Business card that only works fully if the Government pays half.',
   netZero: 'Carbon at 0. The country takes out as much as it puts in.',
   millionTonnes: 'Million tonnes of carbon.',

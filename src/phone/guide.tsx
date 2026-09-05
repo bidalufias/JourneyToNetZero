@@ -3,8 +3,13 @@
  *
  * Four people arrive knowing nothing, on their own phones, with a projector
  * they may not be able to read from where they are sitting. Everything here is
- * written for that person: what the round does to them next, what the words on
- * their own cards mean, and what happens if they freeze.
+ * written for that person: what the words on their own cards mean, what the
+ * round does to them next, and what happens if they freeze.
+ *
+ * The words come first. The TV says "tap ⋯ to see what a word means", and an
+ * eleven-year-old who tapped it landed on a page about money and rounds,
+ * did not find her word, and closed it. The role card is last, because the
+ * player has already read it twice.
  *
  * It is deliberately role-aware. A glossary that explains all four resources to
  * all four players is four times as long and three times as irrelevant, and the
@@ -35,47 +40,52 @@ const RESOURCE_NOTE: Record<Role, Entry> = {
   },
   community: {
     term: 'Vetoes',
-    what: `Two for the whole game. ${DEFINE.veto} Everyone will know it was you.`,
+    what: `Two for the whole game. ${DEFINE.veto} Everyone will know it was you. The Community cannot hold Public Trust.`,
   },
   activist: {
     term: 'Spotlights',
-    what: `Three for the whole game. ${DEFINE.spotlight} It only works if you also pick a protest card.`,
+    what: `Three for the whole game. ${DEFINE.spotlight} You do not choose who it catches.`,
   },
 }
 
-const SHARED: Entry[] = [
-  {
-    term: 'The three targets',
-    what: 'By 2050 the country must reach three targets. Carbon must reach net zero. The economy must grow 5% a year on average. Quality of life must reach 7 out of 10. Miss one and nobody wins.',
-  },
+/** The words a player meets on a card or a screen, each with its one line. */
+const WORDS: Entry[] = [
+  { term: TERM.dirtyCard, what: DEFINE.dirtyCard! },
+  { term: TERM.protestCard, what: DEFINE.protestCard! },
+  { term: TERM.partnership, what: DEFINE.partnership! },
+  { term: TERM.movingTogether, what: DEFINE.movingTogether! },
+  { term: TERM.publicTrust, what: `${DEFINE.publicTrust} Two points go out every round. Promises do not count.` },
+  { term: TERM.spotlight, what: DEFINE.spotlight! },
+  { term: TERM.veto, what: DEFINE.veto! },
+  { term: TERM.secretGoal, what: DEFINE.secretGoal! },
+  { term: TERM.tip, what: DEFINE.tip! },
+  { term: TERM.cleanEconomy, what: `${DEFINE.cleanEconomy} It is the most useful number on the screen.` },
+  { term: TERM.netZero, what: DEFINE.netZero! },
   {
     term: TERM.carbon,
     what: 'The country puts out 300 million tonnes a year. Its forests take in 200. So it starts at 100, and that 100 must reach zero.',
   },
-  { term: TERM.netZero, what: DEFINE.netZero! },
-  { term: TERM.cleanEconomy, what: `${DEFINE.cleanEconomy} It is the most useful number on the screen.` },
-  { term: TERM.publicTrust, what: `${DEFINE.publicTrust} Two points go out every round.` },
   {
     term: 'The four arrows on a card',
     what: 'Each arrow shows what the card does to one meter. More arrows means a bigger change. Green is good for the country. Orange is bad.',
   },
-  { term: TERM.dirtyCard, what: DEFINE.dirtyCard! },
-  { term: TERM.movingTogether, what: DEFINE.movingTogether! },
-  { term: TERM.partnership, what: DEFINE.partnership! },
-  { term: TERM.tip, what: DEFINE.tip! },
+  {
+    term: 'The three targets',
+    what: 'By 2050 the country must reach three targets. Carbon must reach net zero. The economy must grow 5% a year on average. Quality of life must reach 7 out of 10. Miss one and nobody wins.',
+  },
 ]
 
 const PHASES: Entry[] = [
-  { term: STEP_LABEL.crisis, what: 'The news, plus one line only you can see. Nothing to tap.' },
+  { term: STEP_LABEL.crisis, what: 'The news, plus one line only you can see. Tap GOT IT when you have read it.' },
   {
     term: STEP_LABEL.table,
-    what: 'Ninety seconds to talk. Promise things, ask for things, send money. Nobody has to keep a promise.',
+    what: 'Talk. Promise things, ask for things, send money. Nobody has to keep a promise. Tap I AM DONE when you have said your part.',
   },
   {
     term: STEP_LABEL.choice,
-    what: 'Three cards, forty seconds. Tap one card. Then tap LOCK MY CARD. You can change your card until you lock.',
+    what: 'Three cards. Tap one card. Then tap LOCK MY CARD. You can change your card until you lock.',
   },
-  { term: STEP_LABEL.reckoning, what: 'All four cards are shown on the big screen. Look up.' },
+  { term: STEP_LABEL.reckoning, what: 'All four cards turn over on the big screen. Your phone shows them too.' },
 ]
 
 export function HowToPlay({ view }: { view: PhoneView }) {
@@ -83,14 +93,16 @@ export function HowToPlay({ view }: { view: PhoneView }) {
 
   return (
     <>
-      <RoleCard
-        role={view.role}
-        name={view.name}
-        goal={view.goalTitle && view.goalDesc ? { title: view.goalTitle, desc: view.goalDesc } : null}
-        says
-      />
+      <span className="plabel">WORDS ON YOUR SCREEN</span>
+      {WORDS.map((e) => (
+        <p key={e.term} className="ptext">
+          <strong>{e.term}</strong>: {e.what}
+        </p>
+      ))}
 
-      <span className="plabel">WHAT YOU SPEND</span>
+      <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
+        WHAT YOU SPEND
+      </span>
       <div className="bubble">
         <div className="bubble__lead">
           {resource.term} · {view.resource.value} right now
@@ -98,11 +110,9 @@ export function HowToPlay({ view }: { view: PhoneView }) {
         <p className="bubble__text">{resource.what}</p>
       </div>
 
-      {view.goalTitle ? (
-        <p className="pnote">Your secret goal only counts if the country reaches all 3 targets.</p>
-      ) : null}
-
-      <span className="plabel">HOW A ROUND GOES</span>
+      <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
+        HOW A ROUND GOES
+      </span>
       {PHASES.map((e) => (
         <p key={e.term} className="ptext">
           <strong>{e.term}</strong>: {e.what}
@@ -115,12 +125,18 @@ export function HowToPlay({ view }: { view: PhoneView }) {
         nothing, the game picks for you. So pick something early. You can change it later.
       </p>
 
-      <span className="plabel">WORDS ON YOUR SCREEN</span>
-      {SHARED.map((e) => (
-        <p key={e.term} className="ptext">
-          <strong>{e.term}</strong>: {e.what}
-        </p>
-      ))}
+      <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
+        YOUR CARD
+      </span>
+      <RoleCard
+        role={view.role}
+        name={view.name}
+        goal={view.goalTitle && view.goalDesc ? { title: view.goalTitle, desc: view.goalDesc } : null}
+        says
+      />
+      {view.goalTitle ? (
+        <p className="pnote">Your secret goal only counts if the country reaches all 3 targets.</p>
+      ) : null}
     </>
   )
 }

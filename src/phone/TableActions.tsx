@@ -12,6 +12,14 @@
  * shapes are sentences with a blank in them, composed by tapping, never typed,
  * so every line the room reads out loud is short and grammatical.
  *
+ * Two things the first family playtest changed. A promise is now made with
+ * the card in view: the sheet draws the same card the Choice draws, arrows,
+ * cost and all, because two of four players promised a card by its title,
+ * saw its arrows a minute later, switched, and were named promise-breakers
+ * on the big screen. And the Talk ends when all four say they are done,
+ * because a table that has said everything by fifty seconds should not sit
+ * looking at a countdown only the laptop can end.
+ *
  * An incoming offer is the only thing allowed to interrupt, and it announces
  * itself on the dashboard at the same instant so the room hears the deal even
  * if the recipient is mid-sentence.
@@ -22,8 +30,9 @@ import type { Command } from '../game/room'
 import type { PhoneView, SayShape } from '../game/session'
 import { ROLE_LABEL, ROLE_RESOURCE } from '../game/session'
 import { BOARD_NAME, DEAL_CONDITIONS, DEMAND_PHRASES } from '../game/copy'
-import { LABEL, STEP_LABEL } from '../game/vocab'
+import { DEFINE, LABEL, STEP_LABEL } from '../game/vocab'
 import { RoleGlyph } from '../ui/primitives'
+import { OptionCard } from './TheChoice'
 
 type Sheet = 'say' | 'offer' | 'spotlight' | 'veto' | null
 
@@ -43,6 +52,7 @@ export function TableActions({
   const canSend = view.resource.kind === 'fiscal' || view.resource.kind === 'capital'
   const mySent = view.sentOffers
   const spoke = view.promises.some((p) => p.from === view.role && p.kind !== 'cofund')
+  const practising = view.phase === 'practiceTalk'
 
   return (
     <div className="pbody">
@@ -119,12 +129,22 @@ export function TableActions({
         ))
       )}
 
+      {/* The powers, answered where they were used. In the practice the
+          number moves and comes back, and the phone says so, because a
+          counter that drops under a banner saying "this does not count" reads
+          as a power lost for real. */}
       {view.role === 'community' && view.vetoesRemaining < 2 ? (
-        <p className="pnote">You used a veto this round. Everyone knows it was you.</p>
+        <p className="pnote">
+          {practising
+            ? 'Practice veto. You get it back after the practice.'
+            : 'You used a veto this round. Everyone knows it was you.'}
+        </p>
       ) : null}
       {view.role === 'activist' && view.spotlightCalled ? (
         <p className="pnote">
-          Spotlight is on. It only works if you also pick a protest card this round.
+          {practising
+            ? 'Practice Spotlight. It costs nothing here.'
+            : 'Spotlight is on. Pick a protest card, or it does nothing.'}
         </p>
       ) : null}
 
@@ -132,20 +152,21 @@ export function TableActions({
         <button className="btn btn--accent" disabled={readOnly} onClick={() => setSheet('say')}>
           {spoke ? 'SAY IT AGAIN' : 'SAY IT'}
         </button>
-        <button
-          className="btn btn--ghost"
-          disabled={readOnly || !canSend}
-          onClick={() => setSheet('offer')}
-        >
-          SEND MONEY
-        </button>
+        {/* Only the two seats with money get the button. The other two used
+            to carry it greyed out all game, and an eleven-year-old asked why
+            she had a button she could never press. */}
+        {canSend ? (
+          <button className="btn btn--ghost" disabled={readOnly} onClick={() => setSheet('offer')}>
+            SEND MONEY
+          </button>
+        ) : null}
         {view.role === 'activist' ? (
           <button
             className="btn btn--ghost"
             disabled={readOnly || view.spotlightsRemaining <= 0 || view.spotlightCalled}
             onClick={() => setSheet('spotlight')}
           >
-            {LABEL.spotlight} · {view.spotlightsRemaining} LEFT
+            {view.spotlightCalled ? `${LABEL.spotlight} IS ON` : `${LABEL.spotlight} · ${view.spotlightsRemaining} LEFT`}
           </button>
         ) : null}
         {view.role === 'community' ? (
@@ -159,8 +180,52 @@ export function TableActions({
         ) : null}
       </div>
 
+      {/* Four of these end the Talk. The clock is only the fallback. */}
+      {readOnly ? null : (
+        <DoneButton
+          view={view}
+          label={practising ? 'I AM DONE' : 'I AM DONE TALKING'}
+          note="It ends when all four are done, or when the clock ends."
+          send={send}
+        />
+      )}
+
       {sheet ? <ActionSheet kind={sheet} view={view} send={send} onClose={close} /> : null}
     </div>
+  )
+}
+
+/**
+ * GOT IT, I AM DONE: the button that ends a step for this seat.
+ *
+ * Pressed, it becomes the count, so a quick reader waits knowing who they are
+ * waiting for rather than wondering whether the tap registered.
+ */
+export function DoneButton({
+  view,
+  label,
+  note,
+  send,
+}: {
+  view: PhoneView
+  label: string
+  note: string
+  send: (c: Command) => void
+}) {
+  if (view.done) {
+    return (
+      <p className="pnote pnote--done">
+        {view.doneCount} OF 4 DONE. {note}
+      </p>
+    )
+  }
+  return (
+    <>
+      <button className="btn btn--primary" onClick={() => send({ t: 'done', role: view.role })}>
+        {label}
+      </button>
+      <p className="pnote">{note}</p>
+    </>
   )
 }
 
@@ -203,38 +268,51 @@ function ActionSheet({
         <div className="sheet__body">
           {kind === 'say' ? <SaySheet view={view} send={send} onClose={onClose} /> : null}
           {kind === 'offer' ? <OfferSheet view={view} send={send} onClose={onClose} /> : null}
-
-          {kind === 'spotlight' ? (
-            <>
-              <p className="ptext">
-                If a player picks a dirty card, that card only half works. They also lose Public
-                Trust.
-              </p>
-              <p className="pnote">
-                It only works if you also pick a protest card. If nobody picks a dirty card, you
-                keep the Spotlight.
-              </p>
-              <p className="pnote">
-                Three for the whole game. You have {view.spotlightsRemaining} left.
-              </p>
-              <button
-                className="btn btn--accent"
-                onClick={() => {
-                  send({ t: 'spotlight', role: view.role })
-                  onClose()
-                }}
-              >
-                USE SPOTLIGHT
-              </button>
-              <button className="btn" onClick={onClose}>
-                CANCEL
-              </button>
-            </>
-          ) : null}
-
+          {kind === 'spotlight' ? <SpotlightSheet view={view} send={send} onClose={onClose} /> : null}
           {kind === 'veto' ? <VetoSheet view={view} send={send} onClose={onClose} /> : null}
         </div>
       </div>
+    </>
+  )
+}
+
+/**
+ * The Spotlight, said the way it works.
+ *
+ * It names nobody. The engine points it at whichever of the Government and
+ * the Business picked the dirtier card, and only if the Activist picked a
+ * protest card. The sheet used to say "you name one player" and then never
+ * asked who, and the one player holding it said so out loud, twice.
+ */
+function SpotlightSheet({
+  view,
+  send,
+  onClose,
+}: {
+  view: PhoneView
+  send: (c: Command) => void
+  onClose: () => void
+}) {
+  return (
+    <>
+      <p className="ptext">{DEFINE.spotlight}</p>
+      <p className="pnote">
+        You do not choose who. It catches whoever picks the dirtiest card. If nobody picks a
+        dirty card, you keep it.
+      </p>
+      <p className="pnote">Three for the whole game. You have {view.spotlightsRemaining} left.</p>
+      <button
+        className="btn btn--accent"
+        onClick={() => {
+          send({ t: 'spotlight', role: view.role })
+          onClose()
+        }}
+      >
+        TURN THE SPOTLIGHT ON
+      </button>
+      <button className="btn" onClick={onClose}>
+        CANCEL
+      </button>
     </>
   )
 }
@@ -309,18 +387,17 @@ function SaySheet({
   if (shape === 'promise') {
     return (
       <>
-        <p className="pnote">Pick the card you will promise.</p>
+        <p className="pnote">Tap the card you will promise. These are your cards for this round.</p>
         {view.options.map((o) => (
-          <button
+          <OptionCard
             key={o.id}
-            className="btn btn--ghost"
-            onClick={() => {
+            option={o}
+            selected={false}
+            onPick={() => {
               send({ t: 'say', role: view.role, shape: 'promise', optionId: o.id })
               onClose()
             }}
-          >
-            {BOARD_NAME[view.role]} will pick “{o.title}”.
-          </button>
+          />
         ))}
         <button className="btn" onClick={() => setShape(null)}>
           BACK
@@ -398,11 +475,9 @@ function DealSheet({
   if (!card) {
     return (
       <>
-        <p className="pnote">First: what will you pick, if they do their part?</p>
+        <p className="pnote">First: tap the card you will pick, if they do their part.</p>
         {view.options.map((o) => (
-          <button key={o.id} className="btn btn--ghost" onClick={() => setOptionId(o.id)}>
-            {o.title}
-          </button>
+          <OptionCard key={o.id} option={o} selected={false} onPick={() => setOptionId(o.id)} />
         ))}
         <button className="btn" onClick={onBack}>
           BACK
@@ -419,7 +494,10 @@ function DealSheet({
       {ROLES.filter((r) => r !== view.role).map((target) => (
         <div key={target}>
           <span className="plabel">{ROLE_LABEL[target].toUpperCase()}</span>
-          {DEAL_CONDITIONS.map((c) => (
+          {DEAL_CONDITIONS.filter(
+            (c) =>
+              (!c.onlyFor || c.onlyFor === target) && (!c.needsPartnership || card.kind === 'partnership'),
+          ).map((c) => (
             <button
               key={`${target}-${c.id}`}
               className="btn btn--ghost"
@@ -460,19 +538,9 @@ function OfferSheet({
   send: (c: Command) => void
   onClose: () => void
 }) {
-  const [to, setTo] = useState<Role | null>(null)
   const resource = view.resource.kind === 'capital' ? 'capital' : 'fiscal'
   const unit = resource === 'fiscal' ? 'Budget' : 'Company Money'
   const canSend = view.resource.kind === 'fiscal' || view.resource.kind === 'capital'
-
-  if (!canSend) {
-    return (
-      <p className="ptext">
-        You have no money to send. Your power is the{' '}
-        {view.resource.kind === 'vetoes' ? 'veto' : 'Spotlight'}.
-      </p>
-    )
-  }
 
   /**
    * Only the Government and the Business can hold money. Offering to either of
@@ -482,6 +550,18 @@ function OfferSheet({
   const recipients = ROLES.filter(
     (r) => r !== view.role && (ROLE_RESOURCE[r].kind === 'fiscal' || ROLE_RESOURCE[r].kind === 'capital'),
   )
+  // With one possible recipient there is nothing to choose, so it is chosen.
+  // The amount buttons used to sit greyed out until the only name was tapped.
+  const [to, setTo] = useState<Role | null>(recipients.length === 1 ? recipients[0] : null)
+
+  if (!canSend) {
+    return (
+      <p className="ptext">
+        You have no money to send. Your power is the{' '}
+        {view.resource.kind === 'vetoes' ? 'veto' : 'Spotlight'}.
+      </p>
+    )
+  }
 
   return (
     <>
@@ -524,9 +604,11 @@ function OfferSheet({
 }
 
 /**
- * The only hold-and-slide in the app, and the only screen that goes full-bleed
- * in a role's deep tone. Two vetoes for a whole game deserve friction: an
- * accidental veto would be the single worst bug in the product.
+ * Two vetoes for a whole game deserve a second look, and an accidental veto
+ * would be the single worst bug in the product. It used to be a slider, the
+ * only one in the app, and the one player who had it nearly ran out of time
+ * on it. Now it is what everything else is: a tap, then a tap that says
+ * exactly what it does.
  */
 function VetoSheet({
   view,
@@ -538,50 +620,46 @@ function VetoSheet({
   onClose: () => void
 }) {
   const [target, setTarget] = useState<Role | null>(null)
-  const [slide, setSlide] = useState(0)
+  const left = view.vetoesRemaining - 1
+
+  if (target) {
+    return (
+      <>
+        <p className="ptext">
+          You take the {ROLE_LABEL[target]}’s dirty cards away for this round.
+        </p>
+        <p className="pnote">
+          Everyone will know it was you. You will have {left} {left === 1 ? 'veto' : 'vetoes'} left.
+        </p>
+        <p className="pnote" style={{ color: 'var(--jtnz-com-deep)' }}>
+          “The people will not accept this.”
+        </p>
+        <button
+          className="btn btn--accent"
+          onClick={() => {
+            send({ t: 'veto', role: 'community', target })
+            onClose()
+          }}
+        >
+          YES. SAY NO TO THE {ROLE_LABEL[target].toUpperCase()}
+        </button>
+        <button className="btn" onClick={() => setTarget(null)}>
+          BACK
+        </button>
+      </>
+    )
+  }
 
   return (
     <>
-      <p className="ptext">You will take away one player’s dirty cards.</p>
+      <p className="ptext">{DEFINE.veto}</p>
       <span className="plabel">WHICH PLAYER</span>
       {ROLES.filter((r) => r !== 'community').map((r) => (
-        <button
-          key={r}
-          className={`btn ${target === r ? 'btn--primary' : 'btn--ghost'}`}
-          onClick={() => setTarget(r)}
-        >
+        <button key={r} className="btn btn--ghost" onClick={() => setTarget(r)}>
           <RoleGlyph role={r} size={14} /> {ROLE_LABEL[r]}
         </button>
       ))}
-      <p className="pnote">
-        This round only. Everyone will know it was you. You will have{' '}
-        {view.vetoesRemaining - 1} {view.vetoesRemaining - 1 === 1 ? 'veto' : 'vetoes'} left.
-      </p>
-      <p className="pnote" style={{ color: 'var(--jtnz-com-deep)' }}>
-        “The people will not accept this.”
-      </p>
-
-      <label className="plabel" htmlFor="veto-slide">
-        SLIDE ALL THE WAY TO SAY NO
-      </label>
-      <input
-        id="veto-slide"
-        type="range"
-        min={0}
-        max={100}
-        value={slide}
-        disabled={!target}
-        onChange={(e) => {
-          const v = Number(e.target.value)
-          setSlide(v)
-          if (v >= 100 && target) {
-            send({ t: 'veto', role: 'community', target })
-            onClose()
-          }
-        }}
-        onPointerUp={() => setSlide(0)}
-        style={{ width: '100%', height: 48 }}
-      />
+      <p className="pnote">This round only. You have {view.vetoesRemaining} for the whole game.</p>
       <button className="btn" onClick={onClose}>
         CANCEL
       </button>

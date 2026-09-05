@@ -95,8 +95,8 @@ export const BEATS: Beat[] = [
       'And watch this screen while you do it. Everything you say appears up here, where the whole room can see it.',
     ],
     watch:
-      'Wait until all four have appeared on the board. This is the only moment in the session where a button costs nobody anything, and a player who has pressed it once will press it again in Round 2.',
-    next: 'Moves on to practising the choice.',
+      'Wait until all four have appeared on the board, then all four I AM DONE. This is the only moment in the session where a button costs nobody anything, and a player who has pressed it once will press it again in Round 2.',
+    next: 'Moves on to practising the choice. The fourth I AM DONE does this on its own.',
   },
   {
     phase: 'practiceChoice',
@@ -116,15 +116,15 @@ export const BEATS: Beat[] = [
     phase: 'practiceReveal',
     label: 'PRACTICE: THE REVEAL',
     length: seconds('practiceReveal'),
-    onScreen: 'The four practice cards turning over, any practice promise judged, and the meters moving.',
+    onScreen: 'Four seconds of LOOK UP with a countdown, then the four practice cards turning over, any practice promise judged, and the meters moving. The phones show the same cards.',
     say: [
-      'Eyes up. This is what happens at the end of every round: the four cards turn over, one at a time, in front of everybody.',
+      'Eyes up. This is what happens at the end of every round: the four cards turn over, one at a time, in front of everybody. Your phone shows them too.',
       'Watch the meters move. And if anybody promised something up here and then did the other thing, the screen says so. That is the part that is going to matter.',
-      'None of this counted. In a moment the country goes back to where it started.',
+      'None of this counted. Tap GOT IT on your phone and the country goes back to where it started.',
     ],
     watch:
-      'Point at the promise board if a practice promise was broken. A table that has seen the sting once, for free, plays the first real Talk very differently.',
-    next: 'Throws the practice away and introduces each seat to its own special move.',
+      'Point at the promise board if a practice promise was broken. A table that has seen the sting once, for free, plays the first real Talk very differently. GOT IT only appears once the fourth card has turned.',
+    next: 'Throws the practice away and introduces each seat to its own special move. The fourth GOT IT does this on its own.',
   },
   {
     phase: 'power',
@@ -134,6 +134,7 @@ export const BEATS: Beat[] = [
     say: [
       'One more thing, and this one is different for each of you. Read your own phone, then look up: all four cards are on the screen, so you can see what the other three can do to you.',
       'Activist, you have three Spotlights. Community, you have two vetoes. Minister and Company Boss, you have money, and you are the only two who do.',
+      'And the practice is gone. The country is back at the start, and so are your powers.',
     ],
     watch:
       'Heads down, then GOT IT on every phone; the screen counts them, and the step moves on by itself at four. Teaching all four powers to all four players is four times the words and three times the irrelevance, which is why each phone only shows its own.',
@@ -161,11 +162,11 @@ export const BEATS: Beat[] = [
     say: [
       'And here we go. Breaking news. [Read the headline off the screen, and mean it.]',
       'Look at your phone. You have the same story, plus one line written for you and nobody else in this room. Nobody knows what anyone else just read.',
-      'Do not start fixing it yet. Take it in. The Talk opens in a moment, and then you can shout at each other.',
+      'Do not start fixing it yet. Take it in. Tap GOT IT when you have read it. When all four have, the Talk opens.',
     ],
     watch:
       'One player gets a tip this round and nobody is told who. If somebody suddenly goes quiet or suddenly gets loud, that is probably why. Let it play.',
-    next: 'Opens the Talk. The clock starts on its own if you leave it.',
+    next: 'Opens the Talk. The fourth GOT IT does this on its own, and the clock if they never do.',
   },
   {
     phase: 'table',
@@ -175,15 +176,16 @@ export const BEATS: Beat[] = [
     say: [
       'Talking time! Ninety seconds. Talk to each other, not to your phones.',
       'The best sentence in this game is: “what if we both did it?” Your phone will say it for you. SAY IT, then the deal. Somebody use it.',
+      'When you have said your part, tap I AM DONE. When all four have, the cards come out.',
     ],
     firstTime: [
-      'One button. SAY IT. Behind it are three sentences: I will pick this card, I will pick this card if you do that, or I want you to do something. Pick one, tap twice, and the whole room sees it.',
+      'One button. SAY IT. Behind it are three sentences: I will pick this card, I will pick this card if you do that, or I want you to do something. Pick one, tap twice, and the whole room sees it. You see your three cards, arrows and all, before you promise one.',
       'The middle one is a deal, and it is the most powerful thing on your phone. If they keep their part and you do not, this screen says so in front of everybody. If they never keep their part, you are free. So there is no risk in offering one.',
-      'Activist, you have three Spotlights for the whole game. Name somebody in public, and if they pick a dirty card it only half works. Community, you have two vetoes. Take somebody’s dirty cards away for the round. Three and two. That is all you get, so spend them where they hurt.',
+      'Activist, you have three Spotlights for the whole game. Turn one on and pick a protest card, and whoever picks the dirtiest card only half works. Community, you have two vetoes. Take somebody’s dirty cards away for the round. Three and two. That is all you get, so spend them where they hurt.',
     ],
     watch:
       "If the room goes quiet, put the question in somebody's mouth (“Business, what would it take?”) and then stop talking. Do not answer your own question. The silence after it is where the deal gets made.",
-    next: 'Closes the Talk and deals the three cards.',
+    next: 'Closes the Talk and deals the three cards. The fourth I AM DONE does this on its own.',
   },
   {
     phase: 'choice',
@@ -205,7 +207,7 @@ export const BEATS: Beat[] = [
     phase: 'reckoning',
     label: 'THE REVEAL',
     length: seconds('reckoning'),
-    onScreen: 'The four cards flip one at a time, meters moving between each.',
+    onScreen: 'Four seconds of ALL FOUR LOCKED · LOOK UP, counted down, then the four cards flip one at a time, meters moving between each. Every phone shows the same cards.',
     say: [
       'Locked. Eyes up. Let us see what this room actually did.',
     ],
@@ -217,10 +219,10 @@ export const BEATS: Beat[] = [
     phase: 'trust',
     label: 'PUBLIC TRUST',
     length: seconds('trust'),
-    onScreen: 'The two seats the country backed this round, and the running totals.',
+    onScreen: 'The two seats the country backed this round, the running totals, and the rule that promises do not count here.',
     say: [
       'And the country has been watching. Two Public Trust go out every round: one to whoever looked after people, one to whoever built the future.',
-      'Nobody hands these out and you cannot ask for them. Look at your phone as well; it now tells you what your own card actually did.',
+      'Nobody hands these out and you cannot ask for them. Promises do not count here, only what the cards did. Look at your phone as well; it now tells you what your own card actually did.',
     ],
     firstTime: [
       'Minister, watch that number. Some of your best cards will not open until the country has backed you enough times.',
@@ -428,6 +430,10 @@ export const TROUBLE: Trouble[] = [
   {
     problem: 'Somebody typed the code wrong.',
     fix: 'It is always four letters, never digits. O is a letter here. Or have them scan the QR code, which cannot be mistyped.',
+  },
+  {
+    problem: 'Everyone has said their piece and the Talk is still running.',
+    fix: 'They end it themselves: four I AM DONE on the phones close the Talk, four GOT IT close the crisis. The count is in the top corner of the big screen. N still works if one phone is asleep.',
   },
   {
     problem: 'Nobody is locking and the clock is nearly out.',

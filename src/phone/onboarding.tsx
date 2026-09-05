@@ -13,7 +13,7 @@
 import type { Command } from '../game/room'
 import type { Phase, PhoneView } from '../game/session'
 import { RoleCard } from '../ui/RoleCard'
-import { LookUp } from './screens'
+import { RevealScreen } from './screens'
 import { TheChoice } from './TheChoice'
 import { TableActions } from './TableActions'
 
@@ -36,7 +36,7 @@ export function PracticeTalk({ view, send }: { view: PhoneView; send: (c: Comman
     <>
       <Coach step={1} of={4}>
         {said
-          ? 'Good. Everyone can see it on the big screen.'
+          ? 'Good. Everyone can see it on the big screen. Now tap I AM DONE.'
           : 'Practice. Tap SAY IT and pick a sentence. This does not count.'}
       </Coach>
       <TableActions view={view} send={send} />
@@ -69,16 +69,19 @@ export function PracticeChoice({
 /**
  * Between the practice choice and the power step: the cards turn over.
  *
- * The projector runs the real flip sequence on the practice cards, so the
- * phone does the one thing it does at every Reveal, which is send the eyes up.
+ * The projector runs the real flip sequence on the practice cards and the
+ * phone mirrors it, card for card, then offers GOT IT. Four of them end it.
  */
-export function PracticeReveal({ view }: { view: PhoneView }) {
-  return (
-    <>
-      <div className="coach coach--slim">Look up. This is what a Reveal looks like.</div>
-      <LookUp view={view} variant="practice" />
-    </>
-  )
+export function PracticeReveal({
+  view,
+  remaining,
+  send,
+}: {
+  view: PhoneView
+  remaining: number | null
+  send: (c: Command) => void
+}) {
+  return <RevealScreen view={view} remaining={remaining} send={send} />
 }
 
 /**
@@ -94,7 +97,14 @@ export function YourPower({ view, onAck }: { view: PhoneView; onAck: () => void 
     <div className="pbody">
       <Coach step={3} of={4}>This is your special power. Each player has a different one.</Coach>
 
+      {/* The practice took carbon to 53 and this step puts it back to 100.
+          Said, because an eleven-year-old decided the 53 had been "fake". */}
+      <p className="pnote">Practice over. The country is back at the start. So are your powers.</p>
+
       <RoleCard role={view.role} size="big" lines="power" />
+      {view.role === 'community' ? (
+        <p className="pnote">You cannot hold Public Trust. Your power is the veto.</p>
+      ) : null}
 
       {/* The card stays up after GOT IT. The button tells the room this player
           has read it, and the step ends when the fourth one does, so a quick
@@ -114,10 +124,10 @@ export function YourPower({ view, onAck }: { view: PhoneView; onAck: () => void 
 
 /** The Round 1 strip. Says what to do now, and goes away from Round 2. */
 const ROUND_ONE_LINE: Partial<Record<Phase, string>> = {
-  crisis: 'Read the news. Nothing to tap yet.',
-  table: 'Talk to each other. Try asking: what if we both did it?',
+  crisis: 'Read the news. Then tap GOT IT.',
+  table: 'Talk to each other. Tap I AM DONE when you have said your part.',
   choice: 'Pick one card. You can change it until you lock.',
-  reckoning: 'Look up at the big screen.',
+  reckoning: 'Look up. Your phone shows the cards too.',
 }
 
 export function RoundOneCoach({ view }: { view: PhoneView }) {

@@ -46,9 +46,9 @@ export function MenuSheet({
             THE FULL WRITTEN GUIDE
           </a>
 
-          <span className="plabel" style={{ marginTop: 'var(--space-4)' }}>
-            LEAVING
-          </span>
+          {/* Small, last, and behind a second tap. It used to be a full
+              button at the foot of the sheet, and an eleven-year-old said she
+              was afraid of pressing it by accident. */}
           {confirming ? (
             <>
               <p className="ptext">
@@ -63,12 +63,12 @@ export function MenuSheet({
               </button>
             </>
           ) : (
-            <>
-              <p className="pmono">ROOM {view.code}</p>
-              <button className="btn btn--ghost" onClick={() => setConfirming(true)}>
-                LEAVE THE GAME
+            <p className="pmono menu__foot">
+              ROOM {view.code} ·{' '}
+              <button className="menu__leave" onClick={() => setConfirming(true)}>
+                leave the game
               </button>
-            </>
+            </p>
           )}
         </div>
       </div>

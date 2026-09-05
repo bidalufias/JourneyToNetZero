@@ -22,7 +22,7 @@ import {
   tick,
   type Command,
 } from '../src/game/room'
-import { PHASE_MS, phaseMs, type Room } from '../src/game/session'
+import { PHASE_MS, RECKONING_FIRST_CARD_MS, phaseMs, type Room } from '../src/game/session'
 
 const content = loadContent(
   JSON.parse(readFileSync(fileURLToPath(new URL('../content/jtnz-content-pack-v2.json', import.meta.url)), 'utf8')),
@@ -648,7 +648,7 @@ describe('the phone can never see the numbers', () => {
     const parsed = JSON.parse(wire)
     for (const card of parsed.options) {
       expect(Object.keys(card).sort()).toEqual(
-        ['available', 'condition', 'cost', 'desc', 'disabled', 'disabledNote', 'id', 'impact', 'title'].sort(),
+        ['available', 'condition', 'cost', 'desc', 'disabled', 'disabledNote', 'id', 'impact', 'kind', 'title'].sort(),
       )
       // The chips carry a direction and never a value. -3 to 3 is the whole
       // range they may take, so no effect can be read back off one.
@@ -1271,5 +1271,233 @@ describe('phase timings match the published session', () => {
     // Results and the debrief are facilitator-paced and sit outside the clock,
     // so the timed part has to leave room for them.
     expect(total).toBeLessThanOrEqual(28 * 60 * 1000)
+  })
+})
+
+// ── WP7: the room ends the step, and every screen agrees ──────────────────
+
+describe('the room ends the crisis and the Talk', () => {
+  it('opens the Talk on the fourth GOT IT, not on the clock', () => {
+    const room = seated()
+    startPlaying(room)
+    expect(room.phase).toBe('crisis')
+    for (const role of ['government', 'business', 'community'] as const) run(room, { t: 'done', role })
+    expect(room.phase).toBe('crisis')
+    expect(dashboardView(room, content).doneCount).toBe(3)
+    expect(phoneView(room, content, 'activist').doneCount).toBe(3)
+    run(room, { t: 'done', role: 'activist' })
+    expect(room.phase).toBe('table')
+    // A new step, a new button: nobody is done with a Talk that just opened.
+    expect(dashboardView(room, content).doneCount).toBe(0)
+  })
+
+  it('deals the cards on the fourth I AM DONE', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'table')
+    for (const role of ROLES) run(room, { t: 'done', role })
+    expect(room.phase).toBe('choice')
+  })
+
+  it('is refused where the step has no such button', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'choice')
+    for (const role of ROLES) run(room, { t: 'done', role })
+    expect(room.phase).toBe('choice')
+    expect(phoneView(room, content, 'government').done).toBe(false)
+  })
+
+  it('ends the practice Talk the same way', () => {
+    const room = seated()
+    run(room, { t: 'start' })
+    advanceTo(room, 'practiceTalk')
+    for (const role of ROLES) run(room, { t: 'done', role })
+    expect(room.phase).toBe('practiceChoice')
+  })
+
+  it('holds the practice Reveal until the cards have turned, then ends it on four', () => {
+    const room = seated()
+    run(room, { t: 'start' })
+    advanceTo(room, 'practiceChoice')
+    for (const role of ROLES) lockIn(room, role, firstAvailable(room, role))
+    expect(room.phase).toBe('practiceReveal')
+
+    // A phone ahead of the projector cannot skip the one screen the practice
+    // exists to show.
+    for (const role of ROLES) run(room, { t: 'done', role })
+    expect(room.phase).toBe('practiceReveal')
+    expect(dashboardView(room, content).doneCount).toBe(0)
+
+    clock += 17_000
+    for (const role of ROLES) run(room, { t: 'done', role })
+    expect(room.phase).toBe('power')
+  })
+
+  it('does not count a seat nobody is sitting in', () => {
+    const room = seated()
+    run(room, { t: 'leave', role: 'activist' })
+    startPlaying(room)
+    for (const role of ['government', 'business', 'community'] as const) run(room, { t: 'done', role })
+    expect(room.phase).toBe('table')
+  })
+})
+
+describe('the Reveal, on the phone', () => {
+  it('mirrors the four cards with their badges, and nothing else', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'table')
+    expect(phoneView(room, content, 'government').reveal).toBeNull()
+
+    const mine = firstAvailable(room, 'government')
+    run(room, { t: 'say', role: 'government', shape: 'promise', optionId: mine })
+    advanceTo(room, 'choice')
+    for (const role of ROLES) lockIn(room, role, firstAvailable(room, role))
+    expect(room.phase).toBe('reckoning')
+
+    const mirror = phoneView(room, content, 'community').reveal!
+    expect(mirror.practice).toBe(false)
+    expect(mirror.cards.map((c) => c.role)).toEqual(room.lastRound!.reveals.map((r) => r.role))
+    for (const card of mirror.cards) {
+      expect(Object.keys(card).sort()).toEqual(['badges', 'desc', 'role', 'title'])
+    }
+    const gov = mirror.cards.find((c) => c.role === 'government')!
+    expect(gov.badges.map((b) => b.text)).toContain('KEPT THE PROMISE ✓')
+    // Titles and verdicts, never a number the projector would not show.
+    const wire = JSON.stringify(mirror)
+    for (const r of room.lastRound!.reveals) expect(wire).not.toContain(String(r.emissions))
+  })
+
+  it('waits four seconds before the first card turns', () => {
+    // The fourth lock used to turn the first card six hundred milliseconds
+    // later, before the player who locked it had lifted their eyes.
+    expect(RECKONING_FIRST_CARD_MS).toBeGreaterThanOrEqual(3_000)
+  })
+})
+
+describe('Public Trust, said where it is given', () => {
+  it('shows the trust the room holds after a shared tip has paid', () => {
+    const room = seated()
+    startPlaying(room)
+    const tip = room.tips[0]
+    run(room, { t: 'publishTip', role: tip.to })
+    advanceTo(room, 'trust')
+
+    const view = dashboardView(room, content)
+    if (tip.to !== 'community') {
+      // The engine's snapshot is one behind: the stake lands after it.
+      expect(view.trustHeld[tip.to]).toBe(room.lastRound!.state.trust[tip.to] + 1)
+      expect(phoneView(room, content, tip.to).trustLines).toContain('You got 1 Public Trust for sharing your tip.')
+    }
+    expect(view.tipStake?.role).toBe(tip.to)
+    expect(view.tipStake?.text).toContain('shared a tip')
+  })
+
+  it('tells the Community it holds vetoes, and everyone that promises do not count', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'trust')
+    const lines = phoneView(room, content, 'community').trustLines
+    expect(lines).toContain('Promises do not count here. Only what the cards did.')
+    expect(lines).toContain('The Community cannot hold Public Trust. Your power is the veto.')
+    expect(phoneView(room, content, 'government').trustLines).not.toContain(
+      'The Community cannot hold Public Trust. Your power is the veto.',
+    )
+  })
+})
+
+describe('the Spotlight tells the truth', () => {
+  it('is one number, and it moves only when a Spotlight is spent', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'table')
+    const before = phoneView(room, content, 'activist')
+    expect(before.spotlightsRemaining).toBe(3)
+    expect(before.resource.value).toBe(3)
+
+    run(room, { t: 'spotlight', role: 'activist' })
+    const called = phoneView(room, content, 'activist')
+    expect(called.spotlightCalled).toBe(true)
+    // Calling it costs nothing. The header and the button read the same 3.
+    expect(called.spotlightsRemaining).toBe(3)
+    expect(called.resource.value).toBe(3)
+    expect(dashboardView(room, content).spotlight?.remaining).toBe(3)
+  })
+
+  it('says why it caught nobody', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'table')
+    run(room, { t: 'spotlight', role: 'activist' })
+    advanceTo(room, 'choice')
+    // A card that is not a protest card, so the Spotlight cannot fire.
+    const quiet = phoneView(room, content, 'activist').options.find((o) => o.available && o.kind !== 'protest')!
+    lockIn(room, 'activist', quiet.id)
+    for (const role of ['government', 'business', 'community'] as const) {
+      lockIn(room, role, firstAvailable(room, role))
+    }
+    advanceTo(room, 'trust')
+    expect(room.game.spotlights).toBe(3)
+    expect(phoneView(room, content, 'activist').roundResult?.cost).toContain('did not pick a protest card')
+  })
+
+  it('labels protest cards the way it labels dirty cards', () => {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'table')
+    for (const role of ROLES) {
+      for (const o of phoneView(room, content, role).options) {
+        if (o.kind === 'dirty') expect(o.condition).toBe('Dirty card. It breaks moving together.')
+        if (o.kind === 'protest') expect(o.condition).toBe('Protest card. Your Spotlight only works with this.')
+        if (o.kind === 'partnership') expect(o.condition).toContain('Partnership')
+      }
+    }
+  })
+})
+
+describe('the Business can say "if the Government pays half"', () => {
+  /** Round 1, at the table, with the Business holding a partnership card. */
+  function atTable() {
+    const room = seated()
+    startPlaying(room)
+    advanceTo(room, 'table')
+    const partnership = phoneView(room, content, 'business').options.find((o) => o.kind === 'partnership')
+    return { room, partnership }
+  }
+
+  it('is offered only on a partnership card, only against the Government', () => {
+    const { room, partnership } = atTable()
+    if (!partnership) return
+    run(room, {
+      t: 'say',
+      role: 'business',
+      shape: 'deal',
+      optionId: partnership.id,
+      target: 'activist',
+      conditionId: 'pays-half',
+    })
+    expect(room.promises.filter((p) => p.kind === 'deal')).toHaveLength(0)
+
+    const plain = phoneView(room, content, 'business').options.find((o) => o.kind !== 'partnership' && o.available)!
+    run(room, { t: 'say', role: 'business', shape: 'deal', optionId: plain.id, target: 'government', conditionId: 'pays-half' })
+    expect(room.promises.filter((p) => p.kind === 'deal')).toHaveLength(0)
+
+    run(room, { t: 'say', role: 'business', shape: 'deal', optionId: partnership.id, target: 'government', conditionId: 'pays-half' })
+    const deal = room.promises.find((p) => p.kind === 'deal')!
+    expect(deal.text).toBe(`The Business will pick “${partnership.title}” if the Government pays half.`)
+  })
+
+  it('is kept when the Government paid and the Business picked it, void when it did not pay', () => {
+    for (const paid of [true, false]) {
+      const { room, partnership } = atTable()
+      if (!partnership) return
+      run(room, { t: 'say', role: 'business', shape: 'deal', optionId: partnership.id, target: 'government', conditionId: 'pays-half' })
+      if (paid) run(room, { t: 'say', role: 'government', shape: 'cofund', on: true })
+      advanceTo(room, 'choice')
+      lockIn(room, 'business', partnership.id)
+      for (const role of ['government', 'community', 'activist'] as const) lockIn(room, role, firstAvailable(room, role))
+      expect(room.promises.find((p) => p.kind === 'deal')!.outcome).toBe(paid ? 'kept' : 'void')
+    }
   })
 })

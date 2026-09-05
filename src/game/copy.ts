@@ -116,11 +116,16 @@ export const DEMAND_PHRASES: { id: string; you: string; text: (target: string) =
  * The "if" half of a deal, and the only part of a promise the room resolves
  * against somebody else's card.
  *
- * Two conditions, not six, and both are settled by facts the reveal already
- * carries: whether that seat counted toward moving together, and whether it
- * picked a dirty card. Anything richer would need a phone to name a card from
- * another seat's deck, which means either showing every player all sixteen
- * cards, or letting them promise against something they cannot see.
+ * Three conditions, and all are settled by facts the round already carries:
+ * whether that seat counted toward moving together, whether it picked a
+ * dirty card, and whether the Government paid half. Anything richer would
+ * need a phone to name a card from another seat's deck, which means either
+ * showing every player all sixteen cards, or letting them promise against
+ * something they cannot see.
+ *
+ * The third is only offered to a partnership card aimed at the Government,
+ * because it is the sentence the Business's own role card tells the player
+ * to say, and for a round the phone had no way to say it.
  *
  * Worded in the third person, because a deal is composed on a phone and then
  * read off a projector. "...if the Government moves with me" is what the
@@ -128,12 +133,21 @@ export const DEMAND_PHRASES: { id: string; you: string; text: (target: string) =
  * will pick X if the Government moves with me". One sentence has to work in
  * both places, so it is the board's grammar that wins.
  */
+export interface DealContext {
+  /** The Government said it would pay half, and did. */
+  coFund: boolean
+}
+
 export const DEAL_CONDITIONS: {
   id: string
   /** How the condition reads in the deal. */
   text: (target: string) => string
-  /** Settled from that seat's reveal. Nothing here consults the promiser. */
-  met: (them: { aligned: boolean; arch: Archetype }) => boolean
+  /** Settled from that seat's reveal and the round. Nothing here consults the promiser's card. */
+  met: (them: { aligned: boolean; arch: Archetype }, round: DealContext) => boolean
+  /** Only offered against this seat, when set. */
+  onlyFor?: Role
+  /** Only offered on a partnership card, when set. */
+  needsPartnership?: boolean
 }[] = [
   {
     id: 'moves-with-me',
@@ -148,6 +162,13 @@ export const DEAL_CONDITIONS: {
     id: 'no-cheap-card',
     text: (t) => `the ${t} does not pick a dirty card`,
     met: (them) => !DIRTY.has(them.arch),
+  },
+  {
+    id: 'pays-half',
+    text: (t) => `the ${t} pays half`,
+    met: (_them, round) => round.coFund,
+    onlyFor: 'government',
+    needsPartnership: true,
   },
 ]
 

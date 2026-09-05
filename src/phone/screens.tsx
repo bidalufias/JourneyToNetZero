@@ -6,11 +6,13 @@ import { useState } from 'react'
 import type { Role } from '../engine/types'
 import type { Command } from '../game/room'
 import type { InsiderTip, PhoneView } from '../game/session'
-import { ROLE_CARD, ROLE_LABEL } from '../game/session'
+import { RECKONING_CARD_GAP_MS, RECKONING_FIRST_CARD_MS, ROLE_CARD, ROLE_LABEL, phaseMs } from '../game/session'
 import { arrows } from '../game/impact'
 import { LABEL, STEP_LABEL, TERM } from '../game/vocab'
+import { revealedCount } from '../dashboard/reckoning-clock'
 import { RoleGlyph, formatClock } from '../ui/primitives'
 import { RoleCard } from '../ui/RoleCard'
+import { DoneButton } from './TableActions'
 
 /**
  * P-03: the role reveal. The skin applies here and never changes again.
@@ -159,8 +161,14 @@ export function Lobby({ view }: { view: PhoneView }) {
   )
 }
 
-/** P-06: the crisis, plus the one line written for this seat alone. */
-export function Crisis({ view }: { view: PhoneView }) {
+/**
+ * P-06: the crisis, plus the one line written for this seat alone.
+ *
+ * GOT IT under it, when the crisis is live. Four of them open the Talk, so a
+ * room that has read the news does not sit through twenty seconds of
+ * "nothing to tap yet".
+ */
+export function Crisis({ view, send }: { view: PhoneView; send?: (c: Command) => void }) {
   const s = view.scenario
   if (!s) return null
   return (
@@ -173,6 +181,109 @@ export function Crisis({ view }: { view: PhoneView }) {
       <p className="ptext" style={{ fontWeight: 600 }}>
         {view.privateLine}
       </p>
+      {send && view.phase === 'crisis' ? (
+        <div style={{ marginTop: 'auto' }}>
+          <DoneButton
+            view={view}
+            label="GOT IT"
+            note="The Talk starts when all four have tapped, or the clock ends."
+            send={send}
+          />
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+/**
+ * The Reveal, on the phone.
+ *
+ * The same clock as the projector: four seconds of LOOK UP with a countdown,
+ * then the four cards, one every three seconds, each with the two lines the
+ * big screen draws under it. A phone used to say "Look up." and nothing
+ * else, and three of four first-time players lifted their eyes after the
+ * practice cards had already turned.
+ *
+ * In the practice, GOT IT appears once the fourth card has turned, and four
+ * of them end the step.
+ */
+export function RevealScreen({
+  view,
+  remaining,
+  send,
+}: {
+  view: PhoneView
+  remaining: number | null
+  send: (c: Command) => void
+}) {
+  const mirror = view.reveal
+  const total = phaseMs(view.phase, view.round)
+  const elapsed = remaining === null ? total : Math.max(0, total - remaining)
+  const shown = revealedCount(elapsed)
+  const countdown = Math.max(1, Math.ceil((RECKONING_FIRST_CARD_MS - elapsed) / 1000))
+  const seen = elapsed >= RECKONING_FIRST_CARD_MS + 4 * RECKONING_CARD_GAP_MS
+  const practice = mirror?.practice ?? view.phase === 'practiceReveal'
+  const label = practice ? STEP_LABEL.practiceReveal : `${LABEL.reveal} · ROUND ${view.round}`
+
+  if (!mirror || shown === 0) {
+    return (
+      <div className="lookup" data-role={view.role}>
+        <span className="lookup__label">{label}</span>
+        <h1 className="lookup__big">
+          Look
+          <br />
+          up.
+        </h1>
+        <div className="lookup__rule" />
+        <p className="lookup__note">
+          All four locked. The cards turn in <strong>{countdown}</strong>.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mirror" data-role={view.role}>
+      <span className="lookup__label">{label}</span>
+      <p className="mirror__cue">The big screen is showing the cards. Your phone shows them too.</p>
+      {mirror.cards.map((c, i) => {
+        const up = i < shown
+        return (
+          <div key={c.role} className={`mirror__card${up ? ' mirror__card--up' : ''}`} data-role={c.role}>
+            <div className="mirror__role">
+              <RoleGlyph role={c.role} size={14} />
+              <span>{ROLE_LABEL[c.role].toUpperCase()}</span>
+              {c.role === view.role ? <span className="mirror__you">YOU</span> : null}
+            </div>
+            {up ? (
+              <>
+                <div className="mirror__title">{c.title}</div>
+                {c.badges.map((b) => (
+                  <div key={b.text} className={`mirror__badge mirror__badge--${b.tone}`}>
+                    {b.text}
+                  </div>
+                ))}
+              </>
+            ) : (
+              <div className="mirror__back">turning next…</div>
+            )}
+          </div>
+        )
+      })}
+      {practice && seen ? (
+        <div style={{ marginTop: 'var(--space-3)' }}>
+          <p className="ptext">Nothing here counted. The country goes back to the start.</p>
+          <DoneButton
+            view={view}
+            label="GOT IT"
+            note="The game moves on when all four have seen this."
+            send={send}
+          />
+        </div>
+      ) : null}
+      {!practice && shown >= 4 ? (
+        <p className="pnote">Your own result comes next, on this phone.</p>
+      ) : null}
     </div>
   )
 }
@@ -351,6 +462,14 @@ export function RoundResult({ view }: { view: PhoneView }) {
             <strong>{ROLE_LABEL[view.trustAward.care]}</strong> looked after people best.{' '}
             <strong>{ROLE_LABEL[view.trustAward.future]}</strong> did most for the future.
           </p>
+          {/* Why, in this seat's terms. A room that watched both points go to a
+              promise-breaker decided the game was rigged, because nothing said
+              that promises do not move Public Trust. */}
+          {view.trustLines.map((line) => (
+            <p key={line} className="pnote">
+              {line}
+            </p>
+          ))}
         </>
       ) : null}
     </div>

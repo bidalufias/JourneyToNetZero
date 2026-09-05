@@ -66,6 +66,13 @@ export function Attract({
           <p className="attract__seats-label">
             THE FOUR SEATS · {view.seats.filter((x) => x.name).length} OF 4 · {view.readyCount} READY
           </p>
+          {/* Who the room is waiting for, by name. The father started with
+              three of four ready and did not know who the fourth was. */}
+          {view.seats.some((x) => x.name && !x.ready) ? (
+            <p className="attract__seats-label attract__reading">
+              STILL READING: {view.seats.filter((x) => x.name && !x.ready).map((x) => x.name).join(', ')}
+            </p>
+          ) : null}
           {view.seats.map((seat) => (
             <div
               key={seat.role}
@@ -308,10 +315,13 @@ export function TrustAward({ view, clock }: { view: DashboardView; clock: string
   const log = view.lastRound
   if (!award || !log) return null
 
-  const totals = log.state.trust
+  // The room's trust now, after a shared tip has paid. The engine's snapshot
+  // is taken before the tip's point is added, and a player told "you get 1
+  // Public Trust" watched this screen say 0.
+  const totals = view.trustHeld
   const rows: { label: string; role: Role; why: string }[] = [
     { label: 'LOOKED AFTER PEOPLE', role: award.care, why: 'Most for quality of life this round.' },
-    { label: 'BUILT THE FUTURE', role: award.future, why: 'Most for the clean economy this round.' },
+    { label: 'BUILT THE FUTURE', role: award.future, why: 'Most for the Clean Economy this round.' },
   ]
 
   return (
@@ -337,6 +347,13 @@ export function TrustAward({ view, clock }: { view: DashboardView; clock: string
             Nobody hands these out. The people give them to whoever helped them most. Some cards
             need them.
           </p>
+          {/* A room watched both points go to a Minister marked BROKE THE
+              PROMISE and decided the game was rigged. The rule, said. */}
+          <p className="trust__body">
+            Promises do not count here. Only what the cards did. The Community holds vetoes, not
+            Public Trust.
+          </p>
+          {view.tipStake ? <p className="trust__body trust__stake">{view.tipStake.text}</p> : null}
         </div>
 
         <div className="trust__awards">
@@ -355,7 +372,8 @@ export function TrustAward({ view, clock }: { view: DashboardView; clock: string
       <div className="briefing-strip">
         <span className="briefing-strip__label">PUBLIC TRUST HELD</span>
         <span className="briefing-strip__text">
-          Government {totals.government} · Business {totals.business} · Activist {totals.activist}
+          Government {totals.government} · Business {totals.business} · Activist {totals.activist} ·
+          Community holds vetoes
         </span>
       </div>
     </div>

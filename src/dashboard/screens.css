@@ -844,3 +844,37 @@
   opacity: 0.55;
   margin-bottom: 6px;
 }
+
+/* ── LOOK UP: the four seconds before the first card ────────────────── */
+
+.reckoning__cue {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  background: color-mix(in srgb, var(--jtnz-broadcast) 88%, transparent);
+  text-align: center;
+}
+
+.reckoning__cue-label {
+  font: 800 clamp(14px, 1.4cqw, 26px) / 1 var(--font-heading);
+  letter-spacing: 0.2em;
+  color: var(--jtnz-glare);
+}
+
+.reckoning__cue-big {
+  font: 800 clamp(64px, 9cqw, 170px) / 0.95 var(--font-heading);
+  letter-spacing: -0.03em;
+}
+
+.reckoning__cue-count {
+  font: 800 clamp(40px, 5cqw, 96px) / 1 var(--font-heading);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent);
+}
+
+.trust__stake { color: var(--jtnz-com-warm); }

@@ -22,7 +22,7 @@ import { PhoneHeader, ReviewBar, SCREEN_ORDER, reviewableUpTo, type Screen } fro
 import { MenuSheet } from './Menu'
 import { TheChoice } from './TheChoice'
 import { TableActions } from './TableActions'
-import { Crisis, GoalChosen, GoalPicker, Lobby, LookUp, RoleReveal, RoundResult, TipCard } from './screens'
+import { Crisis, GoalChosen, GoalPicker, Lobby, LookUp, RevealScreen, RoleReveal, RoundResult, TipCard } from './screens'
 import { PracticeChoice, PracticeReveal, PracticeTalk, RoundOneCoach, YourPower } from './onboarding'
 import './phone.css'
 
@@ -89,7 +89,7 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
     if (view.phase === 'practiceChoice') {
       return <PracticeChoice view={view} send={send} remaining={remaining} />
     }
-    if (view.phase === 'practiceReveal') return <PracticeReveal view={view} />
+    if (view.phase === 'practiceReveal') return <PracticeReveal view={view} remaining={remaining} send={send} />
     if (view.phase === 'power') return <YourPower view={view} onAck={ack} />
     if (view.phase === 'goal') {
       // A latecomer who took a vacated seat still lands here, which is why the
@@ -100,10 +100,10 @@ export function Phone({ view, endgame, connection, send, onLeave }: PhoneProps) 
       // Took a vacated seat mid-session. Still owes a secret goal.
       return <GoalPicker view={view} send={send} />
     }
-    if (view.phase === 'crisis') return <Crisis view={view} />
+    if (view.phase === 'crisis') return <Crisis view={view} send={send} />
     if (view.phase === 'table') return <TableActions view={view} send={send} />
     if (view.phase === 'choice') return <TheChoice view={view} send={send} remaining={remaining} />
-    if (view.phase === 'reckoning') return <LookUp view={view} variant="reveal" />
+    if (view.phase === 'reckoning') return <RevealScreen view={view} remaining={remaining} send={send} />
     // The reveal belongs to the big screen; from the Public Trust beat onward
     // the phone answers the question the reveal just raised, which is what that
     // card of mine actually did.
