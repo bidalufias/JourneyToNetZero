@@ -11,7 +11,9 @@
 import { chromium } from 'playwright'
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs'
 
-const ROOT = '/tmp/claude-0/-home-user-JourneyToNetZero/d7eef4b3-0dfc-5a56-9820-99faa40be251/scratchpad/family'
+// Where this run's screenshots and living-room chat go. One folder per
+// playtest, so two runs never share a chat.
+const ROOT = process.env.FAMILY_ROOT || '/tmp/claude-0/-home-user-JourneyToNetZero/d7eef4b3-0dfc-5a56-9820-99faa40be251/scratchpad/family'
 const SHOTS = `${ROOT}/shots`
 const CHAT = `${ROOT}/chat.log`
 mkdirSync(SHOTS, { recursive: true })
